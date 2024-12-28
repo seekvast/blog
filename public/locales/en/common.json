@@ -1,0 +1,29 @@
+{
+  "navigation": {
+    "home": "Home",
+    "following": "Following",
+    "boards": "Boards",
+    "bookmarks": "Bookmarks",
+    "recommended": "Recommended",
+    "tracking": "Tracking"
+  },
+  "actions": {
+    "post": "Post",
+    "like": "Like",
+    "comment": "Comment",
+    "share": "Share",
+    "search": "Search"
+  },
+  "user": {
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "forum": {
+    "title": "Forum",
+    "recentTopics": "Recent Topics",
+    "recommendedBoards": "Recommended Boards",
+    "members": "members",
+    "searchPlaceholder": "Press ESC to exit club mode"
+  }
+}

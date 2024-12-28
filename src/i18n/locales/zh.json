@@ -1,0 +1,20 @@
+{
+  "navigation": {
+    "home": "首页",
+    "following": "关注",
+    "boards": "看板",
+    "bookmarks": "书签"
+  },
+  "user": {
+    "profile": "个人资料",
+    "settings": "设置",
+    "logout": "退出登录"
+  },
+  "forum": {
+    "title": "论坛",
+    "post": "发布",
+    "like": "点赞",
+    "comment": "评论",
+    "share": "分享"
+  }
+}

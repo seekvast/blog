@@ -1,0 +1,36 @@
+{
+  "site": {
+    "name": "Kater",
+    "description": "一個充滿創意和熱情的社群平台"
+  },
+  "nav": {
+    "follow": "關注",
+    "bookmark": "書籤",
+    "boards": "看板",
+    "newPost": "發表文章"
+  },
+  "user": {
+    "profile": "個人頁面",
+    "settings": "個人設定"
+  },
+  "sort": {
+    "hot": "熱門",
+    "latest": "最新發表",
+    "lastReply": "最後回覆"
+  },
+  "view": {
+    "imageText": "圖文模式",
+    "textOnly": "文字模式"
+  },
+  "footer": {
+    "terms": "服務條款",
+    "privacy": "隱私權政策",
+    "contact": "聯絡我們",
+    "help": "說明中心"
+  },
+  "theme": {
+    "light": "日間模式",
+    "dark": "夜間模式",
+    "auto": "自動"
+  }
+}

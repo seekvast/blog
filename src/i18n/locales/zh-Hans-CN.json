@@ -1,0 +1,36 @@
+{
+  "site": {
+    "name": "Kater",
+    "description": "一个充满创意和热情的社群平台"
+  },
+  "nav": {
+    "follow": "关注",
+    "bookmark": "书签",
+    "boards": "看板",
+    "newPost": "发表文章"
+  },
+  "user": {
+    "profile": "个人页面",
+    "settings": "个人设定"
+  },
+  "sort": {
+    "hot": "热门",
+    "latest": "最新发表",
+    "lastReply": "最后回复"
+  },
+  "view": {
+    "imageText": "图文模式",
+    "textOnly": "文字模式"
+  },
+  "footer": {
+    "terms": "服务条款",
+    "privacy": "隐私权政策",
+    "contact": "联系我们",
+    "help": "说明中心"
+  },
+  "theme": {
+    "light": "日间模式",
+    "dark": "夜间模式",
+    "auto": "自动"
+  }
+}

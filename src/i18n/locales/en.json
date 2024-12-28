@@ -1,0 +1,20 @@
+{
+  "navigation": {
+    "home": "Home",
+    "following": "Following",
+    "boards": "Boards",
+    "bookmarks": "Bookmarks"
+  },
+  "user": {
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "forum": {
+    "title": "Forum",
+    "post": "Post",
+    "like": "Like",
+    "comment": "Comment",
+    "share": "Share"
+  }
+}

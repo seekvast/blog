@@ -1,0 +1,29 @@
+{
+  "navigation": {
+    "home": "首页",
+    "following": "关注",
+    "boards": "看板",
+    "bookmarks": "书签",
+    "recommended": "推荐",
+    "tracking": "追踪"
+  },
+  "actions": {
+    "post": "发布",
+    "like": "点赞",
+    "comment": "评论",
+    "share": "分享",
+    "search": "搜索"
+  },
+  "user": {
+    "profile": "个人资料",
+    "settings": "设置",
+    "logout": "退出登录"
+  },
+  "forum": {
+    "title": "论坛",
+    "recentTopics": "最近在聊",
+    "recommendedBoards": "推荐看板",
+    "members": "人加入",
+    "searchPlaceholder": "我要退出会所模式，请按 esc"
+  }
+}
