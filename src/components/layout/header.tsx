@@ -19,6 +19,8 @@ import { useState } from "react";
 import { RegisterModal } from "@/components/auth/register-modal";
 import { LoginModal } from "@/components/auth/login-modal";
 import { useToast } from "@/components/ui/use-toast";
+import { usePathname } from "next/navigation";
+
 import {
   DropdownMenu,
   DropdownMenuContent,

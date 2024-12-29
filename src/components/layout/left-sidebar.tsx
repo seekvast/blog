@@ -20,14 +20,15 @@ const mainNavItems = [
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
+        width="20"
+        height="20"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
+        className="text-primary"
       >
         <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
         <polyline points="9 22 9 12 15 12 15 22" />
@@ -35,13 +36,13 @@ const mainNavItems = [
     ),
   },
   {
-    title: "子版",
-    href: "/boards",
+    title: "關注",
+    href: "/",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
+        width="20"
+        height="20"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -49,9 +50,47 @@ const mainNavItems = [
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="M2 5a2 2 0 0 1 2-2h6v18H4a2 2 0 0 1-2-2z" />
-        <path d="M14 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
-        <path d="M10 3v18" />
+        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+      </svg>
+    ),
+  },
+  {
+    title: "看板",
+    href: "/boards",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+        <path d="M2 12h20" />
+      </svg>
+    ),
+  },
+  {
+    title: "書籤",
+    href: "/",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
       </svg>
     ),
   },
@@ -85,12 +124,15 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
 
   const handleLanguageChange = () => {
     const currentLang = i18n.language;
-    const newLang = currentLang === 'zh-TW' ? 'en' : 'zh-TW';
+    const newLang = currentLang === "zh-TW" ? "en" : "zh-TW";
     i18n.changeLanguage(newLang);
   };
 
   return (
-    <aside className={cn("flex w-full flex-col gap-4 h-full", className)} {...props}>
+    <aside
+      className={cn("flex w-full flex-col gap-4 h-full", className)}
+      {...props}
+    >
       <div className="flex flex-col gap-4 pr-4">
         {/* 主导航 */}
         <nav className="flex flex-col gap-1">
@@ -113,19 +155,17 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
           })}
         </nav>
 
-        {/* 发布按钮 */}
-        <Button asChild className="my-4 w-full" size="lg">
-          <Link href="/new">發表文章</Link>
-        </Button>
-
         {/* 创建看板按钮 */}
         <Button
-          variant="ghost"
-          className="w-full justify-start px-2"
+          //   variant="ghost"
+          className="my-4 w-full"
+          size="lg"
           onClick={() => setCreateBoardOpen(true)}
         >
-          <Plus className="mr-2 h-4 w-4" />
-          {pathname.startsWith("/boards") ? t("common.createBoard") : t("common.joinNewBoard")}
+          {/* <Plus className="mr-2 h-4 w-4" /> */}
+          {pathname.startsWith("/boards")
+            ? t("common.createBoard")
+            : t("common.createDiscussion")}
         </Button>
         <CreateBoardModal
           open={createBoardOpen}
