@@ -219,7 +219,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                   </div>
                 </div>
               </div>
-              <Button size="sm" className="rounded-md">
+              <Button size="sm" className="rounded-full">
                 加入
               </Button>
             </div>

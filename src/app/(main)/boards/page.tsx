@@ -84,7 +84,7 @@ export default function BoardsPage() {
     <div className="flex flex-col">
       {/* 顶部导航 */}
       <div className="bg-white">
-        <div className="mx-auto w-[808px] px-8">
+        <div className="mx-auto w-full px-8">
           <div className="flex h-[60px] items-center justify-between border-b border-[#EAEAEA]">
             <div className="flex items-center space-x-8">
               <Button
@@ -113,7 +113,7 @@ export default function BoardsPage() {
       </div>
 
       {/* 看板列表 */}
-      <div className="mx-auto w-[808px] px-8">
+      <div className="mx-auto w-full px-8">
         <div className="divide-y">
           {BOARDS.map((board) => (
             <div
@@ -167,7 +167,7 @@ export default function BoardsPage() {
               <Button
                 variant="default"
                 size="sm"
-                className="w-24 shrink-0 ml-4"
+                className="w-24 shrink-0 ml-4 rounded-full"
               >
                 加入
               </Button>

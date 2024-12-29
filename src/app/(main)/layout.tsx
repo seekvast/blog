@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Bell, PenSquare, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,14 +22,17 @@ export default function MainLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const showRightSidebar = !pathname.startsWith('/boards');
+
   return (
     <div className="min-h-screen">
       <Header />
-      <div className="mx-auto flex  justify-center mt-8">
+      <div className="mx-auto flex justify-center mt-8">
         <div className="w-[1360px] flex justify-between px-4">
-          <LeftSidebar className="hidden lg:block" />
+          <LeftSidebar className="hidden lg:block max-w-[300px]" />
           <main className="w-full">{children}</main>
-          <RightSidebar className="hidden lg:block" />
+          {showRightSidebar && <RightSidebar className="hidden lg:block" />}
         </div>
       </div>
     </div>
