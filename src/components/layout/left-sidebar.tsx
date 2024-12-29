@@ -1,11 +1,14 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { CreateBoardModal } from "@/components/board/create-board-modal";
 
 interface LeftSidebarProps extends React.HTMLAttributes<HTMLElement> {}
 
@@ -113,6 +116,7 @@ const recommendedBoards = [
 
 export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   const pathname = usePathname();
+  const [createBoardOpen, setCreateBoardOpen] = useState(false);
 
   return (
     <aside className={cn("flex w-full flex-col gap-4", className)} {...props}>
@@ -125,8 +129,9 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg py-2 px-2 text-sm transition-colors",
-                isActive && "bg-accent"
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-neutral-500 transition-colors",
+                "hover:bg-neutral-100 hover:text-neutral-900",
+                isActive && "bg-neutral-100 text-neutral-900"
               )}
             >
               {item.icon}
@@ -140,6 +145,20 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
       <Button asChild className="my-4 w-full" size="lg">
         <Link href="/new">發表文章</Link>
       </Button>
+
+      {/* 创建看板按钮 */}
+      <Button
+        variant="ghost"
+        className="w-full justify-start px-2"
+        onClick={() => setCreateBoardOpen(true)}
+      >
+        <Plus className="mr-2 h-4 w-4" />
+        {pathname.startsWith("/boards") ? "創建看板" : "加入新看板"}
+      </Button>
+      <CreateBoardModal
+        open={createBoardOpen}
+        onOpenChange={setCreateBoardOpen}
+      />
 
       {/* 推荐看板 */}
       <div className="my-4">

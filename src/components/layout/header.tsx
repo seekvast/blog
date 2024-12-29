@@ -7,9 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { RegisterModal } from "@/components/auth/register-modal";
+import { LoginModal } from "@/components/auth/login-modal";
 
 export function Header() {
   const { data: session } = useSession();
+  const [registerOpen, setRegisterOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -35,22 +40,45 @@ export function Header() {
 
           {/* Actions */}
           <div className="ml-auto flex items-center gap-2">
-            <Button variant="ghost" size="icon">
-              <PenSquare className="h-5 w-5" />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
-            </Button>
             {session ? (
-              <Avatar className="h-8 w-8">
-                <AvatarFallback>
-                  {session.user?.name?.[0] || "U"}
-                </AvatarFallback>
-              </Avatar>
+              <div>
+                <Button variant="ghost" size="icon">
+                  <PenSquare className="h-5 w-5" />
+                </Button>
+                <Button variant="ghost" size="icon">
+                  <Bell className="h-5 w-5" />
+                </Button>
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback>
+                    {session.user?.name?.[0] || "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
             ) : (
-              <Button asChild>
-                <Link href="/login">登录</Link>
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  className="text-base font-normal hover:bg-transparent hover:text-foreground"
+                  onClick={() => setRegisterOpen(true)}
+                >
+                  註冊
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="text-base font-normal hover:bg-transparent hover:text-foreground"
+                  onClick={() => setLoginOpen(true)}
+                >
+                  登入
+                </Button>
+                <RegisterModal
+                  open={registerOpen}
+                  onOpenChange={setRegisterOpen}
+                />
+                <LoginModal
+                  open={loginOpen}
+                  onOpenChange={setLoginOpen}
+                />
+              </div>
             )}
           </div>
         </div>
