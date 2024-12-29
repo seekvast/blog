@@ -1,4 +1,8 @@
+"use client";
+
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/use-toast";
 
 interface LoginModalProps {
   open: boolean;
@@ -17,8 +22,11 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ open, onOpenChange }: LoginModalProps) {
+  const router = useRouter();
+  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [isValid, setIsValid] = useState(false);
 
   useEffect(() => {
@@ -29,6 +37,46 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
 
     setIsValid(isEmailValid && isPasswordValid);
   }, [email, password]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isValid || isLoading) return;
+
+    setIsLoading(true);
+
+    try {
+      const result = await signIn("credentials", {
+        email: email,
+        password: password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        toast({
+          variant: "destructive",
+          title: "登录失败",
+          description: result.error,
+        });
+        return;
+      }
+
+      // 登录成功
+      toast({
+        title: "登录成功",
+        description: "欢迎回来！",
+      });
+      onOpenChange(false);
+      router.refresh();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "登录失败",
+        description: "请稍后重试",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -45,7 +93,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
           </div>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm text-neutral-500">
               郵箱
@@ -57,6 +105,8 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
               className="h-12"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
+              required
             />
           </div>
           <div className="space-y-2">
@@ -70,6 +120,8 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
               className="h-12"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+              required
             />
           </div>
           <div className="space-y-4">
@@ -77,17 +129,39 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
               {/* reCAPTCHA placeholder */}
             </div>
             <Button 
+              type="submit"
               className={cn(
                 "w-full h-12",
                 isValid 
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
                   : "bg-neutral-100 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-400"
               )}
+              disabled={!isValid || isLoading}
             >
-              登入
+              {isLoading ? (
+                <>
+                  <svg
+                    className="mr-2 h-4 w-4 animate-spin"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                  </svg>
+                  登入中...
+                </>
+              ) : (
+                "登入"
+              )}
             </Button>
           </div>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -1,20 +1,58 @@
 "use client";
 
 import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { Search, Bell, PenSquare } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import {
+  Search,
+  Bell,
+  PenSquare,
+  Moon,
+  LogOut,
+  Settings,
+  User2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { RegisterModal } from "@/components/auth/register-modal";
 import { LoginModal } from "@/components/auth/login-modal";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { http } from "@/lib/request";
 
 export function Header() {
   const { data: session } = useSession();
+  const { toast } = useToast();
   const [registerOpen, setRegisterOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
+
+  const handleLogout = async () => {
+      try {
+      if (!session?.accessToken) {
+        throw new Error('未登录');
+      }
+
+      // 调用后端登出 API
+      await http.get('/api/logout', session.accessToken);
+      
+      // 调用 NextAuth 登出
+      await signOut({ redirect: true, callbackUrl: "/" });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "登出失败",
+        description: error instanceof Error ? error.message : "请稍后重试",
+      });
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -39,21 +77,45 @@ export function Header() {
           </div>
 
           {/* Actions */}
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-4">
             {session ? (
-              <div>
-                <Button variant="ghost" size="icon">
+              <>
+                <Button variant="ghost" size="icon" className="hover:bg-muted">
                   <PenSquare className="h-5 w-5" />
                 </Button>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="hover:bg-muted">
                   <Bell className="h-5 w-5" />
                 </Button>
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback>
-                    {session.user?.name?.[0] || "U"}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Avatar className="h-8 w-8 cursor-pointer ring-offset-background transition-opacity hover:opacity-80">
+                      <AvatarImage src={session.user?.avatar_url || ""} />
+                      <AvatarFallback>
+                        {session.user?.username?.[0] || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem className="cursor-pointer">
+                      <User2 className="mr-2 h-4 w-4" />
+                      <span>基本资料</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>个人设定</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer">
+                      <Moon className="mr-2 h-4 w-4" />
+                      <span>夜间模式</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>登出</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
               <div className="flex items-center gap-2">
                 <Button
@@ -74,10 +136,7 @@ export function Header() {
                   open={registerOpen}
                   onOpenChange={setRegisterOpen}
                 />
-                <LoginModal
-                  open={loginOpen}
-                  onOpenChange={setLoginOpen}
-                />
+                <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
               </div>
             )}
           </div>

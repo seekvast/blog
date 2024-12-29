@@ -90,7 +90,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   };
 
   return (
-    <aside className={cn("flex w-full flex-col gap-4 h-full overflow-y-auto scrollbar-none", className)} {...props}>
+    <aside className={cn("flex w-full flex-col gap-4 h-full", className)} {...props}>
       <div className="flex flex-col gap-4 pr-4">
         {/* 主导航 */}
         <nav className="flex flex-col gap-1">
