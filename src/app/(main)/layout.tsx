@@ -23,16 +23,20 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const showRightSidebar = !pathname.startsWith('/boards');
+  const showRightSidebar = !pathname.startsWith("/boards");
 
   return (
     <div className="min-h-screen">
       <Header />
-      <div className="mx-auto flex justify-center mt-8">
-        <div className="w-[1360px] flex justify-between px-4">
-          <LeftSidebar className="hidden lg:block max-w-[300px]" />
+      <div className="mx-auto flex justify-center pt-8">
+        <div className="w-[1360px] flex justify-between px-4 relative">
+          <div className="sticky top-[88px] min-w-[300px] h-[calc(100vh-88px)]">
+            <LeftSidebar className="hidden lg:block" />
+          </div>
           <main className="w-full">{children}</main>
-          {showRightSidebar && <RightSidebar className="hidden lg:block" />}
+          {showRightSidebar && (
+            <RightSidebar className="hidden lg:block mt-8" />
+          )}
         </div>
       </div>
     </div>

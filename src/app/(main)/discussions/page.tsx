@@ -88,7 +88,7 @@ export default function DiscussionsPage() {
       {/* 看板信息 */}
       <div className="bg-white">
         <div className="mx-auto w-[808px] px-8">
-          <div className="flex items-start space-x-3 py-4">
+          <div className="flex items-start space-x-3 pb-4">
             <Avatar className="h-12 w-12 rounded-lg">
               <AvatarImage src="/avatar.jpg" alt="色图交流" />
               <AvatarFallback>色</AvatarFallback>
