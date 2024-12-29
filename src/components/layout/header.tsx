@@ -43,7 +43,11 @@ export function Header() {
       }
 
       // 调用后端登出 API
-      await http.get('/api/logout', session.accessToken);
+      await http.get('/api/logout', {
+        headers: {
+          Authorization: `Bearer ${session.accessToken}`
+        }
+      });
       
       // 调用 NextAuth 登出
       await signOut({ redirect: true, callbackUrl: "/" });

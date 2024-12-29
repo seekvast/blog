@@ -40,7 +40,7 @@ export function EditorHeader({
           {session && (
             <Avatar className="h-8 w-8">
               <AvatarImage src={session.user?.image || ""} />
-              <AvatarFallback>{session.user?.name?.[0]}</AvatarFallback>
+              <AvatarFallback>{session.user?.username?.[0]}</AvatarFallback>
             </Avatar>
           )}
         </div>

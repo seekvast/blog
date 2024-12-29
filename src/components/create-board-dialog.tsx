@@ -151,7 +151,7 @@ export function CreateBoardDialog({ trigger }: CreateBoardDialogProps) {
             <Checkbox
               id="terms"
               checked={agreed}
-              onCheckedChange={(checked) => setAgreed(checked as boolean)}
+              onCheckedChange={(checked: boolean) => setAgreed(checked)}
               required
             />
             <label
