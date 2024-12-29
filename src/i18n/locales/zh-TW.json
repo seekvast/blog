@@ -1,0 +1,24 @@
+{
+  "common": {
+    "switchToEnglish": "English",
+    "createBoard": "創建看板",
+    "joinNewBoard": "加入新看板",
+    "post": "發表文章",
+    "recommendedBoards": "推薦看板",
+    "autoDetectLanguage": "自動檢測語言",
+    "termsOfService": "服務條款",
+    "privacyPolicy": "隱私政策",
+    "contactUs": "聯繫我們",
+    "helpCenter": "幫助中心",
+    "language": "語言"
+  },
+  "auth": {
+    "login": "登入",
+    "register": "註冊",
+    "email": "郵箱",
+    "password": "密碼",
+    "username": "用戶名",
+    "nickname": "暱稱",
+    "birthday": "生日"
+  }
+}

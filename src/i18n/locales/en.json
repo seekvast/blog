@@ -16,5 +16,27 @@
     "like": "Like",
     "comment": "Comment",
     "share": "Share"
+  },
+  "common": {
+    "switchToEnglish": "English",
+    "createBoard": "Create Board",
+    "joinNewBoard": "Join New Board",
+    "post": "Create Post",
+    "recommendedBoards": "Recommended Boards",
+    "autoDetectLanguage": "Auto Detect Language",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "contactUs": "Contact Us",
+    "helpCenter": "Help Center",
+    "language": "Language"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "username": "Username",
+    "nickname": "Nickname",
+    "birthday": "Birthday"
   }
 }

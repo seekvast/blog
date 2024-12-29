@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useTranslation } from "react-i18next"
-import { MarkdownEditor } from "@/components/editor/markdown-editor"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
+import * as React from "react";
+import { useTranslation } from "react-i18next";
+import { MarkdownEditor } from "@/components/editor/markdown-editor";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 
 // 模拟子版数据
 const BOARDS = [
@@ -22,26 +22,26 @@ const BOARDS = [
   { id: 11, name: "充电攻略", icon: "#" },
   { id: 12, name: "充电攻略", icon: "#" },
   { id: 13, name: "充电攻略", icon: "#" },
-]
+];
 
 export default function NewDiscussionPage() {
-  const [content, setContent] = React.useState("")
-  const [title, setTitle] = React.useState("")
+  const [content, setContent] = React.useState("");
+  const [title, setTitle] = React.useState("");
 
   const handleImageUpload = React.useCallback(async (file: File) => {
     // 这里实现图片上传逻辑
-    return Promise.resolve("")
-  }, [])
+    return Promise.resolve("");
+  }, []);
 
   const handlePublish = React.useCallback(() => {
     // 处理发布逻辑
-    console.log({ title, content })
-  }, [title, content])
+    console.log({ title, content });
+  }, [title, content]);
 
   const handleSaveDraft = React.useCallback(() => {
     // 处理保存草稿逻辑
-    console.log("Save draft", { title, content })
-  }, [title, content])
+    console.log("Save draft", { title, content });
+  }, [title, content]);
 
   return (
     <div className="bg-white">
@@ -88,5 +88,5 @@ export default function NewDiscussionPage() {
         />
       </main>
     </div>
-  )
+  );
 }
