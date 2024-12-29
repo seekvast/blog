@@ -93,28 +93,7 @@ const mainNavItems = [
         <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
       </svg>
     ),
-  },
-  {
-    title: "讨论",
-    href: "/discussions",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M17 6.1H3" />
-        <path d="M21 12.1H3" />
-        <path d="M15.1 18H3" />
-      </svg>
-    ),
-  },
+  }
 ];
 
 export function LeftSidebar({ className, ...props }: LeftSidebarProps) {

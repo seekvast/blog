@@ -31,6 +31,19 @@ interface BoardFormData {
   avatar?: string;
 }
 
+interface UploadResponse {
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  mime_type: string;
+  visibility: string;
+  attachment_type: string;
+  updated_at: string;
+  created_at: string;
+  id: number;
+  host: string;
+}
+
 export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) {
   const { data: session } = useSession();
   const { toast } = useToast();
@@ -51,49 +64,43 @@ export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) 
     }));
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // 检查文件大小（2MB限制）
-    if (file.size > 2 * 1024 * 1024) {
-      toast({
-        variant: "destructive",
-        title: "文件过大",
-        description: "请上传2MB以内的图片",
-      });
-      return;
-    }
-
-    // 检查文件类型
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-    if (!validTypes.includes(file.type)) {
-      toast({
-        variant: "destructive",
-        title: "文件格式不支持",
-        description: "请上传JPG、JPEG、PNG或GIF格式的图片",
-      });
-      return;
-    }
-
+  const handleImageUpload = async (file: File) => {
     try {
       const formData = new FormData();
-      formData.append('file', file);
-      
-      const response = await http.post('/api/upload', formData);
-      if (response.data.code === 0) {
-        setFormData(prev => ({
+      formData.append("image", file);
+      formData.append("attachment_type", "board_avatars");
+
+      // Debug logging
+      console.log('File object:', file);
+      console.log('FormData entries:');
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+
+      const response = await http.post(
+        "/api/upload/image",
+        formData
+      ) as { code: number; data: UploadResponse; message: string };
+
+      if (response.code === 0) {
+        const imageUrl = `${response.data.host}${response.data.file_path}`;
+        setFormData((prev) => ({
           ...prev,
-          attachment_id: response.data.data.id,
-          avatar: response.data.data.url
+          attachment_id: response.data.id,
+          avatar: imageUrl,
         }));
+        return imageUrl;
+      } else {
+        throw new Error(response.message || "Upload failed");
       }
     } catch (error) {
+      console.error("Failed to upload image:", error);
       toast({
-        variant: "destructive",
         title: "上传失败",
-        description: "图片上传失败，请重试",
+        description: error instanceof Error ? error.message : "图片上传失败，请重试",
+        variant: "destructive",
       });
+      return null;
     }
   };
 
@@ -160,7 +167,7 @@ export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) 
                 className="hidden"
                 id="boardImage"
                 accept="image/jpeg,image/jpg,image/png,image/gif"
-                onChange={handleImageUpload}
+                onChange={(e) => handleImageUpload(e.target.files?.[0] as File)}
               />
               <label
                 htmlFor="boardImage"

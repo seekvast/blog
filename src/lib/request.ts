@@ -50,7 +50,9 @@ export async function request<T = any>(
   // 设置默认 headers
   init.headers = {
     Accept: 'application/json',
-    'Content-Type': 'application/json',
+    ...(!(init.body instanceof FormData) && {
+      'Content-Type': 'application/json'
+    }),
     ...init.headers,
   };
 
@@ -99,8 +101,8 @@ export async function request<T = any>(
 
 // 导出便捷方法
 export const http = {
-  async get(endpoint: string, options?: RequestOptions) {
-    return request(endpoint, {
+  async get<T = any>(endpoint: string, options?: RequestOptions) {
+    return request<T>(endpoint, {
       method: 'GET',
       ...options,
     });

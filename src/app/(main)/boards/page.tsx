@@ -40,7 +40,9 @@ export default function BoardsPage() {
   const [boards, setBoards] = useState<Board[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [activeTab, setActiveTab] = useState<'recommended' | 'joined'>('recommended');
+  const [activeTab, setActiveTab] = useState<"recommended" | "joined">(
+    "recommended"
+  );
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
 
   const fetchBoards = async (page: number = 1, isReset: boolean = false) => {
@@ -48,23 +50,27 @@ export default function BoardsPage() {
       setLoading(true);
       const queryParams = new URLSearchParams({
         page: String(page),
-        per_page: '10',
+        per_page: "10",
         ...(categoryFilter && { category_id: String(categoryFilter) }),
       }).toString();
 
-      const response = await http.get<{ code: number; data: BoardsResponse; message: string }>(
-        `/api/boards?${queryParams}`
-      );
+      const response = await http.get<{
+        code: number;
+        data: BoardsResponse;
+        message: string;
+      }>(`/api/boards?${queryParams}`);
 
       if (response.code === 0) {
-        setBoards(prevBoards => 
-          isReset ? response.data.items : [...prevBoards, ...response.data.items]
+        setBoards((prevBoards) =>
+          isReset
+            ? response.data.items
+            : [...prevBoards, ...response.data.items]
         );
         setCurrentPage(response.data.current_page);
         setTotalPages(response.data.last_page);
       }
     } catch (error) {
-      console.error('Failed to fetch boards:', error);
+      console.error("Failed to fetch boards:", error);
     } finally {
       setLoading(false);
     }
@@ -90,22 +96,22 @@ export default function BoardsPage() {
               <Button
                 variant="ghost"
                 className={`h-8 px-1 font-medium ${
-                  activeTab === 'recommended'
-                    ? 'text-primary hover:bg-transparent hover:text-primary'
-                    : 'text-muted-foreground hover:bg-transparent hover:text-foreground'
+                  activeTab === "recommended"
+                    ? "text-primary hover:bg-transparent hover:text-primary"
+                    : "text-muted-foreground hover:bg-transparent hover:text-foreground"
                 }`}
-                onClick={() => setActiveTab('recommended')}
+                onClick={() => setActiveTab("recommended")}
               >
                 推薦
               </Button>
               <Button
                 variant="ghost"
                 className={`h-8 px-1 font-medium ${
-                  activeTab === 'joined'
-                    ? 'text-primary hover:bg-transparent hover:text-primary'
-                    : 'text-muted-foreground hover:bg-transparent hover:text-foreground'
+                  activeTab === "joined"
+                    ? "text-primary hover:bg-transparent hover:text-primary"
+                    : "text-muted-foreground hover:bg-transparent hover:text-foreground"
                 }`}
-                onClick={() => setActiveTab('joined')}
+                onClick={() => setActiveTab("joined")}
               >
                 已加入
               </Button>
