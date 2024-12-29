@@ -20,12 +20,7 @@ export default function HomePage() {
 
   const fetchDiscussions = React.useCallback(async () => {
     try {
-      const response = await http.get("/api/discussions", {
-        params: {
-          page,
-          per_page: 10,
-        },
-      });
+      const response = await http.get(`/api/discussions?page=${page}&per_page=10`);
 
       if (response.code === 0) {
         setDiscussions((prev) => [...prev, ...response.data.items]);
