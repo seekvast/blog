@@ -11,6 +11,7 @@ import type { Discussion } from "@/types/discussion";
 import { http } from "@/lib/request";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
+import MarkdownPreview from '@uiw/react-markdown-preview';
 
 export default function HomePage() {
   const [discussions, setDiscussions] = React.useState<Discussion[]>([]);
@@ -117,9 +118,19 @@ export default function HomePage() {
                     </span>
                   </div>
 
-                  <p className="mt-1 text-md text-muted-foreground line-clamp-2">
-                    {discussion.main_post.content}
-                  </p>
+                  <div className="mt-1 text-md text-muted-foreground line-clamp-2">
+                    <MarkdownPreview 
+                      source={discussion.main_post.content}
+                      wrapperElement={{
+                        "data-color-mode": "light"
+                      }}
+                      style={{ 
+                        backgroundColor: 'transparent',
+                        color: 'inherit',
+                        fontSize: 'inherit'
+                      }}
+                    />
+                  </div>
 
                   {/* <div className="mt-2 flex items-center space-x-4 text-sm text-muted-foreground">
                     <div className="flex items-center space-x-1">

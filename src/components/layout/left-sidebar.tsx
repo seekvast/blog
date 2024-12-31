@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Plus, Globe2, PenSquare } from "lucide-react";
@@ -98,6 +98,7 @@ const mainNavItems = [
 
 export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { t, i18n } = useTranslation();
   const [createBoardOpen, setCreateBoardOpen] = useState(false);
 
@@ -107,9 +108,20 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
     i18n.changeLanguage(newLang);
   };
 
+  const handlePublishClick = () => {
+    // 在看板列表页面，显示创建看板的模态框
+    if (pathname === "/boards") {
+      setCreateBoardOpen(true);
+    } 
+    // 在看板详情页面，跳转到发布文章页面
+    else if (pathname.startsWith("/boards/")) {
+      router.push("/post");
+    }
+  };
+
   return (
     <aside
-      className={cn("flex w-full flex-col gap-4 h-full", className)}
+      className={cn("flex w-full flex-col gap-4 h-full pb-12", className)}
       {...props}
     >
       <div className="flex flex-col gap-4 pr-4">
@@ -135,21 +147,19 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
         </nav>
 
         {/* 创建看板按钮 */}
-        <Button
-          //   variant="ghost"
-          className="my-4 w-full"
-          size="lg"
-          onClick={() => setCreateBoardOpen(true)}
-        >
-          {/* <Plus className="mr-2 h-4 w-4" /> */}
-          {pathname.startsWith("/boards")
-            ? t("common.createBoard")
-            : t("common.createDiscussion")}
-        </Button>
-        <CreateBoardModal
-          open={createBoardOpen}
-          onOpenChange={setCreateBoardOpen}
-        />
+        <div className="px-3 py-2">
+          <Button
+            className="w-full justify-start"
+            onClick={handlePublishClick}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            {pathname === "/boards" ? t("common.createBoard") : t("common.publish")}
+          </Button>
+          <CreateBoardModal
+            open={createBoardOpen}
+            onOpenChange={setCreateBoardOpen}
+          />
+        </div>
 
         {/* 推荐看板 */}
         <div className="my-4">

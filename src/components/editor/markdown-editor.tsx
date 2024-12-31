@@ -32,150 +32,6 @@ interface MarkdownEditorProps extends Omit<MDEditorProps, "onChange"> {
   className?: string
 }
 
-const commands = {
-  h1: {
-    name: "一级标题",
-    keyCommand: "h1",
-    buttonProps: { "aria-label": "插入一级标题" },
-    icon: <span className="text-sm font-bold">H1</span>,
-    execute: (state: any, api: any) => {
-      const modifyContent = `# ${state.selectedText}\n`
-      api.replaceSelection(modifyContent)
-    },
-  },
-  h2: {
-    name: "二级标题",
-    keyCommand: "h2",
-    buttonProps: { "aria-label": "插入二级标题" },
-    icon: <span className="text-sm font-bold">H2</span>,
-    execute: (state: any, api: any) => {
-      const modifyContent = `## ${state.selectedText}\n`
-      api.replaceSelection(modifyContent)
-    },
-  },
-  h3: {
-    name: "三级标题",
-    keyCommand: "h3",
-    buttonProps: { "aria-label": "插入三级标题" },
-    icon: <span className="text-sm font-bold">H3</span>,
-    execute: (state: any, api: any) => {
-      const modifyContent = `### ${state.selectedText}\n`
-      api.replaceSelection(modifyContent)
-    },
-  },
-  bold: {
-    name: "粗体",
-    keyCommand: "bold",
-    buttonProps: { "aria-label": "添加粗体文本" },
-    icon: <Bold className="h-4 w-4" />,
-    execute: (state: any, api: any) => {
-      const modifyContent = `**${state.selectedText}**`
-      api.replaceSelection(modifyContent)
-    },
-  },
-  italic: {
-    name: "斜体",
-    keyCommand: "italic",
-    buttonProps: { "aria-label": "添加斜体文本" },
-    icon: <Italic className="h-4 w-4" />,
-    execute: (state: any, api: any) => {
-      const modifyContent = `_${state.selectedText}_`
-      api.replaceSelection(modifyContent)
-    },
-  },
-  strikethrough: {
-    name: "删除线",
-    keyCommand: "strikethrough",
-    buttonProps: { "aria-label": "添加删除线" },
-    icon: <Strikethrough className="h-4 w-4" />,
-    execute: (state: any, api: any) => {
-      const modifyContent = `~~${state.selectedText}~~`
-      api.replaceSelection(modifyContent)
-    },
-  },
-  quote: {
-    name: "引用",
-    keyCommand: "quote",
-    buttonProps: { "aria-label": "插入引用" },
-    icon: <Quote className="h-4 w-4" />,
-    execute: (state: any, api: any) => {
-      const modifyContent = `> ${state.selectedText}\n`
-      api.replaceSelection(modifyContent)
-    },
-  },
-  spoiler: {
-    name: "黑幕",
-    keyCommand: "spoiler",
-    buttonProps: { "aria-label": "添加黑幕" },
-    icon: <Eye className="h-4 w-4" />,
-    execute: (state: any, api: any) => {
-      const modifyContent = `>!${state.selectedText}!<`
-      api.replaceSelection(modifyContent)
-    },
-  },
-  code: {
-    name: "代码",
-    keyCommand: "code",
-    buttonProps: { "aria-label": "插入代码" },
-    icon: <Code className="h-4 w-4" />,
-    execute: (state: any, api: any) => {
-      const modifyContent = `\`${state.selectedText}\``
-      api.replaceSelection(modifyContent)
-    },
-  },
-  link: {
-    name: "链接",
-    keyCommand: "link",
-    buttonProps: { "aria-label": "插入链接" },
-    icon: <LinkIcon className="h-4 w-4" />,
-    execute: (state: any, api: any) => {
-      const url = state.selectedText.match(/^https?:\/\//) ? state.selectedText : ""
-      const modifyContent = `[${state.selectedText}](${url})`
-      api.replaceSelection(modifyContent)
-    },
-  },
-  image: {
-    name: "图片",
-    keyCommand: "image",
-    buttonProps: { "aria-label": "插入图片" },
-    icon: <ImageIcon className="h-4 w-4" />,
-    execute: (state: any, api: any) => {
-      const modifyContent = `![](${state.selectedText})`
-      api.replaceSelection(modifyContent)
-    },
-  },
-  unorderedList: {
-    name: "无序列表",
-    keyCommand: "unordered-list",
-    buttonProps: { "aria-label": "插入无序列表" },
-    icon: <List className="h-4 w-4" />,
-    execute: (state: any, api: any) => {
-      const modifyContent = `- ${state.selectedText}\n`
-      api.replaceSelection(modifyContent)
-    },
-  },
-  orderedList: {
-    name: "有序列表",
-    keyCommand: "ordered-list",
-    buttonProps: { "aria-label": "插入有序列表" },
-    icon: <ListOrdered className="h-4 w-4" />,
-    execute: (state: any, api: any) => {
-      const modifyContent = `1. ${state.selectedText}\n`
-      api.replaceSelection(modifyContent)
-    },
-  },
-  mention: {
-    name: "提及",
-    keyCommand: "mention",
-    buttonProps: { "aria-label": "提及用户" },
-    icon: <AtSign className="h-4 w-4" />,
-    execute: (state: any, api: any) => {
-      const modifyContent = `@${state.selectedText}`
-      api.replaceSelection(modifyContent)
-    },
-  },
-}
-
 export function MarkdownEditor({
   value,
   onChange,
@@ -183,6 +39,173 @@ export function MarkdownEditor({
   className,
   ...props
 }: MarkdownEditorProps) {
+  const commands = React.useMemo(() => ({
+    h1: {
+      name: "一级标题",
+      keyCommand: "h1",
+      buttonProps: { "aria-label": "插入一级标题" },
+      icon: <span className="text-sm font-bold">H1</span>,
+      execute: (state: any, api: any) => {
+        const modifyContent = `# ${state.selectedText}\n`
+        api.replaceSelection(modifyContent)
+      },
+    },
+    h2: {
+      name: "二级标题",
+      keyCommand: "h2",
+      buttonProps: { "aria-label": "插入二级标题" },
+      icon: <span className="text-sm font-bold">H2</span>,
+      execute: (state: any, api: any) => {
+        const modifyContent = `## ${state.selectedText}\n`
+        api.replaceSelection(modifyContent)
+      },
+    },
+    h3: {
+      name: "三级标题",
+      keyCommand: "h3",
+      buttonProps: { "aria-label": "插入三级标题" },
+      icon: <span className="text-sm font-bold">H3</span>,
+      execute: (state: any, api: any) => {
+        const modifyContent = `### ${state.selectedText}\n`
+        api.replaceSelection(modifyContent)
+      },
+    },
+    bold: {
+      name: "粗体",
+      keyCommand: "bold",
+      buttonProps: { "aria-label": "添加粗体文本" },
+      icon: <Bold className="h-4 w-4" />,
+      execute: (state: any, api: any) => {
+        const modifyContent = `**${state.selectedText}**`
+        api.replaceSelection(modifyContent)
+      },
+    },
+    italic: {
+      name: "斜体",
+      keyCommand: "italic",
+      buttonProps: { "aria-label": "添加斜体文本" },
+      icon: <Italic className="h-4 w-4" />,
+      execute: (state: any, api: any) => {
+        const modifyContent = `_${state.selectedText}_`
+        api.replaceSelection(modifyContent)
+      },
+    },
+    strikethrough: {
+      name: "删除线",
+      keyCommand: "strikethrough",
+      buttonProps: { "aria-label": "添加删除线" },
+      icon: <Strikethrough className="h-4 w-4" />,
+      execute: (state: any, api: any) => {
+        const modifyContent = `~~${state.selectedText}~~`
+        api.replaceSelection(modifyContent)
+      },
+    },
+    quote: {
+      name: "引用",
+      keyCommand: "quote",
+      buttonProps: { "aria-label": "插入引用" },
+      icon: <Quote className="h-4 w-4" />,
+      execute: (state: any, api: any) => {
+        const modifyContent = `> ${state.selectedText}\n`
+        api.replaceSelection(modifyContent)
+      },
+    },
+    spoiler: {
+      name: "黑幕",
+      keyCommand: "spoiler",
+      buttonProps: { "aria-label": "添加黑幕" },
+      icon: <Eye className="h-4 w-4" />,
+      execute: (state: any, api: any) => {
+        const modifyContent = `>!${state.selectedText}!<`
+        api.replaceSelection(modifyContent)
+      },
+    },
+    code: {
+      name: "代码",
+      keyCommand: "code",
+      buttonProps: { "aria-label": "插入代码" },
+      icon: <Code className="h-4 w-4" />,
+      execute: (state: any, api: any) => {
+        const modifyContent = `\`${state.selectedText}\``
+        api.replaceSelection(modifyContent)
+      },
+    },
+    link: {
+      name: "链接",
+      keyCommand: "link",
+      buttonProps: { "aria-label": "插入链接" },
+      icon: <LinkIcon className="h-4 w-4" />,
+      execute: (state: any, api: any) => {
+        const url = state.selectedText.match(/^https?:\/\//) ? state.selectedText : ""
+        const modifyContent = `[${state.selectedText}](${url})`
+        api.replaceSelection(modifyContent)
+      },
+    },
+    image: {
+      name: "图片",
+      keyCommand: "image",
+      buttonProps: { "aria-label": "插入图片" },
+      icon: <ImageIcon className="h-4 w-4" />,
+      execute: async (_state: any, api: any) => {
+        if (!onImageUpload) {
+          console.warn('Image upload handler not provided')
+          return
+        }
+
+        const input = document.createElement('input')
+        input.type = 'file'
+        input.accept = 'image/*'
+        
+        input.onchange = async (e) => {
+          const file = (e.target as HTMLInputElement).files?.[0]
+          if (file) {
+            try {
+              const url = await onImageUpload(file)
+              if (api.onChange) {
+                const imageMarkdown = `![${file.name}](${url})\n`
+                api.onChange(value ? value + '\n' + imageMarkdown : imageMarkdown)
+              }
+            } catch (error) {
+              console.error('Failed to upload image:', error)
+            }
+          }
+        }
+        
+        input.click()
+      },
+    },
+    unorderedList: {
+      name: "无序列表",
+      keyCommand: "unordered-list",
+      buttonProps: { "aria-label": "插入无序列表" },
+      icon: <List className="h-4 w-4" />,
+      execute: (state: any, api: any) => {
+        const modifyContent = `- ${state.selectedText}\n`
+        api.replaceSelection(modifyContent)
+      },
+    },
+    orderedList: {
+      name: "有序列表",
+      keyCommand: "ordered-list",
+      buttonProps: { "aria-label": "插入有序列表" },
+      icon: <ListOrdered className="h-4 w-4" />,
+      execute: (state: any, api: any) => {
+        const modifyContent = `1. ${state.selectedText}\n`
+        api.replaceSelection(modifyContent)
+      },
+    },
+    mention: {
+      name: "提及",
+      keyCommand: "mention",
+      buttonProps: { "aria-label": "提及用户" },
+      icon: <AtSign className="h-4 w-4" />,
+      execute: (state: any, api: any) => {
+        const modifyContent = `@${state.selectedText}`
+        api.replaceSelection(modifyContent)
+      },
+    },
+  }), [onImageUpload, value])
+
   const handlePaste = React.useCallback(
     async (event: React.ClipboardEvent) => {
       if (!onImageUpload) return
@@ -276,7 +299,7 @@ export function MarkdownEditor({
                 size="icon"
                 className="h-6 w-6"
                 {...command.buttonProps}
-                onClick={() => command.execute({ selectedText: "" }, {})}
+                onClick={() => command.execute({ selectedText: "" }, { onChange })}
               >
                 {command.icon}
               </Button>

@@ -65,7 +65,56 @@
     --ring: 217 100% 50%;
   }
 }
- 
+
+/* Markdown 预览样式 */
+.wmde-markdown-var {
+  --color-fg-default: inherit;
+  --color-canvas-default: transparent;
+  --color-border-default: transparent;
+}
+
+.line-clamp-2 .wmde-markdown {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.line-clamp-2 .wmde-markdown p {
+  display: block;
+  margin: 0;
+}
+
+/* 图片容器样式 */
+.line-clamp-2 .wmde-markdown p:has(img) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.line-clamp-2 .wmde-markdown img {
+  display: block;
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  margin: 0;
+  border-radius: 4px;
+}
+
+/* 移除预览容器的默认边距和背景色 */
+.markdown-preview {
+  padding: 0 !important;
+  margin: 0 !important;
+  background-color: transparent !important;
+}
+
+/* 确保链接颜色继承自父元素 */
+.wmde-markdown a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 @layer base {
   * {
     @apply border-border;

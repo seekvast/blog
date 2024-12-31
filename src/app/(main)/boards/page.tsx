@@ -173,28 +173,31 @@ export default function BoardsPage() {
                 className="flex items-center justify-between py-4"
               >
                 <div className="flex items-center space-x-4">
-                  <Avatar className="h-10 w-10">
+                  <Avatar className="h-12 w-12">
                     <AvatarImage src={board.avatar} alt={board.name} />
                     <AvatarFallback>{board.name[0]}</AvatarFallback>
                   </Avatar>
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
                       <Link
-                        href={`/b/${board.slug}`}
-                        className="text-sm font-medium leading-none hover:underline"
+                        href={`/boards/${board.slug}`}
+                        className="text-lg font-medium hover:text-primary"
                       >
                         {board.name}
                       </Link>
                       {board.is_nsfw === 1 && (
                         <Badge variant="destructive" className="h-5">
-                          NSFW
+                          成人
                         </Badge>
                       )}
-                      {board.visibility === 2 && (
+                      {board.visibility === 1 && (
                         <Badge variant="secondary" className="h-5">
                           私密
                         </Badge>
                       )}
+                    </div>
+                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                      {board.category && <span>{board.category.name}</span>}
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-1">
                       {board.desc}
