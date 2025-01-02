@@ -6,11 +6,20 @@
   .glass-effect {
     @apply bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/75;
   }
+
+  .scrollbar-none {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+  }
+  
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;            /* Chrome, Safari and Opera */
+  }
 }
 
 @layer components {
   .sticky-header {
-    @apply sticky top-0 flex items-baseline justify-between py-4 border-b glass-effect;
+    @apply sticky top-0 flex items-baseline justify-between py-4 glass-effect;
   }
 }
 

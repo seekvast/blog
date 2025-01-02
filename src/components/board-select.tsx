@@ -1,22 +1,37 @@
 import * as React from "react";
-import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { http } from "@/lib/request";
+import { Loader2 } from "lucide-react";
+import { API_ROUTES } from "@/constants/api";
 
-// 模拟板块数据
-const BOARDS = [
-  { id: 1, name: "二次元NSFW", icon: "二", color: "bg-green-200" },
-  { id: 2, name: "政治", icon: "政", color: "bg-pink-200" },
-  { id: 3, name: "网站建议与回报", icon: "网", color: "bg-pink-200" },
-  { id: 4, name: "废除专用看板", icon: "废", color: "bg-purple-200" },
-];
+interface Board {
+  id: number;
+  name: string;
+  avatar: string;
+  category: {
+    id: number;
+    name: string;
+  };
+}
+
+interface BoardsResponse {
+  code: number;
+  data: {
+    current_page: number;
+    items: Board[];
+    last_page: number;
+    total: number;
+  };
+}
 
 interface BoardSelectProps {
   value?: number;
@@ -24,69 +39,153 @@ interface BoardSelectProps {
 }
 
 export function BoardSelect({ value, onChange }: BoardSelectProps) {
-  const [search, setSearch] = React.useState("");
-  const selectedBoard = BOARDS.find((board) => board.id === value);
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [boards, setBoards] = React.useState<Board[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  const [page, setPage] = React.useState(1);
+  const [hasMore, setHasMore] = React.useState(true);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const filteredBoards = BOARDS.filter((board) =>
-    board.name.toLowerCase().includes(search.toLowerCase())
+  const selectedBoard = boards.find((board) => board.id === value);
+  const debouncedSearch = React.useRef<NodeJS.Timeout>();
+
+  const loadBoards = React.useCallback(
+    async (searchName: string, pageNum: number, append = false) => {
+      try {
+        setLoading(true);
+        const searchParams = new URLSearchParams();
+        if (searchName) searchParams.set("name", searchName);
+        searchParams.set("per_page", "20");
+        searchParams.set("page", pageNum.toString());
+
+        const response = await http.get<BoardsResponse>(
+          `${API_ROUTES.BOARDS.LIST}?${searchParams.toString()}`
+        );
+
+        if (response.code === 0) {
+          setBoards((prev) =>
+            append ? [...prev, ...response.data.items] : response.data.items
+          );
+          setHasMore(pageNum < response.data.last_page);
+        }
+      } catch (error) {
+        console.error("Failed to load boards:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
   );
 
+  // 处理搜索
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    if (debouncedSearch.current) {
+      clearTimeout(debouncedSearch.current);
+    }
+    debouncedSearch.current = setTimeout(() => {
+      setPage(1);
+      loadBoards(value, 1);
+    }, 300);
+  };
+
+  // 处理滚动加载
+  const handleScroll = React.useCallback(() => {
+    if (containerRef.current && !loading && hasMore) {
+      const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+      if (scrollHeight - scrollTop <= clientHeight * 1.5) {
+        setPage((prev) => prev + 1);
+        loadBoards(searchQuery, page + 1, true);
+      }
+    }
+  }, [loading, hasMore, searchQuery, page, loadBoards]);
+
+  // 初始加载
+  React.useEffect(() => {
+    loadBoards("", 1);
+  }, [loadBoards]);
+
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <span
-          className="text-base font-normal justify-start h-auto py-2"
-        >
-          {selectedBoard ? (
-            <span className="flex items-center gap-2 text-xs cursor-pointer">
-              {selectedBoard.name}
-            </span>
-          ) : (
-            "请选择看板"
-          )}
-        </span>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-normal">選擇看板</DialogTitle>
-        </DialogHeader>
-        <div className="flex gap-2 mt-2">
-          <Input
-            placeholder="請輸入看板名稱"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1"
-          />
-          <Button className="bg-blue-500 hover:bg-blue-600">搜尋</Button>
-        </div>
-        <div className="mt-4 space-y-4 max-h-[400px] overflow-y-auto">
-          {filteredBoards.map((board) => (
-            <button
-              key={board.id}
-              className="flex items-center gap-3 w-full hover:bg-gray-100 p-2 rounded-lg"
-              onClick={() => {
-                onChange?.(board.id);
-                const closeEvent = new CustomEvent("close-dialog");
-                document.dispatchEvent(closeEvent);
-              }}
-            >
-              <span
-                className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${board.color}`}
-              >
-                {board.icon}
-              </span>
-              <div className="text-left">
-                <div className="font-medium">{board.name}</div>
-                {board.description && (
-                  <div className="text-sm text-gray-500">
-                    {board.description}
-                  </div>
+    <Select
+      value={value?.toString()}
+      onValueChange={(value) => onChange?.(parseInt(value))}
+    >
+      <SelectTrigger className="w-[320px] h-auto py-2">
+        <SelectValue placeholder="请选择看板">
+          {selectedBoard && (
+            <div className="flex items-center justify-start gap-2 w-full">
+              {/* <div
+                className={cn(
+                  "w-6 h-6 rounded-full flex items-center justify-center text-sm shrink-0 bg-gray-100"
                 )}
-              </div>
-            </button>
-          ))}
+              >
+                {selectedBoard.avatar ? (
+                  <img
+                    src={selectedBoard.avatar}
+                    alt={selectedBoard.name}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  selectedBoard.name.charAt(0)
+                )}
+              </div> */}
+              <span className="truncate">{selectedBoard.name}</span>
+            </div>
+          )}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        <div className="sticky top-0 bg-popover px-2 py-2 border-b">
+          <Input
+            placeholder="搜索看板..."
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="h-8"
+          />
         </div>
-      </DialogContent>
-    </Dialog>
+        <SelectGroup
+          className="p-2 max-h-[300px] overflow-auto scrollbar-none"
+          ref={containerRef}
+          onScroll={handleScroll}
+        >
+          {boards.map((board) => (
+            <SelectItem
+              key={board.id}
+              value={board.id.toString()}
+              className="flex items-center justify-start gap-2 py-2 pl-2 pr-8 rounded-sm cursor-pointer"
+            >
+              <div className="flex items-center justify-start gap-2 w-full">
+                <div
+                  className={cn(
+                    "w-6 h-6 rounded-full flex items-center justify-center text-sm shrink-0 bg-gray-100"
+                  )}
+                >
+                  {board.avatar ? (
+                    <img
+                      src={board.avatar}
+                      alt={board.name}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    board.name.charAt(0)
+                  )}
+                </div>
+                <span className="truncate">{board.name}</span>
+              </div>
+            </SelectItem>
+          ))}
+          {loading && (
+            <div className="py-2 text-center">
+              <Loader2 className="w-4 h-4 animate-spin inline-block" />
+            </div>
+          )}
+          {!loading && boards.length === 0 && (
+            <div className="py-6 text-center text-sm text-muted-foreground">
+              未找到相关看板
+            </div>
+          )}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
   );
 }
