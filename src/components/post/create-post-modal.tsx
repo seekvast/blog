@@ -11,16 +11,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { cn } from "@/lib/utils";
-
-// 模拟板块数据
-const BOARDS = [
-  { id: 1, name: "OTA测试室", icon: "#" },
-  { id: 2, name: "故事记", icon: "#" },
-  { id: 3, name: "记忆迷宫", icon: "#" },
-  { id: 4, name: "充电攻略", icon: "#" },
-  { id: 5, name: "NGP体验营", icon: "#" },
-  { id: 6, name: "新能源", icon: "#" },
-];
+import { BoardSelect } from "@/components/board-select";
 
 interface CreatePostModalProps {
   open: boolean;
@@ -294,9 +285,13 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
         style={{ height: 'calc(100% - 56px)' }}
       >
         <div className="bg-white h-full flex flex-col mx-auto w-[1360px] mt-4 px-4">
-          <div className="sticky top-0 flex items-center justify-between py-4 border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/75">
-            <div className="flex items-center gap-4">
+          <div className="sticky-header">
+            <div className="flex items-baseline gap-4">
               <h1 className="text-lg font-medium">发布文章</h1>
+              <BoardSelect 
+                value={selectedBoard} 
+                onChange={setSelectedBoard}
+              />
             </div>
             <div className="flex items-center space-x-3">
               <Button variant="outline" size="sm" onClick={handleSaveDraft}>
@@ -311,28 +306,14 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
           <div className="flex-1 overflow-y-auto">
             <main className="py-4">
               <div className="mb-6">
-                <div className="flex flex-wrap gap-2">
-                  {BOARDS.map((board) => (
-                    <Badge
-                      key={board.id}
-                      variant={selectedBoard?.id === board.id ? "default" : "secondary"}
-                      className="flex cursor-pointer items-center space-x-1 rounded-full px-3 py-1 hover:bg-primary/90"
-                      onClick={() => setSelectedBoard(board)}
-                    >
-                      <span>{board.icon}</span>
-                      <span>{board.name}</span>
-                    </Badge>
-                  ))}
-                </div>
+                <Input
+                  type="text"
+                  placeholder="请输入文章标题"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="text-xl"
+                />
               </div>
-
-              <Input
-                type="text"
-                placeholder="请输入文章标题"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="text-xl"
-              />
 
               <div className="relative mt-4">
                 {previewMode ? (

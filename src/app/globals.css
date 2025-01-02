@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .glass-effect {
+    @apply bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/75;
+  }
+}
+
+@layer components {
+  .sticky-header {
+    @apply sticky top-0 flex items-baseline justify-between py-4 border-b glass-effect;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
