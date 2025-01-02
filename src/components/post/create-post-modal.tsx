@@ -2,11 +2,12 @@ import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import { Portal } from "@radix-ui/react-portal";
+import * as Dialog from "@radix-ui/react-dialog";
+import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { http } from "@/lib/request";
-import { useToast } from "@/components/ui/use-toast";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -14,9 +15,13 @@ import { cn } from "@/lib/utils";
 import { BoardSelect } from "@/components/board-select";
 import { API_ROUTES } from "@/constants/api";
 
-interface CreatePostModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+interface PollData {
+  options: string[];
+  isMultipleChoice: boolean;
+  showVoters: boolean;
+  hasDeadline: boolean;
+  startTime?: string;
+  endTime?: string;
 }
 
 interface BoardChild {
@@ -40,60 +45,161 @@ interface BoardChildrenResponse {
   message: string;
 }
 
+interface CreatePostModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+interface CreatePostModalState {
+  title: string;
+  content: string;
+  selectedBoard: number | undefined;
+  selectedChildBoard: number | undefined;
+  previewMode: boolean;
+  isSubmitting: boolean;
+  boardChildren: BoardChild[];
+  loadingChildren: boolean;
+  attachments: { id: number; file_name: string; file_type: string }[];
+  isPollModalOpen: boolean;
+  pollData: PollData | null;
+  pollOptions: string[];
+  isMultipleChoice: boolean;
+  showVoters: boolean;
+  hasDeadline: boolean;
+  pollStartTime: string;
+  pollEndTime: string;
+}
+
 export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
   const { t } = useTranslation();
   const router = useRouter();
-  const { toast } = useToast();
   const [title, setTitle] = React.useState("");
   const [content, setContent] = React.useState("");
-  const [selectedBoard, setSelectedBoard] = React.useState<number | undefined>(undefined);
-  const [selectedChildBoard, setSelectedChildBoard] = React.useState<number | undefined>(undefined);
-  const [boardChildren, setBoardChildren] = React.useState<BoardChild[]>([]);
-  const [loadingChildren, setLoadingChildren] = React.useState(false);
+  const [selectedBoard, setSelectedBoard] = React.useState<number | undefined>(1);
+  const [selectedChildBoard, setSelectedChildBoard] = React.useState<number | undefined>();
   const [previewMode, setPreviewMode] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [boardChildren, setBoardChildren] = React.useState<BoardChild[]>([]);
+  const [loadingChildren, setLoadingChildren] = React.useState(false);
   const [attachments, setAttachments] = React.useState<
     { id: number; file_name: string; file_type: string }[]
   >([]);
+  const [isPollModalOpen, setIsPollModalOpen] = React.useState(false);
+  const [pollData, setPollData] = React.useState<PollData | null>(null);
+  const [pollOptions, setPollOptions] = React.useState<string[]>(['', '']);
+  const [isMultipleChoice, setIsMultipleChoice] = React.useState(false);
+  const [showVoters, setShowVoters] = React.useState(false);
+  const [hasDeadline, setHasDeadline] = React.useState(false);
+  const [pollStartTime, setPollStartTime] = React.useState('');
+  const [pollEndTime, setPollEndTime] = React.useState('');
 
-  const handlePublish = async () => {
-    if (!title.trim()) {
-      toast({
-        title: "错误",
-        description: "请输入标题",
-        variant: "destructive",
-      });
+  const PollPreview = () => {
+    if (!pollData) return null;
+    
+    return (
+      <div className="mb-4 border rounded-lg p-4 bg-gray-50 relative">
+        <button
+          onClick={() => {
+            setPollData(null);
+            setPollOptions(['', '']);
+            setIsMultipleChoice(false);
+            setShowVoters(false);
+            setHasDeadline(false);
+            setPollStartTime('');
+            setPollEndTime('');
+          }}
+          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+          type="button"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </button>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            {pollData.options.map((option, index) => (
+              <div key={index} className="flex items-center space-x-2">
+                <div className="w-4 h-4 border rounded-full" />
+                <span>{option}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2 text-sm text-gray-500">
+            {pollData.isMultipleChoice && (
+              <Badge variant="secondary">多选</Badge>
+            )}
+            {pollData.showVoters && (
+              <Badge variant="secondary">公开投票人</Badge>
+            )}
+            {pollData.hasDeadline && pollData.startTime && pollData.endTime && (
+              <Badge variant="secondary">
+                {new Date(pollData.startTime).toLocaleString()} - {new Date(pollData.endTime).toLocaleString()}
+              </Badge>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const handlePollConfirm = () => {
+    const validOptions = pollOptions.filter(opt => opt.trim());
+    if (validOptions.length < 2) {
+      console.error("至少需要两个有效的投票选项");
       return;
     }
 
-    try {
-      setIsSubmitting(true);
+    if (hasDeadline && (!pollStartTime || !pollEndTime || new Date(pollEndTime) <= new Date(pollStartTime))) {
+      console.error("请设置有效的投票时间区间");
+      return;
+    }
 
+    setPollData({
+      options: validOptions,
+      isMultipleChoice,
+      showVoters,
+      hasDeadline,
+      startTime: hasDeadline ? pollStartTime : undefined,
+      endTime: hasDeadline ? pollEndTime : undefined,
+    });
+    setIsPollModalOpen(false);
+  };
+
+  const handlePublish = async () => {
+    if (!title.trim()) {
+      console.error("请输入标题");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
       const data = {
         title: title.trim(),
         content: content.trim(),
-        board_id: 1, // 父板块ID
-        board_child_id: selectedChildBoard, // 子板块ID
+        board_id: selectedBoard,
+        board_child_id: selectedChildBoard,
         attachments: attachments.length > 0 ? attachments : undefined,
+        poll: pollData
       };
 
       const response = await http.post(API_ROUTES.DISCUSSIONS.CREATE, data);
-
       if (response.code === 0) {
-        toast({
-          title: "发布成功",
-          description: "文章已成功发布",
-        });
+        console.log("发布成功");
         onOpenChange(false);
         router.refresh();
       }
     } catch (error) {
-      console.error("Failed to publish:", error);
-      toast({
-        title: "发布失败",
-        description: error instanceof Error ? error.message : "请稍后重试",
-        variant: "destructive",
-      });
+      console.error("发布失败", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -156,12 +262,6 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
       }
     } catch (error) {
       console.error("Error uploading image:", error);
-      toast({
-        title: "上传失败",
-        description:
-          error instanceof Error ? error.message : "图片上传失败，请重试",
-        variant: "destructive",
-      });
     }
   };
 
@@ -292,7 +392,6 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
     });
   };
 
-  // 获取子版列表
   const loadBoardChildren = React.useCallback(async (boardId: number) => {
     try {
       setLoadingChildren(true);
@@ -311,7 +410,6 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
     }
   }, []);
 
-  // 当选择的板块改变时，加载子版列表
   React.useEffect(() => {
     if (selectedBoard) {
       loadBoardChildren(selectedBoard);
@@ -320,7 +418,6 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
     }
   }, [selectedBoard, loadBoardChildren]);
 
-  // 处理 ESC 键关闭
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -337,7 +434,6 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
     };
   }, [open, onOpenChange]);
 
-  // 处理滚动锁定
   React.useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -368,7 +464,11 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
               <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
                 取消
               </Button>
-              <Button variant="outline" size="sm" onClick={handleSaveDraft}>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setIsPollModalOpen(true)}
+              >
                 投票
               </Button>
               <Button variant="outline" size="sm" onClick={handleSaveDraft}>
@@ -412,6 +512,8 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                   className="text-xl"
                 />
               </div>
+
+              {pollData && <PollPreview />}
 
               <div className="relative mt-4">
                 {previewMode ? (
@@ -501,9 +603,10 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                           strokeWidth="2"
                         >
                           <path
-                            d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"
                             strokeLinecap="round"
                             strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"
                           />
                         </svg>
                       </button>
@@ -519,9 +622,10 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                           strokeWidth="2"
                         >
                           <path
-                            d="M4 6h16M4 12h16M4 18h16"
                             strokeLinecap="round"
                             strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 6h16M4 12h16M4 18h16"
                           />
                         </svg>
                       </button>
@@ -537,9 +641,10 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                           strokeWidth="2"
                         >
                           <path
-                            d="M7.5 8h.01M3 8h.01M3 16h18M3 12h18"
                             strokeLinecap="round"
                             strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M7.5 8h.01M3 8h.01M3 16h18M3 12h18"
                           />
                         </svg>
                       </button>
@@ -556,9 +661,10 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                           strokeWidth="2"
                         >
                           <path
-                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                             strokeLinecap="round"
                             strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                           />
                         </svg>
                       </button>
@@ -574,9 +680,10 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                           strokeWidth="2"
                         >
                           <path
-                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
                             strokeLinecap="round"
                             strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
                           />
                         </svg>
                       </button>
@@ -592,9 +699,10 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                           strokeWidth="2"
                         >
                           <path
-                            d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
                             strokeLinecap="round"
                             strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
                           />
                         </svg>
                       </button>
@@ -630,6 +738,104 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
           </div>
         </div>
       </div>
+
+      <Dialog.Root open={isPollModalOpen} onOpenChange={setIsPollModalOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-[150]" />
+          <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-6 w-[90vw] max-w-lg max-h-[85vh] overflow-y-auto z-[151]">
+            <Dialog.Title className="text-lg font-medium mb-4">添加投票</Dialog.Title>
+            <div className="space-y-4">
+              {pollOptions.map((option, index) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <Input
+                    value={option}
+                    onChange={(e) => {
+                      const newOptions = [...pollOptions];
+                      newOptions[index] = e.target.value;
+                      setPollOptions(newOptions);
+                    }}
+                    placeholder={`选项 ${index + 1}`}
+                  />
+                  {pollOptions.length > 2 && (
+                    <button
+                      onClick={() => {
+                        setPollOptions(pollOptions.filter((_, i) => i !== index));
+                      }}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setPollOptions([...pollOptions, ''])}
+              >
+                添加选项
+              </Button>
+              <div className="flex items-center justify-between">
+                <span>允许多选</span>
+                <Switch
+                  checked={isMultipleChoice}
+                  onCheckedChange={setIsMultipleChoice}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <span>公开投票人</span>
+                <Switch
+                  checked={showVoters}
+                  onCheckedChange={setShowVoters}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <span>设置截止时间</span>
+                <Switch
+                  checked={hasDeadline}
+                  onCheckedChange={setHasDeadline}
+                />
+              </div>
+              {hasDeadline && (
+                <div className="space-y-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">开始时间</label>
+                    <Input
+                      type="datetime-local"
+                      value={pollStartTime}
+                      onChange={(e) => setPollStartTime(e.target.value)}
+                      min={new Date().toISOString().slice(0, 16)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">结束时间</label>
+                    <Input
+                      type="datetime-local"
+                      value={pollEndTime}
+                      onChange={(e) => setPollEndTime(e.target.value)}
+                      min={pollStartTime}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="mt-6 flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsPollModalOpen(false)}
+              >
+                取消
+              </Button>
+              <Button type="button" onClick={handlePollConfirm}>
+                确认
+              </Button>
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </Portal>
   );
 }
