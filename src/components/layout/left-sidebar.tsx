@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { CreateBoardModal } from "@/components/board/create-board-modal";
+import { CreatePostModal } from "@/components/post/create-post-modal";
 
 interface LeftSidebarProps extends React.HTMLAttributes<HTMLElement> {}
 
@@ -37,7 +38,7 @@ const mainNavItems = [
   },
   {
     title: "關注",
-    href: "/",
+    href: "/following",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -77,7 +78,7 @@ const mainNavItems = [
   },
   {
     title: "書籤",
-    href: "/",
+    href: "/bookmarks",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -101,6 +102,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const [createBoardOpen, setCreateBoardOpen] = useState(false);
+  const [createPostOpen, setCreatePostOpen] = useState(false);
 
   const handleLanguageChange = () => {
     const currentLang = i18n.language;
@@ -113,9 +115,9 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
     if (pathname === "/boards") {
       setCreateBoardOpen(true);
     } 
-    // 在看板详情页面，跳转到发布文章页面
-    else if (pathname.startsWith("/boards/")) {
-      router.push("/post");
+    // 在其他页面，显示发布文章的模态框
+    else {
+      setCreatePostOpen(true);
     }
   };
 
@@ -158,6 +160,10 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
           <CreateBoardModal
             open={createBoardOpen}
             onOpenChange={setCreateBoardOpen}
+          />
+          <CreatePostModal
+            open={createPostOpen}
+            onOpenChange={setCreatePostOpen}
           />
         </div>
 

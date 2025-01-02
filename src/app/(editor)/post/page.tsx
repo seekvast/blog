@@ -280,7 +280,7 @@ export default function NewDiscussionPage() {
       if (match) {
         e.preventDefault();
         const videoId = match[1];
-        const embedCode = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        const embedCode = `<iframe src="https://www.youtube.com/embed/${videoId}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
         
         const textArea = e.target as HTMLTextAreaElement;
         const start = textArea.selectionStart;
