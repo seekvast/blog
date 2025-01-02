@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -9,110 +9,113 @@
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
- 
+
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
- 
+
     --primary: 217 100% 50%;
     --primary-foreground: 0 0% 100%;
- 
+
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
- 
+
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
- 
+
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
- 
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 217 100% 50%;
- 
+
     --radius: 0.5rem;
   }
- 
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
- 
+
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
- 
+
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
- 
+
     --primary: 217 100% 50%;
     --primary-foreground: 0 0% 100%;
- 
+
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
- 
+
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
- 
+
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
- 
+
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
- 
+
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 217 100% 50%;
   }
 }
 
-/* Markdown 预览样式 */
-.wmde-markdown-var {
-  --color-fg-default: inherit;
-  --color-canvas-default: transparent;
-  --color-border-default: transparent;
-}
-
-.line-clamp-2 .wmde-markdown {
+/* Markdown 样式 */
+.line-clamp-2 {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
 }
 
-.line-clamp-2 .wmde-markdown p {
-  display: block;
+/* 段落样式 */
+.markdown-paragraph {
   margin: 0;
+  display: block;
 }
 
-/* 图片容器样式 */
-.line-clamp-2 .wmde-markdown p:has(img) {
+/* 包含图片的段落 */
+.markdown-paragraph:has(.markdown-image) {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 8px;
 }
 
-.line-clamp-2 .wmde-markdown img {
+/* 图片样式 */
+.markdown-image {
   display: block;
   width: 80px;
   height: 80px;
   object-fit: cover;
-  margin: 0;
   border-radius: 4px;
 }
 
-/* 移除预览容器的默认边距和背景色 */
-.markdown-preview {
-  padding: 0 !important;
-  margin: 0 !important;
-  background-color: transparent !important;
-}
-
-/* 确保链接颜色继承自父元素 */
-.wmde-markdown a {
+/* 链接样式 */
+.line-clamp-2 a {
   color: inherit;
   text-decoration: underline;
+}
+
+/* 列表样式 */
+.line-clamp-2 ul,
+.line-clamp-2 ol {
+  margin: 0;
+  padding-left: 1.5em;
+}
+
+/* 代码样式 */
+.line-clamp-2 code {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
 }
 
 @layer base {

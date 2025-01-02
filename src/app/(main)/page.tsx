@@ -11,7 +11,9 @@ import type { Discussion } from "@/types/discussion";
 import { http } from "@/lib/request";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
-import MarkdownPreview from '@uiw/react-markdown-preview';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 
 export default function HomePage() {
   const [discussions, setDiscussions] = React.useState<Discussion[]>([]);
@@ -119,17 +121,25 @@ export default function HomePage() {
                   </div>
 
                   <div className="mt-1 text-md text-muted-foreground line-clamp-2">
-                    <MarkdownPreview 
-                      source={discussion.main_post.content}
-                      wrapperElement={{
-                        "data-color-mode": "light"
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeRaw]}
+                      components={{
+                        img: ({ node, ...props }) => (
+                          // 自定义图片渲染
+                          <img
+                            {...props}
+                            className="markdown-image"
+                            loading="lazy"
+                          />
+                        ),
+                        p: ({ node, children }) => (
+                          <p className="markdown-paragraph">{children}</p>
+                        )
                       }}
-                      style={{ 
-                        backgroundColor: 'transparent',
-                        color: 'inherit',
-                        fontSize: 'inherit'
-                      }}
-                    />
+                    >
+                      {discussion.main_post.content}
+                    </ReactMarkdown>
                   </div>
 
                   {/* <div className="mt-2 flex items-center space-x-4 text-sm text-muted-foreground">
