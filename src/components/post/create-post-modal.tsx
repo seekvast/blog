@@ -75,8 +75,12 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
   const router = useRouter();
   const [title, setTitle] = React.useState("");
   const [content, setContent] = React.useState("");
-  const [selectedBoard, setSelectedBoard] = React.useState<number | undefined>(1);
-  const [selectedChildBoard, setSelectedChildBoard] = React.useState<number | undefined>();
+  const [selectedBoard, setSelectedBoard] = React.useState<number | undefined>(
+    1
+  );
+  const [selectedChildBoard, setSelectedChildBoard] = React.useState<
+    number | undefined
+  >();
   const [previewMode, setPreviewMode] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [boardChildren, setBoardChildren] = React.useState<BoardChild[]>([]);
@@ -86,27 +90,27 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
   >([]);
   const [isPollModalOpen, setIsPollModalOpen] = React.useState(false);
   const [pollData, setPollData] = React.useState<PollData | null>(null);
-  const [pollOptions, setPollOptions] = React.useState<string[]>(['', '']);
+  const [pollOptions, setPollOptions] = React.useState<string[]>(["", ""]);
   const [isMultipleChoice, setIsMultipleChoice] = React.useState(false);
   const [showVoters, setShowVoters] = React.useState(false);
   const [hasDeadline, setHasDeadline] = React.useState(false);
-  const [pollStartTime, setPollStartTime] = React.useState('');
-  const [pollEndTime, setPollEndTime] = React.useState('');
+  const [pollStartTime, setPollStartTime] = React.useState("");
+  const [pollEndTime, setPollEndTime] = React.useState("");
 
   const PollPreview = () => {
     if (!pollData) return null;
-    
+
     return (
       <div className="mb-4 border rounded-lg p-4 bg-gray-50 relative">
         <button
           onClick={() => {
             setPollData(null);
-            setPollOptions(['', '']);
+            setPollOptions(["", ""]);
             setIsMultipleChoice(false);
             setShowVoters(false);
             setHasDeadline(false);
-            setPollStartTime('');
-            setPollEndTime('');
+            setPollStartTime("");
+            setPollEndTime("");
           }}
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
           type="button"
@@ -128,7 +132,8 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
           <div className="space-y-2">
             {pollData.options.map((option, index) => (
               <div key={index} className="flex items-center space-x-2">
-                <div className="w-4 h-4 border rounded-full" />
+                {/* <div className="w-4 h-4 border rounded-full" /> */}
+                <span className="">选项{index + 1}</span>
                 <span>{option}</span>
               </div>
             ))}
@@ -142,7 +147,8 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
             )}
             {pollData.hasDeadline && pollData.startTime && pollData.endTime && (
               <Badge variant="secondary">
-                {new Date(pollData.startTime).toLocaleString()} - {new Date(pollData.endTime).toLocaleString()}
+                {new Date(pollData.startTime).toLocaleString()} -{" "}
+                {new Date(pollData.endTime).toLocaleString()}
               </Badge>
             )}
           </div>
@@ -152,13 +158,18 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
   };
 
   const handlePollConfirm = () => {
-    const validOptions = pollOptions.filter(opt => opt.trim());
+    const validOptions = pollOptions.filter((opt) => opt.trim());
     if (validOptions.length < 2) {
       console.error("至少需要两个有效的投票选项");
       return;
     }
 
-    if (hasDeadline && (!pollStartTime || !pollEndTime || new Date(pollEndTime) <= new Date(pollStartTime))) {
+    if (
+      hasDeadline &&
+      (!pollStartTime ||
+        !pollEndTime ||
+        new Date(pollEndTime) <= new Date(pollStartTime))
+    ) {
       console.error("请设置有效的投票时间区间");
       return;
     }
@@ -189,7 +200,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
         board_id: selectedBoard,
         board_child_id: selectedChildBoard,
         attachments: attachments.length > 0 ? attachments : undefined,
-        poll: pollData
+        poll: pollData,
       };
 
       const response = await http.post(API_ROUTES.DISCUSSIONS.CREATE, data);
@@ -395,12 +406,16 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
   const loadBoardChildren = React.useCallback(async (boardId: number) => {
     try {
       setLoadingChildren(true);
-      const response = await http.get<BoardChildrenResponse>(`${API_ROUTES.BOARDS.CHILDREN}?board_id=${boardId}`);
-      
+      const response = await http.get<BoardChildrenResponse>(
+        `${API_ROUTES.BOARDS.CHILDREN}?board_id=${boardId}`
+      );
+
       if (response.code === 0) {
         setBoardChildren(response.data.items);
         // Set default selected child board if exists
-        const defaultChild = response.data.items.find(child => child.is_default === 1);
+        const defaultChild = response.data.items.find(
+          (child) => child.is_default === 1
+        );
         setSelectedChildBoard(defaultChild?.id ?? undefined);
       }
     } catch (error) {
@@ -461,12 +476,16 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
               <BoardSelect value={selectedBoard} onChange={setSelectedBoard} />
             </div>
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+              >
                 取消
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setIsPollModalOpen(true)}
               >
                 投票
@@ -488,7 +507,9 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                 boardChildren.map((child) => (
                   <Badge
                     key={child.id}
-                    variant={selectedChildBoard === child.id ? "default" : "secondary"}
+                    variant={
+                      selectedChildBoard === child.id ? "default" : "secondary"
+                    }
                     className="cursor-pointer hover:bg-secondary/80"
                     onClick={() => setSelectedChildBoard(child.id)}
                   >
@@ -743,7 +764,9 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50 z-[150]" />
           <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-6 w-[90vw] max-w-lg max-h-[85vh] overflow-y-auto z-[151]">
-            <Dialog.Title className="text-lg font-medium mb-4">添加投票</Dialog.Title>
+            <Dialog.Title className="text-lg font-medium mb-4">
+              添加投票
+            </Dialog.Title>
             <div className="space-y-4">
               {pollOptions.map((option, index) => (
                 <div key={index} className="flex items-center space-x-2">
@@ -759,12 +782,23 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                   {pollOptions.length > 2 && (
                     <button
                       onClick={() => {
-                        setPollOptions(pollOptions.filter((_, i) => i !== index));
+                        setPollOptions(
+                          pollOptions.filter((_, i) => i !== index)
+                        );
                       }}
                       className="text-gray-500 hover:text-gray-700"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     </button>
                   )}
@@ -773,7 +807,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setPollOptions([...pollOptions, ''])}
+                onClick={() => setPollOptions([...pollOptions, ""])}
               >
                 添加选项
               </Button>
@@ -786,10 +820,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
               </div>
               <div className="flex items-center justify-between">
                 <span>公开投票人</span>
-                <Switch
-                  checked={showVoters}
-                  onCheckedChange={setShowVoters}
-                />
+                <Switch checked={showVoters} onCheckedChange={setShowVoters} />
               </div>
               <div className="flex items-center justify-between">
                 <span>设置截止时间</span>
@@ -800,23 +831,29 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
               </div>
               {hasDeadline && (
                 <div className="space-y-2">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">开始时间</label>
-                    <Input
-                      type="datetime-local"
-                      value={pollStartTime}
-                      onChange={(e) => setPollStartTime(e.target.value)}
-                      min={new Date().toISOString().slice(0, 16)}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">结束时间</label>
-                    <Input
-                      type="datetime-local"
-                      value={pollEndTime}
-                      onChange={(e) => setPollEndTime(e.target.value)}
-                      min={pollStartTime}
-                    />
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        开始时间
+                      </label>
+                      <Input
+                        type="datetime-local"
+                        value={pollStartTime}
+                        onChange={(e) => setPollStartTime(e.target.value)}
+                        min={new Date().toISOString().slice(0, 16)}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        结束时间
+                      </label>
+                      <Input
+                        type="datetime-local"
+                        value={pollEndTime}
+                        onChange={(e) => setPollEndTime(e.target.value)}
+                        min={pollStartTime}
+                      />
+                    </div>
                   </div>
                 </div>
               )}
