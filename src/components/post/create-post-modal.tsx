@@ -133,20 +133,20 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
             {pollData.options.map((option, index) => (
               <div key={index} className="flex items-center space-x-2">
                 {/* <div className="w-4 h-4 border rounded-full" /> */}
-                <span className="">选项{index + 1}</span>
+                <span className="text-gray-500">选项{index + 1}</span>
                 <span>{option}</span>
               </div>
             ))}
           </div>
           <div className="flex flex-wrap gap-2 text-sm text-gray-500">
             {pollData.isMultipleChoice && (
-              <Badge variant="secondary">多选</Badge>
+              <Badge variant="secondary" className="text-primary">多选</Badge>
             )}
             {pollData.showVoters && (
-              <Badge variant="secondary">公开投票人</Badge>
+              <Badge variant="secondary" className="text-primary">公开投票人</Badge>
             )}
             {pollData.hasDeadline && pollData.startTime && pollData.endTime && (
-              <Badge variant="secondary">
+              <Badge variant="secondary" className="text-primary">
                 {new Date(pollData.startTime).toLocaleString()} -{" "}
                 {new Date(pollData.endTime).toLocaleString()}
               </Badge>
@@ -769,7 +769,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
             </Dialog.Title>
             <div className="space-y-4">
               {pollOptions.map((option, index) => (
-                <div key={index} className="flex items-center space-x-2">
+                <div key={index} className="relative">
                   <Input
                     value={option}
                     onChange={(e) => {
@@ -778,6 +778,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                       setPollOptions(newOptions);
                     }}
                     placeholder={`选项 ${index + 1}`}
+                    className="pr-8"
                   />
                   {pollOptions.length > 2 && (
                     <button
@@ -786,78 +787,73 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                           pollOptions.filter((_, i) => i !== index)
                         );
                       }}
-                      className="text-gray-500 hover:text-gray-700"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-700 rounded-full w-5 h-5 flex items-center justify-center"
+                      type="button"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                          clipRule="evenodd"
-                        />
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                       </svg>
                     </button>
                   )}
                 </div>
               ))}
-              <Button
+              <button
                 type="button"
-                variant="outline"
                 onClick={() => setPollOptions([...pollOptions, ""])}
+                className="w-full flex items-center justify-center gap-1 text-blue-500 hover:text-blue-700"
               >
-                添加选项
-              </Button>
-              <div className="flex items-center justify-between">
-                <span>允许多选</span>
-                <Switch
-                  checked={isMultipleChoice}
-                  onCheckedChange={setIsMultipleChoice}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <span>公开投票人</span>
-                <Switch checked={showVoters} onCheckedChange={setShowVoters} />
-              </div>
-              <div className="flex items-center justify-between">
-                <span>设置截止时间</span>
-                <Switch
-                  checked={hasDeadline}
-                  onCheckedChange={setHasDeadline}
-                />
-              </div>
-              {hasDeadline && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        开始时间
-                      </label>
-                      <Input
-                        type="datetime-local"
-                        value={pollStartTime}
-                        onChange={(e) => setPollStartTime(e.target.value)}
-                        min={new Date().toISOString().slice(0, 16)}
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        结束时间
-                      </label>
-                      <Input
-                        type="datetime-local"
-                        value={pollEndTime}
-                        onChange={(e) => setPollEndTime(e.target.value)}
-                        min={pollStartTime}
-                      />
-                    </div>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 3V13M3 8H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+                增加选项
+              </button>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span>允许多选</span>
+              <Switch
+                checked={isMultipleChoice}
+                onCheckedChange={setIsMultipleChoice}
+              />
+            </div>
+            <div className="flex items-center justify-between border-t border-b py-2">
+              <span>公开投票人</span>
+              <Switch checked={showVoters} onCheckedChange={setShowVoters} />
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span>设置截止时间</span>
+              <Switch
+                checked={hasDeadline}
+                onCheckedChange={setHasDeadline}
+              />
+            </div>
+            {hasDeadline && (
+              <div className="space-y-2 border-t py-2">
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      开始时间
+                    </label>
+                    <Input
+                      type="datetime-local"
+                      value={pollStartTime}
+                      onChange={(e) => setPollStartTime(e.target.value)}
+                      min={new Date().toISOString().slice(0, 16)}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      结束时间
+                    </label>
+                    <Input
+                      type="datetime-local"
+                      value={pollEndTime}
+                      onChange={(e) => setPollEndTime(e.target.value)}
+                      min={pollStartTime}
+                    />
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
             <div className="mt-6 flex justify-end space-x-2">
               <Button
                 type="button"
