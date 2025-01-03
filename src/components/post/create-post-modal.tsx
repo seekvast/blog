@@ -132,21 +132,25 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
           <div className="space-y-2">
             {pollData.options.map((option, index) => (
               <div key={index} className="flex items-center space-x-2">
-                {/* <div className="w-4 h-4 border rounded-full" /> */}
-                <span className="text-gray-500">选项{index + 1}</span>
+                <span className="text-gray-500">选项 {index + 1} </span>
                 <span>{option}</span>
               </div>
             ))}
           </div>
           <div className="flex flex-wrap gap-2 text-sm text-gray-500">
             {pollData.isMultipleChoice && (
-              <Badge variant="secondary" className="text-primary">多选</Badge>
+              <Badge variant="secondary" className="text-primary">
+                多选
+              </Badge>
             )}
             {pollData.showVoters && (
-              <Badge variant="secondary" className="text-primary">公开投票人</Badge>
+              <Badge variant="secondary" className="text-primary">
+                允许用户查看投票人
+              </Badge>
             )}
             {pollData.hasDeadline && pollData.startTime && pollData.endTime && (
               <Badge variant="secondary" className="text-primary">
+                <span>限时投票：</span>
                 {new Date(pollData.startTime).toLocaleString()} -{" "}
                 {new Date(pollData.endTime).toLocaleString()}
               </Badge>
@@ -790,8 +794,19 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                       className="absolute right-2 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-700 rounded-full w-5 h-5 flex items-center justify-center"
                       type="button"
                     >
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M12 4L4 12M4 4L12 12"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
                       </svg>
                     </button>
                   )}
@@ -802,8 +817,19 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                 onClick={() => setPollOptions([...pollOptions, ""])}
                 className="w-full flex items-center justify-center gap-1 text-blue-500 hover:text-blue-700"
               >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 3V13M3 8H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M8 3V13M3 8H13"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
                 </svg>
                 增加选项
               </button>
@@ -821,10 +847,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
             </div>
             <div className="flex items-center justify-between py-2">
               <span>设置截止时间</span>
-              <Switch
-                checked={hasDeadline}
-                onCheckedChange={setHasDeadline}
-              />
+              <Switch checked={hasDeadline} onCheckedChange={setHasDeadline} />
             </div>
             {hasDeadline && (
               <div className="space-y-2 border-t py-2">
