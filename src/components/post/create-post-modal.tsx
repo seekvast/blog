@@ -70,6 +70,23 @@ interface CreatePostModalState {
   pollData: PollData | null;
 }
 
+const ToolbarButton = ({
+  onClick,
+  icon,
+  children,
+}: {
+  onClick: () => void;
+  icon?: React.ReactNode;
+  children?: React.ReactNode;
+}) => (
+  <button
+    onClick={onClick}
+    className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 font-medium"
+  >
+    {icon || children}
+  </button>
+);
+
 export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
   const { t } = useTranslation();
   const router = useRouter();
@@ -225,6 +242,8 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                   value={pollStartTime}
                   onChange={(e) => setPollStartTime(e.target.value)}
                   min={new Date().toISOString().slice(0, 16)}
+                  onClick={(e) => (e.currentTarget as HTMLInputElement).showPicker()}
+                  className="cursor-pointer"
                 />
               </div>
               <div className="flex-1">
@@ -235,7 +254,9 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                   type="datetime-local"
                   value={pollEndTime}
                   onChange={(e) => setPollEndTime(e.target.value)}
-                  min={pollStartTime}
+                  min={pollStartTime || new Date().toISOString().slice(0, 16)}
+                  onClick={(e) => (e.currentTarget as HTMLInputElement).showPicker()}
+                  className="cursor-pointer"
                 />
               </div>
             </div>
@@ -662,7 +683,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                     setIsPollEditing(true);
                   }
                 }}
-                disabled={pollData || isPollEditing}
+                disabled={!!pollData || isPollEditing}
               >
                 投票
               </Button>
@@ -674,6 +695,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
               </Button>
             </div>
           </div>
+
           <div className="border-t py-4">
             <h3 className="text-sm font-medium mb-2">子版</h3>
             <div className="flex flex-wrap gap-2">
@@ -699,11 +721,8 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            <div className="pt-4">
-              {isPollEditing ? <PollEditor /> : pollData && <PollPreview />}
-            </div>
-            <main className="py-4">
-              <div className="mb-6">
+            <main className="space-y-6">
+              <div>
                 <Input
                   type="text"
                   placeholder="请输入文章标题"
@@ -713,7 +732,13 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                 />
               </div>
 
-              <div className="relative mt-4">
+              {(isPollEditing || pollData) && (
+                <div className="">
+                  {isPollEditing ? <PollEditor /> : <PollPreview />}
+                </div>
+              )}
+
+              <div className="relative">
                 {previewMode ? (
                   <div className="min-h-[300px] rounded-lg border p-4">
                     <ReactMarkdown
@@ -750,166 +775,65 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                   <div className="rounded-lg border">
                     <div className="flex items-center gap-1 border-b bg-gray-50/50 px-2">
                       <div className="flex items-center">
-                        <button
-                          onClick={() => handleFormatClick("h1")}
-                          className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 font-medium"
-                        >
-                          H1
-                        </button>
-                        <button
-                          onClick={() => handleFormatClick("h2")}
-                          className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 font-medium"
-                        >
-                          H2
-                        </button>
-                        <button
-                          onClick={() => handleFormatClick("h3")}
-                          className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 font-medium"
-                        >
-                          H3
-                        </button>
+                        <ToolbarButton onClick={() => handleFormatClick("h1")}>H1</ToolbarButton>
+                        <ToolbarButton onClick={() => handleFormatClick("h2")}>H2</ToolbarButton>
+                        <ToolbarButton onClick={() => handleFormatClick("h3")}>H3</ToolbarButton>
                       </div>
                       <div className="h-5 w-px bg-gray-200 mx-1" />
-                      <button
-                        onClick={() => handleFormatClick("bold")}
-                        className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 font-medium"
-                      >
-                        B
-                      </button>
-                      <button
-                        onClick={() => handleFormatClick("italic")}
-                        className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 italic"
-                      >
-                        I
-                      </button>
-                      <button
-                        onClick={() => handleFormatClick("underline")}
-                        className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 line-through"
-                      >
-                        S
-                      </button>
+                      <ToolbarButton onClick={() => handleFormatClick("bold")}>B</ToolbarButton>
+                      <ToolbarButton onClick={() => handleFormatClick("italic")}>I</ToolbarButton>
+                      <ToolbarButton onClick={() => handleFormatClick("underline")}>S</ToolbarButton>
                       <div className="h-5 w-px bg-gray-200 mx-1" />
-                      <button
+                      <ToolbarButton 
                         onClick={() => handleFormatClick("list-ul")}
-                        className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 6h13M8 12h13M8 18h7"
-                          />
-                        </svg>
-                      </button>
-                      <button
+                        icon={
+                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 6h13M8 12h13M8 18h7" />
+                          </svg>
+                        }
+                      />
+                      <ToolbarButton 
                         onClick={() => handleFormatClick("list-ol")}
-                        className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 6h16M4 12h16M4 18h16"
-                          />
-                        </svg>
-                      </button>
-                      <button
+                        icon={
+                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                          </svg>
+                        }
+                      />
+                      <ToolbarButton 
                         onClick={() => handleFormatClick("quote")}
-                        className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M7.5 8h.01M3 8h.01M3 16h18M3 12h18"
-                          />
-                        </svg>
-                      </button>
+                        icon={
+                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8h.01M3 8h.01M3 16h18M3 12h18" />
+                          </svg>
+                        }
+                      />
                       <div className="h-5 w-px bg-gray-200 mx-1" />
-                      <button
+                      <ToolbarButton 
                         onClick={() => handleFormatClick("image")}
-                        className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </button>
-                      <button
+                        icon={
+                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        }
+                      />
+                      <ToolbarButton 
                         onClick={() => handleFormatClick("link")}
-                        className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                          />
-                        </svg>
-                      </button>
-                      <button
+                        icon={
+                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                          </svg>
+                        }
+                      />
+                      <ToolbarButton 
                         onClick={() => handleFormatClick("code")}
-                        className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                          />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={() => handleFormatClick("at")}
-                        className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600"
-                      >
-                        @
-                      </button>
+                        icon={
+                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                          </svg>
+                        }
+                      />
+                      <ToolbarButton onClick={() => handleFormatClick("at")}>@</ToolbarButton>
                     </div>
                     <textarea
                       value={content}
