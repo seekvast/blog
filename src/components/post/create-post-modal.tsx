@@ -569,10 +569,34 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
     }
   }, [selectedBoard, loadBoardChildren]);
 
+  const resetAllStates = React.useCallback(() => {
+    setTitle("");
+    setContent("");
+    setSelectedBoard(1);
+    setSelectedChildBoard(undefined);
+    setPreviewMode(false);
+    setIsSubmitting(false);
+    setBoardChildren([]);
+    setAttachments([]);
+    setPollData(null);
+    setPollOptions(["", ""]);
+    setIsMultipleChoice(false);
+    setShowVoters(false);
+    setHasDeadline(false);
+    setPollStartTime("");
+    setPollEndTime("");
+    setIsPollEditing(false);
+  }, []);
+
+  const handleClose = React.useCallback(() => {
+    resetAllStates();
+    onOpenChange(false);
+  }, [onOpenChange, resetAllStates]);
+
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onOpenChange(false);
+        handleClose();
       }
     };
 
@@ -583,7 +607,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
     return () => {
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [open, onOpenChange]);
+  }, [open, handleClose]);
 
   React.useEffect(() => {
     if (open) {
@@ -595,6 +619,13 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  // 当模态框关闭时重置状态
+  React.useEffect(() => {
+    if (!open) {
+      resetAllStates();
+    }
+  }, [open, resetAllStates]);
 
   return (
     <Portal>
@@ -615,7 +646,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => onOpenChange(false)}
+                onClick={handleClose}
               >
                 取消
               </Button>
