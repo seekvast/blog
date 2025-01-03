@@ -23,7 +23,9 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const showRightSidebar = !pathname.startsWith("/boards");
+  // 只在首页和搜索页显示默认的右侧边栏
+  const showDefaultSidebarPaths = ['/', '/search'];
+  const showRightSidebar = showDefaultSidebarPaths.includes(pathname);
 
   return (
     <div className="min-h-screen">
@@ -33,9 +35,9 @@ export default function MainLayout({
           <div className="sticky top-[88px] min-w-[300px] h-[calc(100vh-88px)]">
             <LeftSidebar className="hidden lg:block" />
           </div>
-          <main className="w-full">{children}</main>
+          <main className="w-full ml-8">{children}</main>
           {showRightSidebar && (
-            <RightSidebar className="hidden lg:block mt-8" />
+            <RightSidebar className="hidden lg:block mt-8 ml-8" />
           )}
         </div>
       </div>

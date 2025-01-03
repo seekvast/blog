@@ -78,7 +78,7 @@ export default function HomePage() {
     <div className="flex flex-col">
       {/* 顶部导航 */}
       <div className="bg-white">
-        <div className="mx-auto w-[808px] px-8">
+        <div className="mx-auto w-[808px]">
           <div className="flex h-[60px] items-center justify-between border-b border-[#EAEAEA]">
             <div className="flex items-center space-x-8">
               <Button
@@ -128,7 +128,7 @@ export default function HomePage() {
       </div>
 
       {/* 帖子列表 */}
-      <div className="mx-auto w-[808px] px-8">
+      <div className="mx-auto w-[808px]">
         <div className="divide-y">
           {discussions.map((discussion, index) => (
             <article
@@ -144,9 +144,12 @@ export default function HomePage() {
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-foreground">
+                    <Link
+                      href={`/discussions/${discussion.slug}`}
+                      className="text-sm font-medium text-foreground hover:text-primary"
+                    >
                       {discussion.title}
-                    </span>
+                    </Link>
                     <span className="text-sm text-muted-foreground">
                       {formatDistanceToNow(
                         new Date(discussion.main_post.created_at),

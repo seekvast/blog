@@ -115,7 +115,7 @@ export default function BoardsPage() {
     <div className="flex flex-col">
       {/* 顶部导航 */}
       <div className="bg-white">
-        <div className="mx-auto w-full px-8">
+        <div className="mx-auto w-full">
           <div className="flex h-[60px] items-center justify-between border-b border-[#EAEAEA]">
             <div className="flex items-center space-x-8">
               <Button
@@ -155,7 +155,7 @@ export default function BoardsPage() {
       </div>
 
       {/* 看板列表 */}
-      <div className="mx-auto w-full px-8">
+      <div className="mx-auto w-full">
         {loading && boards.length === 0 ? (
           <div className="flex justify-center py-8">
             <div className="animate-spin" />
