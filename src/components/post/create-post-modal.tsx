@@ -200,7 +200,10 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
         </button>
         <div className="flex items-center justify-between py-2">
           <span>允许多选</span>
-          <Switch checked={isMultipleChoice} onCheckedChange={setIsMultipleChoice} />
+          <Switch
+            checked={isMultipleChoice}
+            onCheckedChange={setIsMultipleChoice}
+          />
         </div>
         <div className="flex items-center justify-between border-t border-b py-2">
           <span>公开投票人</span>
@@ -284,7 +287,12 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
           className="absolute top-2 right-10 text-gray-500 hover:text-gray-700"
           type="button"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
           </svg>
         </button>
@@ -643,11 +651,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
               <BoardSelect value={selectedBoard} onChange={setSelectedBoard} />
             </div>
             <div className="flex items-center space-x-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleClose}
-              >
+              <Button variant="outline" size="sm" onClick={handleClose}>
                 取消
               </Button>
               <Button
@@ -695,6 +699,9 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
           </div>
 
           <div className="flex-1 overflow-y-auto">
+            <div className="pt-4">
+              {isPollEditing ? <PollEditor /> : pollData && <PollPreview />}
+            </div>
             <main className="py-4">
               <div className="mb-6">
                 <Input
@@ -924,10 +931,6 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                     {previewMode ? "编辑" : "预览"}
                   </Button>
                 </div>
-              </div>
-
-              <div className="mt-8 border-t pt-4">
-                {isPollEditing ? <PollEditor /> : pollData && <PollPreview />}
               </div>
             </main>
           </div>
