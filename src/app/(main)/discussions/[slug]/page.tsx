@@ -137,50 +137,43 @@ export default function DiscussionDetailPage() {
   const [loading, setLoading] = React.useState(true);
   const [discussion, setDiscussion] = React.useState<Discussion | null>(null);
   const [comments, setComments] = React.useState<Comment[]>([]);
+  const fetchedRef = React.useRef(false);
 
   React.useEffect(() => {
-    const fetchDiscussion = async () => {
+    // 在开发环境的严格模式下，useEffect 会被调用两次
+    // 使用 ref 来确保只请求一次
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+
+    const fetchData = async () => {
       if (!slug) return;
 
       try {
-        const response = await http.get(
-          `/api/discussion?slug=${encodeURIComponent(slug)}`
-        );
-        console.log("Discussion API response:", response);
+        // 并行请求讨论和评论数据
+        const [discussionRes, commentsRes] = await Promise.all([
+          http.get(`/api/discussion?slug=${encodeURIComponent(slug)}`),
+          http.get(`/api/discussion/posts?slug=${encodeURIComponent(slug)}`)
+        ]);
 
-        if (response.code == 0) {
-          setDiscussion(response.data);
-          console.log("Discussion.....................:", discussion);
+        if (discussionRes.code === 0) {
+          setDiscussion(discussionRes.data);
         } else {
-          console.log("API returned error code:", response.data.code);
+          console.log("Discussion API returned error code:", discussionRes.code);
           setDiscussion(null);
         }
+
+        if (commentsRes.code === 0) {
+          setComments(commentsRes.data.items);
+        }
       } catch (error) {
-        console.error("Failed to fetch discussion:", error);
+        console.error("Failed to fetch data:", error);
         setDiscussion(null);
       } finally {
         setLoading(false);
       }
     };
 
-    const fetchComments = async () => {
-      if (!slug) return;
-
-      try {
-        const response = await http.get(
-          `/api/discussion/posts?slug=${encodeURIComponent(slug)}`
-        );
-        console.log("Comments API response:", response.data);
-        if (response.code === 0) {
-          setComments(response.data.items);
-        }
-      } catch (error) {
-        console.error("Failed to fetch comments:", error);
-      }
-    };
-
-    fetchDiscussion();
-    fetchComments();
+    fetchData();
   }, [slug]);
 
   if (loading) {

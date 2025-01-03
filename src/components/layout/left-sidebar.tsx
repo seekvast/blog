@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { CreateBoardModal } from "@/components/board/create-board-modal";
-import { CreatePostModal } from "@/components/post/create-post-modal";
+
+// 懒加载 CreatePostModal 组件
+const CreatePostModal = React.lazy(() => import("@/components/post/create-post-modal"));
 
 interface LeftSidebarProps extends React.HTMLAttributes<HTMLElement> {}
 
@@ -161,10 +163,14 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
             open={createBoardOpen}
             onOpenChange={setCreateBoardOpen}
           />
-          <CreatePostModal
-            open={createPostOpen}
-            onOpenChange={setCreatePostOpen}
-          />
+          {createPostOpen && (
+            <Suspense fallback={null}>
+              <CreatePostModal
+                open={createPostOpen}
+                onOpenChange={setCreatePostOpen}
+              />
+            </Suspense>
+          )}
         </div>
 
         {/* 推荐看板 */}

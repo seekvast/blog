@@ -14,6 +14,7 @@ import rehypeRaw from "rehype-raw";
 import { cn } from "@/lib/utils";
 import { BoardSelect } from "@/components/board-select";
 import { API_ROUTES } from "@/constants/api";
+import { useBoardChildrenStore } from "@/store/board-children";
 
 interface PollData {
   options: string[];
@@ -68,6 +69,7 @@ interface CreatePostModalState {
   pollStartTime: string;
   pollEndTime: string;
   pollData: PollData | null;
+  showChildBoards: boolean;
 }
 
 const ToolbarButton = ({
@@ -87,7 +89,13 @@ const ToolbarButton = ({
   </button>
 );
 
-export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
+export default function CreatePostModal({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const { t } = useTranslation();
   const router = useRouter();
   const [title, setTitle] = React.useState("");
@@ -113,6 +121,57 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
   const [pollStartTime, setPollStartTime] = React.useState("");
   const [pollEndTime, setPollEndTime] = React.useState("");
   const [pollData, setPollData] = React.useState<PollData | null>(null);
+  const [showChildBoards, setShowChildBoards] = React.useState(false);
+
+  const { getBoardChildren, setBoardChildren: setStoreBoardChildren } =
+    useBoardChildrenStore();
+
+  const loadBoardChildren = React.useCallback(async (boardId: number) => {
+    try {
+      setLoadingChildren(true);
+      // 先从 store 中获取
+      const cachedChildren = getBoardChildren(boardId);
+      if (cachedChildren) {
+        setBoardChildren(cachedChildren);
+        const defaultChild = cachedChildren.find(
+          (child) => child.is_default === 1
+        );
+        setSelectedChildBoard(defaultChild?.id ?? undefined);
+        setLoadingChildren(false);
+        return;
+      }
+
+      // 如果 store 中没有，则请求 API
+      const response = await http.get<{
+        code: number;
+        data: BoardChildrenResponse;
+        message: string;
+      }>(`/api/board/children?board_id=${boardId}`);
+
+      if (response.code === 0) {
+        setBoardChildren(response.data.items);
+        // 缓存到 store 中
+        setStoreBoardChildren(boardId, response.data.items);
+        // Set default selected child board if exists
+        const defaultChild = response.data.items.find(
+          (child) => child.is_default === 1
+        );
+        setSelectedChildBoard(defaultChild?.id ?? undefined);
+      }
+    } catch (error) {
+      console.error("Failed to load board children:", error);
+    } finally {
+      setLoadingChildren(false);
+    }
+  }, [getBoardChildren, setStoreBoardChildren]);
+
+  React.useEffect(() => {
+    if (selectedBoard) {
+      loadBoardChildren(selectedBoard);
+    } else {
+      setBoardChildren([]);
+    }
+  }, [selectedBoard, loadBoardChildren]);
 
   const handlePollConfirm = () => {
     const validOptions = pollOptions.filter((opt) => opt.trim());
@@ -568,36 +627,6 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
     });
   };
 
-  const loadBoardChildren = React.useCallback(async (boardId: number) => {
-    try {
-      setLoadingChildren(true);
-      const response = await http.get<BoardChildrenResponse>(
-        `${API_ROUTES.BOARDS.CHILDREN}?board_id=${boardId}`
-      );
-
-      if (response.code === 0) {
-        setBoardChildren(response.data.items);
-        // Set default selected child board if exists
-        const defaultChild = response.data.items.find(
-          (child) => child.is_default === 1
-        );
-        setSelectedChildBoard(defaultChild?.id ?? undefined);
-      }
-    } catch (error) {
-      console.error("Failed to load board children:", error);
-    } finally {
-      setLoadingChildren(false);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    if (selectedBoard) {
-      loadBoardChildren(selectedBoard);
-    } else {
-      setBoardChildren([]);
-    }
-  }, [selectedBoard, loadBoardChildren]);
-
   const resetAllStates = React.useCallback(() => {
     setTitle("");
     setContent("");
@@ -615,6 +644,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
     setPollStartTime("");
     setPollEndTime("");
     setIsPollEditing(false);
+    setShowChildBoards(false);
   }, []);
 
   const handleClose = React.useCallback(() => {
@@ -697,27 +727,34 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
           </div>
 
           <div className="border-t py-4">
-            <h3 className="text-sm font-medium mb-2">子版</h3>
-            <div className="flex flex-wrap gap-2">
-              {loadingChildren ? (
-                <div className="text-sm text-muted-foreground">加载中...</div>
-              ) : boardChildren.length > 0 ? (
-                boardChildren.map((child) => (
-                  <Badge
-                    key={child.id}
-                    variant={
-                      selectedChildBoard === child.id ? "default" : "secondary"
-                    }
-                    className="cursor-pointer hover:bg-secondary/80"
-                    onClick={() => setSelectedChildBoard(child.id)}
-                  >
-                    # {child.name}
-                  </Badge>
-                ))
-              ) : (
-                <div className="text-sm text-muted-foreground">暂无子版</div>
-              )}
-            </div>
+            <h3 
+              className="text-sm font-medium mb-2 cursor-pointer hover:text-primary"
+              onClick={() => setShowChildBoards(!showChildBoards)}
+            >
+              子版 {showChildBoards ? "⌄" : "›"}
+            </h3>
+            {showChildBoards && (
+              <div className="flex flex-wrap gap-2">
+                {loadingChildren ? (
+                  <div className="text-sm text-muted-foreground">加载中...</div>
+                ) : boardChildren.length > 0 ? (
+                  boardChildren.map((child) => (
+                    <Badge
+                      key={child.id}
+                      variant={
+                        selectedChildBoard === child.id ? "default" : "secondary"
+                      }
+                      className="cursor-pointer hover:bg-secondary/80"
+                      onClick={() => setSelectedChildBoard(child.id)}
+                    >
+                      # {child.name}
+                    </Badge>
+                  ))
+                ) : (
+                  <div className="text-sm text-muted-foreground">暂无子版</div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex-1 overflow-y-auto">
@@ -740,7 +777,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
 
               <div className="relative">
                 {previewMode ? (
-                  <div className="min-h-[300px] rounded-lg border p-4">
+                  <div className="min-h-[300px] rounded-lg border p-4 bg-gray-50">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeRaw]}

@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
 import { http } from "@/lib/request";
+import { useBoardChildrenStore } from "@/store/board-children";
 
 interface Board {
   id: number;
@@ -148,6 +149,7 @@ export default function BoardDetailPage() {
   const [boardChildren, setBoardChildren] = useState<BoardChild[]>([]);
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
   const { t } = useTranslation();
+  const { getBoardChildren, setBoardChildren: setStoreBoardChildren } = useBoardChildrenStore();
 
   useEffect(() => {
     if (params.slug) {
@@ -186,6 +188,34 @@ export default function BoardDetailPage() {
     }
   };
 
+  const fetchBoardChildren = async () => {
+    try {
+      if (!board?.id) return;
+
+      // 先从 store 中获取
+      const cachedChildren = getBoardChildren(board.id);
+      if (cachedChildren) {
+        setBoardChildren(cachedChildren);
+        return;
+      }
+
+      // 如果 store 中没有，则请求 API
+      const response = await http.get<{
+        code: number;
+        data: BoardChildrenResponse;
+        message: string;
+      }>(`/api/board/children?board_id=${board.id}`);
+
+      if (response.code === 0) {
+        setBoardChildren(response.data.items);
+        // 缓存到 store 中
+        setStoreBoardChildren(board.id, response.data.items);
+      }
+    } catch (error) {
+      console.error("Failed to fetch board children:", error);
+    }
+  };
+
   const fetchDiscussions = async (page: number = 1) => {
     try {
       setDiscussionsLoading(true);
@@ -214,31 +244,6 @@ export default function BoardDetailPage() {
       console.error("Failed to fetch discussions:", error);
     } finally {
       setDiscussionsLoading(false);
-    }
-  };
-
-  const fetchBoardChildren = async () => {
-    try {
-      if (!board?.id) return;
-
-      const response = await http.get<{
-        code: number;
-        data: BoardChildrenResponse;
-        message: string;
-      }>(`/api/board/children?board_id=${board.id}`);
-
-      if (response.code === 0) {
-        setBoardChildren(response.data.items);
-        // 如果有默认子看板，设置为选中状态
-        // const defaultChild = response.data.items.find(
-        //   (child) => child.is_default === 1
-        // );
-        // if (defaultChild) {
-        //   setSelectedChildId(defaultChild.id);
-        // }
-      }
-    } catch (error) {
-      console.error("Failed to fetch board children:", error);
     }
   };
 

@@ -44,6 +44,7 @@ export function BoardSelect({ value, onChange }: BoardSelectProps) {
   const [loading, setLoading] = React.useState(false);
   const [page, setPage] = React.useState(1);
   const [hasMore, setHasMore] = React.useState(true);
+  const [isOpen, setIsOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const selectedBoard = boards.find((board) => board.id === value);
@@ -100,15 +101,18 @@ export function BoardSelect({ value, onChange }: BoardSelectProps) {
     }
   }, [loading, hasMore, searchQuery, page, loadBoards]);
 
-  // 初始加载
+  // 只在打开选择器时加载看板列表
   React.useEffect(() => {
-    loadBoards("", 1);
-  }, [loadBoards]);
+    if (isOpen && boards.length === 0) {
+      loadBoards("", 1);
+    }
+  }, [isOpen, boards.length, loadBoards]);
 
   return (
     <Select
       value={value?.toString()}
       onValueChange={(value) => onChange?.(parseInt(value))}
+      onOpenChange={setIsOpen}
     >
       <SelectTrigger className="w-[320px] h-auto py-2">
         <SelectValue placeholder="请选择看板">
