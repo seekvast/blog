@@ -60,14 +60,14 @@ interface CreatePostModalState {
   boardChildren: BoardChild[];
   loadingChildren: boolean;
   attachments: { id: number; file_name: string; file_type: string }[];
-  isPollModalOpen: boolean;
-  pollData: PollData | null;
+  isPollEditing: boolean;
   pollOptions: string[];
   isMultipleChoice: boolean;
   showVoters: boolean;
   hasDeadline: boolean;
   pollStartTime: string;
   pollEndTime: string;
+  pollData: PollData | null;
 }
 
 export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
@@ -88,14 +88,165 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
   const [attachments, setAttachments] = React.useState<
     { id: number; file_name: string; file_type: string }[]
   >([]);
-  const [isPollModalOpen, setIsPollModalOpen] = React.useState(false);
-  const [pollData, setPollData] = React.useState<PollData | null>(null);
+  const [isPollEditing, setIsPollEditing] = React.useState(false);
   const [pollOptions, setPollOptions] = React.useState<string[]>(["", ""]);
   const [isMultipleChoice, setIsMultipleChoice] = React.useState(false);
   const [showVoters, setShowVoters] = React.useState(false);
   const [hasDeadline, setHasDeadline] = React.useState(false);
   const [pollStartTime, setPollStartTime] = React.useState("");
   const [pollEndTime, setPollEndTime] = React.useState("");
+  const [pollData, setPollData] = React.useState<PollData | null>(null);
+
+  const handlePollConfirm = () => {
+    const validOptions = pollOptions.filter((opt) => opt.trim());
+    if (validOptions.length < 2) {
+      console.error("至少需要两个有效的投票选项");
+      return;
+    }
+
+    if (
+      hasDeadline &&
+      (!pollStartTime ||
+        !pollEndTime ||
+        new Date(pollEndTime) <= new Date(pollStartTime))
+    ) {
+      console.error("请设置有效的投票时间区间");
+      return;
+    }
+
+    setPollData({
+      options: validOptions,
+      isMultipleChoice,
+      showVoters,
+      hasDeadline,
+      startTime: hasDeadline ? pollStartTime : undefined,
+      endTime: hasDeadline ? pollEndTime : undefined,
+    });
+    setIsPollEditing(false);
+  };
+
+  const handleDeletePoll = () => {
+    setPollData(null);
+    setPollOptions(["", ""]);
+    setIsMultipleChoice(false);
+    setShowVoters(false);
+    setHasDeadline(false);
+    setPollStartTime("");
+    setPollEndTime("");
+    setIsPollEditing(false);
+  };
+
+  const PollEditor = () => (
+    <div className="mb-4 border rounded-lg p-4 bg-gray-50">
+      <div className="space-y-4">
+        {pollOptions.map((option, index) => (
+          <div key={index} className="relative">
+            <Input
+              value={option}
+              onChange={(e) => {
+                const newOptions = [...pollOptions];
+                newOptions[index] = e.target.value;
+                setPollOptions(newOptions);
+              }}
+              placeholder={`选项 ${index + 1}`}
+              className="pr-8"
+            />
+            {pollOptions.length > 2 && (
+              <button
+                onClick={() => {
+                  setPollOptions(pollOptions.filter((_, i) => i !== index));
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-700 rounded-full w-5 h-5 flex items-center justify-center"
+                type="button"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 4L4 12M4 4L12 12"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => setPollOptions([...pollOptions, ""])}
+          className="w-full flex items-center justify-center gap-1 text-blue-500 hover:text-blue-700"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8 3V13M3 8H13"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+          增加选项
+        </button>
+        <div className="flex items-center justify-between py-2">
+          <span>允许多选</span>
+          <Switch checked={isMultipleChoice} onCheckedChange={setIsMultipleChoice} />
+        </div>
+        <div className="flex items-center justify-between border-t border-b py-2">
+          <span>公开投票人</span>
+          <Switch checked={showVoters} onCheckedChange={setShowVoters} />
+        </div>
+        <div className="flex items-center justify-between py-2">
+          <span>设置截止时间</span>
+          <Switch checked={hasDeadline} onCheckedChange={setHasDeadline} />
+        </div>
+        {hasDeadline && (
+          <div className="space-y-2 border-t py-2">
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  开始时间
+                </label>
+                <Input
+                  type="datetime-local"
+                  value={pollStartTime}
+                  onChange={(e) => setPollStartTime(e.target.value)}
+                  min={new Date().toISOString().slice(0, 16)}
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  结束时间
+                </label>
+                <Input
+                  type="datetime-local"
+                  value={pollEndTime}
+                  onChange={(e) => setPollEndTime(e.target.value)}
+                  min={pollStartTime}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="flex justify-end space-x-2 pt-4">
+          <Button variant="outline" onClick={() => setIsPollEditing(false)}>
+            取消
+          </Button>
+          <Button onClick={handlePollConfirm}>确认</Button>
+        </div>
+      </div>
+    </div>
+  );
 
   const PollPreview = () => {
     if (!pollData) return null;
@@ -103,15 +254,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
     return (
       <div className="mb-4 border rounded-lg p-4 bg-gray-50 relative">
         <button
-          onClick={() => {
-            setPollData(null);
-            setPollOptions(["", ""]);
-            setIsMultipleChoice(false);
-            setShowVoters(false);
-            setHasDeadline(false);
-            setPollStartTime("");
-            setPollEndTime("");
-          }}
+          onClick={handleDeletePoll}
           className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
           type="button"
         >
@@ -126,6 +269,23 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
               d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
               clipRule="evenodd"
             />
+          </svg>
+        </button>
+        <button
+          onClick={() => {
+            setPollOptions(pollData.options);
+            setIsMultipleChoice(pollData.isMultipleChoice);
+            setShowVoters(pollData.showVoters);
+            setHasDeadline(pollData.hasDeadline);
+            if (pollData.startTime) setPollStartTime(pollData.startTime);
+            if (pollData.endTime) setPollEndTime(pollData.endTime);
+            setIsPollEditing(true);
+          }}
+          className="absolute top-2 right-10 text-gray-500 hover:text-gray-700"
+          type="button"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
           </svg>
         </button>
         <div className="space-y-4">
@@ -159,34 +319,6 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
         </div>
       </div>
     );
-  };
-
-  const handlePollConfirm = () => {
-    const validOptions = pollOptions.filter((opt) => opt.trim());
-    if (validOptions.length < 2) {
-      console.error("至少需要两个有效的投票选项");
-      return;
-    }
-
-    if (
-      hasDeadline &&
-      (!pollStartTime ||
-        !pollEndTime ||
-        new Date(pollEndTime) <= new Date(pollStartTime))
-    ) {
-      console.error("请设置有效的投票时间区间");
-      return;
-    }
-
-    setPollData({
-      options: validOptions,
-      isMultipleChoice,
-      showVoters,
-      hasDeadline,
-      startTime: hasDeadline ? pollStartTime : undefined,
-      endTime: hasDeadline ? pollEndTime : undefined,
-    });
-    setIsPollModalOpen(false);
   };
 
   const handlePublish = async () => {
@@ -490,7 +622,12 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setIsPollModalOpen(true)}
+                onClick={() => {
+                  if (!pollData && !isPollEditing) {
+                    setIsPollEditing(true);
+                  }
+                }}
+                disabled={pollData || isPollEditing}
               >
                 投票
               </Button>
@@ -537,8 +674,6 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                   className="text-xl"
                 />
               </div>
-
-              {pollData && <PollPreview />}
 
               <div className="relative mt-4">
                 {previewMode ? (
@@ -631,7 +766,7 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth={2}
-                            d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"
+                            d="M8 6h13M8 12h13M8 18h7"
                           />
                         </svg>
                       </button>
@@ -759,139 +894,14 @@ export function CreatePostModal({ open, onOpenChange }: CreatePostModalProps) {
                   </Button>
                 </div>
               </div>
+
+              <div className="mt-8 border-t pt-4">
+                {isPollEditing ? <PollEditor /> : pollData && <PollPreview />}
+              </div>
             </main>
           </div>
         </div>
       </div>
-
-      <Dialog.Root open={isPollModalOpen} onOpenChange={setIsPollModalOpen}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-[150]" />
-          <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-6 w-[90vw] max-w-lg max-h-[85vh] overflow-y-auto z-[151]">
-            <Dialog.Title className="text-lg font-medium mb-4">
-              添加投票
-            </Dialog.Title>
-            <div className="space-y-4">
-              {pollOptions.map((option, index) => (
-                <div key={index} className="relative">
-                  <Input
-                    value={option}
-                    onChange={(e) => {
-                      const newOptions = [...pollOptions];
-                      newOptions[index] = e.target.value;
-                      setPollOptions(newOptions);
-                    }}
-                    placeholder={`选项 ${index + 1}`}
-                    className="pr-8"
-                  />
-                  {pollOptions.length > 2 && (
-                    <button
-                      onClick={() => {
-                        setPollOptions(
-                          pollOptions.filter((_, i) => i !== index)
-                        );
-                      }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-red-500 hover:text-red-700 rounded-full w-5 h-5 flex items-center justify-center"
-                      type="button"
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 16 16"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M12 4L4 12M4 4L12 12"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() => setPollOptions([...pollOptions, ""])}
-                className="w-full flex items-center justify-center gap-1 text-blue-500 hover:text-blue-700"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M8 3V13M3 8H13"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                增加选项
-              </button>
-            </div>
-            <div className="flex items-center justify-between py-2">
-              <span>允许多选</span>
-              <Switch
-                checked={isMultipleChoice}
-                onCheckedChange={setIsMultipleChoice}
-              />
-            </div>
-            <div className="flex items-center justify-between border-t border-b py-2">
-              <span>公开投票人</span>
-              <Switch checked={showVoters} onCheckedChange={setShowVoters} />
-            </div>
-            <div className="flex items-center justify-between py-2">
-              <span>设置截止时间</span>
-              <Switch checked={hasDeadline} onCheckedChange={setHasDeadline} />
-            </div>
-            {hasDeadline && (
-              <div className="space-y-2 border-t py-2">
-                <div className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      开始时间
-                    </label>
-                    <Input
-                      type="datetime-local"
-                      value={pollStartTime}
-                      onChange={(e) => setPollStartTime(e.target.value)}
-                      min={new Date().toISOString().slice(0, 16)}
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      结束时间
-                    </label>
-                    <Input
-                      type="datetime-local"
-                      value={pollEndTime}
-                      onChange={(e) => setPollEndTime(e.target.value)}
-                      min={pollStartTime}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-            <div className="mt-6 flex justify-end space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsPollModalOpen(false)}
-              >
-                取消
-              </Button>
-              <Button type="button" onClick={handlePollConfirm}>
-                确认
-              </Button>
-            </div>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
     </Portal>
   );
 }
