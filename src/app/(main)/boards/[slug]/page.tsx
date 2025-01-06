@@ -272,7 +272,7 @@ export default function BoardDetailPage() {
   return (
     <div className="flex flex-col mx-auto w-full">
       {/* 看板信息 */}
-      <div className="bg-white">
+      <div className="bg-background">
         <div className="">
           <div className="flex items-start space-x-3 pb-4">
             <Avatar className="h-12 w-12 rounded-lg">
@@ -313,7 +313,7 @@ export default function BoardDetailPage() {
       </div>
 
       {/* 顶部导航 */}
-      <div className="bg-white">
+      <div className="bg-background">
         <div className="mx-auto w-full">
           <div className="flex h-[60px] items-center justify-between border-b border-[#EAEAEA]">
             <div className="flex items-center space-x-8">

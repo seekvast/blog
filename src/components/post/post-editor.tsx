@@ -161,7 +161,7 @@ export function PostEditor({
         </div>
       ) : (
         <div className="rounded-lg border">
-          <div className="flex items-center gap-1 border-b bg-gray-50/50 px-2">
+          <div className="flex items-center gap-1 border-b bg-gray-50/50 dark:bg-gray-900/50 px-2">
             <div className="flex items-center">
               <ToolbarButton onClick={() => handleToolbarAction("h1")}>
                 <Icon name="format_h1" />

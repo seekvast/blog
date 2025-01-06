@@ -114,7 +114,7 @@ export default function BoardsPage() {
   return (
     <div className="flex flex-col">
       {/* 顶部导航 */}
-      <div className="bg-white">
+      <div className="bg-background">
         <div className="mx-auto w-full">
           <div className="flex h-[60px] items-center justify-between border-b border-[#EAEAEA]">
             <div className="flex items-center space-x-8">

@@ -1,19 +1,22 @@
 "use client";
 
 import * as React from "react";
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
-import { Plus, Globe2, PenSquare } from "lucide-react";
+import { Plus, PenSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { CreateBoardModal } from "@/components/board/create-board-modal";
 import { Icon } from "@/components/icons";
+import { ModeToggle } from "@/components/mode-toggle";
 
 // 懒加载 CreatePostModal 组件
-const CreatePostModal = React.lazy(() => import("@/components/post/create-post-modal"));
+const CreatePostModal = React.lazy(
+  () => import("@/components/post/create-post-modal")
+);
 
 interface NavItem {
   title: string;
@@ -41,7 +44,7 @@ const mainNavItems: NavItem[] = [
     title: "书签",
     href: "/bookmarks",
     icon: "bookmark",
-  }
+  },
 ];
 
 interface LeftSidebarProps extends React.HTMLAttributes<HTMLElement> {}
@@ -63,7 +66,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
     // 在看板列表页面，显示创建看板的模态框
     if (pathname === "/boards") {
       setCreateBoardOpen(true);
-    } 
+    }
     // 在其他页面，显示发布文章的模态框
     else {
       setCreatePostOpen(true);
@@ -87,11 +90,14 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                 className={cn(
                   "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
                   pathname === item.href
-                    ? "bg-neutral-100 text-neutral-900"
-                    : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900",
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 )}
               >
-                <Icon name={item.icon} className="mr-2 text-[20px] leading-none" />
+                <Icon
+                  name={item.icon}
+                  className="mr-2 text-[20px] leading-none"
+                />
                 <span>{item.title}</span>
               </Link>
             );
@@ -100,12 +106,11 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
 
         {/* 创建看板按钮 */}
         <div className="px-3 py-2">
-          <Button
-            className="w-full justify-start"
-            onClick={handlePublishClick}
-          >
+          <Button className="w-full justify-start" onClick={handlePublishClick}>
             <Plus className="mr-2 h-4 w-4" />
-            {pathname === "/boards" ? t("common.createBoard") : t("common.publish")}
+            {pathname === "/boards"
+              ? t("common.createBoard")
+              : t("common.publish")}
           </Button>
           <CreateBoardModal
             open={createBoardOpen}
@@ -230,14 +235,16 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
               {t("common.helpCenter")}
             </Link>
           </div>
-          <div className="flex items-center text-sm text-muted-foreground">
+          <div className="flex justify-between">
             <div
-              role="button"
+              className="flex cursor-pointer items-center py-2 text-sm text-muted-foreground hover:text-foreground"
               onClick={handleLanguageChange}
-              className="flex items-center gap-2 hover:text-foreground"
             >
-              <Globe2 className="ml-auto h-4 w-4" />
-              <span>{t("common.autoDetectLanguage")}</span>
+              <Icon name="language" className="text-[20px] leading-none" />
+              <span className="truncate">{t("common.autoDetectLanguage")}</span>
+            </div>
+            <div>
+              <ModeToggle />
             </div>
           </div>
         </div>

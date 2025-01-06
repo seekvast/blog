@@ -227,7 +227,7 @@ export default function DiscussionDetailPage() {
         </div>
 
         {/* 贴文底部操作栏 */}
-        <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4">
+        <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
           <div className="flex items-center space-x-2">
             <div className="flex items-center space-x-1 text-sm text-muted-foreground">
               <Icon name="favorite" className="text-base" />
@@ -332,7 +332,7 @@ export default function DiscussionDetailPage() {
               <PostEditor
                 content={commentContent}
                 onChange={setCommentContent}
-                className="rounded-lg border bg-white"
+                className="rounded-lg border border-gray-200 bg-background"
                 onImageUpload={async (file) => {
                   const formData = new FormData();
                   formData.append("image", file);

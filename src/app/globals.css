@@ -4,7 +4,7 @@
 
 @layer utilities {
   .glass-effect {
-    @apply bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/75;
+    @apply bg-white/95 dark:bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-white/75 supports-[backdrop-filter]:dark:bg-background/75;
   }
 
   .scrollbar-none {

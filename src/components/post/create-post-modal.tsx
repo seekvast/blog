@@ -86,7 +86,7 @@ export function ToolbarButton({
   return (
     <button
       onClick={onClick}
-      className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 font-medium"
+      className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-600 dark:text-gray-400 font-medium"
     >
       {icon || children}
     </button>
@@ -699,7 +699,7 @@ export default function CreatePostModal({
         )}
         style={{ height: "calc(100% - 56px)" }}
       >
-        <div className="bg-white h-full flex flex-col mx-auto w-[1360px] mt-8 px-4">
+        <div className="bg-theme-background h-full flex flex-col mx-auto w-[1360px] mt-8 px-4">
           <div className="sticky-header">
             <div className="flex items-center gap-4">
               <h1 className="text-lg font-medium leading-none">发布文章</h1>
