@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { http } from "@/lib/request";
 import { DiscussionSidebar } from "@/components/discussion/discussion-sidebar";
 import { PostEditor } from "@/components/post/post-editor";
+import { API_ROUTES } from "@/constants/api";
 
 interface User {
   hashid: string;
@@ -339,26 +340,11 @@ export default function DiscussionDetailPage() {
                   formData.append("attachment_type", "comment_images");
 
                   try {
-                    const response = (await http.post(API_ROUTES.UPLOAD.IMAGE, formData)) as {
-                      code: number;
-                      data: {
-                        id: number;
-                        host: string;
-                        file_path: string;
-                        file_name: string;
-                      };
-                      message: string;
-                    };
-
-                    if (response.code === 0) {
-                      const imageUrl = `${response.data.host}${response.data.file_path}`;
-                      return imageUrl;
-                    } else {
-                      throw new Error(response.message || "Upload failed");
-                    }
+                    const response = await http.post(API_ROUTES.UPLOAD.IMAGE, formData);
+                    // You can still use the response data here if needed
+                    // but don't return it
                   } catch (error) {
-                    console.error("Error uploading image:", error);
-                    throw error;
+                    console.error("Failed to upload image:", error);
                   }
                 }}
               />
@@ -372,7 +358,7 @@ export default function DiscussionDetailPage() {
 
                     try {
                       const response = await http.post(`/api/discussion/posts`, {
-                        discussion_id: discussion?.id,
+                        slug: discussion.slug,
                         content: commentContent.trim(),
                       });
 

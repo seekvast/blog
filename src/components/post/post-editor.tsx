@@ -13,6 +13,7 @@ interface PostEditorProps {
   className?: string;
   previewMode?: boolean;
   onPreviewModeChange?: (mode: boolean) => void;
+  imageUploading?: boolean;
 }
 
 export function PostEditor({
@@ -22,6 +23,7 @@ export function PostEditor({
   className,
   previewMode = false,
   onPreviewModeChange,
+  imageUploading = false,
 }: PostEditorProps) {
   const handleToolbarAction = (action: string) => {
     const textArea = document.querySelector("textarea");
@@ -126,106 +128,116 @@ export function PostEditor({
   };
 
   return (
-    <div className={cn("relative", className)}>
-      {previewMode ? (
-        <div className="min-h-[300px] rounded-lg border p-4 bg-gray-50">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeRaw]}
-            className="prose prose-sm max-w-none dark:prose-invert [&_img]:!my-0"
-            components={{
-              img: ({ src, alt, ...props }) => {
-                const isLargeImage = props.title?.includes("large");
-                const isMediumImage = props.title?.includes("medium");
-                const isSmallImage = props.title?.includes("small");
-
-                let sizeClass = "max-w-2xl"; // 默认尺寸
-                if (isLargeImage) sizeClass = "max-w-4xl";
-                if (isMediumImage) sizeClass = "max-w-xl";
-                if (isSmallImage) sizeClass = "max-w-sm";
-
-                return (
-                  <img
-                    src={src}
-                    alt={alt || "图片"}
-                    className={`${sizeClass} h-auto rounded-lg mx-auto`}
-                    loading="lazy"
-                    {...props}
-                  />
-                );
-              },
-            }}
-          >
-            {content}
-          </ReactMarkdown>
-        </div>
-      ) : (
-        <div className="rounded-lg border">
-          <div className="flex items-center gap-1 border-b bg-gray-50/50 dark:bg-gray-900/50 px-2">
-            <div className="flex items-center">
-              <ToolbarButton onClick={() => handleToolbarAction("h1")}>
-                <Icon name="format_h1" />
-              </ToolbarButton>
-              <ToolbarButton onClick={() => handleToolbarAction("h2")}>
-                <Icon name="format_h2" />
-              </ToolbarButton>
-              <ToolbarButton onClick={() => handleToolbarAction("h3")}>
-                <Icon name="format_h3" />
-              </ToolbarButton>
-            </div>
-            <div className="h-5 w-px bg-gray-200 mx-1" />
-            <ToolbarButton onClick={() => handleToolbarAction("bold")}>
-              <Icon name="format_bold" />
-            </ToolbarButton>
-            <ToolbarButton onClick={() => handleToolbarAction("italic")}>
-              <Icon name="format_italic" />
-            </ToolbarButton>
-            <ToolbarButton onClick={() => handleToolbarAction("underline")}>
-              <Icon name="format_underlined" />
-            </ToolbarButton>
-            <div className="h-5 w-px bg-gray-200 mx-1" />
-            <ToolbarButton onClick={() => handleToolbarAction("list-ul")}>
-              <Icon name="format_list_bulleted" />
-            </ToolbarButton>
-            <ToolbarButton onClick={() => handleToolbarAction("list-ol")}>
-              <Icon name="format_list_numbered" />
-            </ToolbarButton>
-            <ToolbarButton onClick={() => handleToolbarAction("quote")}>
-              <Icon name="format_quote" />
-            </ToolbarButton>
-            <div className="h-5 w-px bg-gray-200 mx-1" />
-            <ToolbarButton onClick={() => handleToolbarAction("image")}>
-              <Icon name="image" />
-            </ToolbarButton>
-            <ToolbarButton onClick={() => handleToolbarAction("link")}>
-              <Icon name="link" />
-            </ToolbarButton>
-            <ToolbarButton onClick={() => handleToolbarAction("code")}>
-              <Icon name="code" />
-            </ToolbarButton>
-            <ToolbarButton onClick={() => handleToolbarAction("at")}>
-              <Icon name="alternate_email" />
-            </ToolbarButton>
+    <div className="relative">
+      {imageUploading && (
+        <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="flex flex-col items-center gap-2">
+            <Icon name="refresh" className="h-6 w-6 animate-spin text-primary" />
+            <span className="text-sm text-gray-500">正在上传图片...</span>
           </div>
-          <textarea
-            value={content}
-            onChange={(e) => onChange(e.target.value)}
-            onPaste={handlePaste}
-            onDrop={handleDrop}
-            onDragOver={(e) => e.preventDefault()}
-            placeholder="说说你的想法..."
-            className="min-h-[300px] w-full resize-none p-4 font-mono focus:outline-none focus:ring-0"
-          />
         </div>
       )}
-      <div className="absolute bottom-4 right-4">
-        <button
-          onClick={() => onPreviewModeChange?.(!previewMode)}
-          className="inline-flex h-8 items-center justify-center rounded-md border bg-background px-3 text-xs font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-1"
-        >
-          <Icon name={previewMode ? "edit" : "preview"} className="text-base" />
-          {previewMode ? "编辑" : "预览"}
-        </button>
+      <div className={cn("space-y-4", className)}>
+        {previewMode ? (
+          <div className="min-h-[300px] rounded-lg border p-4 bg-gray-50">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
+              className="prose prose-sm max-w-none dark:prose-invert [&_img]:!my-0"
+              components={{
+                img: ({ src, alt, ...props }) => {
+                  const isLargeImage = props.title?.includes("large");
+                  const isMediumImage = props.title?.includes("medium");
+                  const isSmallImage = props.title?.includes("small");
+
+                  let sizeClass = "max-w-2xl"; // 默认尺寸
+                  if (isLargeImage) sizeClass = "max-w-4xl";
+                  if (isMediumImage) sizeClass = "max-w-xl";
+                  if (isSmallImage) sizeClass = "max-w-sm";
+
+                  return (
+                    <img
+                      src={src}
+                      alt={alt || "图片"}
+                      className={`${sizeClass} h-auto rounded-lg mx-auto`}
+                      loading="lazy"
+                      {...props}
+                    />
+                  );
+                },
+              }}
+            >
+              {content}
+            </ReactMarkdown>
+          </div>
+        ) : (
+          <div className="rounded-lg border">
+            <div className="flex items-center gap-1 border-b bg-gray-50/50 dark:bg-gray-900/50 px-2">
+              <div className="flex items-center">
+                <ToolbarButton onClick={() => handleToolbarAction("h1")}>
+                  <Icon name="format_h1" />
+                </ToolbarButton>
+                <ToolbarButton onClick={() => handleToolbarAction("h2")}>
+                  <Icon name="format_h2" />
+                </ToolbarButton>
+                <ToolbarButton onClick={() => handleToolbarAction("h3")}>
+                  <Icon name="format_h3" />
+                </ToolbarButton>
+              </div>
+              <div className="h-5 w-px bg-gray-200 mx-1" />
+              <ToolbarButton onClick={() => handleToolbarAction("bold")}>
+                <Icon name="format_bold" />
+              </ToolbarButton>
+              <ToolbarButton onClick={() => handleToolbarAction("italic")}>
+                <Icon name="format_italic" />
+              </ToolbarButton>
+              <ToolbarButton onClick={() => handleToolbarAction("underline")}>
+                <Icon name="format_underlined" />
+              </ToolbarButton>
+              <div className="h-5 w-px bg-gray-200 mx-1" />
+              <ToolbarButton onClick={() => handleToolbarAction("list-ul")}>
+                <Icon name="format_list_bulleted" />
+              </ToolbarButton>
+              <ToolbarButton onClick={() => handleToolbarAction("list-ol")}>
+                <Icon name="format_list_numbered" />
+              </ToolbarButton>
+              <ToolbarButton onClick={() => handleToolbarAction("quote")}>
+                <Icon name="format_quote" />
+              </ToolbarButton>
+              <div className="h-5 w-px bg-gray-200 mx-1" />
+              <ToolbarButton onClick={() => handleToolbarAction("image")}>
+                <Icon name="image" />
+              </ToolbarButton>
+              <ToolbarButton onClick={() => handleToolbarAction("link")}>
+                <Icon name="link" />
+              </ToolbarButton>
+              <ToolbarButton onClick={() => handleToolbarAction("code")}>
+                <Icon name="code" />
+              </ToolbarButton>
+              <ToolbarButton onClick={() => handleToolbarAction("at")}>
+                <Icon name="alternate_email" />
+              </ToolbarButton>
+            </div>
+            <textarea
+              value={content}
+              onChange={(e) => onChange(e.target.value)}
+              onPaste={handlePaste}
+              onDrop={handleDrop}
+              onDragOver={(e) => e.preventDefault()}
+              placeholder="说说你的想法..."
+              className="min-h-[300px] w-full resize-none p-4 font-mono focus:outline-none focus:ring-0"
+            />
+          </div>
+        )}
+        <div className="absolute bottom-4 right-4">
+          <button
+            onClick={() => onPreviewModeChange?.(!previewMode)}
+            className="inline-flex h-8 items-center justify-center rounded-md border bg-background px-3 text-xs font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-1"
+          >
+            <Icon name={previewMode ? "edit" : "preview"} className="text-base" />
+            {previewMode ? "编辑" : "预览"}
+          </button>
+        </div>
       </div>
     </div>
   );

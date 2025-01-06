@@ -17,6 +17,7 @@ import { API_ROUTES } from "@/constants/api";
 import { useBoardChildrenStore } from "@/store/board-children";
 import { PostEditor } from "./post-editor";
 import { Icon } from "@/components/icons";
+import { toast } from "@/components/ui/toast";
 
 interface PollData {
   options: string[];
@@ -72,6 +73,7 @@ interface CreatePostModalState {
   pollEndTime: string;
   pollData: PollData | null;
   showChildBoards: boolean;
+  imageUploading: boolean;
 }
 
 export function ToolbarButton({
@@ -126,48 +128,52 @@ export default function CreatePostModal({
   const [pollEndTime, setPollEndTime] = React.useState("");
   const [pollData, setPollData] = React.useState<PollData | null>(null);
   const [showChildBoards, setShowChildBoards] = React.useState(false);
+  const [imageUploading, setImageUploading] = React.useState(false);
 
   const { getBoardChildren, setBoardChildren: setStoreBoardChildren } =
     useBoardChildrenStore();
 
-  const loadBoardChildren = React.useCallback(async (boardId: number) => {
-    try {
-      setLoadingChildren(true);
-      // 先从 store 中获取
-      const cachedChildren = getBoardChildren(boardId);
-      if (cachedChildren) {
-        setBoardChildren(cachedChildren);
-        const defaultChild = cachedChildren.find(
-          (child) => child.is_default === 1
-        );
-        setSelectedChildBoard(defaultChild?.id ?? undefined);
+  const loadBoardChildren = React.useCallback(
+    async (boardId: number) => {
+      try {
+        setLoadingChildren(true);
+        // 先从 store 中获取
+        const cachedChildren = getBoardChildren(boardId);
+        if (cachedChildren) {
+          setBoardChildren(cachedChildren);
+          const defaultChild = cachedChildren.find(
+            (child) => child.is_default === 1
+          );
+          setSelectedChildBoard(defaultChild?.id ?? undefined);
+          setLoadingChildren(false);
+          return;
+        }
+
+        // 如果 store 中没有，则请求 API
+        const response = await http.get<{
+          code: number;
+          data: BoardChildrenResponse;
+          message: string;
+        }>(`/api/board/children?board_id=${boardId}`);
+
+        if (response.code === 0) {
+          setBoardChildren(response.data.items);
+          // 缓存到 store 中
+          setStoreBoardChildren(boardId, response.data.items);
+          // Set default selected child board if exists
+          const defaultChild = response.data.items.find(
+            (child) => child.is_default === 1
+          );
+          setSelectedChildBoard(defaultChild?.id ?? undefined);
+        }
+      } catch (error) {
+        console.error("Failed to load board children:", error);
+      } finally {
         setLoadingChildren(false);
-        return;
       }
-
-      // 如果 store 中没有，则请求 API
-      const response = await http.get<{
-        code: number;
-        data: BoardChildrenResponse;
-        message: string;
-      }>(`/api/board/children?board_id=${boardId}`);
-
-      if (response.code === 0) {
-        setBoardChildren(response.data.items);
-        // 缓存到 store 中
-        setStoreBoardChildren(boardId, response.data.items);
-        // Set default selected child board if exists
-        const defaultChild = response.data.items.find(
-          (child) => child.is_default === 1
-        );
-        setSelectedChildBoard(defaultChild?.id ?? undefined);
-      }
-    } catch (error) {
-      console.error("Failed to load board children:", error);
-    } finally {
-      setLoadingChildren(false);
-    }
-  }, [getBoardChildren, setStoreBoardChildren]);
+    },
+    [getBoardChildren, setStoreBoardChildren]
+  );
 
   React.useEffect(() => {
     if (selectedBoard) {
@@ -305,7 +311,9 @@ export default function CreatePostModal({
                   value={pollStartTime}
                   onChange={(e) => setPollStartTime(e.target.value)}
                   min={new Date().toISOString().slice(0, 16)}
-                  onClick={(e) => (e.currentTarget as HTMLInputElement).showPicker()}
+                  onClick={(e) =>
+                    (e.currentTarget as HTMLInputElement).showPicker()
+                  }
                   className="cursor-pointer"
                 />
               </div>
@@ -318,7 +326,9 @@ export default function CreatePostModal({
                   value={pollEndTime}
                   onChange={(e) => setPollEndTime(e.target.value)}
                   min={pollStartTime || new Date().toISOString().slice(0, 16)}
-                  onClick={(e) => (e.currentTarget as HTMLInputElement).showPicker()}
+                  onClick={(e) =>
+                    (e.currentTarget as HTMLInputElement).showPicker()
+                  }
                   className="cursor-pointer"
                 />
               </div>
@@ -450,6 +460,7 @@ export default function CreatePostModal({
   }, [title, content]);
 
   const handleImageUpload = async (file: File) => {
+    setImageUploading(true);
     const formData = new FormData();
     formData.append("image", file);
     formData.append("attachment_type", "topics_images");
@@ -501,6 +512,9 @@ export default function CreatePostModal({
       }
     } catch (error) {
       console.error("Error uploading image:", error);
+      toast.error("图片上传失败");
+    } finally {
+      setImageUploading(false);
     }
   };
 
@@ -649,6 +663,7 @@ export default function CreatePostModal({
     setPollEndTime("");
     setIsPollEditing(false);
     setShowChildBoards(false);
+    setImageUploading(false);
   }, []);
 
   const handleClose = React.useCallback(() => {
@@ -724,11 +739,7 @@ export default function CreatePostModal({
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleClose}
-              >
+              <Button variant="outline" size="sm" onClick={handleClose}>
                 取消
               </Button>
               <Button
@@ -748,7 +759,7 @@ export default function CreatePostModal({
           </div>
 
           <div className="border-t py-4">
-            <h3 
+            <h3
               className="text-sm font-medium mb-2 cursor-pointer hover:text-primary"
               onClick={() => setShowChildBoards(!showChildBoards)}
             >
@@ -763,7 +774,9 @@ export default function CreatePostModal({
                     <Badge
                       key={child.id}
                       variant={
-                        selectedChildBoard === child.id ? "default" : "secondary"
+                        selectedChildBoard === child.id
+                          ? "default"
+                          : "secondary"
                       }
                       className="cursor-pointer hover:bg-secondary/80"
                       onClick={() => setSelectedChildBoard(child.id)}
@@ -795,6 +808,7 @@ export default function CreatePostModal({
                 previewMode={previewMode}
                 onPreviewModeChange={setPreviewMode}
                 className="min-h-[400px]"
+                imageUploading={imageUploading}
               />
 
               {isPollEditing && <PollEditor />}
