@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { BoardSelect } from "@/components/board-select";
 import { API_ROUTES } from "@/constants/api";
 import { useBoardChildrenStore } from "@/store/board-children";
+import { PostEditor } from "./post-editor";
 
 interface PollData {
   options: string[];
@@ -72,7 +73,7 @@ interface CreatePostModalState {
   showChildBoards: boolean;
 }
 
-const ToolbarButton = ({
+export function ToolbarButton({
   onClick,
   icon,
   children,
@@ -80,14 +81,16 @@ const ToolbarButton = ({
   onClick: () => void;
   icon?: React.ReactNode;
   children?: React.ReactNode;
-}) => (
-  <button
-    onClick={onClick}
-    className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 font-medium"
-  >
-    {icon || children}
-  </button>
-);
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 rounded text-gray-600 font-medium"
+    >
+      {icon || children}
+    </button>
+  );
+}
 
 export default function CreatePostModal({
   open,
@@ -758,142 +761,27 @@ export default function CreatePostModal({
           </div>
 
           <div className="flex-1 overflow-y-auto">
-            <main className="space-y-6">
-              <div>
-                <Input
-                  type="text"
-                  placeholder="请输入文章标题"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="text-xl"
-                />
-              </div>
+            <div className="space-y-4 py-4">
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full text-2xl font-medium border-none focus:outline-none focus:ring-0 placeholder:text-gray-400"
+                placeholder="输入标题..."
+              />
 
-              {(isPollEditing || pollData) && (
-                <div className="">
-                  {isPollEditing ? <PollEditor /> : <PollPreview />}
-                </div>
-              )}
+              <PostEditor
+                content={content}
+                onChange={setContent}
+                onImageUpload={handleImageUpload}
+                previewMode={previewMode}
+                onPreviewModeChange={setPreviewMode}
+                className="min-h-[400px]"
+              />
 
-              <div className="relative">
-                {previewMode ? (
-                  <div className="min-h-[300px] rounded-lg border p-4 bg-gray-50">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeRaw]}
-                      className="prose prose-sm max-w-none dark:prose-invert [&_img]:!my-0"
-                      components={{
-                        img: ({ src, alt, ...props }) => {
-                          const isLargeImage = props.title?.includes("large");
-                          const isMediumImage = props.title?.includes("medium");
-                          const isSmallImage = props.title?.includes("small");
-
-                          let sizeClass = "max-w-2xl"; // 默认尺寸
-                          if (isLargeImage) sizeClass = "max-w-4xl";
-                          if (isMediumImage) sizeClass = "max-w-xl";
-                          if (isSmallImage) sizeClass = "max-w-sm";
-
-                          return (
-                            <img
-                              src={src}
-                              alt={alt || "图片"}
-                              className={`${sizeClass} h-auto rounded-lg mx-auto`}
-                              loading="lazy"
-                              {...props}
-                            />
-                          );
-                        },
-                      }}
-                    >
-                      {content}
-                    </ReactMarkdown>
-                  </div>
-                ) : (
-                  <div className="rounded-lg border">
-                    <div className="flex items-center gap-1 border-b bg-gray-50/50 px-2">
-                      <div className="flex items-center">
-                        <ToolbarButton onClick={() => handleFormatClick("h1")}>H1</ToolbarButton>
-                        <ToolbarButton onClick={() => handleFormatClick("h2")}>H2</ToolbarButton>
-                        <ToolbarButton onClick={() => handleFormatClick("h3")}>H3</ToolbarButton>
-                      </div>
-                      <div className="h-5 w-px bg-gray-200 mx-1" />
-                      <ToolbarButton onClick={() => handleFormatClick("bold")}>B</ToolbarButton>
-                      <ToolbarButton onClick={() => handleFormatClick("italic")}>I</ToolbarButton>
-                      <ToolbarButton onClick={() => handleFormatClick("underline")}>S</ToolbarButton>
-                      <div className="h-5 w-px bg-gray-200 mx-1" />
-                      <ToolbarButton 
-                        onClick={() => handleFormatClick("list-ul")}
-                        icon={
-                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 6h13M8 12h13M8 18h7" />
-                          </svg>
-                        }
-                      />
-                      <ToolbarButton 
-                        onClick={() => handleFormatClick("list-ol")}
-                        icon={
-                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                          </svg>
-                        }
-                      />
-                      <ToolbarButton 
-                        onClick={() => handleFormatClick("quote")}
-                        icon={
-                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8h.01M3 8h.01M3 16h18M3 12h18" />
-                          </svg>
-                        }
-                      />
-                      <div className="h-5 w-px bg-gray-200 mx-1" />
-                      <ToolbarButton 
-                        onClick={() => handleFormatClick("image")}
-                        icon={
-                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                        }
-                      />
-                      <ToolbarButton 
-                        onClick={() => handleFormatClick("link")}
-                        icon={
-                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                          </svg>
-                        }
-                      />
-                      <ToolbarButton 
-                        onClick={() => handleFormatClick("code")}
-                        icon={
-                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                          </svg>
-                        }
-                      />
-                      <ToolbarButton onClick={() => handleFormatClick("at")}>@</ToolbarButton>
-                    </div>
-                    <textarea
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      onPaste={handlePaste}
-                      onDrop={handleDrop}
-                      onDragOver={(e) => e.preventDefault()}
-                      placeholder="说说你的想法..."
-                      className="min-h-[300px] w-full resize-none p-4 font-mono focus:outline-none focus:ring-0"
-                    />
-                  </div>
-                )}
-                <div className="absolute bottom-4 right-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPreviewMode(!previewMode)}
-                  >
-                    {previewMode ? "编辑" : "预览"}
-                  </Button>
-                </div>
-              </div>
-            </main>
+              {isPollEditing && <PollEditor />}
+              {pollData && !isPollEditing && <PollPreview />}
+            </div>
           </div>
         </div>
       </div>

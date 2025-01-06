@@ -19,6 +19,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { http } from "@/lib/request";
 import { DiscussionSidebar } from "@/components/discussion/discussion-sidebar";
+import { PostEditor } from "@/components/post/post-editor";
 
 interface User {
   hashid: string;
@@ -137,6 +138,7 @@ export default function DiscussionDetailPage() {
   const [loading, setLoading] = React.useState(true);
   const [discussion, setDiscussion] = React.useState<Discussion | null>(null);
   const [comments, setComments] = React.useState<Comment[]>([]);
+  const [commentContent, setCommentContent] = React.useState("");
   const fetchedRef = React.useRef(false);
 
   React.useEffect(() => {
@@ -325,35 +327,72 @@ export default function DiscussionDetailPage() {
             <Avatar className="h-8 w-8">
               <AvatarFallback>无</AvatarFallback>
             </Avatar>
-            <div className="flex-1 rounded-lg border bg-white">
-              <div className="flex items-center justify-between border-b px-4 py-2">
-                <div className="text-sm text-muted-foreground">说两句吧~</div>
-                <div className="flex items-center space-x-1">
-                  <Button variant="ghost" size="sm" className="h-6 px-2">
-                    <span className="text-lg">B</span>
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-6 px-2">
-                    <span className="text-lg">U</span>
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-6 px-2">
-                    <span className="text-lg">I</span>
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-6 px-2">
-                    <span className="text-lg">"</span>
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-6 px-2">
-                    <span className="text-lg">@</span>
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-6 px-2">
-                    <span className="text-lg">?</span>
-                  </Button>
-                </div>
-              </div>
-              <textarea
-                className="w-full resize-none border-0 bg-transparent p-4 text-sm focus:outline-none focus:ring-0"
-                rows={3}
-                placeholder="请输入评论内容..."
+            <div className="flex-1">
+              <PostEditor
+                content={commentContent}
+                onChange={setCommentContent}
+                className="rounded-lg border bg-white"
+                onImageUpload={async (file) => {
+                  const formData = new FormData();
+                  formData.append("image", file);
+                  formData.append("attachment_type", "comment_images");
+
+                  try {
+                    const response = (await http.post(API_ROUTES.UPLOAD.IMAGE, formData)) as {
+                      code: number;
+                      data: {
+                        id: number;
+                        host: string;
+                        file_path: string;
+                        file_name: string;
+                      };
+                      message: string;
+                    };
+
+                    if (response.code === 0) {
+                      const imageUrl = `${response.data.host}${response.data.file_path}`;
+                      return imageUrl;
+                    } else {
+                      throw new Error(response.message || "Upload failed");
+                    }
+                  } catch (error) {
+                    console.error("Error uploading image:", error);
+                    throw error;
+                  }
+                }}
               />
+              <div className="mt-2 flex justify-end">
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    if (!commentContent.trim()) {
+                      return;
+                    }
+
+                    try {
+                      const response = await http.post(`/api/discussion/posts`, {
+                        discussion_id: discussion?.id,
+                        content: commentContent.trim(),
+                      });
+
+                      if (response.code === 0) {
+                        setCommentContent("");
+                        // 刷新评论列表
+                        const commentsRes = await http.get(
+                          `/api/discussion/posts?slug=${encodeURIComponent(slug)}`
+                        );
+                        if (commentsRes.code === 0) {
+                          setComments(commentsRes.data.items);
+                        }
+                      }
+                    } catch (error) {
+                      console.error("Failed to post comment:", error);
+                    }
+                  }}
+                >
+                  发布评论
+                </Button>
+              </div>
             </div>
           </div>
         </div>
