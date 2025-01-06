@@ -16,6 +16,7 @@ import { BoardSelect } from "@/components/board-select";
 import { API_ROUTES } from "@/constants/api";
 import { useBoardChildrenStore } from "@/store/board-children";
 import { PostEditor } from "./post-editor";
+import { Icon } from "@/components/icons";
 
 interface PollData {
   options: string[];
@@ -702,10 +703,32 @@ export default function CreatePostModal({
           <div className="sticky-header">
             <div className="flex items-center gap-4">
               <h1 className="text-lg font-medium leading-none">发布文章</h1>
-              <BoardSelect value={selectedBoard} onChange={setSelectedBoard} />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSaveDraft}
+                  disabled={isSubmitting}
+                >
+                  <Icon name="save" className="mr-1 text-base" />
+                  保存草稿
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handlePublish}
+                  disabled={isSubmitting}
+                >
+                  <Icon name="send" className="mr-1 text-base" />
+                  发布
+                </Button>
+              </div>
             </div>
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" onClick={handleClose}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClose}
+              >
                 取消
               </Button>
               <Button
@@ -718,13 +741,8 @@ export default function CreatePostModal({
                 }}
                 disabled={!!pollData || isPollEditing}
               >
+                <Icon name="poll" className="mr-1 text-base" />
                 投票
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleSaveDraft}>
-                保存草稿箱
-              </Button>
-              <Button size="sm" onClick={handlePublish} disabled={isSubmitting}>
-                {isSubmitting ? "发布中..." : "发布"}
               </Button>
             </div>
           </div>

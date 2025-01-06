@@ -6,7 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Heart, MessageSquare, Share2, MoreHorizontal } from "lucide-react";
+import { Icon } from "@/components/icons";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -230,21 +230,21 @@ export default function DiscussionDetailPage() {
         <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4">
           <div className="flex items-center space-x-2">
             <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-              <Heart className="h-4 w-4" />
+              <Icon name="favorite" className="text-base" />
               <span>{discussion.votes}</span>
             </div>
             <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-              <MessageSquare className="h-4 w-4" />
+              <Icon name="chat" className="text-base" />
               <span>{discussion.comment_count}</span>
             </div>
           </div>
           <div className="flex items-center space-x-2">
             <Button variant="ghost" size="sm" className="h-7">
-              <Share2 className="mr-1 h-4 w-4" />
+              <Icon name="share" className="mr-1 h-4 w-4" />
               分享
             </Button>
             <Button variant="ghost" size="sm" className="h-7">
-              <MoreHorizontal className="h-4 w-4" />
+              <Icon name="more" className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -273,7 +273,7 @@ export default function DiscussionDetailPage() {
                       <div className="flex items-center space-x-2">
                         <span className="text-xs text-muted-foreground">{comment.number}楼</span>
                         <Button variant="ghost" size="sm" className="h-6">
-                          <MoreHorizontal className="h-4 w-4" />
+                          <Icon name="more" className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
@@ -298,18 +298,19 @@ export default function DiscussionDetailPage() {
                     </div>
 
                     <div className="mt-3 flex items-center space-x-4">
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center gap-2">
                         <Button variant="ghost" size="sm" className="h-6 space-x-1 text-xs">
-                          <Heart className="h-3 w-3" />
+                          <Icon name="favorite" className="text-base" />
                           <span>{comment.likes}</span>
                         </Button>
                         <Button variant="ghost" size="sm" className="h-6 space-x-1 text-xs">
-                          <MessageSquare className="h-3 w-3" />
+                          <Icon name="chat" className="text-base" />
                           <span>{comment.replies}</span>
                         </Button>
                       </div>
-                      <Button variant="ghost" size="sm" className="h-6 text-xs">
-                        回复
+                      <Button variant="ghost" size="sm" className="h-6 text-xs space-x-1">
+                        <Icon name="reply" className="text-base" />
+                        <span>回复</span>
                       </Button>
                     </div>
                   </div>

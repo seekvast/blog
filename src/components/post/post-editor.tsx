@@ -4,6 +4,7 @@ import { ToolbarButton } from "./create-post-modal";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import { Icon } from "@/components/icons";
 
 interface PostEditorProps {
   content: string;
@@ -162,65 +163,49 @@ export function PostEditor({
         <div className="rounded-lg border">
           <div className="flex items-center gap-1 border-b bg-gray-50/50 px-2">
             <div className="flex items-center">
-              <ToolbarButton onClick={() => handleToolbarAction("h1")}>H1</ToolbarButton>
-              <ToolbarButton onClick={() => handleToolbarAction("h2")}>H2</ToolbarButton>
-              <ToolbarButton onClick={() => handleToolbarAction("h3")}>H3</ToolbarButton>
+              <ToolbarButton onClick={() => handleToolbarAction("h1")}>
+                <Icon name="format_h1" />
+              </ToolbarButton>
+              <ToolbarButton onClick={() => handleToolbarAction("h2")}>
+                <Icon name="format_h2" />
+              </ToolbarButton>
+              <ToolbarButton onClick={() => handleToolbarAction("h3")}>
+                <Icon name="format_h3" />
+              </ToolbarButton>
             </div>
             <div className="h-5 w-px bg-gray-200 mx-1" />
-            <ToolbarButton onClick={() => handleToolbarAction("bold")}>B</ToolbarButton>
-            <ToolbarButton onClick={() => handleToolbarAction("italic")}>I</ToolbarButton>
-            <ToolbarButton onClick={() => handleToolbarAction("underline")}>S</ToolbarButton>
+            <ToolbarButton onClick={() => handleToolbarAction("bold")}>
+              <Icon name="format_bold" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => handleToolbarAction("italic")}>
+              <Icon name="format_italic" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => handleToolbarAction("underline")}>
+              <Icon name="format_underlined" />
+            </ToolbarButton>
             <div className="h-5 w-px bg-gray-200 mx-1" />
-            <ToolbarButton 
-              onClick={() => handleToolbarAction("list-ul")}
-              icon={
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 6h13M8 12h13M8 18h7" />
-                </svg>
-              }
-            />
-            <ToolbarButton 
-              onClick={() => handleToolbarAction("list-ol")}
-              icon={
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              }
-            />
-            <ToolbarButton 
-              onClick={() => handleToolbarAction("quote")}
-              icon={
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8h.01M3 8h.01M3 16h18M3 12h18" />
-                </svg>
-              }
-            />
+            <ToolbarButton onClick={() => handleToolbarAction("list-ul")}>
+              <Icon name="format_list_bulleted" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => handleToolbarAction("list-ol")}>
+              <Icon name="format_list_numbered" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => handleToolbarAction("quote")}>
+              <Icon name="format_quote" />
+            </ToolbarButton>
             <div className="h-5 w-px bg-gray-200 mx-1" />
-            <ToolbarButton 
-              onClick={() => handleToolbarAction("image")}
-              icon={
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              }
-            />
-            <ToolbarButton 
-              onClick={() => handleToolbarAction("link")}
-              icon={
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                </svg>
-              }
-            />
-            <ToolbarButton 
-              onClick={() => handleToolbarAction("code")}
-              icon={
-                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                </svg>
-              }
-            />
-            <ToolbarButton onClick={() => handleToolbarAction("at")}>@</ToolbarButton>
+            <ToolbarButton onClick={() => handleToolbarAction("image")}>
+              <Icon name="image" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => handleToolbarAction("link")}>
+              <Icon name="link" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => handleToolbarAction("code")}>
+              <Icon name="code" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => handleToolbarAction("at")}>
+              <Icon name="alternate_email" />
+            </ToolbarButton>
           </div>
           <textarea
             value={content}
@@ -236,8 +221,9 @@ export function PostEditor({
       <div className="absolute bottom-4 right-4">
         <button
           onClick={() => onPreviewModeChange?.(!previewMode)}
-          className="inline-flex h-8 items-center justify-center rounded-md border bg-background px-3 text-xs font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+          className="inline-flex h-8 items-center justify-center rounded-md border bg-background px-3 text-xs font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-1"
         >
+          <Icon name={previewMode ? "edit" : "preview"} className="text-base" />
           {previewMode ? "编辑" : "预览"}
         </button>
       </div>

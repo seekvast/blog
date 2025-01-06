@@ -10,94 +10,41 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { CreateBoardModal } from "@/components/board/create-board-modal";
+import { Icon } from "@/components/icons";
 
 // 懒加载 CreatePostModal 组件
 const CreatePostModal = React.lazy(() => import("@/components/post/create-post-modal"));
 
-interface LeftSidebarProps extends React.HTMLAttributes<HTMLElement> {}
+interface NavItem {
+  title: string;
+  href: string;
+  icon: string;
+}
 
-const mainNavItems = [
+const mainNavItems: NavItem[] = [
   {
-    title: "首頁",
+    title: "首页",
     href: "/",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="text-primary"
-      >
-        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-        <polyline points="9 22 9 12 15 12 15 22" />
-      </svg>
-    ),
+    icon: "home",
   },
   {
-    title: "關注",
+    title: "关注",
     href: "/following",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-      </svg>
-    ),
+    icon: "person",
   },
   {
     title: "看板",
     href: "/boards",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-        <path d="M2 12h20" />
-      </svg>
-    ),
+    icon: "view_module",
   },
   {
-    title: "書籤",
+    title: "书签",
     href: "/bookmarks",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M19 21l-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z" />
-      </svg>
-    ),
+    icon: "bookmark",
   }
 ];
+
+interface LeftSidebarProps extends React.HTMLAttributes<HTMLElement> {}
 
 export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   const pathname = usePathname();
@@ -138,12 +85,13 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-neutral-500 transition-colors",
-                  "hover:bg-neutral-100 hover:text-neutral-900",
-                  isActive && "bg-neutral-100 text-neutral-900"
+                  "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
+                  pathname === item.href
+                    ? "bg-neutral-100 text-neutral-900"
+                    : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900",
                 )}
               >
-                {item.icon}
+                <Icon name={item.icon} className="mr-2 text-[20px] leading-none" />
                 <span>{item.title}</span>
               </Link>
             );
