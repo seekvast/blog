@@ -709,7 +709,7 @@ export default function CreatePostModal({
     <Portal>
       <div
         className={cn(
-          "fixed inset-0 top-14 z-40 transform bg-background transition-transform duration-300 ease-in-out",
+          "fixed inset-0 top-14 z-40 transform bg-background transition-transform duration-300 ease-in-out overflow-y-auto",
           open ? "translate-y-0" : "translate-y-full"
         )}
         style={{ height: "calc(100% - 56px)" }}
@@ -718,33 +718,21 @@ export default function CreatePostModal({
           <div className="sticky-header">
             <div className="flex items-center gap-4">
               <h1 className="text-lg font-medium leading-none">发布文章</h1>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSaveDraft}
-                  disabled={isSubmitting}
-                >
-                  <Icon name="save" className="mr-1 text-base" />
-                  保存草稿
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handlePublish}
-                  disabled={isSubmitting}
-                >
-                  <Icon name="send" className="mr-1 text-base" />
-                  发布
-                </Button>
-              </div>
+              <BoardSelect value={selectedBoard} onChange={setSelectedBoard} />
             </div>
             <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm" onClick={handleClose}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full"
+                onClick={handleClose}
+              >
                 取消
               </Button>
               <Button
                 variant="outline"
                 size="sm"
+                className="rounded-full"
                 onClick={() => {
                   if (!pollData && !isPollEditing) {
                     setIsPollEditing(true);
@@ -755,51 +743,62 @@ export default function CreatePostModal({
                 <Icon name="poll" className="mr-1 text-base" />
                 投票
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full"
+                onClick={handleSaveDraft}
+              >
+                保存草稿箱
+              </Button>
+              <Button
+                size="sm"
+                className="rounded-full"
+                onClick={handlePublish}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "发布中..." : "发布"}
+              </Button>
             </div>
           </div>
 
           <div className="border-t py-4">
-            <h3
-              className="text-sm font-medium mb-2 cursor-pointer hover:text-primary"
-              onClick={() => setShowChildBoards(!showChildBoards)}
-            >
-              子版 {showChildBoards ? "⌄" : "›"}
-            </h3>
-            {showChildBoards && (
-              <div className="flex flex-wrap gap-2">
-                {loadingChildren ? (
-                  <div className="text-sm text-muted-foreground">加载中...</div>
-                ) : boardChildren.length > 0 ? (
-                  boardChildren.map((child) => (
-                    <Badge
-                      key={child.id}
-                      variant={
-                        selectedChildBoard === child.id
-                          ? "default"
-                          : "secondary"
-                      }
-                      className="cursor-pointer hover:bg-secondary/80"
-                      onClick={() => setSelectedChildBoard(child.id)}
-                    >
-                      # {child.name}
-                    </Badge>
-                  ))
-                ) : (
-                  <div className="text-sm text-muted-foreground">暂无子版</div>
-                )}
-              </div>
-            )}
+            <h3 className="text-sm font-medium mb-2">子版</h3>
+            <div className="flex flex-wrap gap-2">
+              {loadingChildren ? (
+                <div className="text-sm text-muted-foreground">加载中...</div>
+              ) : boardChildren.length > 0 ? (
+                boardChildren.map((child) => (
+                  <Badge
+                    key={child.id}
+                    variant={
+                      selectedChildBoard === child.id ? "default" : "secondary"
+                    }
+                    className="cursor-pointer hover:bg-secondary/80"
+                    onClick={() => setSelectedChildBoard(child.id)}
+                  >
+                    # {child.name}
+                  </Badge>
+                ))
+              ) : (
+                <div className="text-sm text-muted-foreground">暂无子版</div>
+              )}
+            </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto">
-            <div className="space-y-4 py-4">
+          <div className="flex-1">
+            <div className="py-4">
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full text-2xl font-medium border-none focus:outline-none focus:ring-0 placeholder:text-gray-400"
+                className="w-full text-xl p-2 rounded-lg border"
                 placeholder="输入标题..."
               />
+              <div className="mt-4">
+                {isPollEditing && <PollEditor />}
+                {pollData && !isPollEditing && <PollPreview />}
+              </div>
 
               <PostEditor
                 content={content}
@@ -807,12 +806,9 @@ export default function CreatePostModal({
                 onImageUpload={handleImageUpload}
                 previewMode={previewMode}
                 onPreviewModeChange={setPreviewMode}
-                className="min-h-[400px]"
+                className="min-h-[400px] mt-4"
                 imageUploading={imageUploading}
               />
-
-              {isPollEditing && <PollEditor />}
-              {pollData && !isPollEditing && <PollPreview />}
             </div>
           </div>
         </div>

@@ -229,7 +229,7 @@ export function PostEditor({
             />
           </div>
         )}
-        <div className="absolute bottom-4 right-4">
+        {/* <div className="absolute bottom-4 right-4">
           <button
             onClick={() => onPreviewModeChange?.(!previewMode)}
             className="inline-flex h-8 items-center justify-center rounded-md border bg-background px-3 text-xs font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-1"
@@ -237,7 +237,7 @@ export function PostEditor({
             <Icon name={previewMode ? "edit" : "preview"} className="text-base" />
             {previewMode ? "编辑" : "预览"}
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );
