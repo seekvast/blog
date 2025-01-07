@@ -13,11 +13,15 @@ export function RightSidebar({ className, ...props }: RightSidebarProps) {
   const { data: session } = useSession();
 
   return (
-    <aside className={cn("sticky top-14 flex-shrink-0", className)} {...props}>
+    <aside className={cn(className)} {...props}>
       {/* 精品专题 */}
       <div className="">
-        <h3 className="text-sm font-medium pb-2 px-2 border-b">精品专题</h3>
-        <div className=" space-y-2 py-2 px-2">
+        <div className="border-b px-2">
+          <h3 className="h-[40px] text-sm font-medium flex items-center">
+            精品专题
+          </h3>
+        </div>
+        <div className="space-y-2 p-2">
           <Link href="#" className="block text-sm hover:text-primary">
             发点色图
           </Link>
@@ -35,13 +39,22 @@ export function RightSidebar({ className, ...props }: RightSidebarProps) {
           </Link>
         </div>
 
-        <Button variant="outline" size="sm" className="my-2 w-full">更多专题</Button>
+        <Link
+          href="#"
+          className="my-2 w-full block text-sm hover:text-primary text-muted-foreground px-2"
+        >
+          <Button className="rounded-full w-full" size="sm" variant="outline">
+            更多专题
+          </Button>
+        </Link>
       </div>
 
       {/* 相关文章 */}
-      <div className="">
-        <div className="flex items-center justify-between py-2 px-2 border-b">
-          <h3 className="text-sm font-medium">相关文章</h3>
+      <div className="mt-4">
+        <div className="flex items-center justify-between border-b px-2">
+          <h3 className="h-[40px] text-sm font-medium flex items-center">
+            相关文章
+          </h3>
           <Button
             variant="ghost"
             size="sm"
@@ -50,7 +63,7 @@ export function RightSidebar({ className, ...props }: RightSidebarProps) {
             换一换
           </Button>
         </div>
-        <div className="space-y-2 py-2 px-2">
+        <div className="space-y-2 p-2">
           <Link href="#" className="block text-sm hover:text-primary">
             最近翻译了，大家要小心不要
           </Link>

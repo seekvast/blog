@@ -78,8 +78,8 @@ export default function HomePage() {
     <div className="flex flex-col">
       {/* 顶部导航 */}
       <div className="bg-background">
-        <div className="mx-auto w-[808px]">
-          <div className="flex h-[60px] items-center justify-between border-b border-[#EAEAEA]">
+        <div className="mx-auto">
+          <div className="flex h-[40px] items-center justify-between border-b">
             <div className="flex items-center space-x-8">
               <Button
                 variant="ghost"
@@ -128,7 +128,7 @@ export default function HomePage() {
       </div>
 
       {/* 帖子列表 */}
-      <div className="mx-auto w-[808px]">
+      <div className="mx-auto">
         <div className="divide-y">
           {discussions.map((discussion, index) => (
             <article

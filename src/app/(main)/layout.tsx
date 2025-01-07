@@ -24,21 +24,19 @@ export default function MainLayout({
 }) {
   const pathname = usePathname();
   // 只在首页和搜索页显示默认的右侧边栏
-  const showDefaultSidebarPaths = ['/', '/search'];
+  const showDefaultSidebarPaths = ["/", "/search"];
   const showRightSidebar = showDefaultSidebarPaths.includes(pathname);
 
   return (
     <div className="min-h-screen">
       <Header />
-      <div className="mx-auto flex justify-center pt-8">
-        <div className="w-[1360px] flex justify-between px-4 relative">
-          <div className="sticky top-[88px] min-w-[300px] h-[calc(100vh-88px)]">
-            <LeftSidebar className="hidden lg:block" />
-          </div>
-          <main className="w-full ml-8">{children}</main>
-          {showRightSidebar && (
-            <RightSidebar className="hidden lg:block mt-8 ml-8" />
-          )}
+      <div className="mx-auto w-[1360px] flex pt-8">
+        <div className="sticky top-[88px] min-w-[300px] h-[calc(100vh-88px)]">
+          <LeftSidebar className="hidden lg:block" />
+        </div>
+        <div className="w-full flex px-4">
+          <main className="w-full ml-4">{children}</main>
+          {showRightSidebar && <RightSidebar className="min-w-[240px] ml-8" />}
         </div>
       </div>
     </div>
