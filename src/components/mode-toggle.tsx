@@ -15,8 +15,9 @@ export function ModeToggle() {
       <Icon
         name={theme === "dark" ? "dark_mode" : "light_mode"}
         className="text-[20px] leading-none"
+        suppressHydrationWarning
       />
-      <span className="truncate">{theme === "dark" ? "深色模式" : "浅色模式"}</span>
+      <span className="truncate" suppressHydrationWarning>{theme === "dark" ? "深色模式" : "浅色模式"}</span>
     </div>
   )
 }

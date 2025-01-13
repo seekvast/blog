@@ -12,8 +12,10 @@ import { http } from "@/lib/request";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import ReactMarkdown from "react-markdown";
+import type { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
+import rehypeRaw from "rehype-raw"; 
+import rehypeSanitize from "rehype-sanitize";
 import { Icon } from "@/components/icons";
 import { UserLink } from "@/components/markdown/user-link";
 
@@ -163,7 +165,7 @@ export default function HomePage() {
                     </span>
                   </div>
 
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeRaw]}
@@ -176,105 +178,77 @@ export default function HomePage() {
                     >
                       {discussion.excerpt}
                     </ReactMarkdown>
-                  </div>
+                  </div> */}
 
                   <div className="mt-1 text-md text-muted-foreground">
                     <ReactMarkdown
+                      skipHtml={false} 
                       remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeRaw]}
+                      rehypePlugins={[rehypeRaw, [rehypeSanitize, {
+                        attributes: {
+                          '*': ['className', 'style', 'class'],
+                          'img': ['src', 'alt', 'title', 'width', 'height', 'loading', 'class', 'className', 'ref', 'onLoad'],
+                          'iframe': ['src', 'allow', 'allowfullscreen', 'frameborder', 'loading', 'class', 'className', 'width', 'height', 'style'],
+                          'span': ['className', 'class', 'style'],
+                          'div': ['className', 'class', 'style'],
+                          'a': ['href', 'title', 'target', 'rel', 'className', 'class']
+                        },
+                        protocols: {
+                          src: ['http', 'https', 'data'],
+                          href: ['http', 'https', 'mailto', 'tel']
+                        },
+                        tagNames: ['div', 'p', 'iframe', 'img', 'a', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+                      }]]}
                       className="prose prose-sm max-w-none [&>p]:!m-0 [&_iframe]:!mt-2"
                       components={{
                         a: ({ href, children }) => (
                           <UserLink href={href || ""}>{children}</UserLink>
                         ),
-                        img: ({ node, ...props }) => {
-                          const imgRef = React.useRef<HTMLImageElement>(null);
-                          const [loaded, setLoaded] = React.useState(false);
-                          const containerRef =
-                            React.useRef<HTMLSpanElement>(null);
-                          const [imageCount, setImageCount] = React.useState(0);
-                          const [imageIndex, setImageIndex] = React.useState(0);
-
-                          React.useEffect(() => {
-                            const parent =
-                              containerRef.current?.closest(".image-grid");
-                            if (parent) {
-                              const images = parent.getElementsByTagName("img");
-                              setImageCount(images.length);
-                              for (let i = 0; i < images.length; i++) {
-                                if (images[i] === imgRef.current) {
-                                  setImageIndex(i);
-                                  break;
-                                }
-                              }
-                            }
-                          }, []);
-
-                          if (!props.src) return null;
-
+                        img: ({ node, ...props }: {
+                          node: { tagName: keyof JSX.IntrinsicElements };
+                          [key: string]: any;
+                        }) => {
+                          const { src = "", alt = "", ...rest } = props;
                           return (
-                            <span
-                              ref={containerRef}
-                              className={`
-                              inline-block relative overflow-hidden
-                              ${
-                                imageCount === 1
-                                  ? "col-span-1 row-span-1 rounded-2xl"
-                                  : ""
-                              }
-                              ${
-                                imageCount === 2
-                                  ? imageIndex === 0
-                                    ? "rounded-l-2xl"
-                                    : "rounded-r-2xl"
-                                  : ""
-                              }
-                              ${
-                                imageCount === 3
-                                  ? imageIndex === 0
-                                    ? "col-span-2 rounded-l-2xl"
-                                    : imageIndex === 1
-                                    ? "rounded-tr-2xl"
-                                    : "rounded-br-2xl"
-                                  : ""
-                              }
-                              ${
-                                imageCount === 4
-                                  ? imageIndex === 0
-                                    ? "rounded-tl-2xl"
-                                    : imageIndex === 1
-                                    ? "rounded-tr-2xl"
-                                    : imageIndex === 2
-                                    ? "rounded-bl-2xl"
-                                    : "rounded-br-2xl"
-                                  : ""
-                              }
-                            `}
-                            >
-                              <span
-                                className="block relative pb-[100%]"
-                                style={{
-                                  backgroundColor: "rgb(239, 243, 244)",
-                                }}
-                              >
-                                <span className="absolute inset-0">
-                                  <span
-                                    className={`block w-full h-full transition-opacity duration-200 ${
-                                      loaded ? "opacity-100" : "opacity-0"
-                                    }`}
-                                  >
-                                    <img
-                                      {...props}
-                                      ref={imgRef}
-                                      onLoad={() => setLoaded(true)}
-                                      className="w-full h-full object-cover"
-                                      loading="lazy"
-                                      alt={props.alt || ""}
-                                    />
-                                  </span>
-                                </span>
-                              </span>
-                            </span>
+                            <img
+                              src={src}
+                              alt={alt}
+                              className="my-0 max-w-full h-auto"
+                              {...rest}
+                            />
+                          );
+                        },
+                        iframe: ({ node, ...props }: { 
+                          node?: any; 
+                          src?: string;
+                          [key: string]: any;
+                        }) => {
+                          const { src = "", ...rest } = props;
+                          
+                          // 处理 YouTube URL
+                          let videoSrc = src;
+                          if (src.includes('youtube.com') || src.includes('youtu.be')) {
+                            // 转换 YouTube URL 为嵌入格式
+                            const videoId = src.includes('youtube.com') 
+                              ? src.split('v=')[1]?.split('&')[0]
+                              : src.split('youtu.be/')[1]?.split('?')[0];
+                            if (videoId) {
+                              videoSrc = `https://www.youtube.com/embed/${videoId}`;
+                            }
+                          }
+                          
+                          return (
+                            <div className="mt-3 aspect-video">
+                              <iframe
+                                src={videoSrc}
+                                className="w-full h-full rounded-2xl"
+                                style={{ width: '100%', height: '100%' }}
+                                frameBorder="0"
+                                allowFullScreen
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                loading="lazy"
+                              />
+                            </div>
                           );
                         },
                         p: ({ node, children, ...props }) => {
@@ -285,39 +259,37 @@ export default function HomePage() {
                               React.isValidElement(child) &&
                               (child.type === "img" ||
                                 (typeof child.type === "function" &&
-                                  child.props.src))
+                                  child.type.name === "img"))
                           );
 
                           if (hasOnlyImages) {
-                            const validChildren = React.Children.toArray(
-                              children
-                            ).filter(
+                            const validChildren = React.Children.toArray(children).filter(
                               (child) =>
                                 React.isValidElement(child) &&
                                 (child.type === "img" ||
                                   (typeof child.type === "function" &&
-                                    child.props.src))
+                                    child.type.name === "img"))
                             );
 
                             return (
-                              <div className="mt-3 overflow-hidden">
+                              <div className="mt-3">
                                 <div className="rounded-2xl overflow-hidden">
                                   <div
                                     className={`
-                                    image-grid grid gap-[2px]
+                                    grid gap-[2px] items-start
                                     ${
                                       validChildren.length === 1
-                                        ? "grid-cols-1 grid-rows-1"
+                                        ? "grid-cols-1"
                                         : ""
                                     }
                                     ${
                                       validChildren.length === 2
-                                        ? "grid-cols-2 grid-rows-1"
+                                        ? "grid-cols-2"
                                         : ""
                                     }
                                     ${
                                       validChildren.length === 3
-                                        ? "grid-cols-2 grid-rows-2"
+                                        ? "grid-cols-3"
                                         : ""
                                     }
                                     ${
@@ -326,11 +298,12 @@ export default function HomePage() {
                                         : ""
                                     }
                                   `}
-                                    style={{
-                                      backgroundColor: "rgb(239, 243, 244)",
-                                    }}
                                   >
-                                    {validChildren}
+                                    {validChildren.map((child, index) => (
+                                      <div key={index} className="w-full h-full">
+                                        {child}
+                                      </div>
+                                    ))}
                                   </div>
                                 </div>
                               </div>
@@ -338,19 +311,20 @@ export default function HomePage() {
                           }
 
                           return (
-                            <p {...props} className="!m-0 line-clamp-2">
+                            <p {...props} className="!m-0">
                               {children}
                             </p>
                           );
                         },
-                        iframe: ({ node, ...props }) => {
-                          return (
-                            <div className="mt-3 aspect-video">
-                              <iframe {...props} className="w-full h-full rounded-2xl" />
-                            </div>
-                          );
+                        '*': ({ node, ...props }: { node: { tagName: keyof JSX.IntrinsicElements }; [key: string]: any }) => {
+                          const Element = node.tagName;
+                          if (props.class) {
+                            props.className = props.class;
+                            delete props.class;
+                          }
+                          return <Element {...props} />;
                         },
-                      }}
+                      } as Components}
                     >
                       {discussion.main_post.content}
                     </ReactMarkdown>
