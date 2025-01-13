@@ -11,7 +11,12 @@ import { Icon } from "@/components/icons";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { http } from "@/lib/request";
 import { DiscussionSidebar } from "@/components/discussion/discussion-sidebar";
@@ -241,7 +246,13 @@ export default function DiscussionDetailPage() {
                 a: ({ href, children }) => (
                   <UserLink href={href || ""}>{children}</UserLink>
                 ),
-                code: ({ node, inline, className, children, ...props }: {
+                code: ({
+                  node,
+                  inline,
+                  className,
+                  children,
+                  ...props
+                }: {
                   node?: any;
                   inline?: boolean;
                   className?: string;
@@ -261,7 +272,7 @@ export default function DiscussionDetailPage() {
                       </code>
                     </pre>
                   );
-                }
+                },
               }}
             >
               {discussion.main_post.content}
@@ -279,14 +290,14 @@ export default function DiscussionDetailPage() {
         </div>
 
         {/* 评论区 */}
-        <div className="mt-8">
+        <div className="mt-4">
           {/* 评论列表 */}
           {comments.length > 0 ? (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {comments.map((comment) => (
-                <div key={comment.id} className="border-t py-4">
-                  <div className="flex items-start space-x-3 px-2">
-                    <Avatar className="h-10 w-10">
+                <div key={comment.id} className="pt-2">
+                  <div className="flex items-start space-x-3 px-2 ">
+                    <Avatar className="h-12 w-12">
                       <AvatarImage src={comment.user.avatar_url} />
                       <AvatarFallback>
                         {comment.user.nickname[0]}
@@ -315,7 +326,13 @@ export default function DiscussionDetailPage() {
                             a: ({ href, children }) => (
                               <UserLink href={href || ""}>{children}</UserLink>
                             ),
-                            code: ({ node, inline, className, children, ...props }: {
+                            code: ({
+                              node,
+                              inline,
+                              className,
+                              children,
+                              ...props
+                            }: {
                               node?: any;
                               inline?: boolean;
                               className?: string;
@@ -335,11 +352,34 @@ export default function DiscussionDetailPage() {
                                   </code>
                                 </pre>
                               );
-                            }
+                            },
                           }}
                         >
                           {comment.content}
                         </ReactMarkdown>
+                      </div>
+                      {/* 评论操作 */}
+                      <div className="mt-3 flex justify-between items-center space-x-4 text-base text-gray-500">
+                        <div className="flex items-center gap-2 space-x-8">
+                          <div className="flex items-center h-6 space-x-1 cursor-pointer">
+                            <Icon name="thumb_up" className="h-4 w-4" />
+                            <span className="text-sm">{1000}</span>
+                          </div>
+                          <div className="flex items-center h-6 space-x-1 cursor-pointer">
+                            <Icon name="thumb_down" className="h-4 w-4" />
+                            <span className="text-sm">{10}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center h-6 space-x-8">
+                          <button className="text-sm cursor-pointer">
+                            回复
+                          </button>
+                          <Icon
+                            name="more_horiz"
+                            className="h-4 w-4 cursor-pointer"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -388,13 +428,10 @@ export default function DiscussionDetailPage() {
                     }
 
                     try {
-                      const response = await http.post(
-                        `/api/discussion/posts`,
-                        {
-                          slug: discussion.slug,
-                          content: commentContent.trim(),
-                        }
-                      );
+                      const response = await http.post(`/api/discussion/post`, {
+                        slug: discussion.slug,
+                        content: commentContent.trim(),
+                      });
 
                       if (response.code === 0) {
                         setCommentContent("");
