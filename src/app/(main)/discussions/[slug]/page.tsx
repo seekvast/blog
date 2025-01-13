@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -10,17 +11,13 @@ import { Icon } from "@/components/icons";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { http } from "@/lib/request";
 import { DiscussionSidebar } from "@/components/discussion/discussion-sidebar";
 import { PostEditor } from "@/components/post/post-editor";
 import { API_ROUTES } from "@/constants/api";
+import { UserLink } from "@/components/markdown/user-link";
 
 interface User {
   hashid: string;
@@ -200,21 +197,19 @@ export default function DiscussionDetailPage() {
   return (
     <div className="flex gap-6">
       {/* 主内容区 */}
-      <div className="flex-1">
+      <div className="flex-1 mx-auto max-w-4xl">
         {/* 贴文头部信息 */}
-        <div className="mb-4">
+        <div className="">
           <h1 className="text-xl font-medium">{discussion.title}</h1>
-          <div className="mt-2 flex items-center space-x-2">
-            <div className="flex items-center space-x-2">
-              <Avatar className="h-14 w-14">
-                <AvatarImage
-                  src={discussion.user.avatar_url}
-                  alt={discussion.user.username}
-                />
-                <AvatarFallback>{discussion.user.username[0]}</AvatarFallback>
-              </Avatar>
-            </div>
-            <div className="flex flex-col">
+          <div className="mt-2 flex items-center">
+            <Avatar className="h-14 w-14 flex-shrink-0">
+              <AvatarImage
+                src={discussion.user.avatar_url}
+                alt={discussion.user.username}
+              />
+              <AvatarFallback>{discussion.user.username[0]}</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col justify-center -mt-2 ml-2">
               <div className="flex items-center space-x-2">
                 <span className="text-lg font-medium">
                   {discussion.user.username}
@@ -242,6 +237,11 @@ export default function DiscussionDetailPage() {
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeRaw]}
+              components={{
+                a: ({ href, children }) => (
+                  <UserLink href={href || ""}>{children}</UserLink>
+                ),
+              }}
             >
               {discussion.main_post.content}
             </ReactMarkdown>
@@ -258,25 +258,27 @@ export default function DiscussionDetailPage() {
         </div>
 
         {/* 评论区 */}
-        <div className="mt-8 px-4">
+        <div className="mt-8">
           {/* 评论列表 */}
           {comments.length > 0 ? (
             <div className="space-y-6">
               {comments.map((comment) => (
-                <div key={comment.id} className="flex items-start space-x-3">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage
-                      src={comment.user.avatar_url}
-                      alt={comment.user.username}
-                    />
-                    <AvatarFallback>{comment.user.username[0]}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
+                <div key={comment.id} className="border-t py-4">
+                  <div className="flex items-start space-x-3 px-2">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={comment.user.avatar_url} />
+                      <AvatarFallback>
+                        {comment.user.nickname[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium">
-                          {comment.user.username}
-                        </span>
+                        <Link
+                          href={`/users/${comment.user.hashid}`}
+                          className="font-medium text-foreground hover:underline"
+                        >
+                          {comment.user.nickname}
+                        </Link>
                         <span className="text-xs text-muted-foreground">
                           {formatDistanceToNow(new Date(comment.created_at), {
                             addSuffix: true,
@@ -284,50 +286,18 @@ export default function DiscussionDetailPage() {
                           })}
                         </span>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xs text-muted-foreground">
-                          {comment.number}楼
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* 如果有引用，显示引用内容 */}
-                    {comment.quote && (
-                      <div className="mt-2 rounded-sm border-l-2 border-gray-200 pl-3 text-sm text-muted-foreground">
-                        <div className="mb-1 text-xs">
-                          引用 {comment.quote.username} 的评论
-                        </div>
-                        <div>{comment.quote.content}</div>
-                      </div>
-                    )}
-
-                    <div className="mt-2 text-sm">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                        rehypePlugins={[rehypeRaw]}
-                      >
-                        {comment.content}
-                      </ReactMarkdown>
-                    </div>
-
-                    <div className="mt-3 flex justify-between items-center space-x-4 text-base text-gray-500">
-                      <div className="flex items-center gap-2 space-x-8">
-                        <div className="flex items-center h-6 space-x-1 cursor-pointer">
-                          <Icon name="thumb_up" className="h-4 w-4" />
-                          <span className="text-sm">{1000}</span>
-                        </div>
-                        <div className="flex items-center h-6 space-x-1 cursor-pointer">
-                          <Icon name="thumb_down" className="h-4 w-4" />
-                          <span className="text-sm">{10}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center h-6 space-x-8">
-                        <button className="text-sm cursor-pointer">回复</button>
-                        <Icon
-                          name="more_horiz"
-                          className="h-4 w-4 cursor-pointer"
-                        />
+                      <div className="mt-2 prose prose-sm max-w-none">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          rehypePlugins={[rehypeRaw]}
+                          components={{
+                            a: ({ href, children }) => (
+                              <UserLink href={href || ""}>{children}</UserLink>
+                            ),
+                          }}
+                        >
+                          {comment.content}
+                        </ReactMarkdown>
                       </div>
                     </div>
                   </div>

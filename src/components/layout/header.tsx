@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import { API_ROUTES } from "@/constants/api";
 import {
   Search,
   Bell,
@@ -37,26 +38,25 @@ export function Header() {
   const [loginOpen, setLoginOpen] = useState(false);
 
   const handleLogout = async () => {
-      try {
-      if (!session?.accessToken) {
-        throw new Error('未登录');
-      }
-
+    try {
       // 调用后端登出 API
-      await http.get('/api/logout', {
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`
-        }
-      });
-      
-      // 调用 NextAuth 登出
-      await signOut({ redirect: true, callbackUrl: "/" });
+      await http.get(API_ROUTES.AUTH.LOGOUT);
     } catch (error) {
+      console.error('Logout API failed:', error);
       toast({
         variant: "destructive",
-        title: "登出失败",
+        title: "请求失败",
         description: error instanceof Error ? error.message : "请稍后重试",
       });
+    } finally {
+      // 无论API是否成功，都清理本地存储并登出
+      try {
+        await signOut({ redirect: true, callbackUrl: "/" });
+      } catch (signOutError) {
+        console.error('SignOut failed:', signOutError);
+        // 如果 signOut 也失败，强制刷新页面
+        window.location.href = "/";
+      }
     }
   };
 

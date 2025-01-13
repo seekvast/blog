@@ -15,6 +15,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { Icon } from "@/components/icons";
+import { UserLink } from "@/components/markdown/user-link";
 
 export default function HomePage() {
   const [discussions, setDiscussions] = React.useState<Discussion[]>([]);
@@ -162,12 +163,30 @@ export default function HomePage() {
                     </span>
                   </div>
 
+                  <div className="space-y-2">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeRaw]}
+                      className="prose prose-sm max-w-none break-words"
+                      components={{
+                        a: ({ href, children }) => (
+                          <UserLink href={href || ""}>{children}</UserLink>
+                        ),
+                      }}
+                    >
+                      {discussion.excerpt}
+                    </ReactMarkdown>
+                  </div>
+
                   <div className="mt-1 text-md text-muted-foreground">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       rehypePlugins={[rehypeRaw]}
-                      className="[&>p]:!m-0 [&_iframe]:!mt-2"
+                      className="prose prose-sm max-w-none [&>p]:!m-0 [&_iframe]:!mt-2"
                       components={{
+                        a: ({ href, children }) => (
+                          <UserLink href={href || ""}>{children}</UserLink>
+                        ),
                         img: ({ node, ...props }) => {
                           const imgRef = React.useRef<HTMLImageElement>(null);
                           const [loaded, setLoaded] = React.useState(false);
@@ -326,8 +345,8 @@ export default function HomePage() {
                         },
                         iframe: ({ node, ...props }) => {
                           return (
-                            <div className="mt-3 aspect-video rounded-2xl overflow-hidden">
-                              <iframe {...props} className="w-full h-full" />
+                            <div className="mt-3 aspect-video">
+                              <iframe {...props} className="w-full h-full rounded-2xl" />
                             </div>
                           );
                         },
@@ -336,30 +355,19 @@ export default function HomePage() {
                       {discussion.main_post.content}
                     </ReactMarkdown>
                   </div>
-
-                  {/* <div className="mt-2 flex items-center space-x-4 text-sm text-muted-foreground">
-                    <div className="flex items-center space-x-1">
-                      <span>{discussion.board.name}</span>
-                      {discussion.board_child && (
-                        <>
-                          <span>/</span>
-                          <span>{discussion.board_child.name}</span>
-                        </>
-                      )}
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <span>{discussion.view_count} 次浏览</span>
-                      <span>{discussion.comment_count} 条评论</span>
-                      <span>{discussion.votes} 个赞</span>
-                    </div>
-                  </div> */}
                   <div className="mt-3 flex items-center space-x-4 text-xs">
                     <div className="flex items-center space-x-1 text-muted-foreground">
-                      <Icon name="thumb_up" className="h-4 w-4 text-base cursor-pointer" />
+                      <Icon
+                        name="thumb_up"
+                        className="h-4 w-4 text-base cursor-pointer"
+                      />
                       <span>{discussion.votes}</span>
                     </div>
                     <div className="flex items-center space-x-1 text-muted-foreground">
-                      <Icon name="mode_comment" className="h-4 w-4 text-base cursor-pointer" />
+                      <Icon
+                        name="mode_comment"
+                        className="h-4 w-4 text-base cursor-pointer"
+                      />
                       <span>{discussion.comment_count}</span>
                     </div>
                     <div className="flex items-center space-x-1 text-muted-foreground">
