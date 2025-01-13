@@ -106,8 +106,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
 
         {/* 创建看板按钮 */}
         <div className="px-3 py-2">
-          <Button className="w-full justify-start" onClick={handlePublishClick}>
-            <Plus className="mr-2 h-4 w-4" />
+          <Button className="w-full text-lg" onClick={handlePublishClick}>
             {pathname === "/boards"
               ? t("common.createBoard")
               : t("common.publish")}

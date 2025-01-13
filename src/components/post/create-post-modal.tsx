@@ -18,6 +18,7 @@ import { useBoardChildrenStore } from "@/store/board-children";
 import { PostEditor } from "./post-editor";
 import { Icon } from "@/components/icons";
 import { toast } from "@/components/ui/toast";
+import { BoardChild, BoardChildrenResponse } from "@/types/board";
 
 interface PollData {
   options: string[];
@@ -26,54 +27,6 @@ interface PollData {
   hasDeadline: boolean;
   startTime?: string;
   endTime?: string;
-}
-
-interface BoardChild {
-  board_id: number;
-  name: string;
-  creator_hashid: string;
-  is_default: number;
-  sort: number;
-  id: number;
-}
-
-interface BoardChildrenResponse {
-  code: number;
-  data: {
-    items: BoardChild[];
-    total: number;
-    per_page: number;
-    current_page: number;
-    last_page: number;
-  };
-  message: string;
-}
-
-interface CreatePostModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-interface CreatePostModalState {
-  title: string;
-  content: string;
-  selectedBoard: number | undefined;
-  selectedChildBoard: number | undefined;
-  previewMode: boolean;
-  isSubmitting: boolean;
-  boardChildren: BoardChild[];
-  loadingChildren: boolean;
-  attachments: { id: number; file_name: string; file_type: string }[];
-  isPollEditing: boolean;
-  pollOptions: string[];
-  isMultipleChoice: boolean;
-  showVoters: boolean;
-  hasDeadline: boolean;
-  pollStartTime: string;
-  pollEndTime: string;
-  pollData: PollData | null;
-  showChildBoards: boolean;
-  imageUploading: boolean;
 }
 
 export function ToolbarButton({
@@ -157,11 +110,11 @@ export default function CreatePostModal({
         }>(`/api/board/children?board_id=${boardId}`);
 
         if (response.code === 0) {
-          setBoardChildren(response.data.items);
+          setBoardChildren(response.data.data.items);
           // 缓存到 store 中
-          setStoreBoardChildren(boardId, response.data.items);
+          setStoreBoardChildren(boardId, response.data.data.items);
           // Set default selected child board if exists
-          const defaultChild = response.data.items.find(
+          const defaultChild = response.data.data.items.find(
             (child) => child.is_default === 1
           );
           setSelectedChildBoard(defaultChild?.id ?? undefined);
@@ -291,7 +244,7 @@ export default function CreatePostModal({
             onCheckedChange={setIsMultipleChoice}
           />
         </div>
-        <div className="flex items-center justify-between border-t border-b py-2">
+        <div className="flex items-center justify-between border-t border-b py-4">
           <span>公开投票人</span>
           <Switch checked={showVoters} onCheckedChange={setShowVoters} />
         </div>
@@ -300,12 +253,12 @@ export default function CreatePostModal({
           <Switch checked={hasDeadline} onCheckedChange={setHasDeadline} />
         </div>
         {hasDeadline && (
-          <div className="space-y-2 border-t py-2">
+          <div className="space-y-2">
             <div className="flex items-center gap-4">
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                {/* <label className="block text-sm font-medium text-gray-700 mb-2">
                   开始时间
-                </label>
+                </label> */}
                 <Input
                   type="datetime-local"
                   value={pollStartTime}
@@ -318,9 +271,9 @@ export default function CreatePostModal({
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                {/* <label className="block text-sm font-medium text-gray-700 mb-2">
                   结束时间
-                </label>
+                </label> */}
                 <Input
                   type="datetime-local"
                   value={pollEndTime}
@@ -335,7 +288,7 @@ export default function CreatePostModal({
             </div>
           </div>
         )}
-        <div className="flex justify-end space-x-2 pt-4">
+        <div className="flex justify-end space-x-2">
           <Button variant="outline" onClick={() => setIsPollEditing(false)}>
             取消
           </Button>

@@ -4,7 +4,7 @@ import * as React from "react";
 import { useParams } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/icons";
 import ReactMarkdown from "react-markdown";
@@ -26,7 +26,7 @@ interface User {
   hashid: string;
   username: string;
   nickname: string;
-  avatar_url: string | null;
+  avatar_url: string;
 }
 
 interface Attachment {
@@ -40,10 +40,8 @@ interface Attachment {
 
 interface Comment {
   id: number;
-  user: {
-    username: string;
-    hashid: string;
-  };
+  user: User;
+  attachments: Attachment[];
   content: string;
   created_at: string;
   number: number;
@@ -128,9 +126,12 @@ interface Discussion {
   view_count: number;
   votes: number;
   hotness: number;
+  created_at: string;
+  updated_at: string;
   main_post: MainPost;
   board: Board;
   board_child: BoardChild;
+  user: User;
 }
 
 export default function DiscussionDetailPage() {
@@ -155,13 +156,16 @@ export default function DiscussionDetailPage() {
         // 并行请求讨论和评论数据
         const [discussionRes, commentsRes] = await Promise.all([
           http.get(`/api/discussion?slug=${encodeURIComponent(slug)}`),
-          http.get(`/api/discussion/posts?slug=${encodeURIComponent(slug)}`)
+          http.get(`/api/discussion/posts?slug=${encodeURIComponent(slug)}`),
         ]);
 
         if (discussionRes.code === 0) {
           setDiscussion(discussionRes.data);
         } else {
-          console.log("Discussion API returned error code:", discussionRes.code);
+          console.log(
+            "Discussion API returned error code:",
+            discussionRes.code
+          );
           setDiscussion(null);
         }
 
@@ -200,24 +204,41 @@ export default function DiscussionDetailPage() {
         {/* 贴文头部信息 */}
         <div className="mb-4">
           <h1 className="text-xl font-medium">{discussion.title}</h1>
-          <div className="mt-2 flex items-center space-x-2 text-sm text-muted-foreground">
+          <div className="mt-2 flex items-center space-x-2">
             <div className="flex items-center space-x-2">
-              <Avatar className="h-5 w-5">
-                <AvatarFallback>{discussion.user_hashid[0]}</AvatarFallback>
+              <Avatar className="h-14 w-14">
+                <AvatarImage
+                  src={discussion.user.avatar_url}
+                  alt={discussion.user.username}
+                />
+                <AvatarFallback>{discussion.user.username[0]}</AvatarFallback>
               </Avatar>
-              <span>{discussion.user_hashid}</span>
             </div>
-            <span>·</span>
-            <span>来自 {discussion.board.name}</span>
-            <span className="inline-flex items-center rounded bg-blue-50 px-1.5 py-0.5 text-xs text-blue-600">
-              {discussion.board_child.name}
-            </span>
+            <div className="flex flex-col">
+              <div className="flex items-center space-x-2">
+                <span className="text-lg font-medium">
+                  {discussion.user.username}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  @{discussion.user.nickname}
+                </span>
+                <span className="rounded bg-blue-50 px-1.5 py-0.5 text-xs text-blue-600">
+                  {discussion.board_child.name}
+                </span>
+                <span>·</span>
+                <span>{discussion.created_at}</span>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                <span>来自 {discussion.board.name}</span>
+                <span> # {discussion.board_child.name}</span>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* 贴文内容 */}
-        <div className="space-y-4">
-          <div className="prose max-w-none text-sm">
+        <div className="px-2 text-muted-foreground">
+          <div className="prose max-w-none">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeRaw]}
@@ -228,42 +249,34 @@ export default function DiscussionDetailPage() {
         </div>
 
         {/* 贴文底部操作栏 */}
-        <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-              <Icon name="favorite" className="text-base" />
-              <span>{discussion.votes}</span>
-            </div>
-            <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-              <Icon name="chat" className="text-base" />
-              <span>{discussion.comment_count}</span>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="sm" className="h-7">
-              <Icon name="share" className="mr-1 h-4 w-4" />
-              分享
-            </Button>
-            <Button variant="ghost" size="sm" className="h-7">
-              <Icon name="more" className="h-4 w-4" />
-            </Button>
+        <div className="mt-6 flex items-center justify-between border-b border-gray-200">
+          <div className="flex items-center p-4">
+            <span>评论</span>
+            <span className="w-2"></span>
+            <span className="text-blue-600"> {discussion.comment_count}</span>
           </div>
         </div>
 
         {/* 评论区 */}
-        <div className="mt-8">
+        <div className="mt-8 px-4">
           {/* 评论列表 */}
           {comments.length > 0 ? (
             <div className="space-y-6">
               {comments.map((comment) => (
                 <div key={comment.id} className="flex items-start space-x-3">
-                  <Avatar className="h-8 w-8">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage
+                      src={comment.user.avatar_url}
+                      alt={comment.user.username}
+                    />
                     <AvatarFallback>{comment.user.username[0]}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <span className="text-sm font-medium">{comment.user.username}</span>
+                        <span className="text-sm font-medium">
+                          {comment.user.username}
+                        </span>
                         <span className="text-xs text-muted-foreground">
                           {formatDistanceToNow(new Date(comment.created_at), {
                             addSuffix: true,
@@ -272,10 +285,9 @@ export default function DiscussionDetailPage() {
                         </span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <span className="text-xs text-muted-foreground">{comment.number}楼</span>
-                        <Button variant="ghost" size="sm" className="h-6">
-                          <Icon name="more" className="h-4 w-4" />
-                        </Button>
+                        <span className="text-xs text-muted-foreground">
+                          {comment.number}楼
+                        </span>
                       </div>
                     </div>
 
@@ -298,21 +310,25 @@ export default function DiscussionDetailPage() {
                       </ReactMarkdown>
                     </div>
 
-                    <div className="mt-3 flex items-center space-x-4">
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" className="h-6 space-x-1 text-xs">
-                          <Icon name="favorite" className="text-base" />
-                          <span>{comment.likes}</span>
-                        </Button>
-                        <Button variant="ghost" size="sm" className="h-6 space-x-1 text-xs">
-                          <Icon name="chat" className="text-base" />
-                          <span>{comment.replies}</span>
-                        </Button>
+                    <div className="mt-3 flex justify-between items-center space-x-4 text-base text-gray-500">
+                      <div className="flex items-center gap-2 space-x-8">
+                        <div className="flex items-center h-6 space-x-1 cursor-pointer">
+                          <Icon name="thumb_up" className="h-4 w-4" />
+                          <span className="text-sm">{1000}</span>
+                        </div>
+                        <div className="flex items-center h-6 space-x-1 cursor-pointer">
+                          <Icon name="thumb_down" className="h-4 w-4" />
+                          <span className="text-sm">{10}</span>
+                        </div>
                       </div>
-                      <Button variant="ghost" size="sm" className="h-6 text-xs space-x-1">
-                        <Icon name="reply" className="text-base" />
-                        <span>回复</span>
-                      </Button>
+
+                      <div className="flex items-center h-6 space-x-8">
+                        <button className="text-sm cursor-pointer">回复</button>
+                        <Icon
+                          name="more_horiz"
+                          className="h-4 w-4 cursor-pointer"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -326,7 +342,7 @@ export default function DiscussionDetailPage() {
 
           {/* 评论框 */}
           <div className="mt-6 flex items-start space-x-3">
-            <Avatar className="h-8 w-8">
+            <Avatar className="h-12 w-12">
               <AvatarFallback>无</AvatarFallback>
             </Avatar>
             <div className="flex-1">
@@ -340,7 +356,10 @@ export default function DiscussionDetailPage() {
                   formData.append("attachment_type", "comment_images");
 
                   try {
-                    const response = await http.post(API_ROUTES.UPLOAD.IMAGE, formData);
+                    const response = await http.post(
+                      API_ROUTES.UPLOAD.IMAGE,
+                      formData
+                    );
                     // You can still use the response data here if needed
                     // but don't return it
                   } catch (error) {
@@ -348,7 +367,7 @@ export default function DiscussionDetailPage() {
                   }
                 }}
               />
-              <div className="mt-2 flex justify-end">
+              <div className="my-2 flex justify-end">
                 <Button
                   size="sm"
                   onClick={async () => {
@@ -357,16 +376,21 @@ export default function DiscussionDetailPage() {
                     }
 
                     try {
-                      const response = await http.post(`/api/discussion/posts`, {
-                        slug: discussion.slug,
-                        content: commentContent.trim(),
-                      });
+                      const response = await http.post(
+                        `/api/discussion/posts`,
+                        {
+                          slug: discussion.slug,
+                          content: commentContent.trim(),
+                        }
+                      );
 
                       if (response.code === 0) {
                         setCommentContent("");
                         // 刷新评论列表
                         const commentsRes = await http.get(
-                          `/api/discussion/posts?slug=${encodeURIComponent(slug)}`
+                          `/api/discussion/posts?slug=${encodeURIComponent(
+                            slug
+                          )}`
                         );
                         if (commentsRes.code === 0) {
                           setComments(commentsRes.data.items);
@@ -386,7 +410,7 @@ export default function DiscussionDetailPage() {
       </div>
 
       {/* 右侧边栏 */}
-      <div className="sticky top-4 w-64 flex-none">
+      <div className="sticky top-4 w-64 flex-none ml-4">
         <DiscussionSidebar />
       </div>
     </div>

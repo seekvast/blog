@@ -1,5 +1,6 @@
 {
   "common": {
+    "publish": "發表文章",
     "switchToEnglish": "English",
     "createBoard": "創建看板",
     "joinNewBoard": "加入新看板",

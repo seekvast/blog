@@ -14,6 +14,7 @@ import { zhCN } from "date-fns/locale";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import { Icon } from "@/components/icons";
 
 export default function HomePage() {
   const [discussions, setDiscussions] = React.useState<Discussion[]>([]);
@@ -138,7 +139,7 @@ export default function HomePage() {
             >
               <div className="flex space-x-3">
                 {/* 作者头像 */}
-                <Avatar className="h-10 w-10 flex-shrink-0">
+                <Avatar className="h-12 w-12 flex-shrink-0">
                   <AvatarFallback>{discussion.user.username[0]}</AvatarFallback>
                 </Avatar>
 
@@ -170,14 +171,16 @@ export default function HomePage() {
                         img: ({ node, ...props }) => {
                           const imgRef = React.useRef<HTMLImageElement>(null);
                           const [loaded, setLoaded] = React.useState(false);
-                          const containerRef = React.useRef<HTMLSpanElement>(null);
+                          const containerRef =
+                            React.useRef<HTMLSpanElement>(null);
                           const [imageCount, setImageCount] = React.useState(0);
                           const [imageIndex, setImageIndex] = React.useState(0);
 
                           React.useEffect(() => {
-                            const parent = containerRef.current?.closest('.image-grid');
+                            const parent =
+                              containerRef.current?.closest(".image-grid");
                             if (parent) {
-                              const images = parent.getElementsByTagName('img');
+                              const images = parent.getElementsByTagName("img");
                               setImageCount(images.length);
                               for (let i = 0; i < images.length; i++) {
                                 if (images[i] === imgRef.current) {
@@ -191,35 +194,63 @@ export default function HomePage() {
                           if (!props.src) return null;
 
                           return (
-                            <span ref={containerRef} className={`
+                            <span
+                              ref={containerRef}
+                              className={`
                               inline-block relative overflow-hidden
-                              ${imageCount === 1 ? 'col-span-1 row-span-1 rounded-2xl' : ''}
-                              ${imageCount === 2 ? (imageIndex === 0 ? 'rounded-l-2xl' : 'rounded-r-2xl') : ''}
-                              ${imageCount === 3 ? (
-                                imageIndex === 0 ? 'col-span-2 rounded-l-2xl' :
-                                imageIndex === 1 ? 'rounded-tr-2xl' : 'rounded-br-2xl'
-                              ) : ''}
-                              ${imageCount === 4 ? (
-                                imageIndex === 0 ? 'rounded-tl-2xl' :
-                                imageIndex === 1 ? 'rounded-tr-2xl' :
-                                imageIndex === 2 ? 'rounded-bl-2xl' : 'rounded-br-2xl'
-                              ) : ''}
-                            `}>
-                              <span 
+                              ${
+                                imageCount === 1
+                                  ? "col-span-1 row-span-1 rounded-2xl"
+                                  : ""
+                              }
+                              ${
+                                imageCount === 2
+                                  ? imageIndex === 0
+                                    ? "rounded-l-2xl"
+                                    : "rounded-r-2xl"
+                                  : ""
+                              }
+                              ${
+                                imageCount === 3
+                                  ? imageIndex === 0
+                                    ? "col-span-2 rounded-l-2xl"
+                                    : imageIndex === 1
+                                    ? "rounded-tr-2xl"
+                                    : "rounded-br-2xl"
+                                  : ""
+                              }
+                              ${
+                                imageCount === 4
+                                  ? imageIndex === 0
+                                    ? "rounded-tl-2xl"
+                                    : imageIndex === 1
+                                    ? "rounded-tr-2xl"
+                                    : imageIndex === 2
+                                    ? "rounded-bl-2xl"
+                                    : "rounded-br-2xl"
+                                  : ""
+                              }
+                            `}
+                            >
+                              <span
                                 className="block relative pb-[100%]"
-                                style={{ backgroundColor: 'rgb(239, 243, 244)' }}
+                                style={{
+                                  backgroundColor: "rgb(239, 243, 244)",
+                                }}
                               >
                                 <span className="absolute inset-0">
-                                  <span className={`block w-full h-full transition-opacity duration-200 ${
-                                    loaded ? 'opacity-100' : 'opacity-0'
-                                  }`}>
+                                  <span
+                                    className={`block w-full h-full transition-opacity duration-200 ${
+                                      loaded ? "opacity-100" : "opacity-0"
+                                    }`}
+                                  >
                                     <img
                                       {...props}
                                       ref={imgRef}
                                       onLoad={() => setLoaded(true)}
                                       className="w-full h-full object-cover"
                                       loading="lazy"
-                                      alt={props.alt || ''}
+                                      alt={props.alt || ""}
                                     />
                                   </span>
                                 </span>
@@ -228,28 +259,57 @@ export default function HomePage() {
                           );
                         },
                         p: ({ node, children, ...props }) => {
-                          const hasOnlyImages = React.Children.toArray(children).every(
-                            child => React.isValidElement(child) && 
-                            (child.type === 'img' || (typeof child.type === 'function' && child.props.src))
+                          const hasOnlyImages = React.Children.toArray(
+                            children
+                          ).every(
+                            (child) =>
+                              React.isValidElement(child) &&
+                              (child.type === "img" ||
+                                (typeof child.type === "function" &&
+                                  child.props.src))
                           );
-                          
+
                           if (hasOnlyImages) {
-                            const validChildren = React.Children.toArray(children).filter(
-                              child => React.isValidElement(child) && 
-                              (child.type === 'img' || (typeof child.type === 'function' && child.props.src))
+                            const validChildren = React.Children.toArray(
+                              children
+                            ).filter(
+                              (child) =>
+                                React.isValidElement(child) &&
+                                (child.type === "img" ||
+                                  (typeof child.type === "function" &&
+                                    child.props.src))
                             );
 
                             return (
                               <div className="mt-3 overflow-hidden">
                                 <div className="rounded-2xl overflow-hidden">
-                                  <div className={`
+                                  <div
+                                    className={`
                                     image-grid grid gap-[2px]
-                                    ${validChildren.length === 1 ? 'grid-cols-1 grid-rows-1' : ''}
-                                    ${validChildren.length === 2 ? 'grid-cols-2 grid-rows-1' : ''}
-                                    ${validChildren.length === 3 ? 'grid-cols-2 grid-rows-2' : ''}
-                                    ${validChildren.length === 4 ? 'grid-cols-2 grid-rows-2' : ''}
+                                    ${
+                                      validChildren.length === 1
+                                        ? "grid-cols-1 grid-rows-1"
+                                        : ""
+                                    }
+                                    ${
+                                      validChildren.length === 2
+                                        ? "grid-cols-2 grid-rows-1"
+                                        : ""
+                                    }
+                                    ${
+                                      validChildren.length === 3
+                                        ? "grid-cols-2 grid-rows-2"
+                                        : ""
+                                    }
+                                    ${
+                                      validChildren.length === 4
+                                        ? "grid-cols-2 grid-rows-2"
+                                        : ""
+                                    }
                                   `}
-                                  style={{ backgroundColor: 'rgb(239, 243, 244)' }}
+                                    style={{
+                                      backgroundColor: "rgb(239, 243, 244)",
+                                    }}
                                   >
                                     {validChildren}
                                   </div>
@@ -270,7 +330,7 @@ export default function HomePage() {
                               <iframe {...props} className="w-full h-full" />
                             </div>
                           );
-                        }
+                        },
                       }}
                     >
                       {discussion.main_post.content}
@@ -295,11 +355,11 @@ export default function HomePage() {
                   </div> */}
                   <div className="mt-3 flex items-center space-x-4 text-xs">
                     <div className="flex items-center space-x-1 text-muted-foreground">
-                      <Heart className="h-4 w-4" />
+                      <Icon name="thumb_up" className="h-4 w-4 text-base cursor-pointer" />
                       <span>{discussion.votes}</span>
                     </div>
                     <div className="flex items-center space-x-1 text-muted-foreground">
-                      <MessageSquare className="h-4 w-4" />
+                      <Icon name="mode_comment" className="h-4 w-4 text-base cursor-pointer" />
                       <span>{discussion.comment_count}</span>
                     </div>
                     <div className="flex items-center space-x-1 text-muted-foreground">

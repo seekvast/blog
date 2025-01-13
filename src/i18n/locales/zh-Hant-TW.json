@@ -22,6 +22,22 @@
     "imageText": "圖文模式",
     "textOnly": "文字模式"
   },
+  "common": {
+    "publish": "發表",
+    "cancel": "取消",
+    "create": "創建",
+    "join": "加入",
+    "joinNewBoard": "加入新看板",
+    "createDiscussion": "發表文章",
+    "post": "發表文章",
+    "recommendedBoards": "推薦看板",
+    "autoDetectLanguage": "自動檢測語言",
+    "termsOfService": "服務條款",
+    "privacyPolicy": "隱私權政策",
+    "contactUs": "聯絡我們",
+    "helpCenter": "幫助中心",
+    "language": "語言"
+  },
   "footer": {
     "terms": "服務條款",
     "privacy": "隱私權政策",

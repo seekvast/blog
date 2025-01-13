@@ -18,6 +18,7 @@
     "share": "Share"
   },
   "common": {
+    "publish": "Publish",
     "switchToEnglish": "English",
     "createBoard": "Create Board",
     "joinNewBoard": "Join New Board",

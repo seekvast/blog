@@ -6,11 +6,20 @@ interface IconProps extends React.HTMLAttributes<HTMLSpanElement> {
   className?: string;
 }
 
-export function Icon({ name, filled = false, className = "", ...props }: IconProps) {
+export function Icon({
+  name,
+  filled = false,
+  className = "",
+  ...props
+}: IconProps) {
   return (
     <span
-      className={`material-symbols-rounded ${className}`}
-      style={{ fontVariationSettings: filled ? "'FILL' 1" : "'FILL' 0" }}
+      className={`inline-flex items-center justify-center ${className}`}
+      style={{
+        fontFamily: "'Material Symbols Rounded'",
+        fontVariationSettings: `'FILL' ${filled ? 1 : 0}`,
+        WebkitFontSmoothing: "antialiased",
+      }}
       {...props}
     >
       {name}
