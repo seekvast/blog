@@ -241,6 +241,27 @@ export default function DiscussionDetailPage() {
                 a: ({ href, children }) => (
                   <UserLink href={href || ""}>{children}</UserLink>
                 ),
+                code: ({ node, inline, className, children, ...props }: {
+                  node?: any;
+                  inline?: boolean;
+                  className?: string;
+                  children?: React.ReactNode;
+                } & React.HTMLAttributes<HTMLElement>) => {
+                  if (inline) {
+                    return (
+                      <code className={className} {...props}>
+                        {children}
+                      </code>
+                    );
+                  }
+                  return (
+                    <pre>
+                      <code className={className} {...props}>
+                        {children}
+                      </code>
+                    </pre>
+                  );
+                }
               }}
             >
               {discussion.main_post.content}
@@ -294,6 +315,27 @@ export default function DiscussionDetailPage() {
                             a: ({ href, children }) => (
                               <UserLink href={href || ""}>{children}</UserLink>
                             ),
+                            code: ({ node, inline, className, children, ...props }: {
+                              node?: any;
+                              inline?: boolean;
+                              className?: string;
+                              children?: React.ReactNode;
+                            } & React.HTMLAttributes<HTMLElement>) => {
+                              if (inline) {
+                                return (
+                                  <code className={className} {...props}>
+                                    {children}
+                                  </code>
+                                );
+                              }
+                              return (
+                                <pre>
+                                  <code className={className} {...props}>
+                                    {children}
+                                  </code>
+                                </pre>
+                              );
+                            }
                           }}
                         >
                           {comment.content}

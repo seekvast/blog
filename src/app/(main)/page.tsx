@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LayoutGrid, ChevronDown, MessageSquare, Heart } from "lucide-react";
+import { LayoutGrid, ChevronDown, MessageSquare, Heart, List, ThumbsUp } from "lucide-react";
 import type { Discussion } from "@/types/discussion";
 import { http } from "@/lib/request";
 import { formatDistanceToNow } from "date-fns";
@@ -14,7 +14,7 @@ import { zhCN } from "date-fns/locale";
 import ReactMarkdown from "react-markdown";
 import type { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw"; 
+import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import { Icon } from "@/components/icons";
 import { UserLink } from "@/components/markdown/user-link";
@@ -24,6 +24,7 @@ export default function HomePage() {
   const [loading, setLoading] = React.useState(true);
   const [page, setPage] = React.useState(1);
   const [hasMore, setHasMore] = React.useState(true);
+  const [displayMode, setDisplayMode] = React.useState<'image-text' | 'text-only'>('image-text');
   const loadingRef = React.useRef(false);
   const observerRef = React.useRef<IntersectionObserver>();
   const lastItemRef = React.useRef<HTMLElement>(null);
@@ -48,6 +49,10 @@ export default function HomePage() {
       loadingRef.current = false;
     }
   }, [page]);
+
+  const toggleDisplayMode = () => {
+    setDisplayMode(prev => prev === 'image-text' ? 'text-only' : 'image-text');
+  };
 
   React.useEffect(() => {
     fetchDiscussions();
@@ -123,8 +128,13 @@ export default function HomePage() {
                 variant="ghost"
                 size="sm"
                 className="h-8 text-muted-foreground hover:bg-transparent hover:text-foreground"
+                onClick={toggleDisplayMode}
               >
-                <LayoutGrid className="h-4 w-4" />
+                {displayMode === 'image-text' ? (
+                  <LayoutGrid className="h-4 w-4" />
+                ) : (
+                  <List className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </div>
@@ -143,6 +153,7 @@ export default function HomePage() {
               <div className="flex space-x-3">
                 {/* 作者头像 */}
                 <Avatar className="h-12 w-12 flex-shrink-0">
+                  <AvatarImage src={discussion.user.avatar_url} alt={discussion.user.username} />
                   <AvatarFallback>{discussion.user.username[0]}</AvatarFallback>
                 </Avatar>
 
@@ -165,169 +176,152 @@ export default function HomePage() {
                     </span>
                   </div>
 
-                  {/* <div className="space-y-2">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeRaw]}
-                      className="prose prose-sm max-w-none break-words"
-                      components={{
-                        a: ({ href, children }) => (
-                          <UserLink href={href || ""}>{children}</UserLink>
-                        ),
-                      }}
-                    >
-                      {discussion.excerpt}
-                    </ReactMarkdown>
-                  </div> */}
-
-                  <div className="mt-1 text-md text-muted-foreground">
-                    <ReactMarkdown
-                      skipHtml={false} 
-                      remarkPlugins={[remarkGfm]}
-                      rehypePlugins={[rehypeRaw, [rehypeSanitize, {
-                        attributes: {
-                          '*': ['className', 'style', 'class'],
-                          'img': ['src', 'alt', 'title', 'width', 'height', 'loading', 'class', 'className', 'ref', 'onLoad'],
-                          'iframe': ['src', 'allow', 'allowfullscreen', 'frameborder', 'loading', 'class', 'className', 'width', 'height', 'style'],
-                          'span': ['className', 'class', 'style'],
-                          'div': ['className', 'class', 'style'],
-                          'a': ['href', 'title', 'target', 'rel', 'className', 'class']
-                        },
-                        protocols: {
-                          src: ['http', 'https', 'data'],
-                          href: ['http', 'https', 'mailto', 'tel']
-                        },
-                        tagNames: ['div', 'p', 'iframe', 'img', 'a', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
-                      }]]}
-                      className="prose prose-sm max-w-none [&>p]:!m-0 [&_iframe]:!mt-2"
-                      components={{
-                        a: ({ href, children }) => (
-                          <UserLink href={href || ""}>{children}</UserLink>
-                        ),
-                        img: ({ node, ...props }: {
-                          node: { tagName: keyof JSX.IntrinsicElements };
-                          [key: string]: any;
-                        }) => {
-                          const { src = "", alt = "", ...rest } = props;
-                          return (
-                            <img
-                              src={src}
-                              alt={alt}
-                              className="my-0 max-w-full h-auto"
-                              {...rest}
-                            />
-                          );
-                        },
-                        iframe: ({ node, ...props }: { 
-                          node?: any; 
-                          src?: string;
-                          [key: string]: any;
-                        }) => {
-                          const { src = "", ...rest } = props;
+                  <div className="mt-1">
+                    {displayMode === 'image-text' ? (
+                      <div className="flex gap-3 items-start">
+                        {(() => {
+                          // 使用更精确的正则表达式匹配图片URL
+                          const regex = /!\[(?:.*?)\]\((https?:\/\/[^)]+)\)/;
+                          const matches = discussion.main_post.content.match(regex);
+                          const imgUrl = matches ? matches[1].split(' ')[0] : null; // 处理可能带有标题的URL
                           
-                          // 处理 YouTube URL
-                          let videoSrc = src;
-                          if (src.includes('youtube.com') || src.includes('youtu.be')) {
-                            // 转换 YouTube URL 为嵌入格式
-                            const videoId = src.includes('youtube.com') 
-                              ? src.split('v=')[1]?.split('&')[0]
-                              : src.split('youtu.be/')[1]?.split('?')[0];
-                            if (videoId) {
-                              videoSrc = `https://www.youtube.com/embed/${videoId}`;
-                            }
-                          }
-                          
-                          return (
-                            <div className="mt-3 aspect-video">
-                              <iframe
-                                src={videoSrc}
-                                className="w-full h-full rounded-2xl"
-                                style={{ width: '100%', height: '100%' }}
-                                frameBorder="0"
-                                allowFullScreen
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                loading="lazy"
+                          return imgUrl ? (
+                            <div className="flex-shrink-0">
+                              <Image
+                                src={imgUrl}
+                                alt=""
+                                width={120}
+                                height={80}
+                                className="object-cover"
                               />
                             </div>
-                          );
-                        },
-                        p: ({ node, children, ...props }) => {
-                          const hasOnlyImages = React.Children.toArray(
-                            children
-                          ).every(
-                            (child) =>
-                              React.isValidElement(child) &&
-                              (child.type === "img" ||
-                                (typeof child.type === "function" &&
-                                  child.type.name === "img"))
-                          );
-
-                          if (hasOnlyImages) {
-                            const validChildren = React.Children.toArray(children).filter(
-                              (child) =>
-                                React.isValidElement(child) &&
-                                (child.type === "img" ||
-                                  (typeof child.type === "function" &&
-                                    child.type.name === "img"))
-                            );
-
-                            return (
-                              <div className="mt-3">
-                                <div className="rounded-2xl overflow-hidden">
-                                  <div
-                                    className={`
-                                    grid gap-[2px] items-start
-                                    ${
-                                      validChildren.length === 1
-                                        ? "grid-cols-1"
-                                        : ""
-                                    }
-                                    ${
-                                      validChildren.length === 2
-                                        ? "grid-cols-2"
-                                        : ""
-                                    }
-                                    ${
-                                      validChildren.length === 3
-                                        ? "grid-cols-3"
-                                        : ""
-                                    }
-                                    ${
-                                      validChildren.length === 4
-                                        ? "grid-cols-2 grid-rows-2"
-                                        : ""
-                                    }
-                                  `}
-                                  >
-                                    {validChildren.map((child, index) => (
-                                      <div key={index} className="w-full h-full">
-                                        {child}
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          }
-
-                          return (
-                            <p {...props} className="!m-0">
-                              {children}
-                            </p>
-                          );
-                        },
-                        '*': ({ node, ...props }: { node: { tagName: keyof JSX.IntrinsicElements }; [key: string]: any }) => {
-                          const Element = node.tagName;
-                          if (props.class) {
-                            props.className = props.class;
-                            delete props.class;
-                          }
-                          return <Element {...props} />;
-                        },
-                      } as Components}
-                    >
-                      {discussion.main_post.content}
-                    </ReactMarkdown>
+                          ) : null;
+                        })()}
+                        <div className="flex-1 text-sm text-muted-foreground line-clamp-3">
+                          <ReactMarkdown
+                            skipHtml={false}
+                            remarkPlugins={[remarkGfm]}
+                            rehypePlugins={[
+                              rehypeRaw,
+                              [
+                                rehypeSanitize,
+                                {
+                                  attributes: {
+                                    "*": ["className", "style", "class"],
+                                    a: [
+                                      "href",
+                                      "title",
+                                      "target",
+                                      "rel",
+                                      "className",
+                                      "class",
+                                    ],
+                                  },
+                                  protocols: {
+                                    href: ["http", "https", "mailto", "tel"],
+                                  },
+                                  tagNames: [
+                                    "div",
+                                    "p",
+                                    "a",
+                                    "span",
+                                    "h1",
+                                    "h2",
+                                    "h3",
+                                    "h4",
+                                    "h5",
+                                    "h6",
+                                  ],
+                                },
+                              ],
+                            ]}
+                            className="prose prose-sm max-w-none [&>p]:!m-0"
+                            components={{
+                              img: () => null,
+                              iframe: () => null,
+                              a: ({ href, children }) => {
+                                // 如果是 YouTube 链接，返回 null
+                                if (href?.includes('youtube.com') || href?.includes('youtu.be')) {
+                                  return null;
+                                }
+                                return <UserLink href={href || ""}>{children}</UserLink>;
+                              },
+                              p: ({ children }) => {
+                                // 如果段落只包含被跳过的元素（图片或 YouTube），则不渲染该段落
+                                const hasContent = React.Children.toArray(children).some(
+                                  child => typeof child === 'string' && child.trim() !== ''
+                                );
+                                return hasContent ? <p className="!m-0">{children}</p> : null;
+                              },
+                            }}
+                          >
+                            {discussion.main_post.content}
+                          </ReactMarkdown>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-md text-muted-foreground">
+                        <ReactMarkdown
+                          skipHtml={false}
+                          remarkPlugins={[remarkGfm]}
+                          rehypePlugins={[
+                            rehypeRaw,
+                            [
+                              rehypeSanitize,
+                              {
+                                attributes: {
+                                  "*": ["className", "style", "class"],
+                                  a: [
+                                    "href",
+                                    "title",
+                                    "target",
+                                    "rel",
+                                    "className",
+                                    "class",
+                                  ],
+                                },
+                                protocols: {
+                                  href: ["http", "https", "mailto", "tel"],
+                                },
+                                tagNames: [
+                                  "div",
+                                  "p",
+                                  "a",
+                                  "span",
+                                  "h1",
+                                  "h2",
+                                  "h3",
+                                  "h4",
+                                  "h5",
+                                  "h6",
+                                ],
+                              },
+                            ],
+                          ]}
+                          className="prose prose-sm max-w-none [&>p]:!m-0"
+                          components={{
+                            img: () => null,
+                            iframe: () => null,
+                            a: ({ href, children }) => {
+                              // 如果是 YouTube 链接，返回 null
+                              if (href?.includes('youtube.com') || href?.includes('youtu.be')) {
+                                return null;
+                              }
+                              return <UserLink href={href || ""}>{children}</UserLink>;
+                            },
+                            p: ({ children }) => {
+                              // 如果段落只包含被跳过的元素（图片或 YouTube），则不渲染该段落
+                              const hasContent = React.Children.toArray(children).some(
+                                child => typeof child === 'string' && child.trim() !== ''
+                              );
+                              return hasContent ? <p className="!m-0">{children}</p> : null;
+                            },
+                          }}
+                        >
+                          {discussion.main_post.content}
+                        </ReactMarkdown>
+                      </div>
+                    )}
                   </div>
                   <div className="mt-3 flex items-center space-x-4 text-xs">
                     <div className="flex items-center space-x-1 text-muted-foreground">
