@@ -16,6 +16,11 @@ interface User {
   avatar_url: string;
 }
 
+interface Comment {
+  user: User;
+  content: string;
+}
+
 interface PostEditorProps {
   content: string;
   onChange: (content: string) => void;
@@ -24,6 +29,8 @@ interface PostEditorProps {
   previewMode?: boolean;
   onPreviewModeChange?: (mode: boolean) => void;
   imageUploading?: boolean;
+  replyTo?: Comment;
+  onSubmit?: (content: string) => Promise<void>;
 }
 
 export function PostEditor({
@@ -34,6 +41,8 @@ export function PostEditor({
   onPreviewModeChange,
   imageUploading = false,
   className,
+  replyTo,
+  onSubmit,
 }: PostEditorProps) {
   const [splitView, setSplitView] = React.useState(false);
   const [showUserList, setShowUserList] = React.useState(false);
@@ -384,18 +393,20 @@ export function PostEditor({
   };
 
   return (
-    <div className={className}>
-      {imageUploading && (
-        <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="flex flex-col items-center gap-2">
-            <Icon
-              name="refresh"
-              className="h-6 w-6 animate-spin text-primary"
-            />
-            <span className="text-sm text-gray-500">正在上传图片...</span>
+    <div className={cn("relative", className)}>
+      {/* 回复引用框 */}
+      {replyTo && (
+        <div className="mb-3 rounded-lg border border-gray-100 bg-gray-50/50 p-3">
+          <div className="text-sm text-gray-500">
+            回复 {replyTo.user.username} 的评论：
+          </div>
+          <div className="mt-1.5 text-sm text-gray-600 line-clamp-2">
+            {replyTo.content}
           </div>
         </div>
       )}
+      
+      {/* 工具栏 */}
       <div className="relative rounded-lg border">
         {imageUploading && (
           <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-50">

@@ -23,6 +23,8 @@ import { DiscussionSidebar } from "@/components/discussion/discussion-sidebar";
 import { PostEditor } from "@/components/post/post-editor";
 import { API_ROUTES } from "@/constants/api";
 import { UserLink } from "@/components/markdown/user-link";
+import { useAuth } from "@/components/providers/auth-provider";
+import { useLoginModal } from "@/components/providers/login-modal-provider";
 
 interface User {
   hashid: string;
@@ -52,6 +54,9 @@ interface Comment {
   quote?: {
     username: string;
     content: string;
+  };
+  parent_post?: {
+    user: User;
   };
 }
 
@@ -138,11 +143,15 @@ interface Discussion {
 
 export default function DiscussionDetailPage() {
   const params = useParams();
+  const { user, loading: authLoading } = useAuth();
+  const { openLoginModal } = useLoginModal();
   const slug = params?.slug as string;
   const [loading, setLoading] = React.useState(true);
   const [discussion, setDiscussion] = React.useState<Discussion | null>(null);
   const [comments, setComments] = React.useState<Comment[]>([]);
   const [commentContent, setCommentContent] = React.useState("");
+  const [replyTo, setReplyTo] = React.useState<Comment | null>(null);
+  const [pendingReplyTo, setPendingReplyTo] = React.useState<Comment | null>(null);
   const fetchedRef = React.useRef(false);
 
   React.useEffect(() => {
@@ -185,6 +194,13 @@ export default function DiscussionDetailPage() {
     fetchData();
   }, [slug]);
 
+  React.useEffect(() => {
+    if (user && pendingReplyTo) {
+      setReplyTo(pendingReplyTo);
+      setPendingReplyTo(null);
+    }
+  }, [user, pendingReplyTo]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">Loading...</div>
@@ -198,6 +214,47 @@ export default function DiscussionDetailPage() {
       </div>
     );
   }
+
+  const handleSubmitComment = async (content: string) => {
+    if (!content.trim()) {
+      return;
+    }
+
+    try {
+      const response = await http.post(`/api/discussion/post`, {
+        slug: discussion?.slug,
+        content: content.trim(),
+        parent_id: replyTo?.id,
+        quote: replyTo ? {
+          username: replyTo.user.username,
+          content: replyTo.content
+        } : undefined
+      });
+
+      if (response.code === 0) {
+        setCommentContent("");
+        setReplyTo(null);
+        // 刷新评论列表
+        const commentsRes = await http.get(
+          `/api/discussion/posts?slug=${encodeURIComponent(slug)}`
+        );
+        if (commentsRes.code === 0) {
+          setComments(commentsRes.data.items);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to post comment:", error);
+    }
+  };
+
+  const handleReplyClick = (comment: Comment) => {
+    if (!user) {
+      setPendingReplyTo(comment);
+      openLoginModal();
+    } else {
+      setReplyTo(comment);
+    }
+  };
 
   return (
     <div className="flex gap-6">
@@ -219,14 +276,13 @@ export default function DiscussionDetailPage() {
                 <span className="text-lg font-medium">
                   {discussion.user.username}
                 </span>
-                <span className="text-sm text-muted-foreground">
-                  @{discussion.user.nickname}
+                <span className="mx-2 text-gray-300">·</span>
+                <span className="text-sm text-gray-500">
+                  {formatDistanceToNow(new Date(discussion.created_at), {
+                    addSuffix: true,
+                    locale: zhCN,
+                  })}
                 </span>
-                <span className="rounded bg-blue-50 px-1.5 py-0.5 text-xs text-blue-600">
-                  {discussion.board_child.name}
-                </span>
-                <span>·</span>
-                <span>{discussion.created_at}</span>
               </div>
               <div className="text-xs text-muted-foreground">
                 <span>来自 {discussion.board.name}</span>
@@ -296,29 +352,37 @@ export default function DiscussionDetailPage() {
             <div className="space-y-4">
               {comments.map((comment) => (
                 <div key={comment.id} className="pt-2">
-                  <div className="flex items-start space-x-3 px-2 ">
+                  <div className="flex items-start space-x-3 px-2">
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={comment.user.avatar_url} />
                       <AvatarFallback>
                         {comment.user.nickname[0]}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center space-x-2">
-                        <Link
-                          href={`/users/${comment.user.hashid}`}
-                          className="font-medium text-foreground hover:underline"
-                        >
-                          {comment.user.nickname}
-                        </Link>
-                        <span className="text-xs text-muted-foreground">
+                    <div className="flex-1">
+                      <div className="flex items-center">
+                        <span className="font-medium">
+                          {comment.user.nickname || comment.user.username}
+                        </span>
+                        <span className="mx-2 text-gray-300">·</span>
+                        <span className="text-sm text-gray-500">
                           {formatDistanceToNow(new Date(comment.created_at), {
                             addSuffix: true,
                             locale: zhCN,
                           })}
                         </span>
                       </div>
-                      <div className="mt-2 prose prose-sm max-w-none">
+
+                      {/* 评论内容 */}
+                      <div className="mt-1 text-gray-900">
+                        {comment.parent_post && (
+                          <Link
+                            href={`/users/${comment.parent_post.user.hashid}`}
+                            className="text-blue-600 hover:underline"
+                          >
+                            @{comment.parent_post.user.username}{" "}
+                          </Link>
+                        )}
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           rehypePlugins={[rehypeRaw]}
@@ -358,6 +422,7 @@ export default function DiscussionDetailPage() {
                           {comment.content}
                         </ReactMarkdown>
                       </div>
+
                       {/* 评论操作 */}
                       <div className="mt-3 flex justify-between items-center space-x-4 text-base text-gray-500">
                         <div className="flex items-center gap-2 space-x-8">
@@ -372,7 +437,10 @@ export default function DiscussionDetailPage() {
                         </div>
 
                         <div className="flex items-center h-6 space-x-8">
-                          <button className="text-sm cursor-pointer">
+                          <button
+                            className="text-sm cursor-pointer hover:text-primary"
+                            onClick={() => handleReplyClick(comment)}
+                          >
                             回复
                           </button>
                           <Icon
@@ -392,16 +460,15 @@ export default function DiscussionDetailPage() {
             </div>
           )}
 
-          {/* 评论框 */}
-          <div className="mt-6 flex items-start space-x-3">
-            <Avatar className="h-12 w-12">
-              <AvatarFallback>无</AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
+          {/* 评论编辑器 */}
+          {!authLoading && (user ? (
+            <div className="mt-6">
               <PostEditor
                 content={commentContent}
                 onChange={setCommentContent}
                 className="rounded-lg border border-gray-200 bg-background"
+                replyTo={replyTo}
+                onSubmit={handleSubmitComment}
                 onImageUpload={async (file) => {
                   const formData = new FormData();
                   formData.append("image", file);
@@ -412,49 +479,37 @@ export default function DiscussionDetailPage() {
                       API_ROUTES.UPLOAD.IMAGE,
                       formData
                     );
-                    // You can still use the response data here if needed
-                    // but don't return it
                   } catch (error) {
                     console.error("Failed to upload image:", error);
                   }
                 }}
               />
-              <div className="my-2 flex justify-end">
+              <div className="mt-2 flex items-center justify-between">
+                <button
+                  className="text-sm text-gray-500 hover:text-gray-900"
+                  onClick={() => setReplyTo(null)}
+                >
+                  {replyTo && "取消回复"}
+                </button>
                 <Button
                   size="sm"
-                  onClick={async () => {
-                    if (!commentContent.trim()) {
-                      return;
-                    }
-
-                    try {
-                      const response = await http.post(`/api/discussion/post`, {
-                        slug: discussion.slug,
-                        content: commentContent.trim(),
-                      });
-
-                      if (response.code === 0) {
-                        setCommentContent("");
-                        // 刷新评论列表
-                        const commentsRes = await http.get(
-                          `/api/discussion/posts?slug=${encodeURIComponent(
-                            slug
-                          )}`
-                        );
-                        if (commentsRes.code === 0) {
-                          setComments(commentsRes.data.items);
-                        }
-                      }
-                    } catch (error) {
-                      console.error("Failed to post comment:", error);
-                    }
-                  }}
+                  onClick={() => handleSubmitComment(commentContent)}
                 >
                   发布评论
                 </Button>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="mt-6 flex justify-center">
+              <Button
+                variant="outline"
+                className="w-full max-w-sm"
+                onClick={() => openLoginModal()}
+              >
+                登录后参与评论
+              </Button>
+            </div>
+          ))}
         </div>
       </div>
 
