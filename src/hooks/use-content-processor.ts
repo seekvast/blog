@@ -35,6 +35,17 @@ export function useContentProcessor() {
           return `![](${imageMatch[0]})`;
         }
 
+        // 处理用户提及
+        const userMentionMatch = line.match(/@([a-zA-Z0-9_-]+)/g);
+        if (userMentionMatch) {
+          let processedLine = line;
+          userMentionMatch.forEach(mention => {
+            const username = mention.slice(1);
+            processedLine = processedLine.replace(mention, `[@${username}](/users/${username})`);
+          });
+          return processedLine;
+        }
+
         // 处理普通链接
         const urlMatch = line.match(/https?:\/\/[^\s<]+[^<.,:;"')\]\s]/);
         if (urlMatch && !line.includes("[") && !line.includes("]")) {

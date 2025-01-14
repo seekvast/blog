@@ -4,10 +4,7 @@ import * as React from "react";
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize from "rehype-sanitize";
+import { MarkdownRenderer } from "@/components/markdown/markdown-renderer";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -173,94 +170,20 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
                         ) : null;
                       })()}
                       <div className="flex-1 text-sm text-muted-foreground line-clamp-3 whitespace-pre-line">
-                        <ReactMarkdown
-                          skipHtml={false}
-                          remarkPlugins={[remarkGfm]}
-                          rehypePlugins={[
-                            rehypeRaw,
-                            [
-                              rehypeSanitize,
-                              {
-                                attributes: {
-                                  "*": ["className", "style", "class"],
-                                  a: ["href", "title", "target", "rel", "className", "class"],
-                                },
-                                protocols: {
-                                  href: ["http", "https", "mailto", "tel"],
-                                },
-                                tagNames: [
-                                  "div", "p", "a", "span",
-                                  "h1", "h2", "h3", "h4", "h5", "h6"
-                                ],
-                              },
-                            ],
-                          ]}
+                        <MarkdownRenderer 
+                          content={discussion.main_post.content} 
+                          skipMedia={true}
                           className="prose prose-sm max-w-none [&>p]:!m-0"
-                          components={{
-                            img: () => null,
-                            iframe: () => null,
-                            a: ({ href, children }) => {
-                              if (href?.includes("youtube.com") || href?.includes("youtu.be")) {
-                                return null;
-                              }
-                              return <UserLink href={href || ""}>{children}</UserLink>;
-                            },
-                            p: ({ children }) => {
-                              const hasContent = React.Children.toArray(children).some(
-                                (child) => typeof child === "string" && child.trim() !== ""
-                              );
-                              return hasContent ? <p className="!m-0">{children}</p> : null;
-                            },
-                          }}
-                        >
-                          {discussion.main_post?.content}
-                        </ReactMarkdown>
+                        />
                       </div>
                     </div>
                   ) : (
-                    <div className="text-md text-muted-foreground whitespace-pre-line line-clamp-3">
-                      <ReactMarkdown
-                        skipHtml={false}
-                        remarkPlugins={[remarkGfm]}
-                        rehypePlugins={[
-                          rehypeRaw,
-                          [
-                            rehypeSanitize,
-                            {
-                              attributes: {
-                                "*": ["className", "style", "class"],
-                                a: ["href", "title", "target", "rel", "className", "class"],
-                              },
-                              protocols: {
-                                href: ["http", "https", "mailto", "tel"],
-                              },
-                              tagNames: [
-                                "div", "p", "a", "span",
-                                "h1", "h2", "h3", "h4", "h5", "h6"
-                              ],
-                            },
-                          ],
-                        ]}
+                    <div className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                      <MarkdownRenderer 
+                        content={discussion.main_post.content}
+                        skipMedia={true}
                         className="prose prose-sm max-w-none [&>p]:!m-0"
-                        components={{
-                          img: () => null,
-                          iframe: () => null,
-                          a: ({ href, children }) => {
-                            if (href?.includes("youtube.com") || href?.includes("youtu.be")) {
-                              return null;
-                            }
-                            return <UserLink href={href || ""}>{children}</UserLink>;
-                          },
-                          p: ({ children }) => {
-                            const hasContent = React.Children.toArray(children).some(
-                              (child) => typeof child === "string" && child.trim() !== ""
-                            );
-                            return hasContent ? <p className="!m-0">{children}</p> : null;
-                          },
-                        }}
-                      >
-                        {discussion.main_post?.content}
-                      </ReactMarkdown>
+                      />
                     </div>
                   )}
                 </div>

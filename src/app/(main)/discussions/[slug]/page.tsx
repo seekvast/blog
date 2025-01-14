@@ -8,15 +8,8 @@ import { zhCN } from "date-fns/locale";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/icons";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DetailMarkdownRenderer } from "@/components/markdown/detail-markdown-renderer";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { http } from "@/lib/request";
 import { DiscussionSidebar } from "@/components/discussion/discussion-sidebar";
@@ -299,43 +292,7 @@ export default function DiscussionDetailPage() {
         {/* 贴文内容 */}
         <div className="pt-4 text-muted-foreground">
           <div className="prose max-w-none">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeRaw]}
-              components={{
-                a: ({ href, children }) => (
-                  <UserLink href={href || ""}>{children}</UserLink>
-                ),
-                code: ({
-                  inline,
-                  className,
-                  children,
-                  ...props
-                }: {
-                  inline?: boolean;
-                  className?: string;
-                  children?: React.ReactNode;
-                } & React.HTMLAttributes<HTMLElement>) => {
-                  if (inline) {
-                    return (
-                      <code className={className} {...props}>
-                        {children}
-                      </code>
-                    );
-                  }
-                  return (
-                    <pre>
-                      <code className={className} {...props}>
-                        {children}
-                      </code>
-                    </pre>
-                  );
-                },
-              }}
-              className="break-words whitespace-pre-line"
-            >
-              {discussion.main_post.content}
-            </ReactMarkdown>
+            <DetailMarkdownRenderer content={discussion.main_post.content} />
           </div>
         </div>
 
@@ -380,49 +337,14 @@ export default function DiscussionDetailPage() {
                       <div className="mt-1 text-gray-900">
                         {comment.parent_post && (
                           <Link
-                            href={`/users/${comment.parent_post.user.hashid}`}
-                            className="text-blue-600 hover:underline"
+                            href={`#comment-${comment.parent_post.number}`}
+                            className="inline-block mb-2 text-sm text-muted-foreground"
                           >
+                            回复{" "}
                             @{comment.parent_post.user.username}{" "}
                           </Link>
                         )}
-                        <ReactMarkdown
-                          remarkPlugins={[remarkGfm]}
-                          rehypePlugins={[rehypeRaw]}
-                          components={{
-                            a: ({ href, children }) => (
-                              <UserLink href={href || ""}>{children}</UserLink>
-                            ),
-                            code: ({
-                              inline,
-                              className,
-                              children,
-                              ...props
-                            }: {
-                              inline?: boolean;
-                              className?: string;
-                              children?: React.ReactNode;
-                            } & React.HTMLAttributes<HTMLElement>) => {
-                              if (inline) {
-                                return (
-                                  <code className={className} {...props}>
-                                    {children}
-                                  </code>
-                                );
-                              }
-                              return (
-                                <pre>
-                                  <code className={className} {...props}>
-                                    {children}
-                                  </code>
-                                </pre>
-                              );
-                            },
-                          }}
-                          className="break-words whitespace-pre-line"
-                        >
-                          {comment.content}
-                        </ReactMarkdown>
+                        <DetailMarkdownRenderer content={comment.content} />
                       </div>
 
                       {/* 评论操作 */}

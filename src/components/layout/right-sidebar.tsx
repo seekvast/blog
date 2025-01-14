@@ -23,15 +23,6 @@ export function RightSidebar({ className, ...props }: RightSidebarProps) {
         </div>
         <div className="space-y-2 p-2">
           <Link href="#" className="block text-sm hover:text-primary">
-            发点色图
-          </Link>
-          <Link href="#" className="block text-sm hover:text-primary">
-            老司机的操作
-          </Link>
-          <Link href="#" className="block text-sm hover:text-primary">
-            XXX交流
-          </Link>
-          <Link href="#" className="block text-sm hover:text-primary">
             小阿喵思考lsajbsan爱上
           </Link>
           <Link href="#" className="block text-sm hover:text-primary">
@@ -82,30 +73,18 @@ export function RightSidebar({ className, ...props }: RightSidebarProps) {
           <Link href="#" className="block text-sm hover:text-primary">
             那扇局面已经控制不住了，
           </Link>
-          <Link href="#" className="block text-sm hover:text-primary">
-            T楼送碑名
-          </Link>
-          <Link href="#" className="block text-sm hover:text-primary">
-            煮了7個新米,新玩具
-          </Link>
-          <Link href="#" className="block text-sm hover:text-primary">
-            「郭家軍」被禁黑
-          </Link>
-          <Link href="#" className="block text-sm hover:text-primary">
-            敏感羅莉娘性感精油按摩
-          </Link>
         </div>
       </div>
 
       {/* 广告 */}
-      <div className="relative aspect-[3/4] w-full overflow-hidden">
+      {/* <div className="relative aspect-[3/4] w-full overflow-hidden">
         <Image
           src="/ad.jpg"
           alt="Advertisement"
           fill
           className="object-cover"
         />
-      </div>
+      </div> */}
     </aside>
   );
 }
