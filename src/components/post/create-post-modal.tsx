@@ -546,7 +546,7 @@ export default function CreatePostModal({
     // 处理图片粘贴
     const items = e.clipboardData?.items;
     if (items) {
-      for (let i = 0; i < items.length; i++) {
+      for (let i = 0; i <items.length; i++) {
         if (items[i].type.indexOf("image") !== -1) {
           e.preventDefault();
           const file = items[i].getAsFile();
@@ -733,7 +733,7 @@ export default function CreatePostModal({
     <Portal>
       <div
         className={cn(
-          "fixed inset-0 top-14 z-40 transform bg-background transition-transform duration-300 ease-in-out overflow-y-auto",
+          "fixed inset-0 top-14 z-40 transform bg-background transition-transform duration-500 ease-out overflow-y-auto",
           open ? "translate-y-0" : "translate-y-full"
         )}
         style={{ height: "calc(100% - 56px)" }}
