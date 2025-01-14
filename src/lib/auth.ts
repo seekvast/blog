@@ -40,7 +40,7 @@ export const authOptions: NextAuthOptions = {
             name: data.data.nickname,
             email: data.data.email,
             image: data.data.avatar_url,
-            accessToken: data.data.token,
+            token: data.data.token,
             ...data.data,
           };
         }
@@ -64,13 +64,12 @@ export const authOptions: NextAuthOptions = {
         token.is_email_confirmed = user.is_email_confirmed;
         token.joined_at = user.joined_at;
         token.last_seen_at = user.last_seen_at;
-        token.accessToken = user.token;
+        token.token = user.token;
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
-        session.accessToken = token.accessToken as string;
         session.user = {
           hashid: token.hashid as string,
           username: token.username as string,
@@ -84,6 +83,7 @@ export const authOptions: NextAuthOptions = {
           is_email_confirmed: token.is_email_confirmed as number,
           joined_at: token.joined_at as string,
           last_seen_at: token.last_seen_at as string,
+          token: token.token as string,
         };
       }
       return session;
@@ -106,19 +106,31 @@ export async function getSession() {
 export async function authenticatedFetch(url: string, options: RequestInit = {}) {
   const session = await getSession();
 
-  if (!session?.accessToken) {
-    throw new Error("No access token found");
+  if (!session?.user?.token) {
+    throw new Error("未找到认证令牌");
   }
 
   const headers = {
     ...options.headers,
-    Authorization: `Bearer ${session.accessToken}`,
+    'Authorization': `Bearer ${session.user.token}`,
+    'Content-Type': 'application/json',
   };
 
-  return fetch(url, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
+
+    if (!response.ok) {
+      throw new Error(`请求失败: ${response.status} ${response.statusText}`);
+    }
+
+    return response;
+  } catch (error) {
+    console.error('请求错误:', error);
+    throw error;
+  }
 }
 
 // 用于检查用户是否已认证的中间件
