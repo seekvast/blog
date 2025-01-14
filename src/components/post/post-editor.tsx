@@ -10,7 +10,7 @@ import { UserLink } from "@/components/markdown/user-link";
 import { EditorToolbar } from "./editor-toolbar";
 import { MentionPopover } from "./mention-popover";
 import { ReplyReference } from "./reply-reference";
-import { useContentProcessor } from "@/hooks/use-content-processor";
+import { useMentionProcessor } from "@/hooks/use-mention-processor";
 import { useMention } from "@/hooks/use-mention";
 
 interface User {
@@ -54,7 +54,7 @@ export function PostEditor({
   const processUrlDebounceRef = React.useRef<NodeJS.Timeout>();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  const { processContent } = useContentProcessor();
+  const { processMention } = useMentionProcessor();
   const {
     showUserList,
     users,
@@ -75,7 +75,7 @@ export function PostEditor({
     // 延迟处理以确保文本已被粘贴
     setTimeout(() => {
       if (textAreaRef.current) {
-        const processedText = processContent(textAreaRef.current.value, currentPosition);
+        const processedText = textAreaRef.current.value;
         if (processedText !== textAreaRef.current.value) {
           onChange(processedText);
         }
@@ -89,26 +89,18 @@ export function PostEditor({
     const currentPosition = e.target.selectionStart || 0;
     onChange(value);
 
-    // 清除之前的定时器
-    if (processUrlDebounceRef.current) {
-      clearTimeout(processUrlDebounceRef.current);
-    }
-
     // 处理@提及
     const isMentioning = handleMention(value, currentPosition);
     if (isMentioning) return;
 
-    // 处理特殊内容（链接、YouTube等）
-    if (
-      value[currentPosition - 1] === " " ||
-      value[currentPosition - 1] === "\n"
-    ) {
-      processUrlDebounceRef.current = setTimeout(() => {
-        const processedText = processContent(value, currentPosition);
-        if (processedText !== value) {
-          onChange(processedText);
-        }
-      }, 100);
+    // 获取当前输入的字符
+    const lastChar = value.charAt(currentPosition - 1);
+    // 只在输入空格时处理@提及
+    if (lastChar === ' ') {
+      const processedText = processMention(value, currentPosition);
+      if (processedText !== value) {
+        onChange(processedText);
+      }
     }
   };
 

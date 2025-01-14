@@ -55,7 +55,7 @@ export function DiscussionSidebar({ className }: DiscussionSidebarProps) {
       </div>
 
       {/* 广告区域 */}
-      <div className="relative mt-4 overflow-hidden rounded-lg">
+      {/* <div className="relative mt-4 overflow-hidden rounded-lg">
         <img
           src="/images/ad-placeholder.jpg"
           alt="Advertisement"
@@ -64,7 +64,7 @@ export function DiscussionSidebar({ className }: DiscussionSidebarProps) {
         <div className="absolute right-2 top-2 rounded bg-black/50 px-1.5 py-0.5 text-xs text-white">
           广告
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

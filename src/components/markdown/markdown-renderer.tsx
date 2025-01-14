@@ -14,6 +14,7 @@ interface MarkdownRendererProps {
 }
 
 export function MarkdownRenderer({ content, className, skipMedia = false }: MarkdownRendererProps) {
+  console.log('MarkdownRenderer content:', content);
   return (
     <ReactMarkdown
       skipHtml={false}
@@ -28,10 +29,10 @@ export function MarkdownRenderer({ content, className, skipMedia = false }: Mark
               a: ["href", "title", "target", "rel", "className", "class"],
             },
             protocols: {
-              href: ["http", "https", "mailto", "tel"],
+              href: ["http", "https", "mailto", "tel", "user", "/"],
             },
             tagNames: [
-              "div", "p", "a", "span",
+              "div", "p", "a", "span", "text",
               "h1", "h2", "h3", "h4", "h5", "h6"
             ],
           },
@@ -42,14 +43,44 @@ export function MarkdownRenderer({ content, className, skipMedia = false }: Mark
         img: skipMedia ? () => null : undefined,
         iframe: skipMedia ? () => null : undefined,
         a: ({ href, children }) => {
+          console.log('MarkdownRenderer <a>:', { href, children });
           if (skipMedia && (href?.includes("youtube.com") || href?.includes("youtu.be"))) {
             return null;
+          }
+          if (href?.startsWith("user://")) {
+            const hashid = href.replace("user://", "");
+            return <UserLink href={`/users/${hashid}`}>{children}</UserLink>;
           }
           if (href?.startsWith("/users/")) {
             const username = href.replace("/users/", "");
             return <UserLink href={`@${username}`}>{children}</UserLink>;
           }
+          if (href?.startsWith("@")) {
+            const username = href.replace("@", "");
+            return <UserLink href={`@${username}`}>{children}</UserLink>;
+          }
           return <UserLink href={href || ""}>{children}</UserLink>;
+        },
+        text: ({ children }) => {
+          console.log('MarkdownRenderer text:', children);
+          if (typeof children === 'string') {
+            const parts = children.split(/(@[a-zA-Z0-9_-]+)/g);
+            if (parts.length > 1) {
+              console.log('Found user mentions:', parts);
+              return (
+                <>
+                  {parts.map((part, i) => {
+                    if (part.startsWith('@')) {
+                      const username = part.slice(1);
+                      return <UserLink key={i} href={`@${username}`}>{part}</UserLink>;
+                    }
+                    return part;
+                  })}
+                </>
+              );
+            }
+          }
+          return <>{children}</>;
         },
         p: ({ children }) => {
           const hasContent = React.Children.toArray(children).some(

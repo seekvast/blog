@@ -141,7 +141,7 @@ export function useMention(onChange: (content: string) => void) {
 
       const newText =
         text.slice(0, lastAtPos) +
-        `[@${user.username}](user://${user.hashid})` +
+        `[@${user.username}](@${user.username})` +
         text.slice(cursorPosition.end);
 
       onChange(newText);
@@ -149,7 +149,7 @@ export function useMention(onChange: (content: string) => void) {
 
       // 设置光标位置
       const newCursorPos =
-        lastAtPos + `[@${user.username}](user://${user.hashid})`.length;
+        lastAtPos + `[@${user.username}](@${user.username})`.length;
       textarea.selectionStart = newCursorPos;
       textarea.selectionEnd = newCursorPos;
       textarea.focus();
