@@ -5,6 +5,7 @@ import "@/i18n";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { LoginModalProvider } from "@/components/providers/login-modal-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { I18nProvider } from "@/components/i18n-provider";
 
 export const metadata = {
   title: "Forum System",
@@ -31,11 +32,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
-            <LoginModalProvider>
-              {children}
-            </LoginModalProvider>
-          </AuthProvider>
+          <I18nProvider>
+            <AuthProvider>
+              <LoginModalProvider>
+                {children}
+              </LoginModalProvider>
+            </AuthProvider>
+          </I18nProvider>
         </ThemeProvider>
       </body>
     </html>

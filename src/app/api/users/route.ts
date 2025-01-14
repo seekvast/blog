@@ -3,10 +3,14 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { http } from "@/lib/request";
 
+// 标记该路由为动态路由
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.accessToken) {
+    if (!session?.user?.token) {
       return NextResponse.json(
         { code: 401, message: "Unauthorized" },
         { status: 401 }
@@ -17,10 +21,9 @@ export async function GET(request: NextRequest) {
     const keyword = searchParams.get("keyword") || "";
 
     const response = await http.get(`/users`, {
-      // @ts-ignore
       params: { keyword },
       headers: {
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${session.user.token}`,
       },
     });
 
@@ -28,10 +31,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Error searching users:", error);
     return NextResponse.json(
-      {
-        code: 500,
-        message: "Failed to search users",
-      },
+      { code: 500, message: "Internal Server Error" },
       { status: 500 }
     );
   }

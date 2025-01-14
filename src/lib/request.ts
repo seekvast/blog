@@ -3,6 +3,7 @@ import { getSession, signOut } from "next-auth/react";
 interface RequestOptions extends RequestInit {
   auth?: boolean;  // 是否需要认证
   raw?: boolean;   // 是否返回原始响应
+  params?: Record<string, any>; // 查询参数
 }
 
 interface ApiResponse<T = any> {
@@ -29,6 +30,7 @@ export async function request<T = any>(
   const {
     auth = true,  // 默认需要认证
     raw = false,  // 默认返回处理后的数据
+    params,
     ...init
   } = options;
 

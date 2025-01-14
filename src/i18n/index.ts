@@ -10,6 +10,16 @@ import en from './locales/en.json';
 
 // 检查是否在浏览器环境
 const isBrowser = typeof window !== 'undefined';
+const isDev = process.env.NODE_ENV === 'development';
+
+// 在生产环境禁用 i18next 警告
+if (!isDev) {
+  i18n.options = i18n.options || {};
+  i18n.options.debug = false;
+  i18n.options.saveMissing = false;
+  // 禁用控制台警告
+//   i18n.options.silent = true;
+}
 
 const resources = {
   'zh-Hans-CN': {
@@ -28,29 +38,42 @@ const i18nConfig = {
   resources,
   fallbackLng: 'zh-Hans-CN',
   lng: 'zh-Hans-CN',
-  debug: process.env.NODE_ENV === 'development',
+  debug: isDev,
   interpolation: {
     escapeValue: false,
   },
+  // 禁用缺失键警告
+  saveMissing: false,
 };
 
-// 初始化 i18next
-i18n.use(initReactI18next);
+// 客户端配置
+const clientConfig = {
+  ...i18nConfig,
+  detection: {
+    order: ['localStorage', 'cookie', 'navigator'],
+    lookupCookie: 'i18next',
+    lookupLocalStorage: 'i18nextLng',
+    caches: ['localStorage', 'cookie'],
+    cookieMinutes: 525600, // 一年
+    cookieDomain: typeof window !== 'undefined' ? window.location.hostname : undefined
+  },
+};
 
-// 仅在浏览器环境添加语言检测
+// 服务端配置
+const serverConfig = {
+  ...i18nConfig,
+  preload: ['zh-Hans-CN', 'zh-Hant-TW', 'en'], // 预加载所有语言
+  ns: ['translation'], // 命名空间
+};
+
+const instance = i18n.use(initReactI18next);
+
+// 仅在浏览器环境下使用 LanguageDetector
 if (isBrowser) {
-  i18n.use(LanguageDetector);
+  instance.use(LanguageDetector);
 }
 
-// 确保只初始化一次
-if (!i18n.isInitialized) {
-  i18n.init(isBrowser ? {
-    ...i18nConfig,
-    detection: {
-      order: ['querystring', 'cookie', 'localStorage', 'navigator'],
-      caches: ['cookie', 'localStorage'],
-    },
-  } : i18nConfig);
-}
+// 强制初始化，确保在所有环境下都正确初始化
+instance.init(isBrowser ? clientConfig : serverConfig);
 
-export default i18n;
+export default instance;
