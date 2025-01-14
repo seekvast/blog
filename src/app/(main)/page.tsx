@@ -169,7 +169,7 @@ export default function HomePage() {
                   <div className="flex items-center space-x-2">
                     <Link
                       href={`/discussions/${discussion.slug}`}
-                      className="text-sm font-medium text-foreground hover:text-primary"
+                      className="text-xl font-medium text-foreground hover:text-primary"
                     >
                       {discussion.title}
                     </Link>

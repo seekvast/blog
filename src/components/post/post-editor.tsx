@@ -66,6 +66,23 @@ export function PostEditor({
     closeMention,
   } = useMention(onChange);
 
+  // 处理粘贴事件
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const pastedText = e.clipboardData.getData("text");
+    const currentPosition = e.currentTarget.selectionStart || 0;
+    const textareaValue = e.currentTarget.value;
+
+    // 延迟处理以确保文本已被粘贴
+    setTimeout(() => {
+      if (textAreaRef.current) {
+        const processedText = processContent(textAreaRef.current.value, currentPosition);
+        if (processedText !== textAreaRef.current.value) {
+          onChange(processedText);
+        }
+      }
+    }, 0);
+  };
+
   // 处理输入
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -213,6 +230,7 @@ export function PostEditor({
           ref={textAreaRef}
           value={content}
           onChange={handleInput}
+          onPaste={handlePaste}
           className={cn(
             "w-full resize-none border-0 bg-transparent p-3 text-sm outline-none min-h-full",
             splitView && "flex-1"

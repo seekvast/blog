@@ -341,7 +341,7 @@ export default function DiscussionDetailPage() {
 
         {/* 贴文底部操作栏 */}
         <div className="mt-6 flex items-center justify-between border-b border-gray-200">
-          <div className="flex items-center p-4">
+          <div className="flex items-center py-4">
             <span>评论</span>
             <span className="w-2"></span>
             <span className="text-blue-600"> {discussion.comment_count}</span>
