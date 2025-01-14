@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { SessionProvider, useSession } from "next-auth/react";
+import type { Session } from "next-auth";
 import { User } from "@/types/user";
 
 interface AuthContextValue {
@@ -15,8 +16,13 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const loading = status === "loading";
   
-    //@ts-ignore
-  const user = session?.user as User | null;
+  const user = session ? {
+    hashid: session.user.id,
+    username: session.user.username,
+    email: session.user.email,
+    nickname: session.user.nickname || "",
+    avatar_url: session.user.avatar_url || "",
+  } as User : null;
 
   return (
     <AuthContext.Provider value={{ user, loading }}>
