@@ -23,7 +23,21 @@ export function EditorHeader({
   return (
     <header className={cn("sticky top-0 z-50 border-b bg-white", className)} {...props}>
       <div className="mx-auto flex h-14 max-w-[1440px] items-center justify-between px-6">
-        <Link href="/" className="text-xl font-bold">
+        <Link 
+          href="/" 
+          className="text-xl font-bold"
+          onClick={(e) => {
+            e.preventDefault();
+            if (onPublish) {
+              const confirmed = window.confirm("确定要离开吗？未保存的内容将会丢失。");
+              if (confirmed) {
+                window.location.href = "/";
+              }
+            } else {
+              window.location.href = "/";
+            }
+          }}
+        >
           Logo
         </Link>
 

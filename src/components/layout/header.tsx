@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { API_ROUTES } from "@/constants/api";
@@ -29,20 +30,39 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { http } from "@/lib/request";
+import { usePostEditorStore } from "@/store/post-editor";
 
 export function Header() {
   const { data: session } = useSession();
   const { toast } = useToast();
-  const [registerOpen, setRegisterOpen] = useState(false);
-  const [loginOpen, setLoginOpen] = useState(false);
+  const [registerOpen, setRegisterOpen] = React.useState(false);
+  const [loginOpen, setLoginOpen] = React.useState(false);
+  const { hasUnsavedContent, isOpen, onClose } = usePostEditorStore();
+
+  const handleLogoClick = React.useCallback(
+    (e: React.MouseEvent) => {
+      if (isOpen) {
+        e.preventDefault();
+        onClose?.(false);
+      }
+    },
+    [isOpen, onClose]
+  );
 
   const handleLogout = async () => {
     try {
       // 调用后端登出 API
       await http.get(API_ROUTES.AUTH.LOGOUT);
     } catch (error) {
-      console.error('Logout API failed:', error);
+      console.error("Logout API failed:", error);
       toast({
         variant: "destructive",
         title: "请求失败",
@@ -53,7 +73,7 @@ export function Header() {
       try {
         await signOut({ redirect: true, callbackUrl: "/" });
       } catch (signOutError) {
-        console.error('SignOut failed:', signOutError);
+        console.error("SignOut failed:", signOutError);
         // 如果 signOut 也失败，强制刷新页面
         window.location.href = "/";
       }
@@ -66,7 +86,11 @@ export function Header() {
         <div className="flex justify-between w-full items-center ">
           {/* Logo */}
           <div className="flex justify-between gap-4">
-            <Link href="/" className="flex items-center gap-2">
+            <Link
+              href="/"
+              className="flex items-center gap-2"
+              onClick={handleLogoClick}
+            >
               <img src="/logo-g.png" alt="Kater" className="h-8 w--full" />
               {/* <span className="text-lg font-bold text-primary">Kater</span> */}
             </Link>
@@ -115,7 +139,10 @@ export function Header() {
                       <span>夜间模式</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={handleLogout}
+                    >
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>登出</span>
                     </DropdownMenuItem>

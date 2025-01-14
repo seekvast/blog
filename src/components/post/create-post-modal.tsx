@@ -2,7 +2,6 @@ import * as React from "react";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/navigation";
 import { Portal } from "@radix-ui/react-portal";
-import * as Dialog from "@radix-ui/react-dialog";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +18,15 @@ import { PostEditor } from "./post-editor";
 import { Icon } from "@/components/icons";
 import { toast } from "@/components/ui/toast";
 import { BoardChild, BoardChildrenResponse } from "@/types/board";
+import { usePostEditorStore } from "@/store/post-editor";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogOverlay,
+} from "@/components/ui/dialog";
 
 interface PollData {
   options: string[];
@@ -58,6 +66,32 @@ export default function CreatePostModal({
 }) {
   const { t } = useTranslation();
   const router = useRouter();
+  const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
+  const [pendingAction, setPendingAction] = React.useState<(() => void) | null>(
+    null
+  );
+  const { hasUnsavedContent, setHasUnsavedContent, setIsOpen, setOnClose } =
+    usePostEditorStore();
+
+  React.useEffect(() => {
+    setIsOpen(open);
+    setOnClose((confirmed?: boolean) => {
+      if (hasUnsavedContent && !confirmed) {
+        setShowConfirmDialog(true);
+        setPendingAction(() => () => {
+          setShowConfirmDialog(false);
+          onOpenChange(false);
+        });
+      } else {
+        onOpenChange(false);
+      }
+    });
+    return () => {
+      setIsOpen(false);
+      setOnClose(null);
+    };
+  }, [open, hasUnsavedContent, onOpenChange, setIsOpen, setOnClose]);
+
   const [title, setTitle] = React.useState("");
   const [content, setContent] = React.useState("");
   const [selectedBoard, setSelectedBoard] = React.useState<number | undefined>(
@@ -136,6 +170,42 @@ export default function CreatePostModal({
       setBoardChildren([]);
     }
   }, [selectedBoard, loadBoardChildren]);
+
+  React.useEffect(() => {
+    const hasUnsaved =
+      title.trim() !== "" ||
+      content.trim() !== "" ||
+      attachments.length > 0 ||
+      pollData !== null ||
+      isPollEditing;
+    setHasUnsavedContent(hasUnsaved);
+    return () => {
+      setHasUnsavedContent(false);
+    };
+  }, [
+    title,
+    content,
+    attachments,
+    pollData,
+    isPollEditing,
+    setHasUnsavedContent,
+  ]);
+
+  React.useEffect(() => {
+    if (open) {
+      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        if (hasUnsavedContent) {
+          e.preventDefault();
+          e.returnValue = "";
+          return "";
+        }
+      };
+
+      window.addEventListener("beforeunload", handleBeforeUnload);
+      return () =>
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+    }
+  }, [open, hasUnsavedContent]);
 
   const handlePollConfirm = () => {
     const validOptions = pollOptions.filter((opt) => opt.trim());
@@ -766,6 +836,40 @@ export default function CreatePostModal({
           </div>
         </div>
       </div>
+
+      {/* 确认离开对话框 */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent className="bg-white">
+          <DialogHeader className="border-b border-destructive/10 pb-4">
+            <DialogTitle className="text-destructive flex items-center gap-2 text-lg font-semibold">
+              <Icon name="warning" className="h-5 w-5 text-destructive" />
+              <span>确认离开？</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-6">
+            <div className="flex flex-col gap-2">
+              <p className="text-base text-foreground">
+                你有未保存的内容，确定要离开吗？
+              </p>
+              <p className="text-sm font-medium text-destructive">
+                离开后未保存的内容将会丢失
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setShowConfirmDialog(false)}
+              className="border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
+            >
+              取消
+            </Button>
+            <Button variant="destructive" onClick={() => pendingAction?.()}>
+              确认离开
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Portal>
   );
 }

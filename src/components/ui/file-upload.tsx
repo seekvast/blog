@@ -3,6 +3,7 @@
 import * as React from "react"
 import { Plus } from "lucide-react"
 import Image from "next/image"
+import { toast } from "@/components/ui/toast";
 
 interface FileUploadProps extends React.InputHTMLAttributes<HTMLInputElement> {
   preview?: string
@@ -20,12 +21,20 @@ export function FileUpload({ preview, onFileSelect, ...props }: FileUploadProps)
     const file = e.target.files?.[0]
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        alert("文件大小不能超过2MB")
-        return
+        toast({
+          title: "文件过大",
+          description: "文件大小不能超过2MB",
+          variant: "destructive",
+        });
+        return;
       }
-      if (!["image/jpeg", "image/jpg", "image/png", "image/gif"].includes(file.type)) {
-        alert("只支持JPG、JPEG、GIF或PNG格式")
-        return
+      if (!["image/jpeg", "image/jpg", "image/gif", "image/png"].includes(file.type)) {
+        toast({
+          title: "格式不支持",
+          description: "只支持JPG、JPEG、GIF或PNG格式",
+          variant: "destructive",
+        });
+        return;
       }
       onFileSelect?.(file)
     }
