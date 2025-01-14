@@ -469,6 +469,9 @@ export default function CreatePostModal({
       if (response.code === 0) {
         console.log("发布成功");
         onOpenChange(false);
+        if (window.location.pathname !== "/") {
+          router.push("/");
+        }
         router.refresh();
       }
     } catch (error) {
