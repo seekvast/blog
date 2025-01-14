@@ -52,15 +52,39 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.accessToken = user.accessToken;
+        token.hashid = user.hashid;
+        token.username = user.username;
+        token.email = user.email;
+        token.nickname = user.nickname;
+        token.avatar_url = user.avatar_url;
+        token.cover = user.cover;
+        token.bio = user.bio;
+        token.gender = user.gender;
+        token.birthday = user.birthday;
+        token.is_email_confirmed = user.is_email_confirmed;
+        token.joined_at = user.joined_at;
+        token.last_seen_at = user.last_seen_at;
+        token.accessToken = user.token;
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id;
-        session.accessToken = token.accessToken;
+        session.accessToken = token.accessToken as string;
+        session.user = {
+          hashid: token.hashid as string,
+          username: token.username as string,
+          email: token.email as string,
+          nickname: token.nickname as string,
+          avatar_url: token.avatar_url as string,
+          cover: token.cover as string,
+          bio: token.bio as string,
+          gender: token.gender as number,
+          birthday: token.birthday as string,
+          is_email_confirmed: token.is_email_confirmed as number,
+          joined_at: token.joined_at as string,
+          last_seen_at: token.last_seen_at as string,
+        };
       }
       return session;
     },

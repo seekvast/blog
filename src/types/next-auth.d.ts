@@ -7,12 +7,10 @@ declare module "next-auth" {
   }
 
   interface User {
-    id: string;
+    id?: string;
+    hashid: string;
     username: string;
     email: string;
-    image?: string;
-    accessToken?: string;
-    token?: string;
     nickname?: string;
     avatar_url?: string;
     cover?: string;
@@ -22,12 +20,13 @@ declare module "next-auth" {
     is_email_confirmed?: number;
     joined_at?: string;
     last_seen_at?: string;
+    token?: string;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    id: string;
+    hashid: string;
     accessToken?: string;
     token?: string;
     nickname?: string;
