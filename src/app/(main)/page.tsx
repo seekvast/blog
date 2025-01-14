@@ -119,12 +119,6 @@ export default function HomePage() {
               >
                 标签
               </Button>
-              <Button
-                variant="ghost"
-                className="h-8 px-1 font-medium text-muted-foreground hover:bg-transparent hover:text-foreground"
-              >
-                标签
-              </Button>
             </div>
             <div className="flex items-center space-x-2">
               <Button
@@ -290,7 +284,7 @@ export default function HomePage() {
                         </div>
                       </div>
                     ) : (
-                      <div className="text-md text-muted-foreground whitespace-pre-line">
+                      <div className="text-md text-muted-foreground whitespace-pre-line line-clamp-3">
                         <ReactMarkdown
                           skipHtml={false}
                           remarkPlugins={[remarkGfm]}
