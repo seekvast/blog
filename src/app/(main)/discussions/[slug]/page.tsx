@@ -151,7 +151,9 @@ export default function DiscussionDetailPage() {
   const [comments, setComments] = React.useState<Comment[]>([]);
   const [commentContent, setCommentContent] = React.useState("");
   const [replyTo, setReplyTo] = React.useState<Comment | null>(null);
-  const [pendingReplyTo, setPendingReplyTo] = React.useState<Comment | null>(null);
+  const [pendingReplyTo, setPendingReplyTo] = React.useState<Comment | null>(
+    null
+  );
   const fetchedRef = React.useRef(false);
 
   React.useEffect(() => {
@@ -225,10 +227,12 @@ export default function DiscussionDetailPage() {
         slug: discussion?.slug,
         content: content.trim(),
         parent_id: replyTo?.id,
-        quote: replyTo ? {
-          username: replyTo.user.username,
-          content: replyTo.content
-        } : undefined
+        quote: replyTo
+          ? {
+              username: replyTo.user.username,
+              content: replyTo.content,
+            }
+          : undefined,
       });
 
       if (response.code === 0) {
@@ -257,13 +261,13 @@ export default function DiscussionDetailPage() {
   };
 
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-6 mb-8">
       {/* 主内容区 */}
       <div className="flex-1 mx-auto max-w-4xl">
         {/* 贴文头部信息 */}
-        <div className="">
+        <div className="border-b pb-4">
           <h1 className="text-xl font-medium">{discussion.title}</h1>
-          <div className="mt-2 flex items-center">
+          <div className="mt-2 flex justify-start items-center">
             <Avatar className="h-14 w-14 flex-shrink-0">
               <AvatarImage
                 src={discussion.user.avatar_url}
@@ -293,7 +297,7 @@ export default function DiscussionDetailPage() {
         </div>
 
         {/* 贴文内容 */}
-        <div className="px-2 text-muted-foreground">
+        <div className="pt-4 text-muted-foreground">
           <div className="prose max-w-none">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
@@ -351,7 +355,7 @@ export default function DiscussionDetailPage() {
           {comments.length > 0 ? (
             <div className="space-y-4">
               {comments.map((comment) => (
-                <div key={comment.id} className="pt-2">
+                <div key={comment.id} className="pt-2 pb-4 border-b">
                   <div className="flex items-start space-x-3 px-2">
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={comment.user.avatar_url} />
@@ -461,55 +465,53 @@ export default function DiscussionDetailPage() {
           )}
 
           {/* 评论编辑器 */}
-          {!authLoading && (user ? (
-            <div className="mt-6">
-              <PostEditor
-                content={commentContent}
-                onChange={setCommentContent}
-                className="rounded-lg border border-gray-200 bg-background"
-                replyTo={replyTo}
-                onSubmit={handleSubmitComment}
-                onImageUpload={async (file) => {
-                  const formData = new FormData();
-                  formData.append("image", file);
-                  formData.append("attachment_type", "comment_images");
+          {!authLoading &&
+            (user ? (
+              <div className="mt-6">
+                <PostEditor
+                  content={commentContent}
+                  onChange={setCommentContent}
+                  className="rounded-lg border border-gray-200 bg-background"
+                  replyTo={replyTo}
+                  onReplyToChange={(comment) => setReplyTo(comment ?? null)}
+                  onSubmit={handleSubmitComment}
+                  onImageUpload={async (file) => {
+                    const formData = new FormData();
+                    formData.append("image", file);
+                    formData.append("attachment_type", "comment_images");
 
-                  try {
-                    const response = await http.post(
-                      API_ROUTES.UPLOAD.IMAGE,
-                      formData
-                    );
-                  } catch (error) {
-                    console.error("Failed to upload image:", error);
-                  }
-                }}
-              />
-              <div className="mt-2 flex items-center justify-between">
-                <button
-                  className="text-sm text-gray-500 hover:text-gray-900"
-                  onClick={() => setReplyTo(null)}
-                >
-                  {replyTo && "取消回复"}
-                </button>
-                <Button
-                  size="sm"
-                  onClick={() => handleSubmitComment(commentContent)}
-                >
-                  发布评论
-                </Button>
+                    try {
+                      const response = await http.post(
+                        API_ROUTES.UPLOAD.IMAGE,
+                        formData
+                      );
+                    } catch (error) {
+                      console.error("Failed to upload image:", error);
+                    }
+                  }}
+                />
+                <div className="mt-2 flex items-center justify-between">
+                  <div></div>
+                  <Button
+                    size="sm"
+                    onClick={() => handleSubmitComment(commentContent)}
+                  >
+                    发布评论
+                  </Button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="mt-6 flex justify-center">
-              <Button
-                variant="outline"
-                className="w-full max-w-sm"
-                onClick={() => openLoginModal()}
-              >
-                登录后参与评论
-              </Button>
-            </div>
-          ))}
+            ) : (
+              <div className="mt-6 w-full flex justify-center p-8">
+                <span>请</span>
+                <span
+                  className="text-primary cursor-pointer"
+                  onClick={() => openLoginModal()}
+                >
+                  登录
+                </span>
+                <span>后发表评论</span>
+              </div>
+            ))}
         </div>
       </div>
 

@@ -40,8 +40,9 @@ export function ToolbarButton({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className="h-10 w-10 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-600 dark:text-gray-400 font-medium"
+      className="flex h-8 w-8 items-center justify-center rounded text-muted-foreground hover:bg-accent"
     >
       {icon || children}
     </button>

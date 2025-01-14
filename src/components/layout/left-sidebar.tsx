@@ -56,12 +56,6 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   const [createBoardOpen, setCreateBoardOpen] = useState(false);
   const [createPostOpen, setCreatePostOpen] = useState(false);
 
-  const handleLanguageChange = () => {
-    const currentLang = i18n.language;
-    const newLang = currentLang === "zh-TW" ? "en" : "zh-TW";
-    i18n.changeLanguage(newLang);
-  };
-
   const handlePublishClick = () => {
     // 在看板列表页面，显示创建看板的模态框
     if (pathname === "/boards") {
@@ -70,6 +64,17 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
     // 在其他页面，显示发布文章的模态框
     else {
       setCreatePostOpen(true);
+    }
+  };
+
+  const handleLanguageChange = () => {
+    const currentLang = i18n.language;
+    if (currentLang === 'zh-Hans-CN') {
+      i18n.changeLanguage('zh-Hant-TW');
+    } else if (currentLang === 'zh-Hant-TW') {
+      i18n.changeLanguage('en');
+    } else {
+      i18n.changeLanguage('zh-Hans-CN');
     }
   };
 
@@ -108,8 +113,8 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
         <div className="px-3 py-2">
           <Button className="w-full text-lg" onClick={handlePublishClick}>
             {pathname === "/boards"
-              ? t("common.createBoard")
-              : t("common.publish")}
+              ? t("common.createBoard", { defaultValue: "创建看板" })
+              : t("common.publish", { defaultValue: "发表文章" })}
           </Button>
           <CreateBoardModal
             open={createBoardOpen}
@@ -222,16 +227,16 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
         <div className="mt-auto space-y-4">
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
             <Link href="#" className="hover:text-foreground">
-              {t("common.termsOfService")}
+              {t("common.termsOfService", { defaultValue: "服务条款" })}
             </Link>
             <Link href="#" className="hover:text-foreground">
-              {t("common.privacyPolicy")}
+              {t("common.privacyPolicy", { defaultValue: "隐私政策" })}
             </Link>
             <Link href="#" className="hover:text-foreground">
-              {t("common.contactUs")}
+              {t("common.contactUs", { defaultValue: "联系我们" })}
             </Link>
             <Link href="#" className="hover:text-foreground">
-              {t("common.helpCenter")}
+              {t("common.helpCenter", { defaultValue: "帮助中心" })}
             </Link>
           </div>
           <div className="flex justify-between">
@@ -240,7 +245,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
               onClick={handleLanguageChange}
             >
               <Icon name="language" className="text-[20px] leading-none" />
-              <span className="truncate">{t("common.autoDetectLanguage")}</span>
+              <span className="truncate">{t("common.autoDetectLanguage", { defaultValue: "自动检测语言" })}</span>
             </div>
             <div>
               <ModeToggle />

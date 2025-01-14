@@ -28,9 +28,41 @@
     "contact": "联系我们",
     "help": "说明中心"
   },
+  "header": {
+    "home": "首页",
+    "boards": "看板",
+    "discussions": "讨论",
+    "notifications": "通知",
+    "messages": "消息",
+    "search": "搜索",
+    "login": "登录",
+    "register": "注册",
+    "logout": "退出",
+    "profile": "个人资料",
+    "settings": "设置",
+    "contact": "联系我们",
+    "help": "说明中心"
+  },
+  "common": {
+    "publish": "发表文章",
+    "cancel": "取消",
+    "create": "创建",
+    "join": "加入",
+    "joinNewBoard": "加入新看板",
+    "createDiscussion": "发表文章",
+    "post": "发表文章",
+    "recommendedBoards": "推荐看板",
+    "autoDetectLanguage": "自动检测语言",
+    "termsOfService": "服务条款",
+    "privacyPolicy": "隐私政策",
+    "contactUs": "联系我们",
+    "helpCenter": "帮助中心",
+    "language": "语言"
+  },
   "theme": {
     "light": "日间模式",
     "dark": "夜间模式",
-    "auto": "自动"
+    "auto": "自动",
+    "system": "跟随系统"
   }
 }

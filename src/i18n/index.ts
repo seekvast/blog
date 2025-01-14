@@ -4,24 +4,30 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-import zhTW from './locales/zh-TW.json';
+import zhHansCN from './locales/zh-Hans-CN.json';
+import zhHantTW from './locales/zh-Hant-TW.json';
 import en from './locales/en.json';
+
+const resources = {
+  'zh-Hans-CN': {
+    translation: zhHansCN,
+  },
+  'zh-Hant-TW': {
+    translation: zhHantTW,
+  },
+  en: {
+    translation: en,
+  },
+};
 
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    resources: {
-      'zh-TW': {
-        translation: zhTW,
-      },
-      en: {
-        translation: en,
-      },
-    },
-    fallbackLng: 'zh-TW',
-    lng: 'zh-TW', 
-    debug: true, 
+    resources,
+    fallbackLng: 'zh-Hans-CN',
+    lng: 'zh-Hans-CN',
+    debug: process.env.NODE_ENV === 'development',
     detection: {
       order: ['localStorage', 'navigator'],
       lookupLocalStorage: 'i18nextLng',
@@ -30,9 +36,6 @@ i18n
     interpolation: {
       escapeValue: false,
     },
-    react: {
-      useSuspense: false 
-    }
   });
 
 export default i18n;
