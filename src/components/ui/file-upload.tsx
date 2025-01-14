@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Plus } from "lucide-react"
 import Image from "next/image"
-import { toast } from "@/components/ui/toast";
+import { toast } from "@/components/ui/use-toast";
 
 interface FileUploadProps extends React.InputHTMLAttributes<HTMLInputElement> {
   preview?: string

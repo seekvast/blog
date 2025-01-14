@@ -15,6 +15,7 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const loading = status === "loading";
   
+    //@ts-ignore
   const user = session?.user as User | null;
 
   return (

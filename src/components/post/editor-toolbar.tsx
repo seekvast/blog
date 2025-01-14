@@ -36,7 +36,7 @@ export function EditorToolbar({
       await onImageUpload(file);
     }
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -87,6 +87,7 @@ export function EditorToolbar({
         <div className="mx-1 h-8 w-px bg-gray-200" />
         <ToolbarButton
           onClick={handleImageUpload}
+          //@ts-ignore
           disabled={imageUploading}
           icon={<Icon name="image" className="text-2xl" />}
         />

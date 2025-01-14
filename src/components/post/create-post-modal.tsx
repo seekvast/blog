@@ -16,7 +16,7 @@ import { API_ROUTES } from "@/constants/api";
 import { useBoardChildrenStore } from "@/store/board-children";
 import { PostEditor } from "./post-editor";
 import { Icon } from "@/components/icons";
-import { toast } from "@/components/ui/toast";
+import { toast } from "@/components/ui/use-toast";
 import { BoardChild, BoardChildrenResponse } from "@/types/board";
 import { usePostEditorStore } from "@/store/post-editor";
 import {
@@ -545,7 +545,10 @@ export default function CreatePostModal({
       }
     } catch (error) {
       console.error("Error uploading image:", error);
-      toast.error("图片上传失败");
+      toast({
+        variant: "destructive",
+        title: "图片上传失败"
+      });
     } finally {
       setImageUploading(false);
     }

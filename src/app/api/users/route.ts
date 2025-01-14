@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
     const keyword = searchParams.get("keyword") || "";
 
     const response = await http.get(`/users`, {
+      // @ts-ignore
       params: { keyword },
       headers: {
         Authorization: `Bearer ${session.accessToken}`,

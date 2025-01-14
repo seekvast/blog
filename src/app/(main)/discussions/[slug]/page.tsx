@@ -9,7 +9,12 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/icons";
 import { DetailMarkdownRenderer } from "@/components/markdown/detail-markdown-renderer";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { http } from "@/lib/request";
 import { DiscussionSidebar } from "@/components/discussion/discussion-sidebar";
@@ -337,11 +342,10 @@ export default function DiscussionDetailPage() {
                       <div className="mt-1 text-gray-900">
                         {comment.parent_post && (
                           <Link
-                            href={`#comment-${comment.parent_post.number}`}
+                            href={`#comment-${comment.parent_post.user.hashid}`}
                             className="inline-block mb-2 text-sm text-muted-foreground"
                           >
-                            回复{" "}
-                            @{comment.parent_post.user.username}{" "}
+                            回复 @{comment.parent_post.user.username}{" "}
                           </Link>
                         )}
                         <DetailMarkdownRenderer content={comment.content} />
@@ -392,7 +396,9 @@ export default function DiscussionDetailPage() {
                   content={commentContent}
                   onChange={setCommentContent}
                   className="rounded-lg border border-gray-200 bg-background"
+                  // @ts-ignore
                   replyTo={replyTo}
+                  // @ts-ignore
                   onReplyToChange={(comment) => setReplyTo(comment ?? null)}
                   onSubmit={handleSubmitComment}
                   onImageUpload={async (file) => {
