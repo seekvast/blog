@@ -182,13 +182,13 @@ export function PostEditor({
         onSplitViewToggle={() => setSplitView(!splitView)}
       />
 
-      <div className={cn("relative flex-1 flex", splitView && "divide-x")}>
+      <div className={cn("relative flex-1 flex min-h-[200px]", splitView && "divide-x")}>
         <textarea
           ref={textAreaRef}
           value={content}
           onChange={handleInput}
           className={cn(
-            "w-full resize-none border-0 bg-transparent p-3 text-sm outline-none",
+            "w-full resize-none border-0 bg-transparent p-3 text-sm outline-none min-h-full",
             splitView && "flex-1"
           )}
           placeholder="写点什么..."
@@ -197,7 +197,7 @@ export function PostEditor({
         {(previewMode || splitView) && (
           <div
             className={cn(
-              "prose prose-sm max-w-none p-3 dark:prose-invert whitespace-pre-line",
+              "prose prose-sm max-w-none p-3 dark:prose-invert whitespace-pre-line min-h-full",
               splitView ? "flex-1" : "absolute inset-0 bg-background"
             )}
           >

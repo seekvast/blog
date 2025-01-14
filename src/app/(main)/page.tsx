@@ -6,7 +6,14 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LayoutGrid, ChevronDown, MessageSquare, Heart, List, ThumbsUp } from "lucide-react";
+import {
+  LayoutGrid,
+  ChevronDown,
+  MessageSquare,
+  Heart,
+  List,
+  ThumbsUp,
+} from "lucide-react";
 import type { Discussion } from "@/types/discussion";
 import { http } from "@/lib/request";
 import { formatDistanceToNow } from "date-fns";
@@ -24,7 +31,9 @@ export default function HomePage() {
   const [loading, setLoading] = React.useState(true);
   const [page, setPage] = React.useState(1);
   const [hasMore, setHasMore] = React.useState(true);
-  const [displayMode, setDisplayMode] = React.useState<'image-text' | 'text-only'>('image-text');
+  const [displayMode, setDisplayMode] = React.useState<
+    "image-text" | "text-only"
+  >("image-text");
   const loadingRef = React.useRef(false);
   const observerRef = React.useRef<IntersectionObserver>();
   const lastItemRef = React.useRef<HTMLElement>(null);
@@ -51,7 +60,9 @@ export default function HomePage() {
   }, [page]);
 
   const toggleDisplayMode = () => {
-    setDisplayMode(prev => prev === 'image-text' ? 'text-only' : 'image-text');
+    setDisplayMode((prev) =>
+      prev === "image-text" ? "text-only" : "image-text"
+    );
   };
 
   React.useEffect(() => {
@@ -130,7 +141,7 @@ export default function HomePage() {
                 className="h-8 text-muted-foreground hover:bg-transparent hover:text-foreground"
                 onClick={toggleDisplayMode}
               >
-                {displayMode === 'image-text' ? (
+                {displayMode === "image-text" ? (
                   <LayoutGrid className="h-4 w-4" />
                 ) : (
                   <List className="h-4 w-4" />
@@ -153,7 +164,10 @@ export default function HomePage() {
               <div className="flex space-x-3">
                 {/* 作者头像 */}
                 <Avatar className="h-12 w-12 flex-shrink-0">
-                  <AvatarImage src={discussion.user.avatar_url} alt={discussion.user.username} />
+                  <AvatarImage
+                    src={discussion.user.avatar_url}
+                    alt={discussion.user.username}
+                  />
                   <AvatarFallback>{discussion.user.username[0]}</AvatarFallback>
                 </Avatar>
 
@@ -177,14 +191,17 @@ export default function HomePage() {
                   </div>
 
                   <div className="mt-1">
-                    {displayMode === 'image-text' ? (
+                    {displayMode === "image-text" ? (
                       <div className="flex gap-3 items-start">
                         {(() => {
                           // 使用更精确的正则表达式匹配图片URL
                           const regex = /!\[(?:.*?)\]\((https?:\/\/[^)]+)\)/;
-                          const matches = discussion.main_post.content.match(regex);
-                          const imgUrl = matches ? matches[1].split(' ')[0] : null; // 处理可能带有标题的URL
-                          
+                          const matches =
+                            discussion.main_post.content.match(regex);
+                          const imgUrl = matches
+                            ? matches[1].split(" ")[0]
+                            : null; // 处理可能带有标题的URL
+
                           return imgUrl ? (
                             <div className="flex-shrink-0">
                               <Image
@@ -197,7 +214,7 @@ export default function HomePage() {
                             </div>
                           ) : null;
                         })()}
-                        <div className="flex-1 text-sm text-muted-foreground line-clamp-3">
+                        <div className="flex-1 text-sm text-muted-foreground line-clamp-3 whitespace-pre-line">
                           <ReactMarkdown
                             skipHtml={false}
                             remarkPlugins={[remarkGfm]}
@@ -241,17 +258,30 @@ export default function HomePage() {
                               iframe: () => null,
                               a: ({ href, children }) => {
                                 // 如果是 YouTube 链接，返回 null
-                                if (href?.includes('youtube.com') || href?.includes('youtu.be')) {
+                                if (
+                                  href?.includes("youtube.com") ||
+                                  href?.includes("youtu.be")
+                                ) {
                                   return null;
                                 }
-                                return <UserLink href={href || ""}>{children}</UserLink>;
+                                return (
+                                  <UserLink href={href || ""}>
+                                    {children}
+                                  </UserLink>
+                                );
                               },
                               p: ({ children }) => {
                                 // 如果段落只包含被跳过的元素（图片或 YouTube），则不渲染该段落
-                                const hasContent = React.Children.toArray(children).some(
-                                  child => typeof child === 'string' && child.trim() !== ''
+                                const hasContent = React.Children.toArray(
+                                  children
+                                ).some(
+                                  (child) =>
+                                    typeof child === "string" &&
+                                    child.trim() !== ""
                                 );
-                                return hasContent ? <p className="!m-0">{children}</p> : null;
+                                return hasContent ? (
+                                  <p className="!m-0">{children}</p>
+                                ) : null;
                               },
                             }}
                           >
@@ -260,7 +290,7 @@ export default function HomePage() {
                         </div>
                       </div>
                     ) : (
-                      <div className="text-md text-muted-foreground">
+                      <div className="text-md text-muted-foreground whitespace-pre-line">
                         <ReactMarkdown
                           skipHtml={false}
                           remarkPlugins={[remarkGfm]}
@@ -304,17 +334,30 @@ export default function HomePage() {
                             iframe: () => null,
                             a: ({ href, children }) => {
                               // 如果是 YouTube 链接，返回 null
-                              if (href?.includes('youtube.com') || href?.includes('youtu.be')) {
+                              if (
+                                href?.includes("youtube.com") ||
+                                href?.includes("youtu.be")
+                              ) {
                                 return null;
                               }
-                              return <UserLink href={href || ""}>{children}</UserLink>;
+                              return (
+                                <UserLink href={href || ""}>
+                                  {children}
+                                </UserLink>
+                              );
                             },
                             p: ({ children }) => {
                               // 如果段落只包含被跳过的元素（图片或 YouTube），则不渲染该段落
-                              const hasContent = React.Children.toArray(children).some(
-                                child => typeof child === 'string' && child.trim() !== ''
+                              const hasContent = React.Children.toArray(
+                                children
+                              ).some(
+                                (child) =>
+                                  typeof child === "string" &&
+                                  child.trim() !== ""
                               );
-                              return hasContent ? <p className="!m-0">{children}</p> : null;
+                              return hasContent ? (
+                                <p className="!m-0">{children}</p>
+                              ) : null;
                             },
                           }}
                         >
