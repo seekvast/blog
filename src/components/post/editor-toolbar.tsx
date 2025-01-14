@@ -86,20 +86,10 @@ export function EditorToolbar({
           icon={<Icon name="code" className="text-2xl" />}
         />
         <div className="ml-auto flex items-center gap-0.5">
-          {/* <button
-            type="button"
+          <ToolbarButton
             onClick={onSplitViewToggle}
-            className={cn(
-              "rounded p-1.5 hover:bg-accent",
-              splitView && "bg-accent"
-            )}
-          > */}
-          <Icon
-            onClick={onSplitViewToggle}
-            name="splitscreen"
-            className="text-2xl cursor-pointer"
+            icon={<Icon name="splitscreen" className="text-2xl" />}
           />
-          {/* </button> */}
           {/* <button
             type="button"
             onClick={onPreviewToggle}

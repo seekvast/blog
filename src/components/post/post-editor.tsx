@@ -159,7 +159,7 @@ export function PostEditor({
   };
 
   return (
-    <div className={cn("rounded-lg border bg-background", className)}>
+    <div className={cn("rounded-lg border bg-background flex flex-col", className)}>
       {replyTo && (
         <ReplyReference
           comment={replyTo}
@@ -180,13 +180,13 @@ export function PostEditor({
         onSplitViewToggle={() => setSplitView(!splitView)}
       />
 
-      <div className={cn("relative", splitView && "flex")}>
+      <div className={cn("relative flex-1 flex", splitView && "divide-x")}>
         <textarea
           ref={textAreaRef}
           value={content}
           onChange={handleInput}
           className={cn(
-            "min-h-[200px] w-full resize-none border-0 bg-transparent p-3 text-sm outline-none",
+            "w-full resize-none border-0 bg-transparent p-3 text-sm outline-none",
             splitView && "flex-1"
           )}
           placeholder="写点什么..."
@@ -195,7 +195,7 @@ export function PostEditor({
         {(previewMode || splitView) && (
           <div
             className={cn(
-              "prose prose-sm max-w-none border-l p-3 dark:prose-invert",
+              "prose prose-sm max-w-none p-3 dark:prose-invert",
               splitView ? "flex-1" : "absolute inset-0 bg-background"
             )}
           >
