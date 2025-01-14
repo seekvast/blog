@@ -694,7 +694,6 @@ export default function CreatePostModal({
                 }}
                 disabled={!!pollData || isPollEditing}
               >
-                <Icon name="poll" className="mr-1 text-base" />
                 投票
               </Button>
               <Button
@@ -746,7 +745,7 @@ export default function CreatePostModal({
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full text-xl p-2 rounded-lg border"
+                className="w-full text-xl p-2 rounded-lg border border-input bg-background px-3 py-2 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-primary"
                 placeholder="输入标题..."
               />
               <div className="mt-4">
