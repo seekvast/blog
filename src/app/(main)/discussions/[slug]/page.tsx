@@ -307,13 +307,11 @@ export default function DiscussionDetailPage() {
                   <UserLink href={href || ""}>{children}</UserLink>
                 ),
                 code: ({
-                  node,
                   inline,
                   className,
                   children,
                   ...props
                 }: {
-                  node?: any;
                   inline?: boolean;
                   className?: string;
                   children?: React.ReactNode;
@@ -334,6 +332,7 @@ export default function DiscussionDetailPage() {
                   );
                 },
               }}
+              className="break-words whitespace-pre-line"
             >
               {discussion.main_post.content}
             </ReactMarkdown>
@@ -395,13 +394,11 @@ export default function DiscussionDetailPage() {
                               <UserLink href={href || ""}>{children}</UserLink>
                             ),
                             code: ({
-                              node,
                               inline,
                               className,
                               children,
                               ...props
                             }: {
-                              node?: any;
                               inline?: boolean;
                               className?: string;
                               children?: React.ReactNode;
@@ -422,6 +419,7 @@ export default function DiscussionDetailPage() {
                               );
                             },
                           }}
+                          className="break-words whitespace-pre-line"
                         >
                           {comment.content}
                         </ReactMarkdown>

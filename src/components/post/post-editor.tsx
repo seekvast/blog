@@ -159,7 +159,9 @@ export function PostEditor({
   };
 
   return (
-    <div className={cn("rounded-lg border bg-background flex flex-col", className)}>
+    <div
+      className={cn("rounded-lg border bg-background flex flex-col", className)}
+    >
       {replyTo && (
         <ReplyReference
           comment={replyTo}
@@ -195,7 +197,7 @@ export function PostEditor({
         {(previewMode || splitView) && (
           <div
             className={cn(
-              "prose prose-sm max-w-none p-3 dark:prose-invert",
+              "prose prose-sm max-w-none p-3 dark:prose-invert whitespace-pre-line",
               splitView ? "flex-1" : "absolute inset-0 bg-background"
             )}
           >
@@ -217,6 +219,31 @@ export function PostEditor({
                   }
                   return (
                     <a {...props} target="_blank" rel="noopener noreferrer" />
+                  );
+                },
+                code: ({
+                  inline,
+                  className,
+                  children,
+                  ...props
+                }: {
+                  inline?: boolean;
+                  className?: string;
+                  children?: React.ReactNode;
+                } & React.HTMLAttributes<HTMLElement>) => {
+                  if (inline) {
+                    return (
+                      <code className={className} {...props}>
+                        {children}
+                      </code>
+                    );
+                  }
+                  return (
+                    <pre>
+                      <code className={className} {...props}>
+                        {children}
+                      </code>
+                    </pre>
                   );
                 },
               }}
