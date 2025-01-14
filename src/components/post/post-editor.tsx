@@ -52,6 +52,7 @@ export function PostEditor({
 }: PostEditorProps) {
   const [splitView, setSplitView] = React.useState(false);
   const processUrlDebounceRef = React.useRef<NodeJS.Timeout>();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const { processContent } = useContentProcessor();
   const {
@@ -89,6 +90,16 @@ export function PostEditor({
           onChange(processedText);
         }
       }, 100);
+    }
+  };
+
+  // 处理文件选择
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onImageUpload) {
+      onImageUpload(file);
+      // 清空文件选择器，这样同一个文件可以再次选择
+      e.target.value = '';
     }
   };
 
@@ -133,7 +144,7 @@ export function PostEditor({
         break;
       case "image":
         if (onImageUpload) {
-          onImageUpload(new File([], ""));
+          fileInputRef.current?.click();
           return;
         }
         newText = `![${selectedText || "图片描述"}](图片地址)`;
@@ -159,15 +170,28 @@ export function PostEditor({
   };
 
   return (
-    <div
-      className={cn("rounded-lg border bg-background flex flex-col", className)}
-    >
+    <div className={cn("rounded-lg border bg-background flex flex-col relative", className)}>
+      {imageUploading && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-2">
+            <Icon name="refresh" className="text-2xl text-primary animate-spin" />
+            <span className="text-sm text-gray-500">正在上传图片...</span>
+          </div>
+        </div>
+      )}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
       {replyTo && (
         <ReplyReference
           comment={replyTo}
           onClose={() => {
             if (onReplyToChange) {
-              onReplyToChange(undefined);
+              onReplyToChange(null);
             }
           }}
         />
@@ -208,14 +232,10 @@ export function PostEditor({
                 a: ({ node, ...props }) => {
                   const href = props.href || "";
                   if (href.startsWith("user://")) {
-                    const user = {
-                      hashid: href.replace("user://", ""),
-                      username:
-                        props.children[0]?.toString().replace("@", "") || "",
-                      nickname: "",
-                      avatar_url: "",
-                    };
-                    return <UserLink user={user} />;
+                    const username = Array.isArray(props.children) && props.children[0]
+                      ? props.children[0].toString().replace("@", "")
+                      : "";
+                    return <UserLink href={`/users/${href.replace("user://", "")}`}>{`@${username}`}</UserLink>;
                   }
                   return (
                     <a {...props} target="_blank" rel="noopener noreferrer" />

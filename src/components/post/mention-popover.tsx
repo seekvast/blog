@@ -30,10 +30,10 @@ export function MentionPopover({
   return (
     <Portal>
       <div
-        className="fixed z-50 w-64 max-h-48 overflow-y-auto rounded-lg border bg-popover p-1 shadow-md"
+        className="fixed z-[9999] w-64 max-h-48 overflow-y-auto rounded-lg border bg-background p-1 shadow-md"
         style={{
-          top: position.top + window.scrollY,
-          left: position.left,
+          top: `${position.top}px`,
+          left: `${position.left}px`,
         }}
       >
         {users.length > 0 ? (

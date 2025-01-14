@@ -10,7 +10,7 @@ export function UserLink({ href, children }: UserLinkProps) {
   // 处理空链接
   if (!href) return <>{children}</>;
 
-  // 检查是否是用户链接（支持两种格式）
+  // 棄查是否是用户链接（支持两种格式）
   if (href.startsWith("/users/") || href.startsWith("@")) {
     const path = href.startsWith("@") ? `/users/${href.slice(1)}` : href;
 
@@ -30,14 +30,9 @@ export function UserLink({ href, children }: UserLinkProps) {
     );
   }
 
-  // 对于外部链接，返回普通链接
+  // 外部链接
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-600 hover:underline"
-    >
+    <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
       {children}
     </a>
   );

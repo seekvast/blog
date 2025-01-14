@@ -137,7 +137,8 @@ export function useMention(onChange: (content: string) => void) {
       setShowUserList(false);
 
       // 设置光标位置
-      const newCursorPos = lastAtPos + `[@${user.username}](user://${user.hashid})`.length;
+      const newCursorPos =
+        lastAtPos + `[@${user.username}](user://${user.hashid})`.length;
       textarea.selectionStart = newCursorPos;
       textarea.selectionEnd = newCursorPos;
       textarea.focus();

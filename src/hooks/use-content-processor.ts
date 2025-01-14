@@ -23,10 +23,15 @@ export function useContentProcessor() {
         }
 
         // 处理图片链接
+        const markdownImageMatch = line.match(/!\[.*?\]\(.*?\)/);
+        if (markdownImageMatch) {
+          return line; // 如果已经是 markdown 图片格式，直接返回
+        }
+
         const imageMatch = line.match(
           /https?:\/\/[^\s<]+\.(?:jpg|jpeg|png|gif)(?:\?[^\s<]+)?/i
         );
-        if (imageMatch) {
+        if (imageMatch && !line.includes("](")) {
           return `![](${imageMatch[0]})`;
         }
 

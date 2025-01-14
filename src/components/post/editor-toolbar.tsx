@@ -7,7 +7,7 @@ import { ToolbarButton } from "./create-post-modal";
 
 interface EditorToolbarProps {
   onAction: (action: string) => void;
-  onImageUpload?: () => void;
+  onImageUpload?: (file: File) => Promise<void>;
   imageUploading?: boolean;
   onPreviewToggle: () => void;
   previewMode: boolean;
@@ -24,19 +24,31 @@ export function EditorToolbar({
   splitView,
   onSplitViewToggle,
 }: EditorToolbarProps) {
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onImageUpload) {
+      await onImageUpload(file);
+    }
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div className="relative">
-      {imageUploading && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-2">
-            <Icon
-              name="refresh"
-              className="text-2xl text-primary animate-spin"
-            />
-            <span className="text-sm text-gray-500">正在上传图片...</span>
-          </div>
-        </div>
-      )}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept="image/*"
+        className="hidden"
+      />
       <div className="flex items-center gap-0.5 border-b bg-gray-50/50 p-2">
         <ToolbarButton
           onClick={() => onAction("h1")}
@@ -74,7 +86,8 @@ export function EditorToolbar({
         />
         <div className="mx-1 h-8 w-px bg-gray-200" />
         <ToolbarButton
-          onClick={() => onAction("image")}
+          onClick={handleImageUpload}
+          disabled={imageUploading}
           icon={<Icon name="image" className="text-2xl" />}
         />
         <ToolbarButton

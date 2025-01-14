@@ -147,7 +147,7 @@ export default function HomePage() {
       </div>
 
       {/* 帖子列表 */}
-      <div className="mx-auto">
+      <div className="">
         <div className="divide-y">
           {discussions.map((discussion, index) => (
             <article
