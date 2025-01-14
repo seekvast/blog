@@ -34,23 +34,23 @@ const i18nConfig = {
   },
 };
 
+// 初始化 i18next
+i18n.use(initReactI18next);
+
 // 仅在浏览器环境添加语言检测
 if (isBrowser) {
-  i18n
-    .use(LanguageDetector)
-    .use(initReactI18next)
-    .init({
-      ...i18nConfig,
-      detection: {
-        order: ['querystring', 'cookie', 'localStorage', 'navigator'],
-        caches: ['cookie', 'localStorage'],
-      },
-    });
-} else {
-  // 服务器端使用简化配置
-  i18n
-    .use(initReactI18next)
-    .init(i18nConfig);
+  i18n.use(LanguageDetector);
+}
+
+// 确保只初始化一次
+if (!i18n.isInitialized) {
+  i18n.init(isBrowser ? {
+    ...i18nConfig,
+    detection: {
+      order: ['querystring', 'cookie', 'localStorage', 'navigator'],
+      caches: ['cookie', 'localStorage'],
+    },
+  } : i18nConfig);
 }
 
 export default i18n;
