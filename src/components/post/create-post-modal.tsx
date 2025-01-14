@@ -115,7 +115,6 @@ export default function CreatePostModal({
   const [pollStartTime, setPollStartTime] = React.useState("");
   const [pollEndTime, setPollEndTime] = React.useState("");
   const [pollData, setPollData] = React.useState<PollData | null>(null);
-  const [showChildBoards, setShowChildBoards] = React.useState(false);
   const [imageUploading, setImageUploading] = React.useState(false);
 
   const { getBoardChildren, setBoardChildren: setStoreBoardChildren } =
@@ -140,16 +139,23 @@ export default function CreatePostModal({
         // 如果 store 中没有，则请求 API
         const response = await http.get<{
           code: number;
-          data: BoardChildrenResponse;
+          data: {
+            items: BoardChild[];
+            total: number;
+            per_page: number;
+            current_page: number;
+            last_page: number;
+          };
           message: string;
-        }>(`/api/board/children?board_id=${boardId}`);
+        }>(`${API_ROUTES.BOARDS.CHILDREN}?board_id=${boardId}`);
 
         if (response.code === 0) {
-          setBoardChildren(response.data.data.items);
+          const children = response.data.items;
+          setBoardChildren(children);
           // 缓存到 store 中
-          setStoreBoardChildren(boardId, response.data.data.items);
+          setStoreBoardChildren(boardId, children);
           // Set default selected child board if exists
-          const defaultChild = response.data.data.items.find(
+          const defaultChild = children.find(
             (child) => child.is_default === 1
           );
           setSelectedChildBoard(defaultChild?.id ?? undefined);
@@ -689,7 +695,6 @@ export default function CreatePostModal({
     setPollStartTime("");
     setPollEndTime("");
     setIsPollEditing(false);
-    setShowChildBoards(false);
     setImageUploading(false);
   }, []);
 
@@ -800,10 +805,10 @@ export default function CreatePostModal({
                     variant={
                       selectedChildBoard === child.id ? "default" : "secondary"
                     }
-                    className="cursor-pointer hover:bg-secondary/80"
+                    className="cursor-pointer"
                     onClick={() => setSelectedChildBoard(child.id)}
                   >
-                    # {child.name}
+                    {child.name}
                   </Badge>
                 ))
               ) : (
