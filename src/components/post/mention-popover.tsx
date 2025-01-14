@@ -4,6 +4,7 @@ import * as React from "react";
 import { Portal } from "@/components/ui/portal";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { useClickOutside } from "@/hooks/use-click-outside";
 
 interface User {
   hashid: string;
@@ -17,6 +18,8 @@ interface MentionPopoverProps {
   position: { top: number; left: number };
   users: User[];
   onSelect: (user: User) => void;
+  isSearching?: boolean;
+  onClose: () => void;
 }
 
 export function MentionPopover({
@@ -24,19 +27,31 @@ export function MentionPopover({
   position,
   users,
   onSelect,
+  isSearching = false,
+  onClose,
 }: MentionPopoverProps) {
+  const ref = React.useRef<HTMLDivElement>(null);
+
+  // 处理点击外部关闭
+  useClickOutside(ref, onClose);
+
   if (!show) return null;
 
   return (
     <Portal>
       <div
+        ref={ref}
         className="fixed z-[9999] w-64 max-h-48 overflow-y-auto rounded-lg border bg-background p-1 shadow-md"
         style={{
           top: `${position.top}px`,
           left: `${position.left}px`,
         }}
       >
-        {users.length > 0 ? (
+        {isSearching ? (
+          <div className="px-2 py-6 text-center text-sm text-muted-foreground">
+            正在搜索...
+          </div>
+        ) : users.length > 0 ? (
           <div className="space-y-1">
             {users.map((user) => (
               <div
@@ -59,7 +74,7 @@ export function MentionPopover({
           </div>
         ) : (
           <div className="px-2 py-6 text-center text-sm text-muted-foreground">
-            未找到用户
+            未找到相关用户
           </div>
         )}
       </div>

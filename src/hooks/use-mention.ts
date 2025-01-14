@@ -14,6 +14,7 @@ export function useMention(onChange: (content: string) => void) {
   const [showUserList, setShowUserList] = React.useState(false);
   const [userSearchQuery, setUserSearchQuery] = React.useState("");
   const [users, setUsers] = React.useState<User[]>([]);
+  const [isSearching, setIsSearching] = React.useState(false);
   const [cursorPosition, setCursorPosition] = React.useState({
     start: 0,
     end: 0,
@@ -27,18 +28,24 @@ export function useMention(onChange: (content: string) => void) {
 
   const searchUsers = React.useCallback(async (query: string) => {
     try {
+      setIsSearching(true);
       const response = await http.get(
         `/api/users?keyword=${encodeURIComponent(query)}`
       );
       if (response.code === 0) {
         setUsers(response.data);
+        setShowUserList(true);
       } else {
         console.error("Error searching users:", response.message);
         setUsers([]);
+        setShowUserList(true);
       }
     } catch (error) {
       console.error("Error searching users:", error);
       setUsers([]);
+      setShowUserList(true);
+    } finally {
+      setIsSearching(false);
     }
   }, []);
 
@@ -100,14 +107,18 @@ export function useMention(onChange: (content: string) => void) {
       if (lastAtPos !== -1) {
         const textAfterAt = text.slice(lastAtPos + 1, currentPosition);
         if (!textAfterAt.includes(" ") && !textAfterAt.includes("\n")) {
-          setShowUserList(true);
           setCursorPosition({ start: currentPosition, end: currentPosition });
           setUserSearchQuery(textAfterAt);
           calculateMentionPosition(lastAtPos);
+          
+          // Only search if there are characters after @
           if (textAfterAt) {
+            setShowUserList(false); // Hide list while searching
             userSearchDebounceRef.current = setTimeout(() => {
               searchUsers(textAfterAt);
             }, 300);
+          } else {
+            setShowUserList(false); // Hide list when only @ is typed
           }
           return true;
         }
@@ -146,6 +157,12 @@ export function useMention(onChange: (content: string) => void) {
     [cursorPosition.end, onChange]
   );
 
+  const closeMention = React.useCallback(() => {
+    setShowUserList(false);
+    setUsers([]);
+    setUserSearchQuery("");
+  }, []);
+
   return {
     showUserList,
     users,
@@ -153,5 +170,7 @@ export function useMention(onChange: (content: string) => void) {
     textAreaRef,
     handleMention,
     selectUser,
+    isSearching,
+    closeMention,
   };
 }

@@ -62,6 +62,8 @@ export function PostEditor({
     textAreaRef,
     handleMention,
     selectUser,
+    isSearching,
+    closeMention,
   } = useMention(onChange);
 
   // 处理输入
@@ -274,12 +276,16 @@ export function PostEditor({
         )}
       </div>
 
-      <MentionPopover
-        show={showUserList}
-        position={mentionPosition}
-        users={users}
-        onSelect={selectUser}
-      />
+      {showUserList && (
+        <MentionPopover
+          show={showUserList}
+          position={mentionPosition}
+          users={users}
+          onSelect={selectUser}
+          isSearching={isSearching}
+          onClose={closeMention}
+        />
+      )}
     </div>
   );
 }
