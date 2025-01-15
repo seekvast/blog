@@ -18,7 +18,7 @@ export function UserLink({ href, children }: UserLinkProps) {
     return (
       <Link
         href={`/users/${username}`}
-        className="text-primary hover:underline font-medium"
+        className="text-primary font-medium not-prose"
       >
         {children}
       </Link>
@@ -28,7 +28,7 @@ export function UserLink({ href, children }: UserLinkProps) {
   // 处理普通用户链接
   if (href.startsWith("/users/")) {
     return (
-      <Link href={href} className="text-primary hover:underline font-medium">
+      <Link href={href} className="text-primary font-medium not-prose">
         {children}
       </Link>
     );
@@ -37,7 +37,7 @@ export function UserLink({ href, children }: UserLinkProps) {
   // 检查是否是内部链接
   if (href.startsWith("/")) {
     return (
-      <Link href={href} className="text-blue-600 hover:underline">
+      <Link href={href} className="text-primary not-prose">
         {children}
       </Link>
     );
@@ -49,7 +49,7 @@ export function UserLink({ href, children }: UserLinkProps) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-blue-600 hover:underline"
+      className="text-primary not-prose"
     >
       {children}
     </a>

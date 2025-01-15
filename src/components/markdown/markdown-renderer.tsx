@@ -38,7 +38,7 @@ export function MarkdownRenderer({ content, className, skipMedia = false }: Mark
           },
         ],
       ]}
-      className={className}
+      className={` ${className || ''}`}
       components={{
         img: skipMedia ? () => null : undefined,
         iframe: skipMedia ? () => null : undefined,

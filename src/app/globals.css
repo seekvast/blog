@@ -56,6 +56,10 @@
     --radius: 0.5rem;
   }
 
+  a, a:hover {
+    text-decoration: none;
+  }
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -121,7 +125,6 @@
 /* 链接样式 */
 .line-clamp-2 a {
   color: inherit;
-  text-decoration: underline;
 }
 
 /* 列表样式 */

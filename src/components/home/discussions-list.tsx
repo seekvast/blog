@@ -10,7 +10,14 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Icon } from "@/components/icons";
 import { UserLink } from "@/components/markdown/user-link";
-import { LayoutGrid, List, ThumbsUp, Heart, MessageSquare, ChevronDown } from "lucide-react";
+import {
+  LayoutGrid,
+  List,
+  ThumbsUp,
+  Heart,
+  MessageSquare,
+  ChevronDown,
+} from "lucide-react";
 import type { Discussion } from "@/types/discussion";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
@@ -21,11 +28,14 @@ interface DiscussionsListProps {
 }
 
 export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
-  const [discussions, setDiscussions] = React.useState<Discussion[]>(initialDiscussions);
+  const [discussions, setDiscussions] =
+    React.useState<Discussion[]>(initialDiscussions);
   const [loading, setLoading] = React.useState(false);
   const [page, setPage] = React.useState(2); // Start from page 2 since we have initial data
   const [hasMore, setHasMore] = React.useState(true);
-  const [displayMode, setDisplayMode] = React.useState<"image-text" | "text-only">("image-text");
+  const [displayMode, setDisplayMode] = React.useState<
+    "image-text" | "text-only"
+  >("image-text");
   const observerRef = React.useRef<IntersectionObserver>();
 
   // 响应 initialDiscussions 的变化
@@ -40,13 +50,15 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
     setLoading(true);
 
     try {
-      const response = await http.get(`/api/discussions?page=${page}&per_page=10`);
+      const response = await http.get(
+        `/api/discussions?page=${page}&per_page=10`
+      );
       if (response.code === 0) {
         if (response.data.items.length === 0) {
           setHasMore(false);
         } else {
-          setDiscussions(prev => [...prev, ...response.data.items]);
-          setPage(prev => prev + 1);
+          setDiscussions((prev) => [...prev, ...response.data.items]);
+          setPage((prev) => prev + 1);
         }
       }
     } catch (error) {
@@ -95,7 +107,11 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
                 variant="ghost"
                 size="sm"
                 className="h-8 text-muted-foreground hover:bg-transparent hover:text-foreground"
-                onClick={() => setDisplayMode(prev => prev === "image-text" ? "text-only" : "image-text")}
+                onClick={() =>
+                  setDisplayMode((prev) =>
+                    prev === "image-text" ? "text-only" : "image-text"
+                  )
+                }
               >
                 {displayMode === "image-text" ? (
                   <LayoutGrid className="h-4 w-4" />
@@ -113,28 +129,35 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
         {discussions.map((discussion, index) => (
           <article
             key={discussion.slug}
-            ref={index === discussions.length - 1 ? (node) => {
-              if (node && hasMore && !loading) {
-                if (observerRef.current) {
-                  observerRef.current.disconnect();
-                }
-                observerRef.current = new IntersectionObserver(
-                  entries => {
-                    if (entries[0].isIntersecting) {
-                      fetchMoreDiscussions();
+            ref={
+              index === discussions.length - 1
+                ? (node) => {
+                    if (node && hasMore && !loading) {
+                      if (observerRef.current) {
+                        observerRef.current.disconnect();
+                      }
+                      observerRef.current = new IntersectionObserver(
+                        (entries) => {
+                          if (entries[0].isIntersecting) {
+                            fetchMoreDiscussions();
+                          }
+                        },
+                        { threshold: 0.1 }
+                      );
+                      observerRef.current.observe(node);
                     }
-                  },
-                  { threshold: 0.1 }
-                );
-                observerRef.current.observe(node);
-              }
-            } : null}
+                  }
+                : null
+            }
             className="py-4"
           >
             <div className="flex space-x-3">
               {/* 作者头像 */}
               <Avatar className="h-12 w-12 flex-shrink-0">
-                <AvatarImage src={discussion.user.avatar_url} alt={discussion.user.username} />
+                <AvatarImage
+                  src={discussion.user.avatar_url}
+                  alt={discussion.user.username}
+                />
                 <AvatarFallback>{discussion.user.username[0]}</AvatarFallback>
               </Avatar>
 
@@ -154,8 +177,11 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
                       {(() => {
                         // 使用更精确的正则表达式匹配图片URL
                         const regex = /!\[(?:.*?)\]\((https?:\/\/[^)]+)\)/;
-                        const matches = discussion.main_post?.content?.match(regex);
-                        const imgUrl = matches ? matches[1].split(" ")[0] : null;
+                        const matches =
+                          discussion.main_post?.content?.match(regex);
+                        const imgUrl = matches
+                          ? matches[1].split(" ")[0]
+                          : null;
 
                         return imgUrl ? (
                           <div className="flex-shrink-0">
@@ -169,20 +195,20 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
                           </div>
                         ) : null;
                       })()}
-                      <div className="flex-1 text-sm text-muted-foreground line-clamp-3 whitespace-pre-line">
-                        <MarkdownRenderer 
-                          content={discussion.main_post.content} 
+                      <div className="flex-1 text-sm line-clamp-3 whitespace-pre-line">
+                        <MarkdownRenderer
+                          content={discussion.main_post.content}
                           skipMedia={true}
-                          className="prose prose-sm max-w-none [&>p]:!m-0"
+                          className="prose-sm prose-a:text-primary max-w-none [&>p]:!m-0"
                         />
                       </div>
                     </div>
                   ) : (
-                    <div className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                      <MarkdownRenderer 
+                    <div className="mt-2 text-sm line-clamp-2">
+                      <MarkdownRenderer
                         content={discussion.main_post.content}
                         skipMedia={true}
-                        className="prose prose-sm max-w-none [&>p]:!m-0"
+                        className="prose-sm prose-a:text-primary max-w-none [&>p]:!m-0"
                       />
                     </div>
                   )}
@@ -190,11 +216,17 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
 
                 <div className="mt-3 flex items-center space-x-4 text-xs">
                   <div className="flex items-center space-x-1 text-muted-foreground">
-                    <Icon name="thumb_up" className="h-4 w-4 text-base cursor-pointer" />
+                    <Icon
+                      name="thumb_up"
+                      className="h-4 w-4 text-base cursor-pointer"
+                    />
                     <span>{discussion.votes}</span>
                   </div>
                   <div className="flex items-center space-x-1 text-muted-foreground">
-                    <Icon name="mode_comment" className="h-4 w-4 text-base cursor-pointer" />
+                    <Icon
+                      name="mode_comment"
+                      className="h-4 w-4 text-base cursor-pointer"
+                    />
                     <span>{discussion.comment_count}</span>
                   </div>
                   <div className="flex items-center space-x-1 text-muted-foreground">
@@ -212,13 +244,9 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
       </div>
 
       {loading ? (
-        <div className="py-8 text-center text-muted-foreground">
-          加载中...
-        </div>
+        <div className="py-8 text-center text-muted-foreground">加载中...</div>
       ) : !hasMore && discussions.length > 0 ? (
-        <div className="py-8 text-center text-muted-foreground">
-          没有更多了
-        </div>
+        <div className="py-8 text-center text-muted-foreground">没有更多了</div>
       ) : discussions.length === 0 ? (
         <div className="py-8 text-center text-muted-foreground">
           这里空空如也
