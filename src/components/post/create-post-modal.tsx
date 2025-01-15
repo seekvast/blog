@@ -7,25 +7,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { http } from "@/lib/request";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
 import { cn } from "@/lib/utils";
 import { BoardSelect } from "@/components/board-select";
 import { API_ROUTES } from "@/constants/api";
 import { useBoardChildrenStore } from "@/store/board-children";
-import { PostEditor } from "./post-editor";
 import { Icon } from "@/components/icons";
 import { toast } from "@/components/ui/use-toast";
-import { BoardChild, BoardChildrenResponse } from "@/types/board";
-import { usePostEditorStore } from "@/store/post-editor";
+import { BoardChild } from "@/types/board";
+import { useMarkdownEditor } from "@/store/md-editor";
+import { Editor } from "@/components/editor/Editor";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogOverlay,
 } from "@/components/ui/dialog";
 
 interface PollData {
@@ -35,26 +31,6 @@ interface PollData {
   hasDeadline: boolean;
   startTime?: string;
   endTime?: string;
-}
-
-export function ToolbarButton({
-  onClick,
-  icon,
-  children,
-}: {
-  onClick: () => void;
-  icon?: React.ReactNode;
-  children?: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex h-8 w-8 items-center justify-center rounded text-muted-foreground hover:bg-accent"
-    >
-      {icon || children}
-    </button>
-  );
 }
 
 export default function CreatePostModal({
@@ -67,11 +43,15 @@ export default function CreatePostModal({
   const { t } = useTranslation();
   const router = useRouter();
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
-  const [pendingAction, setPendingAction] = React.useState<(() => void) | null>(
-    null
-  );
-  const { hasUnsavedContent, setHasUnsavedContent, setIsOpen, setOnClose } =
-    usePostEditorStore();
+  const [pendingAction, setPendingAction] = React.useState<(() => void) | null>(null);
+  const { 
+    content, 
+    setContent,
+    hasUnsavedContent, 
+    setHasUnsavedContent, 
+    setIsOpen, 
+    setOnClose 
+  } = useMarkdownEditor();
 
   React.useEffect(() => {
     setIsOpen(open);
@@ -93,20 +73,11 @@ export default function CreatePostModal({
   }, [open, hasUnsavedContent, onOpenChange, setIsOpen, setOnClose]);
 
   const [title, setTitle] = React.useState("");
-  const [content, setContent] = React.useState("");
-  const [selectedBoard, setSelectedBoard] = React.useState<number | undefined>(
-    1
-  );
-  const [selectedChildBoard, setSelectedChildBoard] = React.useState<
-    number | undefined
-  >();
-  const [previewMode, setPreviewMode] = React.useState(false);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [selectedBoard, setSelectedBoard] = React.useState<number | undefined>(1);
+  const [selectedChildBoard, setSelectedChildBoard] = React.useState<number | undefined>();
   const [boardChildren, setBoardChildren] = React.useState<BoardChild[]>([]);
   const [loadingChildren, setLoadingChildren] = React.useState(false);
-  const [attachments, setAttachments] = React.useState<
-    { id: number; file_name: string; file_type: string }[]
-  >([]);
+  const [attachments, setAttachments] = React.useState<{ id: number; file_name: string; file_type: string }[]>([]);
   const [isPollEditing, setIsPollEditing] = React.useState(false);
   const [pollOptions, setPollOptions] = React.useState<string[]>(["", ""]);
   const [isMultipleChoice, setIsMultipleChoice] = React.useState(false);
@@ -115,10 +86,9 @@ export default function CreatePostModal({
   const [pollStartTime, setPollStartTime] = React.useState("");
   const [pollEndTime, setPollEndTime] = React.useState("");
   const [pollData, setPollData] = React.useState<PollData | null>(null);
-  const [imageUploading, setImageUploading] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const { getBoardChildren, setBoardChildren: setStoreBoardChildren } =
-    useBoardChildrenStore();
+  const { getBoardChildren, setBoardChildren: setStoreBoardChildren } = useBoardChildrenStore();
 
   const loadBoardChildren = React.useCallback(
     async (boardId: number) => {
@@ -493,7 +463,6 @@ export default function CreatePostModal({
   }, [title, content]);
 
   const handleImageUpload = async (file: File) => {
-    setImageUploading(true);
     const formData = new FormData();
     formData.append("image", file);
     formData.append("attachment_type", "topics_images");
@@ -519,27 +488,7 @@ export default function CreatePostModal({
           file_type: "image",
         };
         setAttachments((prev) => [...prev, newAttachment]);
-
-        // 在光标位置插入图片 Markdown
-        const textArea = document.querySelector("textarea");
-        if (textArea) {
-          const start = textArea.selectionStart;
-          const end = textArea.selectionEnd;
-          const newContent =
-            content.substring(0, start) +
-            `![${response.data.file_name}](${imageUrl} "medium")` +
-            content.substring(end);
-          setContent(newContent);
-
-          // 恢复光标位置
-          setTimeout(() => {
-            textArea.focus();
-            const newPos =
-              start +
-              `![${response.data.file_name}](${imageUrl} "medium")`.length;
-            textArea.selectionStart = textArea.selectionEnd = newPos;
-          });
-        }
+        return imageUrl;
       } else {
         throw new Error(response.message || "Upload failed");
       }
@@ -549,136 +498,8 @@ export default function CreatePostModal({
         variant: "destructive",
         title: "图片上传失败"
       });
-    } finally {
-      setImageUploading(false);
+      return null;
     }
-  };
-
-  const handlePaste = async (e: React.ClipboardEvent) => {
-    // 处理图片粘贴
-    const items = e.clipboardData?.items;
-    if (items) {
-      for (let i = 0; i <items.length; i++) {
-        if (items[i].type.indexOf("image") !== -1) {
-          e.preventDefault();
-          const file = items[i].getAsFile();
-          if (file) {
-            await handleImageUpload(file);
-          }
-          return;
-        }
-      }
-    }
-
-    // 处理文本粘贴（YouTube 链接）
-    const text = e.clipboardData.getData("text");
-    if (text) {
-      const youtubeRegex =
-        /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/;
-      const match = text.match(youtubeRegex);
-      if (match) {
-        e.preventDefault();
-        const videoId = match[1];
-        const embedCode = `<iframe src="https://www.youtube.com/embed/${videoId}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-
-        const textArea = e.target as HTMLTextAreaElement;
-        const start = textArea.selectionStart;
-        const end = textArea.selectionEnd;
-        const newContent =
-          content.substring(0, start) + embedCode + content.substring(end);
-        setContent(newContent);
-      }
-    }
-  };
-
-  const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault();
-    const files = e.dataTransfer.files;
-    if (files.length > 0 && files[0].type.startsWith("image/")) {
-      await handleImageUpload(files[0]);
-    }
-  };
-
-  const handleFormatClick = (format: string) => {
-    const textArea = document.querySelector("textarea");
-    if (!textArea) return;
-
-    const start = textArea.selectionStart;
-    const end = textArea.selectionEnd;
-    const selectedText = content.substring(start, end);
-    let newText = "";
-
-    switch (format) {
-      case "bold":
-        newText = `**${selectedText || "粗体文字"}**`;
-        break;
-      case "italic":
-        newText = `_${selectedText || "斜体文字"}_`;
-        break;
-      case "underline":
-        newText = `~~${selectedText || "删除文字"}~~`;
-        break;
-      case "list-ul":
-        newText = selectedText
-          ? selectedText
-              .split("\n")
-              .map((line) => `- ${line}`)
-              .join("\n")
-          : "- 列表项";
-        break;
-      case "list-ol":
-        newText = selectedText
-          ? selectedText
-              .split("\n")
-              .map((line, i) => `${i + 1}. ${line}`)
-              .join("\n")
-          : "1. 列表项";
-        break;
-      case "quote":
-        newText = selectedText
-          ? selectedText
-              .split("\n")
-              .map((line) => `> ${line}`)
-              .join("\n")
-          : "> 引用文字";
-        break;
-      case "code":
-        newText = selectedText ? `\`${selectedText}\`` : "`代码`";
-        break;
-      case "link":
-        newText = selectedText
-          ? `[${selectedText}](链接地址)`
-          : "[链接文字](链接地址)";
-        break;
-      case "image":
-        newText = '![图片描述](图片地址 "medium")'; // 默认使用 medium 尺寸
-        break;
-      case "at":
-        newText = "@用户";
-        break;
-      case "h1":
-        newText = `# ${selectedText || "标题"}`;
-        break;
-      case "h2":
-        newText = `## ${selectedText || "标题"}`;
-        break;
-      case "h3":
-        newText = `### ${selectedText || "标题"}`;
-        break;
-      default:
-        return;
-    }
-
-    const newContent =
-      content.substring(0, start) + newText + content.substring(end);
-    setContent(newContent);
-
-    // 恢复光标位置
-    setTimeout(() => {
-      textArea.focus();
-      const newCursorPos = start + newText.length;
-      textArea.selectionStart = textArea.selectionEnd = newCursorPos;
-    });
   };
 
   const resetAllStates = React.useCallback(() => {
@@ -686,9 +507,6 @@ export default function CreatePostModal({
     setContent("");
     setSelectedBoard(1);
     setSelectedChildBoard(undefined);
-    setPreviewMode(false);
-    setIsSubmitting(false);
-    setBoardChildren([]);
     setAttachments([]);
     setPollData(null);
     setPollOptions(["", ""]);
@@ -698,7 +516,6 @@ export default function CreatePostModal({
     setPollStartTime("");
     setPollEndTime("");
     setIsPollEditing(false);
-    setImageUploading(false);
   }, []);
 
   const handleClose = React.useCallback(() => {
@@ -834,14 +651,9 @@ export default function CreatePostModal({
                 {pollData && !isPollEditing && <PollPreview />}
               </div>
 
-              <PostEditor
-                content={content}
-                onChange={setContent}
-                onImageUpload={handleImageUpload}
-                previewMode={previewMode}
-                onPreviewModeChange={setPreviewMode}
+              <Editor
+                placeholder="开始编写正文..."
                 className="min-h-[400px] mt-4"
-                imageUploading={imageUploading}
               />
             </div>
           </div>

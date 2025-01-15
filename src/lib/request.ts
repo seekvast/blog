@@ -65,7 +65,7 @@ export async function request<T = any>(
     if (raw) {
       return response as T;
     }
-
+    console.log('Response Status.................:', url, response);
     const data = await response.json();
 
     // 处理业务错误
