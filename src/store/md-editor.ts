@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { formatterApi } from "@/services/formatter";
 
 interface Selection {
   start: number;
@@ -10,47 +11,58 @@ interface History {
   future: string[];
 }
 
-interface MarkdownEditorStore {
-  // 基础状态
+interface EditorState {
   content: string;
-  hasUnsavedContent: boolean;
-  isOpen: boolean;
-  
-  // 编辑器状态
   selection: Selection;
   previewMode: boolean;
-  uploadingFiles: File[];
   history: History;
-  mentions: string[];
-  
-  // 基础方法
+  parsedContent: string | null;
+}
+
+interface EditorActions {
   setContent: (content: string) => void;
+  setSelection: (selection: Selection) => void;
+  setPreviewMode: (mode: boolean) => void;
+  undo: () => void;
+  redo: () => void;
+}
+
+interface MarkdownEditorStore {
+  // 基础状态
+  hasUnsavedContent: boolean;
+  isOpen: boolean;
+
+  // 编辑器状态
+  uploadingFiles: File[];
+  mentions: string[];
+
+  // 基础方法
   setHasUnsavedContent: (hasUnsavedContent: boolean) => void;
   setIsOpen: (isOpen: boolean) => void;
-  setSelection: (selection: Selection) => void;
-  setPreviewMode: (previewMode: boolean) => void;
-  
+
   // Markdown 编辑方法
   insertText: (text: string, position?: number) => void;
   wrapSelection: (before: string, after: string) => void;
-  
-  // 历史记录
-  undo: () => void;
-  redo: () => void;
-  
+
   // 文件和扩展功能
   addUploadingFile: (file: File) => void;
   removeUploadingFile: (file: File) => void;
   addMention: (username: string) => void;
-  
+
+  // 服务器解析方法
+  parseContent: () => Promise<string>;
+  setParsedContent: (html: string | null) => void;
+
   // 关闭回调
   onClose: ((confirmed?: boolean) => void) | null;
   setOnClose: (onClose: ((confirmed?: boolean) => void) | null) => void;
 }
 
-const MAX_HISTORY_LENGTH = 50;
+const MAX_HISTORY = 50;
 
-export const useMarkdownEditor = create<MarkdownEditorStore>((set, get) => ({
+export const useMarkdownEditor = create<
+  EditorState & EditorActions & MarkdownEditorStore
+>((set, get) => ({
   // 初始状态
   content: "",
   hasUnsavedContent: false,
@@ -60,40 +72,37 @@ export const useMarkdownEditor = create<MarkdownEditorStore>((set, get) => ({
   uploadingFiles: [],
   history: { past: [], future: [] },
   mentions: [],
+  parsedContent: null,
   onClose: null,
 
   // 基础方法
-  setContent: (content) => {
-    const currentState = get();
-    set({
+  setContent: (content) =>
+    set((state) => ({
       content,
       hasUnsavedContent: true,
       history: {
-        past: [...currentState.history.past.slice(-MAX_HISTORY_LENGTH), currentState.content],
+        past: [...state.history.past.slice(-MAX_HISTORY), state.content],
         future: [],
       },
-    });
-  },
-  
+    })),
+
   setHasUnsavedContent: (hasUnsavedContent) => set({ hasUnsavedContent }),
   setIsOpen: (isOpen) => set({ isOpen }),
   setSelection: (selection) => set({ selection }),
-  setPreviewMode: (previewMode) => set({ previewMode }),
+  setPreviewMode: (mode) => set({ previewMode: mode }),
   setOnClose: (onClose) => set({ onClose }),
 
   // Markdown 编辑方法
   insertText: (text, position) => {
     const state = get();
     const pos = position ?? state.selection.start;
-    const newContent = 
-      state.content.slice(0, pos) + 
-      text + 
-      state.content.slice(pos);
-    
+    const newContent =
+      state.content.slice(0, pos) + text + state.content.slice(pos);
+
     state.setContent(newContent);
-    state.setSelection({ 
-      start: pos + text.length, 
-      end: pos + text.length 
+    state.setSelection({
+      start: pos + text.length,
+      end: pos + text.length,
     });
   },
 
@@ -102,68 +111,77 @@ export const useMarkdownEditor = create<MarkdownEditorStore>((set, get) => ({
     const { start, end } = state.selection;
     const selectedText = state.content.slice(start, end);
     const newText = before + selectedText + after;
-    
-    const newContent = 
-      state.content.slice(0, start) + 
-      newText + 
-      state.content.slice(end);
-    
+
+    const newContent =
+      state.content.slice(0, start) + newText + state.content.slice(end);
+
     state.setContent(newContent);
-    state.setSelection({ 
-      start: start + before.length, 
-      end: end + before.length 
+    state.setSelection({
+      start: start + before.length,
+      end: end + before.length,
     });
   },
 
   // 历史记录方法
-  undo: () => {
-    const state = get();
-    if (state.history.past.length === 0) return;
+  undo: () =>
+    set((state) => {
+      const previous = state.history.past[state.history.past.length - 1];
+      if (!previous) return state;
 
-    const previous = state.history.past[state.history.past.length - 1];
-    const newPast = state.history.past.slice(0, -1);
+      return {
+        content: previous,
+        history: {
+          past: state.history.past.slice(0, -1),
+          future: [state.content, ...state.history.future],
+        },
+      };
+    }),
 
-    set({
-      content: previous,
-      history: {
-        past: newPast,
-        future: [state.content, ...state.history.future],
-      },
-    });
+  redo: () =>
+    set((state) => {
+      const next = state.history.future[0];
+      if (!next) return state;
+
+      return {
+        content: next,
+        history: {
+          past: [...state.history.past, state.content],
+          future: state.history.future.slice(1),
+        },
+      };
+    }),
+
+  // 服务器解析方法
+  parseContent: async () => {
+    const { content } = get();
+    try {
+      const html = await formatterApi.parse(content);
+      set({ parsedContent: html });
+      return html;
+    } catch (error) {
+      console.error('Failed to parse content:', error);
+      throw error;
+    }
   },
 
-  redo: () => {
-    const state = get();
-    if (state.history.future.length === 0) return;
-
-    const next = state.history.future[0];
-    const newFuture = state.history.future.slice(1);
-
-    set({
-      content: next,
-      history: {
-        past: [...state.history.past, state.content],
-        future: newFuture,
-      },
-    });
-  },
+  setParsedContent: (html) => set({ parsedContent: html }),
 
   // 文件和扩展功能方法
-  addUploadingFile: (file) => 
-    set((state) => ({ 
-      uploadingFiles: [...state.uploadingFiles, file] 
+  addUploadingFile: (file) =>
+    set((state) => ({
+      uploadingFiles: [...state.uploadingFiles, file],
     })),
 
   removeUploadingFile: (file) =>
     set((state) => ({
-      uploadingFiles: state.uploadingFiles.filter((f) => f !== file)
+      uploadingFiles: state.uploadingFiles.filter((f) => f !== file),
     })),
 
   addMention: (username) => {
     const state = get();
     state.insertText(`@${username} `);
-    set((state) => ({ 
-      mentions: [...state.mentions, username] 
+    set((state) => ({
+      mentions: [...state.mentions, username],
     }));
   },
 }));

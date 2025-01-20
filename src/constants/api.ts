@@ -1,41 +1,41 @@
 export const API_ROUTES = {
   // 看板相关
   BOARDS: {
-    LIST: '/api/boards',
-    DETAIL: (id: number | string) => `/api/boards/${id}`,
-    CREATE: '/api/boards',
-    UPDATE: (id: number | string) => `/api/boards/${id}`,
-    DELETE: (id: number | string) => `/api/boards/${id}`,
-    CHILDREN: '/api/board/children',
+    LIST: '/boards',
+    DETAIL: (id: number | string) => `/boards/${id}`,
+    CREATE: '/boards',
+    UPDATE: (id: number | string) => `/boards/${id}`,
+    DELETE: (id: number | string) => `/boards/${id}`,
+    CHILDREN: '/board/children',
   },
   
   // 帖子相关
   DISCUSSIONS: {
-    LIST: '/api/discussions',
-    DETAIL: (id: number | string) => `/api/discussions/${id}`,
-    CREATE: '/api/discussion',
-    UPDATE: (id: number | string) => `/api/discussions/${id}`,
-    DELETE: (id: number | string) => `/api/discussions/${id}`,
+    LIST: '/discussions',
+    DETAIL: (id: number | string) => `/discussions/${id}`,
+    CREATE: '/discussion',
+    UPDATE: (id: number | string) => `/discussions/${id}`,
+    DELETE: (id: number | string) => `/discussions/${id}`,
   },
 
   // 上传相关
   UPLOAD: {
-    IMAGE: '/api/upload/image',
+    IMAGE: '/upload/image',
   },
 
   // 用户相关
   USER: {
-    PROFILE: '/api/user/profile',
-    UPDATE_PROFILE: '/api/user/profile',
-    SETTINGS: '/api/user/settings',
+    PROFILE: '/user/profile',
+    UPDATE_PROFILE: '/user/profile',
+    SETTINGS: '/user/settings',
   },
 
   // 认证相关
   AUTH: {
-    LOGIN: '/api/auth/login',
-    REGISTER: '/api/auth/register',
-    LOGOUT: '/api/auth/logout',
-    REFRESH: '/api/auth/refresh',
+    LOGIN: '/auth/login',
+    REGISTER: '/auth/register',
+    LOGOUT: '/auth/logout',
+    REFRESH: '/auth/refresh',
   },
 } as const;
 

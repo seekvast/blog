@@ -1,9 +1,12 @@
-import React, { useRef, useEffect } from "react";
+"use client";
+
+import * as React from "react";
 import { useMarkdownEditor } from "@/store/md-editor";
 import { Toolbar } from "./Toolbar";
 import { Preview } from "./Preview";
 import { FileUploader } from "./FileUploader";
 import { cn } from "@/lib/utils";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 interface EditorProps {
   className?: string;
@@ -20,23 +23,23 @@ export function Editor({ className, placeholder }: EditorProps) {
     hasUnsavedContent,
   } = useMarkdownEditor();
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
-  // 同步选择范围
-  const handleSelect = () => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
+  const handleSelect = React.useCallback(() => {
+    if (!textareaRef.current) return;
 
     setSelection({
-      start: textarea.selectionStart,
-      end: textarea.selectionEnd,
+      start: textareaRef.current.selectionStart,
+      end: textareaRef.current.selectionEnd,
     });
-  };
+  }, [setSelection]);
 
-  // 处理输入
-  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value);
-  };
+  const handleInput = React.useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setContent(e.target.value);
+    },
+    [setContent]
+  );
 
   // 处理快捷键
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -62,7 +65,7 @@ export function Editor({ className, placeholder }: EditorProps) {
   };
 
   // 保持选择范围同步
-  useEffect(() => {
+  React.useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
@@ -71,37 +74,45 @@ export function Editor({ className, placeholder }: EditorProps) {
   }, [selection]);
 
   return (
-    <div className={cn("flex flex-col", className)}>
-      <div className="border rounded-md focus-within:ring-2 focus-within:ring-primary">
-        <Toolbar className="border-b rounded-t-md" />
-
-        <div className="relative">
-          {!previewMode && (
-            <textarea
-              ref={textareaRef}
-              value={content}
-              onChange={handleInput}
-              onSelect={handleSelect}
-              onKeyDown={handleKeyDown}
-              placeholder={placeholder}
-              className={cn(
-                "w-full min-h-[200px] p-3",
-                "focus:outline-none",
-                "resize-y bg-background",
-                hasUnsavedContent && "border-yellow-500"
-              )}
-            />
-          )}
-
-          {previewMode && (
-            <div className="min-h-[200px]">
-              <Preview content={content} />
-            </div>
-          )}
+    <ErrorBoundary
+      fallback={
+        <div className="p-4 text-red-500">
+          编辑器出现错误，请刷新页面重试
         </div>
-      </div>
+      }
+    >
+      <div className={cn("flex flex-col", className)}>
+        <div className="border rounded-md focus-within:ring-2 focus-within:ring-primary">
+          <Toolbar className="border-b rounded-t-md" />
 
-      <FileUploader className="mt-2" />
-    </div>
+          <div className="relative">
+            {!previewMode && (
+              <textarea
+                ref={textareaRef}
+                value={content}
+                onChange={handleInput}
+                onSelect={handleSelect}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                className={cn(
+                  "w-full min-h-[200px] p-3",
+                  "focus:outline-none",
+                  "resize-y bg-background",
+                  hasUnsavedContent && "border-yellow-500"
+                )}
+              />
+            )}
+
+            {previewMode && (
+              <div className="min-h-[200px]">
+                <Preview content={content} />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <FileUploader className="mt-2" />
+      </div>
+    </ErrorBoundary>
   );
 }
