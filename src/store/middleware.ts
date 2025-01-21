@@ -42,42 +42,46 @@ export const logger: Logger = (f, name) => (set, get, store) => {
 
 export const persist = <T extends object>(
   config: PersistOptions
-): StateCreator<T> => (set, get, api) => {
+) => (f: StateCreator<T>) => (set, get, api): T => {
   const { name, whitelist, blacklist } = config
-  
-  return {
-    ...get(),
-    _hasHydrated: false,
-    _persist: {
-      setItem: async (name: string, value: unknown) => {
-        try {
-          const serialized = JSON.stringify(value)
-          localStorage.setItem(name, serialized)
-        } catch (err) {
-          console.error('Error saving state:', err)
-        }
-      },
-      getItem: async (name: string) => {
-        try {
-          const serialized = localStorage.getItem(name)
-          if (serialized === null) return undefined
-          return JSON.parse(serialized)
-        } catch (err) {
-          console.error('Error loading state:', err)
-          return undefined
-        }
-      },
-      removeItem: async (name: string) => {
-        try {
-          localStorage.removeItem(name)
-        } catch (err) {
-          console.error('Error removing state:', err)
-        }
+
+  // 创建持久化存储方法
+  const persistStorage = {
+    setItem: async (name: string, value: unknown) => {
+      try {
+        const serialized = JSON.stringify(value)
+        localStorage.setItem(name, serialized)
+      } catch (err) {
+        console.error('Error saving state:', err)
       }
     },
+    getItem: async (name: string) => {
+      try {
+        const serialized = localStorage.getItem(name)
+        if (serialized === null) return undefined
+        return JSON.parse(serialized)
+      } catch (err) {
+        console.error('Error loading state:', err)
+        return undefined
+      }
+    },
+    removeItem: async (name: string) => {
+      try {
+        localStorage.removeItem(name)
+      } catch (err) {
+        console.error('Error removing state:', err)
+      }
+    }
+  }
+
+  // 创建持久化方法
+  const persistMethods = {
     persist: {
+      setItem: persistStorage.setItem,
+      getItem: persistStorage.getItem,
+      removeItem: persistStorage.removeItem,
       rehydrate: async () => {
-        const stored = await get()._persist.getItem(name)
+        const stored = await persistStorage.getItem(name)
         
         if (stored) {
           let state = stored
@@ -102,17 +106,30 @@ export const persist = <T extends object>(
           
           set({ ...state, _hasHydrated: true })
         } else {
-          set({ _hasHydrated: true })
+          set({ _hasHydrated: true } as Partial<T>)
         }
       },
-      flush: async () => {
+      save: async () => {
         const state = get()
-        await state._persist.setItem(name, state)
+        await persistStorage.setItem(name, state)
       },
       clear: async () => {
-        await get()._persist.removeItem(name)
+        await persistStorage.removeItem(name)
         set({} as T)
       }
-    }
+    },
+    _hasHydrated: false
+  }
+
+  // 创建包装后的 set 函数，在每次更新后自动保存
+  const persistSet: typeof set = (...args) => {
+    set(...args)
+    const state = get()
+    persistStorage.setItem(name, state)
+  }
+
+  return {
+    ...f(persistSet, get, api),
+    ...persistMethods
   }
 }
