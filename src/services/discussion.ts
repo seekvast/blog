@@ -9,7 +9,7 @@ import type {
 
 export const discussionService = {
   getDiscussions: (params?: QueryParams) => 
-    api.get<Paginate<Discussion>>('/api/discussions', { params }),
+    api.get<Paginate<Discussion>>('/api/discussions', params),
 
   getDiscussion: (slug: string) => 
     api.get<Discussion>(`/api/discussions/${slug}`),

@@ -7,7 +7,6 @@ import Image from "next/image";
 import { MarkdownRenderer } from "@/components/markdown/markdown-renderer";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Icon } from "@/components/icons";
 import {
   LayoutGrid,
   List,
@@ -55,7 +54,7 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
         setDiscussions(prev => ({
           ...prev,
           items: [...prev.items, ...response.items],
-          current_page: response.current_page,
+          current_page: page,  
           last_page: response.last_page
         }));
         setPage(prev => prev + 1);
@@ -221,17 +220,11 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
 
                 <div className="mt-3 flex items-center space-x-4 text-xs">
                   <div className="flex items-center space-x-1 text-muted-foreground">
-                    <Icon
-                      name="thumb_up"
-                      className="h-4 w-4 text-base cursor-pointer"
-                    />
+                    <ThumbsUp className="h-4 w-4 text-base cursor-pointer" />
                     <span>{discussion.votes}</span>
                   </div>
                   <div className="flex items-center space-x-1 text-muted-foreground">
-                    <Icon
-                      name="mode_comment"
-                      className="h-4 w-4 text-base cursor-pointer"
-                    />
+                    <MessageSquare className="h-4 w-4 text-base cursor-pointer" />
                     <span>{discussion.comment_count}</span>
                   </div>
                   <div className="flex items-center space-x-1 text-muted-foreground">

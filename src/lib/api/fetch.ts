@@ -99,10 +99,15 @@ export async function fetchApi<T>(
   } = options;
 
   // 处理 URL
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "";
-  const url = new URL(
-    endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`
-  );
+  const isServer = typeof window === 'undefined';
+  const baseUrl = isServer
+    ? (process.env.SERVER_API_URL || 'http://api.kater.host')
+    : (process.env.NEXT_PUBLIC_API_URL || '/api');
+
+  // 在服务端必须使用完整 URL，在客户端可以使用相对路径
+  const url = isServer
+    ? new URL(endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`)
+    : new URL(endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`, window.location.origin);
 
   // 添加查询参数
   if (params) {

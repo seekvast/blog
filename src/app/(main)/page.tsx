@@ -12,6 +12,7 @@ async function getDiscussions() {
     });
     return response;
   } catch (error) {
+      console.log(error, 'home.............')
     // Return an empty paginated result in case of error
     return {
       code: -1,

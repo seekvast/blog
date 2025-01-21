@@ -12,6 +12,14 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://api.kater.host/:path*',
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig

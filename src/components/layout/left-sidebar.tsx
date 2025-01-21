@@ -5,7 +5,7 @@ import { useState, Suspense, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
-import { Plus, PenSquare } from "lucide-react";
+import { Plus, PenSquare, Home, User, LayoutGrid, Bookmark, RotateCcw, Users, Languages, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -99,10 +99,10 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                     : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 )}
               >
-                <Icon
-                  name={item.icon}
-                  className="mr-2 text-[20px] leading-none"
-                />
+                {item.icon === "home" && <Home className="mr-2 text-[20px] leading-none" />}
+                {item.icon === "person" && <User className="mr-2 text-[20px] leading-none" />}
+                {item.icon === "view_module" && <LayoutGrid className="mr-2 text-[20px] leading-none" />}
+                {item.icon === "bookmark" && <Bookmark className="mr-2 text-[20px] leading-none" />}
                 <span>{item.title}</span>
               </Link>
             );
@@ -135,22 +135,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
           <div className="flex items-center justify-between px-2 mb-2">
             <h3 className="text-sm font-medium">推薦看板</h3>
             <Button variant="ghost" size="icon" className="h-6 w-6">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-                <path d="M21 3v5h-5" />
-                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-                <path d="M8 16H3v5" />
-              </svg>
+              <RotateCcw className="h-4 w-4" />
             </Button>
           </div>
           <div className="border-y py-3 space-y-1">
@@ -195,22 +180,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                       )}
                     </div>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                      </svg>
+                      <Users className="h-3 w-3" />
                       <span>{board.members}</span>
                     </div>
                   </div>
@@ -244,7 +214,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
               className="flex cursor-pointer items-center py-2 text-sm text-muted-foreground hover:text-foreground"
               onClick={handleLanguageChange}
             >
-              <Icon name="language" className="text-[20px] leading-none" />
+              <Globe className="mr-2 leading-none" />
               <span className="truncate">{t("common.autoDetectLanguage", { defaultValue: "自动检测语言" })}</span>
             </div>
             <div>
