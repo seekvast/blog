@@ -1,31 +1,29 @@
-import { create } from 'zustand';
-
-interface BoardChild {
-  board_id: number;
-  name: string;
-  creator_hashid: string;
-  is_default: number;
-  sort: number;
-  id: number;
-}
+import { create } from 'zustand'
+import type { Board } from '@/types'
+import { boardService } from '@/services/board'
 
 interface BoardChildrenState {
-  boardChildrenMap: Record<number, BoardChild[]>;
-  setBoardChildren: (boardId: number, children: BoardChild[]) => void;
-  getBoardChildren: (boardId: number) => BoardChild[] | undefined;
+  children: Board[]
+  isLoading: boolean
+  isError: boolean
+  fetchChildren: (slug: string) => Promise<void>
 }
 
-export const useBoardChildrenStore = create<BoardChildrenState>((set, get) => ({
-  boardChildrenMap: {},
-  setBoardChildren: (boardId, children) => {
-    set((state) => ({
-      boardChildrenMap: {
-        ...state.boardChildrenMap,
-        [boardId]: children,
-      },
-    }));
+export const useBoardChildrenStore = create<BoardChildrenState>((set) => ({
+  children: [],
+  isLoading: false,
+  isError: false,
+
+  fetchChildren: async (slug: string) => {
+    try {
+      set({ isLoading: true, isError: false })
+      const response = await boardService.getBoardChildren(slug)
+      set({ children: response.data })
+    } catch (error) {
+      set({ isError: true })
+      console.error('Failed to fetch board children:', error)
+    } finally {
+      set({ isLoading: false })
+    }
   },
-  getBoardChildren: (boardId) => {
-    return get().boardChildrenMap[boardId];
-  },
-}));
+}))

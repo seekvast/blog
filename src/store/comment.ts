@@ -1,88 +1,97 @@
 import { create } from 'zustand'
-import { logger } from './middleware'
-import type { CommentState } from './types'
-import { commentService } from '@/services'
+import type { Comment } from '@/types'
+import { commentService } from '@/services/comment'
 
-const initialState = {
-  comments: [],
-  isLoading: false,
-  error: null,
-  total: 0
+interface CommentState {
+  comments: Comment[]
+  currentComment: Comment | null
+  loading: boolean
+  error: string | null
+  fetchComments: (postId: number, params?: Record<string, any>) => Promise<void>
+  fetchComment: (id: number) => Promise<void>
+  createComment: (data: Partial<Comment>) => Promise<void>
+  updateComment: (id: number, data: Partial<Comment>) => Promise<void>
+  deleteComment: (id: number) => Promise<void>
+  clearError: () => void
 }
 
-export const useCommentStore = create<CommentState>()(
-  logger((set, get) => ({
-    ...initialState,
+export const useCommentStore = create<CommentState>((set) => ({
+  comments: [],
+  currentComment: null,
+  loading: false,
+  error: null,
 
-    fetchComments: async (postId, params) => {
-      set({ isLoading: true, error: null })
-      
-      try {
-        const { items: comments, total } = await commentService.getComments(postId, params)
-        set({ comments, total, isLoading: false })
-      } catch (error) {
-        set({ error: error as Error, isLoading: false })
-        throw error
-      }
-    },
+  fetchComments: async (postId: number, params = {}) => {
+    try {
+      set({ loading: true, error: null })
+      const response = await commentService.getComments(postId, params)
+      set({ comments: response.data.items })
+    } catch (error: any) {
+      set({ error: error.message })
+    } finally {
+      set({ loading: false })
+    }
+  },
 
-    addComment: async (data) => {
-      set({ isLoading: true, error: null })
-      
-      try {
-        const comment = await commentService.createComment(data)
-        set(state => ({
-          comments: [comment, ...state.comments],
-          total: state.total + 1,
-          isLoading: false
-        }))
-        return comment
-      } catch (error) {
-        set({ error: error as Error, isLoading: false })
-        throw error
-      }
-    },
+  fetchComment: async (id: number) => {
+    try {
+      set({ loading: true, error: null })
+      const response = await commentService.getComment(id)
+      set({ currentComment: response.data })
+    } catch (error: any) {
+      set({ error: error.message })
+    } finally {
+      set({ loading: false })
+    }
+  },
 
-    updateComment: async (id, content) => {
-      set({ isLoading: true, error: null })
-      
-      try {
-        const comment = await commentService.updateComment({ id, content })
-        set(state => ({
-          comments: state.comments.map(c => 
-            c.id === id ? { ...c, content } : c
-          ),
-          isLoading: false
-        }))
-        return comment
-      } catch (error) {
-        set({ error: error as Error, isLoading: false })
-        throw error
-      }
-    },
+  createComment: async (data: Partial<Comment>) => {
+    try {
+      set({ loading: true, error: null })
+      const response = await commentService.createComment(data)
+      set(state => ({
+        comments: [...state.comments, response.data]
+      }))
+    } catch (error: any) {
+      set({ error: error.message })
+    } finally {
+      set({ loading: false })
+    }
+  },
 
-    deleteComment: async (id) => {
-      set({ isLoading: true, error: null })
-      
-      try {
-        await commentService.deleteComment(id)
-        set(state => ({
-          comments: state.comments.filter(c => c.id !== id),
-          total: state.total - 1,
-          isLoading: false
-        }))
-      } catch (error) {
-        set({ error: error as Error, isLoading: false })
-        throw error
-      }
-    },
+  updateComment: async (id: number, data: Partial<Comment>) => {
+    try {
+      set({ loading: true, error: null })
+      const response = await commentService.updateComment({ id, ...data })
+      set(state => ({
+        comments: state.comments.map(c => 
+          c.id === id ? { ...c, ...response.data } : c
+        ),
+        currentComment: state.currentComment?.id === id
+          ? { ...state.currentComment, ...response.data }
+          : state.currentComment
+      }))
+    } catch (error: any) {
+      set({ error: error.message })
+    } finally {
+      set({ loading: false })
+    }
+  },
 
-    reset: () => set(initialState)
-  }))
-)
+  deleteComment: async (id: number) => {
+    try {
+      set({ loading: true, error: null })
+      await commentService.deleteComment(id)
+      set(state => ({
+        comments: state.comments.filter(c => c.id !== id),
+        currentComment: state.currentComment?.id === id ? null : state.currentComment
+      }))
+    } catch (error: any) {
+      set({ error: error.message })
+    } finally {
+      set({ loading: false })
+    }
+  },
 
-// 选择器
-export const selectComments = (state: CommentState) => state.comments
-export const selectCommentsTotal = (state: CommentState) => state.total
-export const selectCommentsLoading = (state: CommentState) => state.isLoading
-export const selectCommentsError = (state: CommentState) => state.error
+  clearError: () => set({ error: null })
+}))

@@ -1,27 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { api } from '@/lib/api'
-import { API_ROUTES } from '@/constants/api'
-
-interface Discussion {
-  id: number
-  title: string
-  content: string
-  board_id: number
-  board_child_id?: number
-  type?: string
-  is_private?: boolean
-  is_locked?: boolean
-  is_sticky?: boolean
-  created_at: string
-  updated_at: string
-  user: {
-    hashid: string
-    username: string
-    nickname: string
-    avatar_url: string
-  }
-}
+import type { Discussion } from '@/types'
+import { discussionService } from '@/services/discussion'
 
 interface DiscussionState {
   discussions: Discussion[]
@@ -45,73 +25,74 @@ export const useDiscussionStore = create<DiscussionState>()(
       error: null,
 
       fetchDiscussions: async (params = {}) => {
-        set({ loading: true, error: null })
         try {
-          const response = await api.get(API_ROUTES.DISCUSSIONS, { params })
-          set({ discussions: response.data.items, loading: false })
-        } catch (error) {
-          set({ error: '获取讨论列表失败', loading: false })
+          set({ loading: true, error: null })
+          const response = await discussionService.getDiscussions(params)
+          set({ discussions: response.data.items })
+        } catch (error: any) {
+          set({ error: error.message })
+        } finally {
+          set({ loading: false })
         }
       },
 
       fetchDiscussion: async (slug: string) => {
-        set({ loading: true, error: null })
         try {
-          const response = await api.get(`${API_ROUTES.DISCUSSIONS}/${slug}`)
-          set({ currentDiscussion: response.data, loading: false })
-        } catch (error) {
-          set({ error: '获取讨论详情失败', loading: false })
+          set({ loading: true, error: null })
+          const response = await discussionService.getDiscussion(slug)
+          set({ currentDiscussion: response.data })
+        } catch (error: any) {
+          set({ error: error.message })
+        } finally {
+          set({ loading: false })
         }
       },
 
       createDiscussion: async (data: Partial<Discussion>) => {
-        set({ loading: true, error: null })
         try {
-          const response = await api.post(API_ROUTES.DISCUSSIONS, data)
+          set({ loading: true, error: null })
+          const response = await discussionService.createDiscussion(data)
           set(state => ({
-            discussions: [response.data, ...state.discussions],
-            loading: false
+            discussions: [response.data, ...state.discussions]
           }))
-        } catch (error) {
-          set({ error: '创建讨论失败', loading: false })
+        } catch (error: any) {
+          set({ error: error.message })
+        } finally {
+          set({ loading: false })
         }
       },
 
       updateDiscussion: async (slug: string, data: Partial<Discussion>) => {
-        set({ loading: true, error: null })
         try {
-          const response = await api.patch(
-            `${API_ROUTES.DISCUSSIONS}/${slug}`,
-            data
-          )
+          set({ loading: true, error: null })
+          const response = await discussionService.updateDiscussion({ slug, ...data })
           set(state => ({
-            discussions: state.discussions.map(d =>
-              d.id === response.data.id ? response.data : d
+            discussions: state.discussions.map(d => 
+              d.slug === slug ? { ...d, ...response.data } : d
             ),
-            currentDiscussion:
-              state.currentDiscussion?.id === response.data.id
-                ? response.data
-                : state.currentDiscussion,
-            loading: false
+            currentDiscussion: state.currentDiscussion?.slug === slug
+              ? { ...state.currentDiscussion, ...response.data }
+              : state.currentDiscussion
           }))
-        } catch (error) {
-          set({ error: '更新讨论失败', loading: false })
+        } catch (error: any) {
+          set({ error: error.message })
+        } finally {
+          set({ loading: false })
         }
       },
 
       deleteDiscussion: async (slug: string) => {
-        set({ loading: true, error: null })
         try {
-          await api.delete(`${API_ROUTES.DISCUSSIONS}/${slug}`)
+          set({ loading: true, error: null })
+          await discussionService.deleteDiscussion(slug)
           set(state => ({
-            discussions: state.discussions.filter(
-              d => d.id !== state.currentDiscussion?.id
-            ),
-            currentDiscussion: null,
-            loading: false
+            discussions: state.discussions.filter(d => d.slug !== slug),
+            currentDiscussion: null
           }))
-        } catch (error) {
-          set({ error: '删除讨论失败', loading: false })
+        } catch (error: any) {
+          set({ error: error.message })
+        } finally {
+          set({ loading: false })
         }
       },
 

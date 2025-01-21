@@ -3,13 +3,13 @@ import type {
   Discussion, 
   CreateDiscussionDto, 
   UpdateDiscussionDto,
-  PaginatedResponse,
+  Paginate,
   QueryParams 
 } from '@/types'
 
 export const discussionService = {
   getDiscussions: (params?: QueryParams) => 
-    api.get<PaginatedResponse<Discussion>>('/api/discussions', { params }),
+    api.get<Paginate<Discussion>>('/api/discussions', { params }),
 
   getDiscussion: (slug: string) => 
     api.get<Discussion>(`/api/discussions/${slug}`),

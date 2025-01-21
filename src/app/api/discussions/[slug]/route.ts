@@ -34,10 +34,8 @@ export const GET = withErrorHandler(async (
 })
 
 // PATCH /api/discussions/[slug]
-export const PATCH = withErrorHandler(async (
-  request: NextRequest,
-  { params }: { params: { slug: string } }
-) => {
+export const PATCH = withErrorHandler(async (request: NextRequest) => {
+  const slug = request.nextUrl.pathname.split('/').pop()
   await validate({ body: updateDiscussionSchema })(request)
 
   try {
@@ -48,7 +46,7 @@ export const PATCH = withErrorHandler(async (
 
     const body = await request.json()
     const response = await api.patch(
-      `${API_ROUTES.DISCUSSIONS}/${params.slug}`,
+      `${API_ROUTES.DISCUSSIONS}/${slug}`,
       body,
       {
         headers: {

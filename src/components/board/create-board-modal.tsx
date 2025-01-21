@@ -70,13 +70,6 @@ export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) 
       formData.append("image", file);
       formData.append("attachment_type", "board_avatars");
 
-      // Debug logging
-      console.log('File object:', file);
-      console.log('FormData entries:');
-      for (let pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-
       const response = await api.post(
         "/api/upload/image",
         formData

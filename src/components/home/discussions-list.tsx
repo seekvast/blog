@@ -5,11 +5,9 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { MarkdownRenderer } from "@/components/markdown/markdown-renderer";
-import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Icon } from "@/components/icons";
-import { UserLink } from "@/components/markdown/user-link";
 import {
   LayoutGrid,
   List,
@@ -19,17 +17,15 @@ import {
   ChevronDown,
 } from "lucide-react";
 import type { Discussion } from "@/types/discussion";
-import { formatDistanceToNow } from "date-fns";
-import { zhCN } from "date-fns/locale";
+import type { Paginate } from "@/types";
 import { discussionService } from "@/services/discussion";
 
 interface DiscussionsListProps {
-  initialDiscussions: Discussion[];
+  initialDiscussions: Paginate<Discussion>;
 }
 
 export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
-  const { data: session } = useSession();
-  const [discussions, setDiscussions] = useState<Discussion[]>(initialDiscussions);
+  const [discussions, setDiscussions] = useState<Paginate<Discussion>>(initialDiscussions);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(2); // Start from page 2 since we have initial data
   const [hasMore, setHasMore] = useState(true);
@@ -46,27 +42,27 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
   const loadMore = async () => {
     if (loading || !hasMore) return;
     setLoading(true);
-
+    
     try {
       const response = await discussionService.getDiscussions({ 
         page, 
         per_page: 10 
       });
-
-      if (response.code === 0) {
-        if (response.data.items.length === 0) {
-          setHasMore(false);
-        } else {
-          setDiscussions(prev => [...prev, ...response.data.items]);
-          setPage(prev => prev + 1);
-        }
-      } else {
-        console.error("Failed to load more discussions:", response);
+      
+      if (response.items.length === 0 || page >= response.last_page) {
         setHasMore(false);
+      } else {
+        setDiscussions(prev => ({
+          ...prev,
+          items: [...prev.items, ...response.items],
+          current_page: response.current_page,
+          last_page: response.last_page
+        }));
+        setPage(prev => prev + 1);
       }
     } catch (error) {
-      console.error("Error loading more discussions:", error);
-      setHasMore(false);
+      console.error("Failed to load more discussions:", error);
+      // 不要在这里设置 hasMore = false，让用户可以重试
     } finally {
       setLoading(false);
     }
@@ -130,11 +126,11 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
 
       {/* 帖子列表 */}
       <div className="divide-y">
-        {discussions.map((discussion, index) => (
+        {discussions.items.map((discussion, index) => (
           <article
             key={discussion.slug}
             ref={
-              index === discussions.length - 1
+              index === discussions.items.length - 1
                 ? (node) => {
                     if (node && hasMore && !loading) {
                       if (observerRef.current) {
@@ -142,11 +138,16 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
                       }
                       observerRef.current = new IntersectionObserver(
                         (entries) => {
-                          if (entries[0].isIntersecting) {
+                          // 只在元素进入视图时触发加载
+                          if (entries[0].isIntersecting && !loading && hasMore) {
                             loadMore();
                           }
                         },
-                        { threshold: 0.1 }
+                        { 
+                          root: null,
+                          rootMargin: '50px',  // 提前50px触发
+                          threshold: 0.1 
+                        }
                       );
                       observerRef.current.observe(node);
                     }
@@ -249,9 +250,9 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
 
       {loading ? (
         <div className="py-8 text-center text-muted-foreground">加载中...</div>
-      ) : !hasMore && discussions.length > 0 ? (
+      ) : !hasMore && discussions.items.length > 0 ? (
         <div className="py-8 text-center text-muted-foreground">没有更多了</div>
-      ) : discussions.length === 0 ? (
+      ) : discussions.items.length === 0 ? (
         <div className="py-8 text-center text-muted-foreground">
           这里空空如也
         </div>

@@ -10,21 +10,22 @@ async function getDiscussions() {
       page: 1, 
       per_page: 10 
     });
-
-    if (response.code === 0) {
-      return response.data.items;
-    }
-    
-    // console.error("Failed to fetch discussions:", response);
-    return [];
+    return response;
   } catch (error) {
-    // console.error("Error fetching discussions:", error);
-    return [];
+    // Return an empty paginated result in case of error
+    return {
+      code: -1,
+      items: [],
+      total: 0,
+      per_page: 10,
+      current_page: 1,
+      last_page: 1,
+      message: error instanceof Error ? error.message : 'Failed to fetch discussions'
+    };
   }
 }
 
 export default async function HomePage() {
   const initialDiscussions = await getDiscussions();
-  
   return <DiscussionsList initialDiscussions={initialDiscussions} />;
 }

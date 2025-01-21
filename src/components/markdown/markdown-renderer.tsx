@@ -14,7 +14,6 @@ interface MarkdownRendererProps {
 }
 
 export function MarkdownRenderer({ content, className, skipMedia = false }: MarkdownRendererProps) {
-  console.log('MarkdownRenderer content:', content);
   return (
     <ReactMarkdown
       skipHtml={false}
@@ -43,7 +42,6 @@ export function MarkdownRenderer({ content, className, skipMedia = false }: Mark
         img: skipMedia ? () => null : undefined,
         iframe: skipMedia ? () => null : undefined,
         a: ({ href, children }) => {
-          console.log('MarkdownRenderer <a>:', { href, children });
           if (skipMedia && (href?.includes("youtube.com") || href?.includes("youtu.be"))) {
             return null;
           }
@@ -62,11 +60,9 @@ export function MarkdownRenderer({ content, className, skipMedia = false }: Mark
           return <UserLink href={href || ""}>{children}</UserLink>;
         },
         text: ({ children }) => {
-          console.log('MarkdownRenderer text:', children);
           if (typeof children === 'string') {
             const parts = children.split(/(@[a-zA-Z0-9_-]+)/g);
             if (parts.length > 1) {
-              console.log('Found user mentions:', parts);
               return (
                 <>
                   {parts.map((part, i) => {

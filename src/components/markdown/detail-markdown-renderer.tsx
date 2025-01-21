@@ -12,14 +12,12 @@ interface DetailMarkdownRendererProps {
 }
 
 export function DetailMarkdownRenderer({ content, className }: DetailMarkdownRendererProps) {
-  console.log('DetailMarkdownRenderer content:', content);
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       rehypePlugins={[rehypeRaw]}
       components={{
         a: ({ href, children }) => {
-          console.log('DetailMarkdownRenderer <a>:', { href, children });
           if (href?.startsWith("user://")) {
             const hashid = href.replace("user://", "");
             return <UserLink href={`/users/${hashid}`}>{children}</UserLink>;

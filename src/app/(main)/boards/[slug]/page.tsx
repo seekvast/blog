@@ -26,6 +26,9 @@ import {
 import { Card } from "@/components/ui/card";
 import { api } from "@/lib/api";
 import { useBoardChildrenStore } from "@/store/board-children";
+import { Suspense } from 'react'
+import { ErrorBoundary } from '@/components/error-boundary'
+import styles from './page.module.styl'
 
 interface Board {
   id: number;
@@ -138,7 +141,23 @@ interface BoardChildrenResponse {
   last_page: number;
 }
 
-export default function BoardDetailPage() {
+export default function BoardPage() {
+  return (
+    <ErrorBoundary>
+      <Suspense 
+        fallback={
+          <div className={styles.loadingContainer}>
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        }
+      >
+        <BoardContent />
+      </Suspense>
+    </ErrorBoundary>
+  )
+}
+
+function BoardContent() {
   const params = useParams();
   const [loading, setLoading] = useState(true);
   const [board, setBoard] = useState<Board | null>(null);
