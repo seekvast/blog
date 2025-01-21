@@ -9,7 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { http } from "@/lib/request";
+import { api } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import { API_ROUTES } from "@/constants/api";
 
@@ -59,7 +59,7 @@ export function BoardSelect({ value, onChange }: BoardSelectProps) {
         searchParams.set("per_page", "20");
         searchParams.set("page", pageNum.toString());
 
-        const response = await http.get<BoardsResponse>(
+        const response = await api.get<BoardsResponse>(
           `${API_ROUTES.BOARDS.LIST}?${searchParams.toString()}`
         );
 

@@ -24,7 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
-import { http } from "@/lib/request";
+import { api } from "@/lib/api";
 import { useBoardChildrenStore } from "@/store/board-children";
 
 interface Board {
@@ -172,7 +172,7 @@ export default function BoardDetailPage() {
   const fetchBoardDetail = async () => {
     try {
       setLoading(true);
-      const response = await http.get<{
+      const response = await api.get<{
         code: number;
         data: Board;
         message: string;
@@ -200,7 +200,7 @@ export default function BoardDetailPage() {
       }
 
       // 如果 store 中没有，则请求 API
-      const response = await http.get<{
+      const response = await api.get<{
         code: number;
         data: BoardChildrenResponse;
         message: string;
@@ -221,7 +221,7 @@ export default function BoardDetailPage() {
       setDiscussionsLoading(true);
       if (!board?.id) return;
 
-      const response = await http.get<{
+      const response = await api.get<{
         code: number;
         data: DiscussionsResponse;
         message: string;
@@ -241,7 +241,7 @@ export default function BoardDetailPage() {
         setTotalPages(response.data.last_page);
       }
     } catch (error) {
-      console.error("Failed to fetch discussions:", error);
+    //   console.error("Failed to fetch discussions:", error);
     } finally {
       setDiscussionsLoading(false);
     }

@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Header } from "@/components/layout/header";
 import { LeftSidebar } from "@/components/layout/left-sidebar";
 import { RightSidebar } from "@/components/layout/right-sidebar";
+import { RouteProgress } from '@/components/router/route-progress';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -29,13 +30,18 @@ export default function MainLayout({
 
   return (
     <div className="min-h-screen">
+      <RouteProgress />
       <Header />
       <div className="mx-auto w-[1360px] flex pt-8">
         <div className="sticky top-[88px] min-w-[300px] h-[calc(100vh-88px)]">
           <LeftSidebar className="hidden lg:block" />
         </div>
         <div className="w-full flex px-4">
-          <main className="w-full ml-4">{children}</main>
+          <main className="w-full ml-4">
+            <div className="container py-6">
+              {children}
+            </div>
+          </main>
           {showRightSidebar && <RightSidebar className="min-w-[240px] ml-8" />}
         </div>
       </div>

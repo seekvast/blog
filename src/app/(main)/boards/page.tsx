@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
-import { http } from "@/lib/request";
+import { api } from "@/lib/api";
 import { ChevronDown } from "lucide-react";
 
 interface Board {
@@ -54,7 +54,7 @@ export default function BoardsPage() {
         ...(categoryFilter && { category_id: String(categoryFilter) }),
       }).toString();
 
-      const response = await http.get<{
+      const response = await api.get<{
         code: number;
         data: BoardsResponse;
         message: string;
@@ -87,7 +87,7 @@ export default function BoardsPage() {
         ...(categoryFilter && { category_id: String(categoryFilter) }),
       }).toString();
 
-      const response = await http.get<{
+      const response = await api.get<{
         code: number;
         data: BoardsResponse;
         message: string;

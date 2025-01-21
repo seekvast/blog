@@ -6,17 +6,22 @@ import { AuthProvider } from "@/components/providers/auth-provider";
 import { LoginModalProvider } from "@/components/providers/login-modal-provider";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { I18nProvider } from "@/components/i18n-provider";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata = {
   title: "Forum System",
   description: "A modern forum system built with Next.js",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getServerSession(authOptions);
+
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head>
@@ -32,13 +37,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <I18nProvider>
-            <AuthProvider>
-              <LoginModalProvider>
+          <AuthProvider session={session}>
+            <LoginModalProvider>
+              <I18nProvider>
                 {children}
-              </LoginModalProvider>
-            </AuthProvider>
-          </I18nProvider>
+                <Toaster />
+              </I18nProvider>
+            </LoginModalProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { http } from "@/lib/request";
+import { api } from "@/lib/api";
 
 interface User {
   hashid: string;
@@ -29,7 +29,7 @@ export function useMention(onChange: (content: string) => void) {
   const searchUsers = React.useCallback(async (query: string) => {
     try {
       setIsSearching(true);
-      const response = await http.get(
+      const response = await api.get(
         `/api/users?keyword=${encodeURIComponent(query)}`
       );
       if (response.code === 0) {

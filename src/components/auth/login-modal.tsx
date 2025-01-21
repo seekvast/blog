@@ -46,16 +46,26 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
 
     try {
       const result = await signIn("credentials", {
-        email: email,
-        password: password,
+        email,
+        password,
         redirect: false,
       });
 
-      if (result?.error) {
+      if (!result?.ok) {
+        // 显示具体的错误信息
         toast({
           variant: "destructive",
           title: "登录失败",
-          description: result.error,
+          description: result?.error || "邮箱或密码错误",
+        });
+        return;
+      }
+      if (result.error) {
+        // 显示具体的错误信息
+        toast({
+          variant: "destructive",
+          title: "登录失败",
+          description: result?.error || "邮箱或密码错误",
         });
         return;
       }
@@ -68,10 +78,16 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
       onOpenChange(false);
       router.refresh();
     } catch (error) {
+      // 显示具体的错误信息
       toast({
         variant: "destructive",
         title: "登录失败",
-        description: "请稍后重试",
+        description:
+          error instanceof Error
+            ? error.message
+                .split("\n")
+                .map((msg, i) => <div key={i}>{msg}</div>)
+            : "服务器错误，请稍后重试",
       });
     } finally {
       setIsLoading(false);
@@ -82,9 +98,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[480px] p-8">
         <DialogHeader className="mb-6">
-          <DialogTitle className="text-2xl font-medium">
-            登入
-          </DialogTitle>
+          <DialogTitle className="text-2xl font-medium">登入</DialogTitle>
           <div className="text-sm text-muted-foreground">
             還沒有賬號？
             <Link href="/register" className="text-primary hover:underline">
@@ -128,11 +142,11 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
             <div className="h-[100px] bg-muted rounded-md">
               {/* reCAPTCHA placeholder */}
             </div>
-            <Button 
+            <Button
               type="submit"
               className={cn(
                 "w-full h-12",
-                isValid 
+                isValid
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
                   : "bg-neutral-100 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-400"
               )}

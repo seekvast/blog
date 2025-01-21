@@ -1,51 +1,58 @@
-import { getServerSession } from "next-auth/next"
-import { NextAuthOptions } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
+import { getServerSession } from "next-auth/next";
+import { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { api } from "./api";
+import type { ApiError } from "./api/types";
+
+interface LoginResponse {
+  hashid: string;
+  nickname: string;
+  email: string;
+  avatar_url: string;
+  token: string;
+  [key: string]: any; // for other potential fields
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Username", type: "text", placeholder: "Email or username" },
-        password: { label: "Password", type: "password" }
+        email: {
+          label: "Username",
+          type: "text",
+          placeholder: "Email or username",
+        },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Please enter your email and password");
         }
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/login`, {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          body: JSON.stringify({
-            username: credentials.email,
-            password: credentials.password,
-          }),
+        // try {
+        const response = await api.post<LoginResponse>("/api/login", {
+          email: credentials.email,
+          password: credentials.password,
         });
 
-        if (!res.ok) {
-          const error = await res.json();
-          throw new Error(error.message || "Login failed");
-        }
-
-        const data = await res.json();
-
-        if (data.code === 0 && data.data) {
-          return {
-            id: data.data.hashid,
-            name: data.data.nickname,
-            email: data.data.email,
-            image: data.data.avatar_url,
-            token: data.data.token,
-            ...data.data,
-          };
-        }
-
-        throw new Error(data.message || "Invalid credentials");
+        return {
+          id: response.hashid,
+          hashid: response.hashid,
+          name: response.nickname,
+          email: response.email,
+          image: response.avatar_url,
+          username: response.nickname,
+          token: response.token,
+        };
+        // } catch (error) {
+        //   console.error('Login error:', error);
+        //   // API 客户端会自动处理错误，这里只需要抛出错误消息
+        //   if (error instanceof Error) {
+        //     throw error;
+        //   }
+        //   throw new Error('Login failed');
+        // }
       },
     }),
   ],
@@ -103,7 +110,10 @@ export async function getSession() {
 }
 
 // 创建一个带有认证token的fetch函数
-export async function authenticatedFetch(url: string, options: RequestInit = {}) {
+export async function authenticatedFetch(
+  url: string,
+  options: RequestInit = {}
+) {
   const session = await getSession();
 
   if (!session?.user?.token) {
@@ -112,8 +122,8 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
 
   const headers = {
     ...options.headers,
-    'Authorization': `Bearer ${session.user.token}`,
-    'Content-Type': 'application/json',
+    Authorization: `Bearer ${session.user.token}`,
+    "Content-Type": "application/json",
   };
 
   try {
@@ -128,7 +138,7 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
 
     return response;
   } catch (error) {
-    console.error('请求错误:', error);
+    console.error("请求错误:", error);
     throw error;
   }
 }

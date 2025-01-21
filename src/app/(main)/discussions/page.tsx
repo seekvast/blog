@@ -21,6 +21,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
+import { useSearchParams } from "next/navigation";
+import { useDiscussionStore } from "@/store/discussion";
+import { useAuthStore } from "@/store/auth";
+import { PostCard } from "@/components/post/post-card";
+import { useLoginModal } from "@/components/providers/login-modal-provider";
+import { AsyncBoundary } from "@/components/ui/async-boundary";
 
 // 示例数据
 const SAMPLE_POSTS = [
@@ -82,6 +88,23 @@ const DISCUSSIONS = [
 
 export default function DiscussionsPage() {
   const { t } = useTranslation();
+
+  const searchParams = useSearchParams();
+  const { discussions, loading, error, fetchDiscussions } = useDiscussionStore();
+  const user = useAuthStore((state) => state.user);
+  const { openLoginModal } = useLoginModal();
+
+  React.useEffect(() => {
+    fetchDiscussions(Object.fromEntries(searchParams));
+  }, [searchParams, fetchDiscussions]);
+
+  const handleCreatePost = () => {
+    if (!user) {
+      openLoginModal();
+      return;
+    }
+    // 打开创建讨论的模态框
+  };
 
   return (
     <div className="flex flex-col">
@@ -249,10 +272,7 @@ export default function DiscussionsPage() {
             <div key={post.id} className="py-4">
               <div className="flex items-start space-x-3">
                 <Avatar className="h-10 w-10 rounded-lg">
-                  <AvatarImage
-                    src={post.author.avatar}
-                    alt={post.author.name}
-                  />
+                  <AvatarImage src={post.author.avatar} alt={post.author.name} />
                   <AvatarFallback>{post.author.name[0]}</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
@@ -317,49 +337,34 @@ export default function DiscussionsPage() {
       {/* 讨论列表 */}
       <div className="mx-auto w-[808px] px-8">
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold">讨论</h1>
-            <Button>发起讨论</Button>
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-bold">讨论列表</h1>
+            <Button onClick={handleCreatePost}>发起讨论</Button>
           </div>
 
-          <div className="grid gap-4">
-            {DISCUSSIONS.map((discussion) => (
-              <Card key={discussion.id} className="p-4">
-                <div className="flex gap-4">
-                  <Avatar>
-                    <AvatarImage src={discussion.author.avatar} />
-                    <AvatarFallback>{discussion.author.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium">{discussion.author.name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {discussion.createdAt}
-                        </div>
-                      </div>
-                    </div>
-                    <h3 className="text-lg font-semibold">{discussion.title}</h3>
-                    <p className="text-muted-foreground">{discussion.content}</p>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <button className="flex items-center gap-1">
-                        <Heart className="h-4 w-4" />
-                        <span>{discussion.stats.likes}</span>
-                      </button>
-                      <button className="flex items-center gap-1">
-                        <MessageSquare className="h-4 w-4" />
-                        <span>{discussion.stats.comments}</span>
-                      </button>
-                      <button className="flex items-center gap-1">
-                        <Share2 className="h-4 w-4" />
-                        <span>{discussion.stats.shares}</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+          <AsyncBoundary loading={loading} error={error}>
+            <div className="space-y-4">
+              {discussions.map((discussion) => (
+                <PostCard
+                  key={discussion.id}
+                  post={{
+                    id: discussion.id.toString(),
+                    title: discussion.title,
+                    content: discussion.content,
+                    author: {
+                      name: discussion.user.nickname,
+                      avatar: discussion.user.avatar_url,
+                    },
+                    createdAt: discussion.created_at,
+                    stats: {
+                      likes: 0, // 从API获取
+                      comments: 0, // 从API获取
+                    },
+                  }}
+                />
+              ))}
+            </div>
+          </AsyncBoundary>
         </div>
       </div>
     </div>

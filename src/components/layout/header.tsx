@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
-import { API_ROUTES } from "@/constants/api";
+import { useAuth } from "@/components/providers/auth-provider";
+import { signOut } from "next-auth/react";
 import {
   Search,
   Bell,
@@ -30,18 +30,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { http } from "@/lib/request";
+import { api } from "@/lib/api";
 import { usePostEditorStore } from "@/store/post-editor";
 
 export function Header() {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [registerOpen, setRegisterOpen] = React.useState(false);
   const [loginOpen, setLoginOpen] = React.useState(false);
@@ -59,24 +52,13 @@ export function Header() {
 
   const handleLogout = async () => {
     try {
-      // 调用后端登出 API
-      await http.get(API_ROUTES.AUTH.LOGOUT);
-    } catch (error) {
-      console.error("Logout API failed:", error);
-      toast({
-        variant: "destructive",
-        title: "请求失败",
-        description: error instanceof Error ? error.message : "请稍后重试",
+      await signOut({
+        redirect: true,
+        callbackUrl: "/",
       });
-    } finally {
-      // 无论API是否成功，都清理本地存储并登出
-      try {
-        await signOut({ redirect: true, callbackUrl: "/" });
-      } catch (signOutError) {
-        console.error("SignOut failed:", signOutError);
-        // 如果 signOut 也失败，强制刷新页面
-        window.location.href = "/";
-      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      window.location.href = "/";
     }
   };
 
@@ -92,7 +74,6 @@ export function Header() {
               onClick={handleLogoClick}
             >
               <img src="/logo-g.png" alt="Kater" className="h-8 w--full" />
-              {/* <span className="text-lg font-bold text-primary">Kater</span> */}
             </Link>
 
             {/* Search */}
@@ -108,7 +89,7 @@ export function Header() {
 
           {/* Actions */}
           <div className="ml-auto flex items-center gap-4">
-            {session ? (
+            {user ? (
               <>
                 <Button variant="ghost" size="icon" className="hover:bg-muted">
                   <PenSquare className="h-5 w-5" />
@@ -119,9 +100,9 @@ export function Header() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Avatar className="h-8 w-8 cursor-pointer ring-offset-background transition-opacity hover:opacity-80">
-                      <AvatarImage src={session.user?.avatar_url || ""} />
+                      <AvatarImage src={user.avatar_url || ""} />
                       <AvatarFallback>
-                        {session.user?.username?.[0] || "U"}
+                        {user.username?.[0] || "U"}
                       </AvatarFallback>
                     </Avatar>
                   </DropdownMenuTrigger>

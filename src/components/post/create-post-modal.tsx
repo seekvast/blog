@@ -6,13 +6,13 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { http } from "@/lib/request";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { BoardSelect } from "@/components/board-select";
 import { API_ROUTES } from "@/constants/api";
 import { useBoardChildrenStore } from "@/store/board-children";
 import { Icon } from "@/components/icons";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { BoardChild } from "@/types/board";
 import { useMarkdownEditor } from "@/store/md-editor";
 import { Editor } from "@/components/editor/Editor";
@@ -107,7 +107,7 @@ export default function CreatePostModal({
         }
 
         // 如果 store 中没有，则请求 API
-        const response = await http.get<{
+        const response = await api.get<{
           code: number;
           data: {
             items: BoardChild[];
@@ -441,7 +441,7 @@ export default function CreatePostModal({
         poll: pollData,
       };
 
-      const response = await http.post(API_ROUTES.DISCUSSIONS.CREATE, data);
+      const response = await api.post(API_ROUTES.DISCUSSIONS.CREATE, data);
       if (response.code === 0) {
         console.log("发布成功");
         onOpenChange(false);
@@ -468,7 +468,7 @@ export default function CreatePostModal({
     formData.append("attachment_type", "topics_images");
 
     try {
-      const response = (await http.post(API_ROUTES.UPLOAD.IMAGE, formData)) as {
+      const response = (await api.post(API_ROUTES.UPLOAD.IMAGE, formData)) as {
         code: number;
         data: {
           id: number;
@@ -494,7 +494,7 @@ export default function CreatePostModal({
       }
     } catch (error) {
       console.error("Error uploading image:", error);
-      toast({
+      useToast({
         variant: "destructive",
         title: "图片上传失败"
       });

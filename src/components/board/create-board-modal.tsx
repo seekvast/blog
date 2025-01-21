@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImagePlus } from "lucide-react";
-import { http } from "@/lib/request";
+import { api } from "@/lib/api";
 
 interface CreateBoardModalProps {
   open: boolean;
@@ -77,7 +77,7 @@ export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) 
         console.log(pair[0], pair[1]);
       }
 
-      const response = await http.post(
+      const response = await api.post(
         "/api/upload/image",
         formData
       ) as { code: number; data: UploadResponse; message: string };
@@ -133,7 +133,7 @@ export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) 
 
     try {
       setLoading(true);
-      await http.post('/api/board', formData);
+      await api.post('/api/board', formData);
       
       toast({
         title: "创建成功",

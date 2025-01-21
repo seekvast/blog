@@ -21,22 +21,20 @@ import {
 import type { Discussion } from "@/types/discussion";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
-import { http } from "@/lib/request";
+import { discussionService } from "@/services/discussion";
 
 interface DiscussionsListProps {
   initialDiscussions: Discussion[];
 }
 
 export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
-  const [discussions, setDiscussions] =
-    React.useState<Discussion[]>(initialDiscussions);
-  const [loading, setLoading] = React.useState(false);
-  const [page, setPage] = React.useState(2); // Start from page 2 since we have initial data
-  const [hasMore, setHasMore] = React.useState(true);
-  const [displayMode, setDisplayMode] = React.useState<
-    "image-text" | "text-only"
-  >("image-text");
-  const observerRef = React.useRef<IntersectionObserver>();
+  const { data: session } = useSession();
+  const [discussions, setDiscussions] = useState<Discussion[]>(initialDiscussions);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(2); // Start from page 2 since we have initial data
+  const [hasMore, setHasMore] = useState(true);
+  const [displayMode, setDisplayMode] = useState<"image-text" | "text-only">("image-text");
+  const observerRef = useRef<IntersectionObserver>();
 
   // 响应 initialDiscussions 的变化
   useEffect(() => {
@@ -45,28 +43,34 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
     setHasMore(true);
   }, [initialDiscussions]);
 
-  const fetchMoreDiscussions = React.useCallback(async () => {
+  const loadMore = async () => {
     if (loading || !hasMore) return;
     setLoading(true);
 
     try {
-      const response = await http.get(
-        `/api/discussions?page=${page}&per_page=10`
-      );
+      const response = await discussionService.getDiscussions({ 
+        page, 
+        per_page: 10 
+      });
+
       if (response.code === 0) {
         if (response.data.items.length === 0) {
           setHasMore(false);
         } else {
-          setDiscussions((prev) => [...prev, ...response.data.items]);
-          setPage((prev) => prev + 1);
+          setDiscussions(prev => [...prev, ...response.data.items]);
+          setPage(prev => prev + 1);
         }
+      } else {
+        console.error("Failed to load more discussions:", response);
+        setHasMore(false);
       }
     } catch (error) {
-      console.error("Failed to fetch discussions:", error);
+      console.error("Error loading more discussions:", error);
+      setHasMore(false);
     } finally {
       setLoading(false);
     }
-  }, [page, hasMore, loading]);
+  };
 
   return (
     <div className="flex flex-col">
@@ -139,7 +143,7 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
                       observerRef.current = new IntersectionObserver(
                         (entries) => {
                           if (entries[0].isIntersecting) {
-                            fetchMoreDiscussions();
+                            loadMore();
                           }
                         },
                         { threshold: 0.1 }
