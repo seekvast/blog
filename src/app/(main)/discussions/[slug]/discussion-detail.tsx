@@ -15,7 +15,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ThumbsUp, ThumbsDown, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useLoginModal } from "@/components/providers/login-modal-provider";
-
+import { PostContent } from "@/components/post/post-content";
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
 }
@@ -143,9 +143,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
 
           {/* 贴文内容 */}
           <div className="pt-4 text-muted-foreground">
-            <div className="prose max-w-none">
-              {currentDiscussion.main_post.content}
-            </div>
+            <PostContent post={currentDiscussion.main_post} />
           </div>
 
           {/* 贴文底部操作栏 */}

@@ -16,6 +16,8 @@ export interface CreateDiscussionDto {
   content: string
   board_id: number
   board_child_id?: number
+  attachments?: string[]
+  poll?: string
 }
 
 export interface UpdateDiscussionDto extends Partial<CreateDiscussionDto> {

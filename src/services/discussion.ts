@@ -15,7 +15,7 @@ export const discussionService = {
     api.get<Discussion>(`/api/discussions/${slug}`),
 
   createDiscussion: (data: CreateDiscussionDto) => 
-    api.post<Discussion>('/api/discussions', data),
+    api.post<Discussion>('/api/discussion', data),
 
   updateDiscussion: ({ slug, ...data }: UpdateDiscussionDto) => 
     api.patch<Discussion>(`/api/discussions/${slug}`, data),

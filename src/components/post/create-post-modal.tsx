@@ -16,6 +16,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { BoardChild } from "@/types/board";
 import { useMarkdownEditor } from "@/store/md-editor";
 import { Editor } from "@/components/editor/Editor";
+import { discussionService } from "@/services/discussion";
+
 import {
   Dialog,
   DialogContent,
@@ -43,14 +45,16 @@ export default function CreatePostModal({
   const { t } = useTranslation();
   const router = useRouter();
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
-  const [pendingAction, setPendingAction] = React.useState<(() => void) | null>(null);
-  const { 
-    content, 
+  const [pendingAction, setPendingAction] = React.useState<(() => void) | null>(
+    null
+  );
+  const {
+    content,
     setContent,
-    hasUnsavedContent, 
-    setHasUnsavedContent, 
-    setIsOpen, 
-    setOnClose 
+    hasUnsavedContent,
+    setHasUnsavedContent,
+    setIsOpen,
+    setOnClose,
   } = useMarkdownEditor();
 
   React.useEffect(() => {
@@ -73,11 +77,17 @@ export default function CreatePostModal({
   }, [open, hasUnsavedContent, onOpenChange, setIsOpen, setOnClose]);
 
   const [title, setTitle] = React.useState("");
-  const [selectedBoard, setSelectedBoard] = React.useState<number | undefined>(1);
-  const [selectedChildBoard, setSelectedChildBoard] = React.useState<number | undefined>();
+  const [selectedBoard, setSelectedBoard] = React.useState<number | undefined>(
+    1
+  );
+  const [selectedChildBoard, setSelectedChildBoard] = React.useState<
+    number | undefined
+  >();
   const [boardChildren, setBoardChildren] = React.useState<BoardChild[]>([]);
   const [loadingChildren, setLoadingChildren] = React.useState(false);
-  const [attachments, setAttachments] = React.useState<{ id: number; file_name: string; file_type: string }[]>([]);
+  const [attachments, setAttachments] = React.useState<
+    { id: number; file_name: string; file_type: string }[]
+  >([]);
   const [isPollEditing, setIsPollEditing] = React.useState(false);
   const [pollOptions, setPollOptions] = React.useState<string[]>(["", ""]);
   const [isMultipleChoice, setIsMultipleChoice] = React.useState(false);
@@ -88,7 +98,8 @@ export default function CreatePostModal({
   const [pollData, setPollData] = React.useState<PollData | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const { getBoardChildren, setBoardChildren: setStoreBoardChildren } = useBoardChildrenStore();
+  const { getBoardChildren, setBoardChildren: setStoreBoardChildren } =
+    useBoardChildrenStore();
 
   const loadBoardChildren = React.useCallback(
     async (boardId: number) => {
@@ -125,9 +136,7 @@ export default function CreatePostModal({
           // 缓存到 store 中
           setStoreBoardChildren(boardId, children);
           // Set default selected child board if exists
-          const defaultChild = children.find(
-            (child) => child.is_default === 1
-          );
+          const defaultChild = children.find((child) => child.is_default === 1);
           setSelectedChildBoard(defaultChild?.id ?? undefined);
         }
       } catch (error) {
@@ -441,15 +450,16 @@ export default function CreatePostModal({
         poll: pollData,
       };
 
-      const response = await api.post(API_ROUTES.DISCUSSIONS.CREATE, data);
-      if (response.code === 0) {
+      const response = discussionService.createDiscussion(data);
+    //   const response = await api.post(API_ROUTES.DISCUSSIONS.CREATE, data);
+    //   if (response.code === 0) {
         console.log("发布成功");
         onOpenChange(false);
         if (window.location.pathname !== "/") {
           router.push("/");
         }
         router.refresh();
-      }
+    //   }
     } catch (error) {
       console.error("发布失败", error);
     } finally {
@@ -496,7 +506,7 @@ export default function CreatePostModal({
       console.error("Error uploading image:", error);
       useToast({
         variant: "destructive",
-        title: "图片上传失败"
+        title: "图片上传失败",
       });
       return null;
     }
