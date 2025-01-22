@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react'
 import { Alert, AlertDescription, AlertTitle } from './alert'
 import { Button } from './button'

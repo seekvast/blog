@@ -26,6 +26,9 @@ export interface Discussion {
   main_post: MainPost;
   board: Board;
   board_child: BoardChild;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
   user: {
     hashid: string;
     username: string;

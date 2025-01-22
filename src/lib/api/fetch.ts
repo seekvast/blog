@@ -108,7 +108,7 @@ export async function fetchApi<T>(
   const url = isServer
     ? new URL(endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`)
     : new URL(endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`, window.location.origin);
-
+console.log(url, 'fetch,url.........................')
   // 添加查询参数
   if (params) {
     Object.entries(params).forEach(([key, value]) => {

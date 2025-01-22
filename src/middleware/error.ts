@@ -12,10 +12,12 @@ export class ApiError extends Error {
   }
 }
 
-export function withErrorHandler(handler: (request: NextRequest) => Promise<Response>) {
-  return async (request: NextRequest) => {
+export function withErrorHandler<T extends { params: Record<string, string> }>(
+  handler: (request: NextRequest, context: T) => Promise<Response>
+) {
+  return async (request: NextRequest, context: T) => {
     try {
-      return await handler(request)
+      return await handler(request, context)
     } catch (error) {
 
       if (error instanceof ApiError) {

@@ -1,4 +1,3 @@
-import { ErrorBoundary } from './error-boundary'
 import { Loading } from './loading'
 
 interface AsyncBoundaryProps {
@@ -26,7 +25,7 @@ export function AsyncBoundary({
     return loadingFallback || <Loading fullscreen={fullscreen} />
   }
 
-  return <ErrorBoundary fallback={fallback}>{children}</ErrorBoundary>
+  return children;
 }
 
 interface AsyncBoundaryWithQueryProps<T> {

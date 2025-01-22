@@ -13,6 +13,7 @@ interface DiscussionState {
   createDiscussion: (data: Partial<Discussion>) => Promise<void>
   updateDiscussion: (slug: string, data: Partial<Discussion>) => Promise<void>
   deleteDiscussion: (slug: string) => Promise<void>
+  setDiscussion: (discussion: Discussion) => void
   clearError: () => void
 }
 
@@ -28,7 +29,7 @@ export const useDiscussionStore = create<DiscussionState>()(
         try {
           set({ loading: true, error: null })
           const response = await discussionService.getDiscussions(params)
-          set({ discussions: response.data.items })
+          set({ discussions: response.items })
         } catch (error: any) {
           set({ error: error.message })
         } finally {
@@ -40,7 +41,9 @@ export const useDiscussionStore = create<DiscussionState>()(
         try {
           set({ loading: true, error: null })
           const response = await discussionService.getDiscussion(slug)
-          set({ currentDiscussion: response.data })
+          // 如果是分页数据，取第一个项
+          const discussion = 'items' in response ? response.items[0] : response
+          set({ currentDiscussion: discussion })
         } catch (error: any) {
           set({ error: error.message })
         } finally {
@@ -52,8 +55,8 @@ export const useDiscussionStore = create<DiscussionState>()(
         try {
           set({ loading: true, error: null })
           const response = await discussionService.createDiscussion(data)
-          set(state => ({
-            discussions: [response.data, ...state.discussions]
+          set((state) => ({
+            discussions: [response, ...state.discussions]
           }))
         } catch (error: any) {
           set({ error: error.message })
@@ -66,13 +69,14 @@ export const useDiscussionStore = create<DiscussionState>()(
         try {
           set({ loading: true, error: null })
           const response = await discussionService.updateDiscussion({ slug, ...data })
-          set(state => ({
-            discussions: state.discussions.map(d => 
-              d.slug === slug ? { ...d, ...response.data } : d
+          set((state) => ({
+            discussions: state.discussions.map((d) =>
+              d.slug === slug ? response : d
             ),
-            currentDiscussion: state.currentDiscussion?.slug === slug
-              ? { ...state.currentDiscussion, ...response.data }
-              : state.currentDiscussion
+            currentDiscussion:
+              state.currentDiscussion?.slug === slug
+                ? response
+                : state.currentDiscussion
           }))
         } catch (error: any) {
           set({ error: error.message })
@@ -85,9 +89,10 @@ export const useDiscussionStore = create<DiscussionState>()(
         try {
           set({ loading: true, error: null })
           await discussionService.deleteDiscussion(slug)
-          set(state => ({
-            discussions: state.discussions.filter(d => d.slug !== slug),
-            currentDiscussion: null
+          set((state) => ({
+            discussions: state.discussions.filter((d) => d.slug !== slug),
+            currentDiscussion:
+              state.currentDiscussion?.slug === slug ? null : state.currentDiscussion
           }))
         } catch (error: any) {
           set({ error: error.message })
@@ -96,10 +101,17 @@ export const useDiscussionStore = create<DiscussionState>()(
         }
       },
 
+      setDiscussion: (discussion: Discussion) => {
+        set({ currentDiscussion: discussion })
+      },
+
       clearError: () => set({ error: null })
     }),
     {
-      name: 'discussion-storage'
+      name: 'discussion-storage',
+      partialize: (state) => ({
+        discussions: state.discussions
+      })
     }
   )
 )
