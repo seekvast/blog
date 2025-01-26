@@ -11,27 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { Loader2 } from "lucide-react";
-import { API_ROUTES } from "@/constants/api";
-
-interface Board {
-  id: number;
-  name: string;
-  avatar: string;
-  category: {
-    id: number;
-    name: string;
-  };
-}
-
-interface BoardsResponse {
-  code: number;
-  data: {
-    current_page: number;
-    items: Board[];
-    last_page: number;
-    total: number;
-  };
-}
+import { QueryParams } from "@/types/common";
 
 interface BoardSelectProps {
   value?: number;
@@ -54,20 +34,19 @@ export function BoardSelect({ value, onChange }: BoardSelectProps) {
     async (searchName: string, pageNum: number, append = false) => {
       try {
         setLoading(true);
-        const searchParams = new URLSearchParams();
-        if (searchName) searchParams.set("name", searchName);
-        searchParams.set("per_page", "20");
-        searchParams.set("page", pageNum.toString());
+        const queryParams = {
+          page: pageNum,
+          name: "",
+        };
+        if (searchName) queryParams.name = searchName;
 
-        const response = await api.get<BoardsResponse>(
-          `${API_ROUTES.BOARDS.LIST}?${searchParams.toString()}`
-        );
+        const data = await api.boards.list(queryParams);
 
-        if (response.code === 0) {
+        if (data.items.length > 0) {
           setBoards((prev) =>
-            append ? [...prev, ...response.data.items] : response.data.items
+            append ? [...prev, ...data.items] : data.items
           );
-          setHasMore(pageNum < response.data.last_page);
+          setHasMore(pageNum < data.last_page);
         }
       } catch (error) {
         console.error("Failed to load boards:", error);

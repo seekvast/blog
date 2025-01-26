@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Discussion } from '@/types'
 import { discussionService } from '@/services/discussion'
+import { api } from '@/lib/api'
 
 interface DiscussionState {
   discussions: Discussion[]
@@ -28,8 +29,8 @@ export const useDiscussionStore = create<DiscussionState>()(
       fetchDiscussions: async (params = {}) => {
         try {
           set({ loading: true, error: null })
-          const response = await discussionService.getDiscussions(params)
-          set({ discussions: response.items })
+          const response = await api.discussions.list(params)
+          set({ discussions: response.data.items })
         } catch (error: any) {
           set({ error: error.message })
         } finally {
@@ -40,9 +41,9 @@ export const useDiscussionStore = create<DiscussionState>()(
       fetchDiscussion: async (slug: string) => {
         try {
           set({ loading: true, error: null })
-          const response = await discussionService.getDiscussion(slug)
+          const response = await api.discussions.get(slug)
           // 如果是分页数据，取第一个项
-          const discussion = 'items' in response ? response.items[0] : response
+          const discussion = response
           set({ currentDiscussion: discussion })
         } catch (error: any) {
           set({ error: error.message })
@@ -54,9 +55,9 @@ export const useDiscussionStore = create<DiscussionState>()(
       createDiscussion: async (data: Partial<Discussion>) => {
         try {
           set({ loading: true, error: null })
-          const response = await discussionService.createDiscussion(data)
+          const response = await api.discussions.create(data)
           set((state) => ({
-            discussions: [response, ...state.discussions]
+            discussions: [response.data, ...state.discussions]
           }))
         } catch (error: any) {
           set({ error: error.message })
@@ -68,7 +69,7 @@ export const useDiscussionStore = create<DiscussionState>()(
       updateDiscussion: async (slug: string, data: Partial<Discussion>) => {
         try {
           set({ loading: true, error: null })
-          const response = await discussionService.updateDiscussion({ slug, ...data })
+          const response = await api.discussions.update({ slug, ...data })
           set((state) => ({
             discussions: state.discussions.map((d) =>
               d.slug === slug ? response : d

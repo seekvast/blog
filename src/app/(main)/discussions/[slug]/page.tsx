@@ -3,10 +3,11 @@ import { discussionService } from "@/services/discussion";
 import { DiscussionDetail } from "./discussion-detail";
 import { AsyncBoundary } from "@/components/ui/async-boundary";
 import { notFound } from "next/navigation";
+import { api } from "@/lib/api";
 
 async function getDiscussion(slug: string) {
   try {
-    const response = await discussionService.getDiscussion(slug);
+      const response = await api.discussions.get(slug);
     console.log(response, "--------------------detail");
     return response;
   } catch (error: any) {

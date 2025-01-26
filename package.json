@@ -30,6 +30,7 @@
     "@types/nprogress": "^0.2.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "cmdk": "^1.0.4",
     "date-fns": "^4.1.0",
     "i18next": "^24.2.0",
     "i18next-browser-languagedetector": "^8.0.2",

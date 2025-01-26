@@ -1,18 +1,19 @@
 import { discussionService } from "@/services/discussion";
 import { DiscussionsList } from "@/components/home/discussions-list";
+import { api } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 async function getDiscussions() {
   try {
-    const response = await discussionService.getDiscussions({ 
+    const response = await api.discussions.list({ 
       page: 1, 
       per_page: 10 
     });
     return response;
   } catch (error) {
-      console.log(error, 'home.............')
+      console.log(error, 'error home.............')
     // Return an empty paginated result in case of error
     return {
       code: -1,

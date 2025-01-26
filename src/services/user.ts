@@ -1,6 +1,6 @@
 import { api } from '@/lib/api'
 import { validate } from '@/lib/validation'
-import type { User, PaginatedResponse, QueryParams } from '@/types/common'
+import type { User, Pagination, QueryParams } from '@/types/common'
 import {
   updateProfileSchema,
   changePasswordSchema,
@@ -28,7 +28,7 @@ export const userService = {
 
   getUsers: (params?: QueryParams) => {
     const validatedParams = params ? validate(userQuerySchema, params) : undefined
-    return api.get<PaginatedResponse<User>>('/users', validatedParams)
+    return api.get<Pagination<User>>('/users', validatedParams)
   },
 
   updateProfile: (data: UpdateProfileDto) => {

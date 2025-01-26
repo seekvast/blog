@@ -21,3 +21,42 @@ export function debounce<T extends (...args: any[]) => any>(
     }, wait);
   };
 }
+
+// 获取光标在文本区域中的坐标
+export function getCaretCoordinates(
+  element: HTMLTextAreaElement,
+  position: number
+): { top: number; left: number } {
+  const { offsetLeft, offsetTop, scrollLeft, scrollTop } = element;
+  const div = document.createElement('div');
+  const styles = getComputedStyle(element);
+  const properties = [
+    'direction', 'boxSizing', 'width', 'height', 'overflowX', 'overflowY',
+    'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth',
+    'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+    'fontStyle', 'fontVariant', 'fontWeight', 'fontStretch', 'fontSize',
+    'fontSizeAdjust', 'lineHeight', 'fontFamily', 'textAlign', 'textTransform',
+    'textIndent', 'textDecoration', 'letterSpacing', 'wordSpacing'
+  ];
+
+  div.style.position = 'absolute';
+  div.style.visibility = 'hidden';
+  properties.forEach(prop => {
+    div.style[prop as any] = styles[prop];
+  });
+
+  div.textContent = element.value.substring(0, position);
+  document.body.appendChild(div);
+  
+  const span = document.createElement('span');
+  span.textContent = element.value.substring(position) || '.';
+  div.appendChild(span);
+  
+  const coordinates = {
+    top: span.offsetTop - scrollTop,
+    left: span.offsetLeft - scrollLeft
+  };
+  
+  document.body.removeChild(div);
+  return coordinates;
+}

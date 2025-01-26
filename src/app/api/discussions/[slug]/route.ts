@@ -10,8 +10,8 @@ export const GET = withErrorHandler(async (
   { params }: { params: { slug: string } }
 ) => {
   try {
-    const response = await api.get(`/discussions/${params.slug}`)
-    return NextResponse.json(response)
+    const data = await api.discussions.get(params.slug)
+    return NextResponse.json(data)
   } catch (error) {
     throw new ApiError('Failed to fetch discussion', 500)
   }

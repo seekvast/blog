@@ -1,108 +1,17 @@
-import { fetchApi } from './fetch'
-import type { FetchOptions, ApiResult } from './types'
-import { withCache, generateCacheKey } from './cache'
-import { handleApiError } from './error-middleware'
+import { createApi } from './factory'
+import type { Discussion } from '@/types'
+import { http } from './http'
 
-interface ApiOptions extends FetchOptions {
-  useCache?: boolean
-  ttl?: number
-}
+const options = { prefix: '/api' }
+// 创建基础客户端 API 实例
+const baseApi = createApi(options)
 
-async function handleRequest<T>(
-  promise: Promise<T>,
-  options?: ApiOptions
-): Promise<T> {
-  try {
-    return await promise
-  } catch (error) {
-    await handleApiError(error)
-    throw error
+export const clientApi = {
+  ...baseApi,
+  discussions: {
+    ...baseApi.discussions,
+    // 重写特定方法
+    get: (slug: string) =>
+        http.get<Discussion>(`${options.prefix}/discussions/${slug}`, undefined),
   }
-}
-
-export const api = {
-  get: <T>(
-    endpoint: string,
-    params?: Record<string, any>,
-    options: ApiOptions = {}
-  ): ApiResult<T> => {
-    const { useCache, ttl, ...fetchOptions } = options
-    const request = () => fetchApi<T>(endpoint, { ...fetchOptions, params })
-
-    if (useCache) {
-      const cacheKey = generateCacheKey(endpoint, params)
-      return handleRequest(
-        withCache(request, { key: cacheKey, ttl }),
-        options
-      )
-    }
-
-    return handleRequest(request(), options)
-  },
-
-  post: <T>(
-    endpoint: string,
-    data?: any,
-    options: ApiOptions = {}
-  ): ApiResult<T> =>
-    handleRequest(
-      fetchApi<T>(endpoint, {
-        ...options,
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers
-        },
-        body: JSON.stringify(data)
-      }),
-      options
-    ),
-
-  put: <T>(
-    endpoint: string,
-    data?: any,
-    options: ApiOptions = {}
-  ): ApiResult<T> =>
-    handleRequest(
-      fetchApi<T>(endpoint, {
-        ...options,
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers
-        },
-        body: JSON.stringify(data)
-      }),
-      options
-    ),
-
-  delete: <T>(
-    endpoint: string,
-    options: ApiOptions = {}
-  ): ApiResult<T> =>
-    handleRequest(
-      fetchApi<T>(endpoint, { 
-        ...options,
-        method: 'DELETE' 
-      }),
-      options
-    ),
-
-  patch: <T>(
-    endpoint: string,
-    data?: any,
-    options: ApiOptions = {}
-  ): ApiResult<T> =>
-    handleRequest(
-      fetchApi<T>(endpoint, {
-        ...options,
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers
-        },
-        body: JSON.stringify(data)
-      }),
-      options
-    )
 }

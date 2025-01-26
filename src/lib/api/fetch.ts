@@ -5,9 +5,9 @@ import {
   runResponseInterceptors,
   runResponseDataInterceptors,
 } from "./interceptor";
+import { getBaseUrl, API_CONFIG } from './config';
 
-const DEFAULT_RETRY = 3;
-const DEFAULT_TIMEOUT = 10000;
+const { DEFAULT_RETRY, DEFAULT_TIMEOUT } = API_CONFIG;
 
 async function createHeaders(options: FetchOptions): Promise<Headers> {
   const session = await getSession();
@@ -100,15 +100,12 @@ export async function fetchApi<T>(
 
   // 处理 URL
   const isServer = typeof window === 'undefined';
-  const baseUrl = isServer
-    ? (process.env.SERVER_API_URL || 'http://api.kater.host')
-    : (process.env.NEXT_PUBLIC_API_URL || '/api');
+  const baseUrl = getBaseUrl(isServer);
 
   // 在服务端必须使用完整 URL，在客户端可以使用相对路径
   const url = isServer
     ? new URL(endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`)
     : new URL(endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`, window.location.origin);
-console.log(url, 'fetch,url.........................')
   // 添加查询参数
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
@@ -117,7 +114,7 @@ console.log(url, 'fetch,url.........................')
       }
     });
   }
-
+console.log(url, 'fetch,url.........................')
   // 创建请求选项
   const headers = await createHeaders(restOptions);
   const interceptedOptions = await runRequestInterceptors({

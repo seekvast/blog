@@ -6,7 +6,6 @@ import { Toolbar } from "./Toolbar";
 import { Preview } from "./Preview";
 import { FileUploader } from "./FileUploader";
 import { cn } from "@/lib/utils";
-import { ErrorBoundary } from "@/components/error-boundary";
 
 interface EditorProps {
   className?: string;
@@ -74,45 +73,37 @@ export function Editor({ className, placeholder }: EditorProps) {
   }, [selection]);
 
   return (
-    <ErrorBoundary
-      fallback={
-        <div className="p-4 text-red-500">
-          编辑器出现错误，请刷新页面重试
+    <div className={cn("flex flex-col", className)}>
+      <div className="border rounded-md focus-within:ring-2 focus-within:ring-primary">
+        <Toolbar className="border-b rounded-t-md" />
+
+        <div className="relative">
+          {!previewMode && (
+            <textarea
+              ref={textareaRef}
+              value={content}
+              onChange={handleInput}
+              onSelect={handleSelect}
+              onKeyDown={handleKeyDown}
+              placeholder={placeholder}
+              className={cn(
+                "w-full min-h-[200px] p-3",
+                "focus:outline-none",
+                "resize-y bg-background",
+                hasUnsavedContent && "border-yellow-500"
+              )}
+            />
+          )}
+
+          {previewMode && (
+            <div className="min-h-[200px]">
+              <Preview content={content} />
+            </div>
+          )}
         </div>
-      }
-    >
-      <div className={cn("flex flex-col", className)}>
-        <div className="border rounded-md focus-within:ring-2 focus-within:ring-primary">
-          <Toolbar className="border-b rounded-t-md" />
-
-          <div className="relative">
-            {!previewMode && (
-              <textarea
-                ref={textareaRef}
-                value={content}
-                onChange={handleInput}
-                onSelect={handleSelect}
-                onKeyDown={handleKeyDown}
-                placeholder={placeholder}
-                className={cn(
-                  "w-full min-h-[200px] p-3",
-                  "focus:outline-none",
-                  "resize-y bg-background",
-                  hasUnsavedContent && "border-yellow-500"
-                )}
-              />
-            )}
-
-            {previewMode && (
-              <div className="min-h-[200px]">
-                <Preview content={content} />
-              </div>
-            )}
-          </div>
-        </div>
-
-        <FileUploader className="mt-2" />
       </div>
-    </ErrorBoundary>
+
+      <FileUploader className="mt-2" />
+    </div>
   );
 }
