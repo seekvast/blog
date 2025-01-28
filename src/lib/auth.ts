@@ -2,16 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { api } from "./api";
-import type { ApiError } from "./api/types";
-
-interface LoginResponse {
-  hashid: string;
-  nickname: string;
-  email: string;
-  avatar_url: string;
-  token: string;
-  [key: string]: any; // for other potential fields
-}
+import type { LoginResponse } from "@/types/common";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -31,7 +22,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         // try {
-        const response = await api.post<LoginResponse>("/api/login", {
+        const response = await api.users.login({
           email: credentials.email,
           password: credentials.password,
         });

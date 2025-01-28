@@ -13,95 +13,98 @@ interface PreviewProps {
 
 export function Preview({ content, className }: PreviewProps) {
   // 使用 useMemo 缓存渲染结果，避免不必要的重渲染
-  const markdown = React.useMemo(() => (
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      rehypePlugins={[rehypeRaw, rehypeSanitize]}
-      components={{
-        // 自定义链接渲染
-        a: ({ node, href, children, ...props }) => {
-          const isMention = href?.startsWith('@');
-          if (isMention) {
+  const markdown = React.useMemo(
+    () => (
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw, rehypeSanitize]}
+        components={{
+          // 自定义链接渲染
+          a: ({ node, href, children, ...props }) => {
+            const isMention = href?.startsWith("@");
+            if (isMention) {
+              return (
+                <a
+                  {...props}
+                  href={`/users/${href?.slice(1)}`}
+                  className="inline-flex items-center text-primary hover:underline"
+                >
+                  {children}
+                </a>
+              );
+            }
             return (
               <a
                 {...props}
-                href={`/users/${href?.slice(1)}`}
-                className="inline-flex items-center text-primary hover:underline"
-              >
-                {children}
-              </a>
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+              />
             );
-          }
-          return (
-            <a
-              {...props}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            />
-          );
-        },
-        // 自定义代码块渲染
-        code: ({ node, inline, className, children, ...props }) => {
-          const match = /language-(\w+)/.exec(className || '');
-          return !inline ? (
-            <pre className="relative group">
+          },
+          // 自定义代码块渲染
+          code: ({ node, inline, className, children, ...props }) => {
+            const match = /language-(\w+)/.exec(className || "");
+            return !inline ? (
+              <pre className="relative group">
+                <code
+                  className={cn(
+                    "block overflow-x-auto p-4 rounded-lg bg-muted",
+                    match && `language-${match[1]}`,
+                    className
+                  )}
+                  {...props}
+                >
+                  {children}
+                </code>
+                {/* 可以在这里添加复制按钮 */}
+              </pre>
+            ) : (
               <code
                 className={cn(
-                  "block overflow-x-auto p-4 rounded-lg bg-muted",
-                  match && `language-${match[1]}`,
+                  "bg-muted px-1.5 py-0.5 rounded text-sm",
                   className
                 )}
                 {...props}
               >
                 {children}
               </code>
-              {/* 可以在这里添加复制按钮 */}
-            </pre>
-          ) : (
-            <code
-              className={cn(
-                "bg-muted px-1.5 py-0.5 rounded text-sm",
-                className
-              )}
+            );
+          },
+          // 自定义图片渲染
+          img: ({ node, ...props }) => (
+            <img
               {...props}
-            >
-              {children}
-            </code>
-          );
-        },
-        // 自定义图片渲染
-        img: ({ node, ...props }) => (
-          <img
-            {...props}
-            className="rounded-lg max-h-[600px] mx-auto"
-            loading="lazy"
-          />
-        ),
-        // 自定义表格渲染
-        table: ({ node, ...props }) => (
-          <div className="overflow-x-auto">
-            <table
-              {...props}
-              className="w-full border-collapse border border-border"
+              className="rounded-lg max-h-[600px] mx-auto"
+              loading="lazy"
             />
-          </div>
-        ),
-        th: ({ node, ...props }) => (
-          <th
-            {...props}
-            className="border border-border p-2 bg-muted font-semibold"
-          />
-        ),
-        td: ({ node, ...props }) => (
-          <td {...props} className="border border-border p-2" />
-        ),
-      }}
-    >
-      {content}
-    </ReactMarkdown>
-  ), [content]);
+          ),
+          // 自定义表格渲染
+          table: ({ node, ...props }) => (
+            <div className="overflow-x-auto">
+              <table
+                {...props}
+                className="w-full border-collapse border border-border"
+              />
+            </div>
+          ),
+          th: ({ node, ...props }) => (
+            <th
+              {...props}
+              className="border border-border p-2 bg-muted font-semibold"
+            />
+          ),
+          td: ({ node, ...props }) => (
+            <td {...props} className="border border-border p-2" />
+          ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    ),
+    [content]
+  );
 
   return (
     <div
