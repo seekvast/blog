@@ -53,14 +53,35 @@ export function Editor({
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const value = e.target.value;
 
+      // 检测@提及
+      const cursorPosition = e.target.selectionStart;
+      const textBeforeCursor = value.slice(0, cursorPosition);
+      const mentionMatch = textBeforeCursor.match(/@(?!["\w\s#]+")(\w*)$/);
+
+      if (mentionMatch && mentionMatch[1]) {
+        const query = mentionMatch[1];
+        const atSignPosition = cursorPosition - query.length - 1;
+
+        const rect = e.target.getBoundingClientRect();
+        const position = getCaretCoordinates(e.target, atSignPosition);
+
+        setMentionPosition({
+          top: rect.top + position.top,
+          left: rect.left + position.left,
+        });
+
+        setMentionQuery(query);
+        setShowMentionPicker(true);
+      } else {
+        setShowMentionPicker(false);
+      }
+
       // 检测URL并转换为Markdown链接
       const urlRegex = /(?:^|\s)(https?:\/\/[^\s]+)(?=\s|$)/g;
-      const youtubeRegex =
-        /https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[^&\s]+/;
+      const youtubeRegex = /https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[^&\s]+/;
       let newContent = value;
       let match;
 
-      // 使用while循环处理所有匹配项
       while ((match = urlRegex.exec(value)) !== null) {
         const url = match[1];
         // 检查URL是否已经是Markdown链接格式或YouTube链接
@@ -89,33 +110,9 @@ export function Editor({
         }
       }
 
-      // 修改@提及的检查逻辑
-      const cursorPosition = e.target.selectionStart;
-      const textBeforeCursor = value.slice(0, cursorPosition);
-      // 修改正则表达式，只匹配尚未完成的@提及
-      const mentionMatch = textBeforeCursor.match(/@(?!["\w\s#]+")(\w*)$/);
-
-      if (mentionMatch && mentionMatch[1]) {
-        const query = mentionMatch[1];
-        const atSignPosition = cursorPosition - query.length - 1;
-
-        const rect = e.target.getBoundingClientRect();
-        const position = getCaretCoordinates(e.target, atSignPosition);
-
-        setMentionPosition({
-          top: rect.top + position.top,
-          left: rect.left + position.left,
-        });
-
-        setMentionQuery(query);
-        setShowMentionPicker(true);
-      } else {
-        setShowMentionPicker(false);
-      }
-
       setContent(newContent);
     },
-    [setContent]
+    [setContent, setMentionPosition, setMentionQuery, setShowMentionPicker]
   );
 
   // 处理键盘事件，包括 @ 提及的处理

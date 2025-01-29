@@ -203,6 +203,26 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
     setIsPollEditing(true);
   };
 
+  const resetAllStates = React.useCallback(() => {
+    setTitle("");
+    setContent("");
+    setSelectedBoard(0);
+    setSelectedChildBoard(undefined);
+    setAttachments([]);
+    setPollData(null);
+    setPollOptions(["", ""]);
+    setIsMultipleChoice(false);
+    setShowVoters(false);
+    setHasDeadline(false);
+    setPollStartTime("");
+    setPollEndTime("");
+    setIsPollEditing(false);
+    setIsSubmitting(false);
+    setShowConfirmDialog(false);
+    setPendingAction(null);
+    setHasUnsavedContent(false);
+  }, [setHasUnsavedContent]);
+
   const handlePublish = async () => {
     if (!title.trim()) {
       console.error("请输入标题");
@@ -227,7 +247,7 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
       };
 
       await api.discussions.create(data);
-      console.log("发布成功");
+      resetAllStates();
       onOpenChange(false);
       if (window.location.pathname !== "/") {
         router.push("/");
@@ -235,7 +255,6 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
       router.refresh();
     } catch (error) {
       console.error("发布失败", error);
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -244,22 +263,6 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
     // 处理保存草稿逻辑
     console.log("Save draft", { title, content });
   }, [title, content]);
-
-  const resetAllStates = React.useCallback(() => {
-    setTitle("");
-    setContent("");
-    setSelectedBoard(0);
-    setSelectedChildBoard(undefined);
-    setAttachments([]);
-    setPollData(null);
-    setPollOptions(["", ""]);
-    setIsMultipleChoice(false);
-    setShowVoters(false);
-    setHasDeadline(false);
-    setPollStartTime("");
-    setPollEndTime("");
-    setIsPollEditing(false);
-  }, []);
 
   const handleClose = React.useCallback(() => {
     resetAllStates();
