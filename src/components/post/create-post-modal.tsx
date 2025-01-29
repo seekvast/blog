@@ -16,6 +16,7 @@ import { useMarkdownEditor } from "@/store/md-editor";
 import { Editor } from "@/components/editor/Editor";
 import { discussionService } from "@/services/discussion";
 import { AlertTriangle } from "lucide-react";
+import { AttachmentType } from "@/constants/attachment-type";
 
 import {
   Dialog,
@@ -244,36 +245,6 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
     console.log("Save draft", { title, content });
   }, [title, content]);
 
-  const handleImageUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append("image", file);
-    formData.append("attachment_type", "topics_images");
-
-    try {
-      const response = await api.upload.image(formData);
-
-      if (response.code === 0) {
-        const imageUrl = `${response.data.host}${response.data.file_path}`;
-        const newAttachment = {
-          id: response.data.id,
-          file_name: response.data.file_name,
-          file_type: "image",
-        };
-        setAttachments((prev) => [...prev, newAttachment]);
-        return imageUrl;
-      } else {
-        throw new Error(response.message || "Upload failed");
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      toast({
-        variant: "destructive",
-        title: "图片上传失败",
-      });
-      return null;
-    }
-  };
-
   const resetAllStates = React.useCallback(() => {
     setTitle("");
     setContent("");
@@ -448,6 +419,7 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
               <Editor
                 placeholder="开始编写正文..."
                 className="min-h-[400px] mt-4"
+                attachmentType={AttachmentType.TOPIC}
               />
             </div>
           </div>

@@ -7,13 +7,19 @@ import { Preview } from "./Preview";
 import { MentionPicker } from "./MentionPicker";
 import { cn } from "@/lib/utils";
 import { getCaretCoordinates } from "@/lib/utils/caret";
+import { uploadFile, AttachmentType } from "@/lib/utils/upload";
 
 interface EditorProps {
   className?: string;
   placeholder?: string;
+  attachmentType: AttachmentType;
 }
 
-export function Editor({ className, placeholder }: EditorProps) {
+export function Editor({
+  className,
+  placeholder,
+  attachmentType,
+}: EditorProps) {
   const {
     content,
     setContent,
@@ -22,6 +28,8 @@ export function Editor({ className, placeholder }: EditorProps) {
     previewMode,
     hasUnsavedContent,
     addMention,
+    addUploadingFile,
+    removeUploadingFile,
   } = useMarkdownEditor();
 
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
@@ -44,50 +52,68 @@ export function Editor({ className, placeholder }: EditorProps) {
   const handleInput = React.useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const value = e.target.value;
-      
+
       // 检测URL并转换为Markdown链接
       const urlRegex = /(?:^|\s)(https?:\/\/[^\s]+)(?=\s|$)/g;
-      const youtubeRegex = /https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[^&\s]+/;
+      const youtubeRegex =
+        /https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[^&\s]+/;
       let newContent = value;
       let match;
-      
+
       // 使用while循环处理所有匹配项
       while ((match = urlRegex.exec(value)) !== null) {
         const url = match[1];
         // 检查URL是否已经是Markdown链接格式或YouTube链接
-        const beforeUrl = value.slice(Math.max(0, match.index - 2), match.index);
-        const afterUrl = value.slice(match.index + url.length, match.index + url.length + 2);
-        const isAlreadyLink = beforeUrl === '](' || afterUrl.startsWith(')');
+        const beforeUrl = value.slice(
+          Math.max(0, match.index - 2),
+          match.index
+        );
+        const afterUrl = value.slice(
+          match.index + url.length,
+          match.index + url.length + 2
+        );
+        const isAlreadyLink = beforeUrl === "](" || afterUrl.startsWith(")");
         const isYoutubeLink = url.match(youtubeRegex);
-        
+
         if (!isAlreadyLink && !isYoutubeLink) {
           // 替换URL为Markdown链接
           const markdownLink = `[${url}](${url})`;
-          newContent = newContent.slice(0, match.index) + 
-                      match[0].replace(url, markdownLink) + 
-                      newContent.slice(match.index + match[0].length);
-          
+          newContent =
+            newContent.slice(0, match.index) +
+            match[0].replace(url, markdownLink) +
+            newContent.slice(match.index + match[0].length);
+
           // 更新正则表达式的lastIndex以考虑新插入的文本长度
           const diff = markdownLink.length - url.length;
           urlRegex.lastIndex += diff;
         }
       }
-      
-      setContent(newContent);
 
-      // 检查@提及
-      const lastChar = value[e.target.selectionStart - 1];
-      if (lastChar === "@") {
+      // 修改@提及的检查逻辑
+      const cursorPosition = e.target.selectionStart;
+      const textBeforeCursor = value.slice(0, cursorPosition);
+      // 修改正则表达式，只匹配尚未完成的@提及
+      const mentionMatch = textBeforeCursor.match(/@(?!["\w\s#]+")(\w*)$/);
+
+      if (mentionMatch && mentionMatch[1]) {
+        const query = mentionMatch[1];
+        const atSignPosition = cursorPosition - query.length - 1;
+
         const rect = e.target.getBoundingClientRect();
-        const position = getCaretCoordinates(e.target, e.target.selectionStart);
+        const position = getCaretCoordinates(e.target, atSignPosition);
 
         setMentionPosition({
           top: rect.top + position.top,
           left: rect.left + position.left,
         });
-        setMentionQuery("@");
+
+        setMentionQuery(query);
         setShowMentionPicker(true);
+      } else {
+        setShowMentionPicker(false);
       }
+
+      setContent(newContent);
     },
     [setContent]
   );
@@ -117,13 +143,47 @@ export function Editor({ className, placeholder }: EditorProps) {
 
   const handlePaste = (e: React.ClipboardEvent) => {
     const items = e.clipboardData.items;
-    
+
     for (const item of items) {
-      if (item.type.startsWith('image/')) {
+      if (item.type.startsWith("image/")) {
         e.preventDefault();
         const file = item.getAsFile();
         if (file) handleImageUpload(file);
       }
+    }
+  };
+
+  const insertText = React.useCallback(
+    (text: string) => {
+      if (!textareaRef.current) return;
+
+      const start = textareaRef.current.selectionStart;
+      const end = textareaRef.current.selectionEnd;
+
+      const newContent = content.slice(0, start) + text + content.slice(end);
+      setContent(newContent);
+
+      // 更新光标位置
+      const newPosition = start + text.length;
+      requestAnimationFrame(() => {
+        if (!textareaRef.current) return;
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newPosition, newPosition);
+        setSelection({ start: newPosition, end: newPosition });
+      });
+    },
+    [content, setContent, setSelection]
+  );
+
+  const handleImageUpload = async (file: File) => {
+    try {
+      addUploadingFile(file);
+      const url = await uploadFile(file, attachmentType);
+      insertText(`![${file.name}](${url})`);
+    } catch (error) {
+      console.error("Failed to upload image:", error);
+    } finally {
+      removeUploadingFile(file);
     }
   };
 
@@ -139,7 +199,11 @@ export function Editor({ className, placeholder }: EditorProps) {
   return (
     <div className={cn("flex flex-col", className)}>
       <div className="border rounded-md focus-within:ring-2 focus-within:ring-primary">
-        <Toolbar className="border-b rounded-t-md" textareaRef={textareaRef} />
+        <Toolbar
+          className="border-b rounded-t-md"
+          textareaRef={textareaRef}
+          onImageUpload={handleImageUpload}
+        />
 
         <div className="relative">
           {!previewMode && (

@@ -41,7 +41,12 @@ interface MarkdownEditorStore {
   setIsOpen: (isOpen: boolean) => void;
 
   // Markdown 编辑方法
-  insertText: (text: string, position?: number) => void;
+  insertText: (
+    text: string,
+    position?: number,
+    before?: number,
+    after?: number
+  ) => void;
   wrapSelection: (before: string, after: string) => void;
 
   // 文件和扩展功能
@@ -93,25 +98,61 @@ export const useMarkdownEditor = create<
   setOnClose: (onClose) => set({ onClose }),
 
   // Markdown 编辑方法
-  insertText: (text, position) => {
+  insertText: (
+    text: string,
+    position?: number,
+    before: number = 0,
+    after: number = 0
+  ) => {
     const state = get();
-    const pos = position ?? state.selection.start;
+    const pos = position ?? Math.max(0, state.selection.start);
+    const newPos = Math.min(state.content.length, pos + before);
     const newContent =
-      state.content.slice(0, pos) + text + state.content.slice(pos);
+      state.content.slice(0, newPos) +
+      text +
+      state.content.slice(Math.min(state.content.length, pos + after));
 
     state.setContent(newContent);
+
+    // 设置新的光标位置到插入文本的末尾
+    const finalPos = Math.min(newContent.length, newPos + text.length);
     state.setSelection({
-      start: pos + text.length,
-      end: pos + text.length,
+      start: finalPos,
+      end: finalPos,
+    });
+
+    // 确保文本区域获得焦点并更新光标位置
+    requestAnimationFrame(() => {
+      const textarea = document.querySelector("textarea");
+      if (textarea) {
+        textarea.focus();
+        textarea.setSelectionRange(finalPos, finalPos);
+      }
     });
   },
 
-  wrapSelection: (before, after) => {
+  wrapSelection: (before: string, after: string) => {
     const state = get();
     const { start, end } = state.selection;
+
+    // 如果没有选择文本，在光标处插入
+    if (start === end) {
+      const newText = before + after;
+      const newContent =
+        state.content.slice(0, start) + newText + state.content.slice(end);
+
+      state.setContent(newContent);
+      // 将光标放在中间
+      state.setSelection({
+        start: start + before.length,
+        end: start + before.length,
+      });
+      return;
+    }
+
+    // 处理选中文本的情况
     const selectedText = state.content.slice(start, end);
     const newText = before + selectedText + after;
-
     const newContent =
       state.content.slice(0, start) + newText + state.content.slice(end);
 
@@ -159,7 +200,7 @@ export const useMarkdownEditor = create<
       set({ parsedContent: html });
       return html;
     } catch (error) {
-      console.error('Failed to parse content:', error);
+      console.error("Failed to parse content:", error);
       throw error;
     }
   },

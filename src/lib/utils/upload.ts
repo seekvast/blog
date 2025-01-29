@@ -1,4 +1,3 @@
-import { UploadResponse } from "@/types";
 import { api } from "@/lib/api";
 
 export type AttachmentType =
