@@ -5,7 +5,9 @@ import { useMarkdownEditor } from "@/store/md-editor";
 import { Toolbar } from "./Toolbar";
 import { Preview } from "./Preview";
 import { FileUploader } from "./FileUploader";
+import { MentionPicker } from "./MentionPicker";
 import { cn } from "@/lib/utils";
+import { getCaretCoordinates } from "@/lib/utils/caret";
 
 interface EditorProps {
   className?: string;
@@ -20,9 +22,16 @@ export function Editor({ className, placeholder }: EditorProps) {
     setSelection,
     previewMode,
     hasUnsavedContent,
+    addMention,
   } = useMarkdownEditor();
 
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const [showMentionPicker, setShowMentionPicker] = React.useState(false);
+  const [mentionQuery, setMentionQuery] = React.useState("");
+  const [mentionPosition, setMentionPosition] = React.useState({
+    top: 0,
+    left: 0,
+  });
 
   const handleSelect = React.useCallback(() => {
     if (!textareaRef.current) return;
@@ -35,12 +44,27 @@ export function Editor({ className, placeholder }: EditorProps) {
 
   const handleInput = React.useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setContent(e.target.value);
+      const newContent = e.target.value;
+      setContent(newContent);
+
+      // 检查是否输入了 @ 符号
+      const lastChar = newContent[e.target.selectionStart - 1];
+      if (lastChar === "@") {
+        const rect = e.target.getBoundingClientRect();
+        const position = getCaretCoordinates(e.target, e.target.selectionStart);
+
+        setMentionPosition({
+          top: rect.top + position.top,
+          left: rect.left + position.left,
+        });
+        setMentionQuery("@");
+        setShowMentionPicker(true);
+      }
     },
     [setContent]
   );
 
-  // 处理快捷键
+  // 处理键盘事件，包括 @ 提及的处理
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Tab") {
       e.preventDefault();
@@ -49,10 +73,7 @@ export function Editor({ className, placeholder }: EditorProps) {
 
       if (start === end) {
         const newContent = content.slice(0, start) + "  " + content.slice(end);
-
         setContent(newContent);
-
-        // 移动光标到缩进后的位置
         setTimeout(() => {
           if (textareaRef.current) {
             textareaRef.current.selectionStart =
@@ -60,6 +81,9 @@ export function Editor({ className, placeholder }: EditorProps) {
           }
         }, 0);
       }
+    } else if (showMentionPicker && e.key === "Escape") {
+      e.preventDefault();
+      setShowMentionPicker(false);
     }
   };
 
@@ -79,20 +103,29 @@ export function Editor({ className, placeholder }: EditorProps) {
 
         <div className="relative">
           {!previewMode && (
-            <textarea
-              ref={textareaRef}
-              value={content}
-              onChange={handleInput}
-              onSelect={handleSelect}
-              onKeyDown={handleKeyDown}
-              placeholder={placeholder}
-              className={cn(
-                "w-full min-h-[200px] p-3",
-                "focus:outline-none",
-                "resize-y bg-background",
-                hasUnsavedContent && "border-yellow-500"
+            <>
+              <textarea
+                ref={textareaRef}
+                value={content}
+                onChange={handleInput}
+                onSelect={handleSelect}
+                onKeyDown={handleKeyDown}
+                placeholder={placeholder}
+                className={cn(
+                  "w-full min-h-[200px] p-3",
+                  "focus:outline-none",
+                  "resize-y bg-background",
+                  hasUnsavedContent && "border-yellow-500"
+                )}
+              />
+              {showMentionPicker && (
+                <MentionPicker
+                  position={mentionPosition}
+                  query={mentionQuery}
+                  onClose={() => setShowMentionPicker(false)}
+                />
               )}
-            />
+            </>
           )}
 
           {previewMode && (

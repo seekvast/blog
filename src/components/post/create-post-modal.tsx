@@ -71,12 +71,11 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
 
   const [title, setTitle] = React.useState("");
   const [selectedBoard, setSelectedBoard] = React.useState<number | undefined>(
-    1
+    0
   );
   const [selectedChildBoard, setSelectedChildBoard] = React.useState<
     number | undefined
   >();
-  const [boardChildren, setBoardChildren] = React.useState<BoardChild[]>([]);
   const [loadingChildren, setLoadingChildren] = React.useState(false);
   const [attachments, setAttachments] = React.useState<
     { id: number; file_name: string; file_type: string }[]
@@ -91,7 +90,8 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
   const [pollData, setPollData] = React.useState<PollData | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const { children, setChildren: setChildren } = useBoardChildrenStore();
+  const { boardChildren, setBoardChildren: setBoardChildren } =
+    useBoardChildrenStore();
 
   const loadBoardChildren = React.useCallback(
     async (boardId: number) => {
@@ -101,21 +101,29 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
         // 如果 store 中没有，则请求 API
         const data = await api.boards.getChildren(boardId);
         // 缓存到 store 中
-        setChildren(data);
+        setBoardChildren(data);
       } catch (error) {
         console.error("Failed to load board children:", error);
       } finally {
         setLoadingChildren(false);
       }
     },
-    [children, setChildren]
+    [setBoardChildren]
   );
 
   React.useEffect(() => {
     if (selectedBoard) {
       loadBoardChildren(selectedBoard);
     } else {
-      setBoardChildren([]);
+      setBoardChildren({
+        code: 0,
+        items: [],
+        total: 0,
+        per_page: 10,
+        current_page: 1,
+        last_page: 1,
+        message: "",
+      });
     }
   }, [selectedBoard, loadBoardChildren]);
 
@@ -258,7 +266,7 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
   const resetAllStates = React.useCallback(() => {
     setTitle("");
     setContent("");
-    setSelectedBoard(1);
+    setSelectedBoard(0);
     setSelectedChildBoard(undefined);
     setAttachments([]);
     setPollData(null);
@@ -371,8 +379,8 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
             <div className="flex flex-wrap gap-2">
               {loadingChildren ? (
                 <div className="text-sm text-muted-foreground">加载中...</div>
-              ) : boardChildren.length > 0 ? (
-                boardChildren.map((child) => (
+              ) : boardChildren.items.length > 0 ? (
+                boardChildren.items.map((child) => (
                   <Badge
                     key={child.id}
                     variant={
@@ -426,7 +434,8 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
                       setIsMultipleChoice(pollData.isMultipleChoice);
                       setShowVoters(pollData.showVoters);
                       setHasDeadline(pollData.hasDeadline);
-                      if (pollData.startTime) setPollStartTime(pollData.startTime);
+                      if (pollData.startTime)
+                        setPollStartTime(pollData.startTime);
                       if (pollData.endTime) setPollEndTime(pollData.endTime);
                       setIsPollEditing(true);
                     }}
