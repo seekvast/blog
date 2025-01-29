@@ -11,6 +11,8 @@ interface PreviewProps {
   className?: string;
 }
 
+const youtubeRegex = /https?:\/\/(?:www\.)?youtube\.com\/watch\?v=([^&\s]+)/;
+
 export function Preview({ content, className }: PreviewProps) {
   // 使用 useMemo 缓存渲染结果，避免不必要的重渲染
   const markdown = React.useMemo(
@@ -98,6 +100,24 @@ export function Preview({ content, className }: PreviewProps) {
           td: ({ node, ...props }) => (
             <td {...props} className="border border-border p-2" />
           ),
+          p: ({ children }) => {
+            const child = children[0];
+            if (typeof child === 'string') {
+              const match = child.match(youtubeRegex);
+              if (match) {
+                return (
+                  <iframe
+                    width="560"
+                    height="315"
+                    src={`https://www.youtube.com/embed/${match[1]}`}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                );
+              }
+            }
+          },
         }}
       >
         {content}

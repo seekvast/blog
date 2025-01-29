@@ -43,11 +43,40 @@ export function Editor({ className, placeholder }: EditorProps) {
 
   const handleInput = React.useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const newContent = e.target.value;
+      const value = e.target.value;
+      
+      // 检测URL并转换为Markdown链接
+      const urlRegex = /(?:^|\s)(https?:\/\/[^\s]+)(?=\s|$)/g;
+      const youtubeRegex = /https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[^&\s]+/;
+      let newContent = value;
+      let match;
+      
+      // 使用while循环处理所有匹配项
+      while ((match = urlRegex.exec(value)) !== null) {
+        const url = match[1];
+        // 检查URL是否已经是Markdown链接格式或YouTube链接
+        const beforeUrl = value.slice(Math.max(0, match.index - 2), match.index);
+        const afterUrl = value.slice(match.index + url.length, match.index + url.length + 2);
+        const isAlreadyLink = beforeUrl === '](' || afterUrl.startsWith(')');
+        const isYoutubeLink = url.match(youtubeRegex);
+        
+        if (!isAlreadyLink && !isYoutubeLink) {
+          // 替换URL为Markdown链接
+          const markdownLink = `[${url}](${url})`;
+          newContent = newContent.slice(0, match.index) + 
+                      match[0].replace(url, markdownLink) + 
+                      newContent.slice(match.index + match[0].length);
+          
+          // 更新正则表达式的lastIndex以考虑新插入的文本长度
+          const diff = markdownLink.length - url.length;
+          urlRegex.lastIndex += diff;
+        }
+      }
+      
       setContent(newContent);
 
-      // 检查是否输入了 @ 符号
-      const lastChar = newContent[e.target.selectionStart - 1];
+      // 检查@提及
+      const lastChar = value[e.target.selectionStart - 1];
       if (lastChar === "@") {
         const rect = e.target.getBoundingClientRect();
         const position = getCaretCoordinates(e.target, e.target.selectionStart);
@@ -86,6 +115,18 @@ export function Editor({ className, placeholder }: EditorProps) {
     }
   };
 
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items;
+    
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) handleImageUpload(file);
+      }
+    }
+  };
+
   // 保持选择范围同步
   React.useEffect(() => {
     const textarea = textareaRef.current;
@@ -109,6 +150,7 @@ export function Editor({ className, placeholder }: EditorProps) {
                 onChange={handleInput}
                 onSelect={handleSelect}
                 onKeyDown={handleKeyDown}
+                onPaste={handlePaste}
                 placeholder={placeholder}
                 className={cn(
                   "w-full min-h-[200px] p-3",

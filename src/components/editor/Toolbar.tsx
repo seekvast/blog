@@ -15,6 +15,7 @@ import {
   Undo,
   Redo,
   Heading,
+  Strikethrough,
 } from "lucide-react";
 import {
   Tooltip,
@@ -237,8 +238,8 @@ export function Toolbar({ className, textareaRef }: ToolbarProps) {
   const tools = [
     {
       icon: Heading,
-      tooltip: "标题 3",
-      onClick: () => toggleLineFormat("### "),
+      tooltip: "标题 1",
+      onClick: () => toggleLineFormat("# "),
     },
     {
       icon: Bold,
@@ -249,6 +250,11 @@ export function Toolbar({ className, textareaRef }: ToolbarProps) {
       icon: Italic,
       tooltip: "斜体 (Ctrl+I)",
       onClick: () => wrapText("*", "*"),
+    },
+    {
+      icon: Strikethrough,
+      tooltip: "删除线",
+      onClick: () => wrapText("~~", "~~"),
     },
     {
       icon: Link,
