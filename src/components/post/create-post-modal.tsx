@@ -10,7 +10,7 @@ import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { BoardSelect } from "@/components/board-select";
 import { useBoardChildrenStore } from "@/store/board-children";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/components/ui/use-toast";
 import { BoardChild } from "@/types/board";
 import { useMarkdownEditor } from "@/store/md-editor";
 import { Editor } from "@/components/editor/Editor";
@@ -186,9 +186,30 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
     setIsPollEditing(false);
   };
 
+  const handlePollEdit = () => {
+    if (!pollData) return;
+
+    setPollOptions(pollData.options);
+    setIsMultipleChoice(pollData.isMultipleChoice);
+    setShowVoters(pollData.showVoters);
+    setHasDeadline(pollData.hasDeadline);
+    if (pollData.startTime) {
+      setPollStartTime(pollData.startTime);
+    }
+    if (pollData.endTime) {
+      setPollEndTime(pollData.endTime);
+    }
+    setIsPollEditing(true);
+  };
+
   const handlePublish = async () => {
     if (!title.trim()) {
       console.error("请输入标题");
+      return;
+    }
+
+    if (!selectedBoard) {
+      console.error("请选择板块");
       return;
     }
 
@@ -199,12 +220,12 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
         title: title.trim(),
         content: content.trim(),
         board_id: selectedBoard,
-        board_child_id: selectedChildBoard,
+        board_child_id: selectedChildBoard || undefined,
         attachments: attachments.length > 0 ? attachments : undefined,
         poll: pollData,
       };
 
-      const response = discussionService.createDiscussion(data);
+      await api.discussions.create(data);
       console.log("发布成功");
       onOpenChange(false);
       if (window.location.pathname !== "/") {
@@ -229,20 +250,10 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
     formData.append("attachment_type", "topics_images");
 
     try {
-      const response = (await api.post(API_ROUTES.UPLOAD.IMAGE, formData)) as {
-        code: number;
-        data: {
-          id: number;
-          host: string;
-          file_path: string;
-          file_name: string;
-        };
-        message: string;
-      };
+      const response = await api.upload.image(formData);
 
       if (response.code === 0) {
         const imageUrl = `${response.data.host}${response.data.file_path}`;
-        // 添加到附件列表
         const newAttachment = {
           id: response.data.id,
           file_name: response.data.file_name,
@@ -255,7 +266,7 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
       }
     } catch (error) {
       console.error("Error uploading image:", error);
-      useToast({
+      toast({
         variant: "destructive",
         title: "图片上传失败",
       });
@@ -429,16 +440,7 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
                   <PollPreview
                     pollData={pollData}
                     onDelete={handleDeletePoll}
-                    onEdit={() => {
-                      setPollOptions(pollData.options);
-                      setIsMultipleChoice(pollData.isMultipleChoice);
-                      setShowVoters(pollData.showVoters);
-                      setHasDeadline(pollData.hasDeadline);
-                      if (pollData.startTime)
-                        setPollStartTime(pollData.startTime);
-                      if (pollData.endTime) setPollEndTime(pollData.endTime);
-                      setIsPollEditing(true);
-                    }}
+                    onEdit={handlePollEdit}
                   />
                 )}
               </div>

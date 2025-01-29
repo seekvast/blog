@@ -1,3 +1,5 @@
+import type { Board, BoardChild } from "@/types";
+
 export interface Discussion {
   title: string;
   comment_count: number;
@@ -65,16 +67,6 @@ export interface MainPost {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
-}
-
-export interface Board {
-  id: number;
-  name: string;
-}
-
-export interface BoardChild {
-  id: number;
-  name: string;
 }
 
 export interface DiscussionResponse {

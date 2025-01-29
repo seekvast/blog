@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Portal } from "@radix-ui/react-portal";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useMentionable } from "@/hooks/use-mentionable";
 import { createUserMention } from "@/lib/mentions/user-mention";
@@ -84,59 +83,57 @@ export function MentionPicker({
   );
 
   return (
-    <Portal>
-      <div
-        ref={ref}
-        className="fixed z-50"
-        style={{
-          top: position.top + 24,
-          left: position.left
-        }}
-      >
-        <Command className="w-64 border shadow-md rounded-lg">
-          <CommandInput
-            placeholder="搜索用户..."
-            value={search}
-            onValueChange={setSearch}
-          />
+    <div
+      ref={ref}
+      className="absolute z-50"
+      style={{
+        top: position.top + 24,
+        left: position.left,
+      }}
+    >
+      <Command className="w-64 border shadow-md rounded-lg">
+        <CommandInput
+          placeholder="搜索用户..."
+          value={search}
+          onValueChange={setSearch}
+        />
 
-          {error ? (
-            <CommandEmpty>加载失败,请重试</CommandEmpty>
-          ) : isLoading ? (
-            <CommandEmpty>加载中...</CommandEmpty>
-          ) : items.length === 0 ? (
-            <CommandEmpty>未找到用户</CommandEmpty>
-          ) : (
-            <CommandGroup heading="用户">
-              {items.map((user, index) => (
-                <CommandItem
-                  key={user.id}
-                  onSelect={() => handleSelect(user)}
-                  className={cn(
-                    "flex items-center gap-2 cursor-pointer",
-                    selectedIndex === index && "bg-primary/20"
+        {error ? (
+          <CommandEmpty>加载失败,请重试</CommandEmpty>
+        ) : isLoading ? (
+          <CommandEmpty>加载中...</CommandEmpty>
+        ) : items.length === 0 ? (
+          <CommandEmpty>未找到用户</CommandEmpty>
+        ) : (
+          <CommandGroup heading="用户">
+            {items.map((user, index) => (
+              <CommandItem
+                key={user.id}
+                onSelect={() => handleSelect(user)}
+                className={cn(
+                  "flex items-center gap-2 cursor-pointer",
+                  selectedIndex === index && "bg-primary/20"
+                )}
+              >
+                <Avatar className="h-6 w-6">
+                  <AvatarImage src={user.avatar} alt={user.username} />
+                  <AvatarFallback>
+                    {user.username[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium">{user.username}</span>
+                  {user.nickname && (
+                    <span className="text-xs text-muted-foreground">
+                      {user.nickname}
+                    </span>
                   )}
-                >
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage src={user.avatar} alt={user.username} />
-                    <AvatarFallback>
-                      {user.username[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">{user.username}</span>
-                    {user.nickname && (
-                      <span className="text-xs text-muted-foreground">
-                        {user.nickname}
-                      </span>
-                    )}
-                  </div>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-        </Command>
-      </div>
-    </Portal>
+                </div>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+      </Command>
+    </div>
   );
 }

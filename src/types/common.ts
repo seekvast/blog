@@ -21,11 +21,10 @@ export interface BaseModel {
   updatedAt: string;
 }
 
-export interface User extends BaseModel {
-  username: string;
-  email: string;
-  avatar?: string;
-  role: "user" | "admin";
+export interface Response<T> {
+  code: number;
+  data: T;
+  message: string;
 }
 
 export interface Tag extends BaseModel {
@@ -52,3 +51,18 @@ export interface QueryParams extends PaginationParams {
   per_page?: number;
   page?: number;
 }
+
+export interface Attachment {
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  mime_type: string;
+  visibility: string;
+  attachment_type: string;
+  updated_at: string;
+  created_at: string;
+  id: number;
+  host: string;
+}
+
+export type UploadResponse = Response<Attachment>;

@@ -99,7 +99,7 @@ export function Editor({ className, placeholder }: EditorProps) {
   return (
     <div className={cn("flex flex-col", className)}>
       <div className="border rounded-md focus-within:ring-2 focus-within:ring-primary">
-        <Toolbar className="border-b rounded-t-md" />
+        <Toolbar className="border-b rounded-t-md" textareaRef={textareaRef} />
 
         <div className="relative">
           {!previewMode && (

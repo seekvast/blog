@@ -1,6 +1,13 @@
 import { http } from "./http";
-import type { Pagination, User, QueryParams, LoginResponse } from "@/types/common";
-import type { Discussion, Board, Post, BoardChild } from "@/types";
+import type { Pagination, QueryParams, UploadResponse } from "@/types/common";
+import type {
+  Discussion,
+  Board,
+  Post,
+  BoardChild,
+  LoginResponse,
+  User,
+} from "@/types";
 
 export interface ApiOptions {
   prefix?: string;
@@ -90,6 +97,11 @@ export function createApi(options: ApiOptions = {}) {
         http.patch<Post>(`${prefix}/posts/${slug}`, data),
 
       delete: (slug: string) => http.delete(`${prefix}/posts/${slug}`),
+    },
+
+    upload: {
+      image: (data: any) =>
+        http.post<UploadResponse>(`${prefix}/upload/image`, data),
     },
   };
 }

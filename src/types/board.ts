@@ -1,3 +1,26 @@
+export interface Board {
+  id: number;
+  name: string;
+  avatar: string;
+  creator_id: number;
+  slug: string;
+  desc: string;
+  visibility: number;
+  badge_visible: number[];
+  category_id: number;
+  child_id: number;
+  is_nsfw: number;
+  approval_mode: number;
+  question: string;
+  answer: string;
+  poll_role: number[];
+  status: number;
+  category: {
+    id: number;
+    name: string;
+  };
+}
+
 export interface BoardChild {
   board_id: number;
   name: string;

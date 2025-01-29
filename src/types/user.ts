@@ -1,3 +1,5 @@
+import { Response } from "./common";
+
 export interface User {
   hashid: string;
   username: string;
@@ -11,5 +13,7 @@ export interface User {
   is_email_confirmed?: number;
   joined_at?: string;
   last_seen_at?: string;
-  accessToken?: string;
+  token?: string;
 }
+
+export type LoginResponse = Response<User>;
