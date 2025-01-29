@@ -5,10 +5,10 @@ export const UserGender = {
 } as const;
 
 export const UserGenderMapping = {
-  [UserGender.MALE]: '男',
-  [UserGender.FEMALE]: '女',
-  [UserGender.OTHER]: '其他',
+  [UserGender.MALE]: "男",
+  [UserGender.FEMALE]: "女",
+  [UserGender.OTHER]: "其他",
 } as const;
 
 // TypeScript 类型定义
-export type UserGenderType = typeof UserGender[keyof typeof UserGender]; 
+export type UserGenderType = (typeof UserGender)[keyof typeof UserGender];

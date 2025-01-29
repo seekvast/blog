@@ -4,7 +4,6 @@ import * as React from "react";
 import { useMarkdownEditor } from "@/store/md-editor";
 import { Toolbar } from "./Toolbar";
 import { Preview } from "./Preview";
-import { FileUploader } from "./FileUploader";
 import { MentionPicker } from "./MentionPicker";
 import { cn } from "@/lib/utils";
 import { getCaretCoordinates } from "@/lib/utils/caret";
@@ -135,8 +134,6 @@ export function Editor({ className, placeholder }: EditorProps) {
           )}
         </div>
       </div>
-
-      <FileUploader className="mt-2" />
     </div>
   );
 }

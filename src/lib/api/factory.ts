@@ -1,5 +1,5 @@
 import { http } from "./http";
-import type { Pagination, QueryParams, UploadResponse } from "@/types/common";
+import type { Attachment, Pagination, QueryParams, UploadResponse } from "@/types/common";
 import type {
   Discussion,
   Board,
@@ -101,7 +101,7 @@ export function createApi(options: ApiOptions = {}) {
 
     upload: {
       image: (data: any) =>
-        http.post<UploadResponse>(`${prefix}/upload/image`, data),
+        http.post<Attachment>(`${prefix}/upload/image`, data),
     },
   };
 }

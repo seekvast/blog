@@ -23,6 +23,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { uploadFile } from "@/lib/utils/upload";
 
 interface ToolbarProps {
   className?: string;
@@ -189,6 +190,50 @@ export function Toolbar({ className, textareaRef }: ToolbarProps) {
     [content, selection, setContent, setSelection, textareaRef]
   );
 
+  // 添加图片上传处理函数
+  const handleImageUpload = React.useCallback(async () => {
+    // 创建一个隐藏的文件输入框
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      try {
+        // 上传图片并获取URL
+        const imageUrl = await uploadFile(file);
+
+        // 在光标位置插入图片markdown
+        const imageMarkdown = `![${file.name}](${imageUrl})`;
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+
+        const newContent =
+          content.slice(0, start) + imageMarkdown + content.slice(end);
+
+        setContent(newContent);
+
+        // 更新光标位置
+        const newPosition = start + imageMarkdown.length;
+        requestAnimationFrame(() => {
+          textarea.focus();
+          textarea.setSelectionRange(newPosition, newPosition);
+          setSelection({ start: newPosition, end: newPosition });
+        });
+      } catch (error) {
+        console.error("Failed to upload image:", error);
+        // 这里可以添加错误提示
+      }
+    };
+
+    input.click();
+  }, [content, setContent, setSelection, textareaRef]);
+
   const tools = [
     {
       icon: Heading,
@@ -212,8 +257,8 @@ export function Toolbar({ className, textareaRef }: ToolbarProps) {
     },
     {
       icon: Image,
-      tooltip: "图片",
-      onClick: () => wrapText("![alt](", ")"),
+      tooltip: "上传图片",
+      onClick: handleImageUpload,
     },
     {
       icon: List,
@@ -260,9 +305,9 @@ export function Toolbar({ className, textareaRef }: ToolbarProps) {
           </Tooltip>
         ))}
 
-        <div className="h-4 w-px bg-border mx-2" />
+        {/* <div className="h-4 w-px bg-border mx-2" /> */}
 
-        <Tooltip>
+        {/* <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
@@ -292,7 +337,7 @@ export function Toolbar({ className, textareaRef }: ToolbarProps) {
           <TooltipContent>
             <p>重做 (Ctrl+Y)</p>
           </TooltipContent>
-        </Tooltip>
+        </Tooltip> */}
 
         <div className="h-4 w-px bg-border mx-2" />
 

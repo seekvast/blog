@@ -49,10 +49,12 @@ const post = <T>(
       ...options,
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        ...(!(data instanceof FormData) && {
+          'Content-Type': 'application/json'
+        }),
         ...options.headers
       },
-      body: JSON.stringify(data)
+      body: data instanceof FormData ? data : JSON.stringify(data)
     }),
     options
   )
