@@ -42,56 +42,52 @@ export function PostContent({ post, className }: PostContentProps) {
     <article
       ref={contentRef}
       className={cn(
-        // 基础样式
-        "prose prose-sm dark:prose-invert max-w-none",
-        "min-h-[100px] w-full",
+        "min-h-[100px] w-full text-sm leading-7 text-foreground",
+        
+        // 基础文本样式
+        "[&_p]:mb-4 [&_p]:last:mb-0",
+        "[&_ul]:mb-4 [&_ul]:pl-6 [&_ul]:list-disc",
+        "[&_ol]:mb-4 [&_ol]:pl-6 [&_ol]:list-decimal",
         
         // 标题样式
-        "prose-headings:scroll-mt-20 prose-headings:font-semibold",
-        "prose-h1:text-3xl prose-h1:mt-8 prose-h1:mb-4",
-        "prose-h2:text-2xl prose-h2:mt-6 prose-h2:mb-3",
-        "prose-h3:text-xl prose-h3:mt-4 prose-h3:mb-2",
+        "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mt-6 [&_h1]:mb-4",
+        "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3",
+        "[&_h3]:text-lg [&_h3]:font-bold [&_h3]:mt-4 [&_h3]:mb-2",
         
-        // 段落和列表样式
-        "prose-p:my-4",
-        "prose-ul:my-4 prose-ul:pl-6 prose-ul:list-disc",
-        "prose-ol:my-4 prose-ol:pl-6 prose-ol:list-decimal",
+        // 代码相关样式
+        "[&_:not(pre)>code]:font-mono [&_:not(pre)>code]:text-[90%]",
+        "[&_:not(pre)>code]:bg-muted/30 [&_:not(pre)>code]:px-2 [&_:not(pre)>code]:py-1",
+        "[&_:not(pre)>code]:rounded [&_:not(pre)>code]:border [&_:not(pre)>code]:border-muted/20",
         
-        // 代码块样式
-        "prose-pre:bg-muted/50 prose-pre:border prose-pre:p-4 prose-pre:rounded-lg",
-        "prose-pre:overflow-x-auto prose-pre:scrollbar-thin prose-pre:scrollbar-thumb-border",
-        "prose-pre:scrollbar-track-muted hover:prose-pre:scrollbar-thumb-primary/50",
+        "[&_pre]:bg-muted/30 [&_pre]:p-4 [&_pre]:rounded-md",
+        "[&_pre]:border [&_pre]:border-muted/20",
+        "[&_pre]:overflow-x-auto [&_pre]:text-[90%]",
         
-        // 行内代码样式
-        "prose-code:bg-muted/50 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm",
-        "prose-pre:prose-code:p-0 prose-pre:prose-code:bg-transparent",
-        
-        // 图片样式
-        "prose-img:rounded-lg prose-img:max-h-[600px] prose-img:mx-auto",
-        "prose-img:transition-opacity prose-img:duration-200",
-        
-        // 表格样式
-        "prose-table:w-full prose-table:my-4",
-        "prose-th:border prose-th:p-2 prose-th:bg-muted/50",
-        "prose-td:border prose-td:p-2",
+        "[&_pre>code]:p-0 [&_pre>code]:bg-transparent",
+        "[&_pre>code]:border-0 [&_pre>code]:block",
+        "[&_pre>code]:max-h-[50vh] [&_pre>code]:min-h-[250px]",
         
         // 引用样式
-        "prose-blockquote:border-l-4 prose-blockquote:border-primary",
-        "prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-4",
-        "prose-blockquote:text-muted-foreground",
+        "[&_blockquote]:border-l-4 [&_blockquote]:border-primary/50",
+        "[&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-4",
+        "[&_blockquote]:text-muted-foreground",
         
         // 链接样式
-        "prose-a:text-primary prose-a:no-underline hover:prose-a:underline",
+        "[&_a:not(.mention)]:text-primary [&_a:not(.mention)]:underline-offset-4",
+        "[&_a:not(.mention)]:hover:underline",
         
         // 用户提及链接样式
         "[&_.mention]:text-primary [&_.mention]:font-medium",
         "[&_.mention]:bg-primary/10 [&_.mention]:px-1.5 [&_.mention]:py-0.5",
-        "[&_.mention]:rounded hover:[&_.mention]:bg-primary/20",
+        "[&_.mention]:rounded [&_.mention]:hover:bg-primary/20",
         
         // 分割线样式
-        "prose-hr:my-8 prose-hr:border-t prose-hr:border-border",
+        "[&_hr]:my-8 [&_hr]:border-t [&_hr]:border-border",
         
-        // 自定义类名
+        // 表格样式
+        "[&_table]:w-full [&_table]:my-4 [&_table]:border-collapse",
+        "[&_th]:border [&_th]:p-2 [&_th]:bg-muted/50",
+        "[&_td]:border [&_td]:p-2",
         className
       )}
       dangerouslySetInnerHTML={{ __html: post.content }}

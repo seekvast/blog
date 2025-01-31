@@ -76,21 +76,6 @@ const config = {
   },
   plugins: [
     require("tailwindcss-animate"),
-    require("@tailwindcss/typography")({
-      className: "prose",
-      target: "modern",
-      defaultValue: {
-        css: {
-          a: {
-            // color: "hsl(var(--primary))",
-            textDecoration: "none",
-            "&:hover": {
-              textDecoration: "none",
-            },
-          },
-        },
-      },
-    }),
   ],
 } satisfies Config;
 

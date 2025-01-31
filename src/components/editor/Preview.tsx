@@ -20,6 +20,24 @@ export function Preview({ content, className }: PreviewProps) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw, rehypeSanitize]}
+        className={cn(
+          "min-h-[100px] w-full text-sm leading-7 text-foreground",
+          // 基础文本样式
+          "[&_p]:mb-4 [&_p]:last:mb-0",
+          "[&_ul]:mb-4 [&_ul]:pl-6 [&_ul]:list-disc",
+          "[&_ol]:mb-4 [&_ol]:pl-6 [&_ol]:list-decimal",
+          // 标题样式
+          "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mt-6 [&_h1]:mb-4",
+          "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:mt-6 [&_h2]:mb-3",
+          "[&_h3]:text-lg [&_h3]:font-bold [&_h3]:mt-4 [&_h3]:mb-2",
+          // 引用样式
+          "[&_blockquote]:border-l-4 [&_blockquote]:border-primary/50",
+          "[&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-4",
+          "[&_blockquote]:text-muted-foreground",
+          // 分割线样式
+          "[&_hr]:my-8 [&_hr]:border-t [&_hr]:border-border",
+          className
+        )}
         components={{
           // 自定义链接渲染
           a: ({ node, href, children, ...props }) => {
@@ -29,7 +47,7 @@ export function Preview({ content, className }: PreviewProps) {
                 <a
                   {...props}
                   href={`/users/${href?.slice(1)}`}
-                  className="inline-flex items-center text-primary hover:underline"
+                  className="inline-flex items-center text-primary hover:underline mention bg-primary/10 px-1.5 py-0.5 rounded hover:bg-primary/20"
                 >
                   {children}
                 </a>
@@ -41,18 +59,20 @@ export function Preview({ content, className }: PreviewProps) {
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              />
+                className="text-primary underline-offset-4 hover:underline"
+              >
+                {children}
+              </a>
             );
           },
           // 自定义代码块渲染
           code: ({ node, inline, className, children, ...props }) => {
             const match = /language-(\w+)/.exec(className || "");
             return !inline ? (
-              <pre className="relative group">
+              <pre className="bg-muted/30 p-4 rounded-md border border-muted/20 overflow-x-auto text-[90%]">
                 <code
                   className={cn(
-                    "block overflow-x-auto p-4 rounded-lg bg-muted",
+                    "block p-0 bg-transparent border-0 max-h-[50vh] min-h-[250px]",
                     match && `language-${match[1]}`,
                     className
                   )}
@@ -60,12 +80,11 @@ export function Preview({ content, className }: PreviewProps) {
                 >
                   {children}
                 </code>
-                {/* 可以在这里添加复制按钮 */}
               </pre>
             ) : (
               <code
                 className={cn(
-                  "bg-muted px-1.5 py-0.5 rounded text-sm",
+                  "font-mono text-[90%] bg-muted/30 px-2 py-1 rounded border border-muted/20",
                   className
                 )}
                 {...props}
@@ -87,69 +106,26 @@ export function Preview({ content, className }: PreviewProps) {
             <div className="overflow-x-auto">
               <table
                 {...props}
-                className="w-full border-collapse border border-border"
+                className="w-full my-4 border-collapse"
               />
             </div>
           ),
           th: ({ node, ...props }) => (
             <th
               {...props}
-              className="border border-border p-2 bg-muted font-semibold"
+              className="border p-2 bg-muted/50"
             />
           ),
           td: ({ node, ...props }) => (
-            <td {...props} className="border border-border p-2" />
+            <td {...props} className="border p-2" />
           ),
-          // 自定义段落渲染，优化普通文本显示
-          p: ({ children }) => {
-            const child = children[0];
-            // 处理 YouTube 链接
-            if (typeof child === 'string') {
-              const match = child.match(youtubeRegex);
-              if (match) {
-                return (
-                  <iframe
-                    width="560"
-                    height="315"
-                    src={`https://www.youtube.com/embed/${match[1]}`}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                );
-              }
-            }
-            // 普通文本段落
-            return (
-              <p className="whitespace-pre-wrap break-words">{children}</p>
-            );
-          },
         }}
       >
         {content}
       </ReactMarkdown>
     ),
-    [content]
+    [content, className]
   );
 
-  return (
-    <div
-      className={cn(
-        "prose-sm dark:prose-invert max-w-none",
-        "min-h-[100%] rounded-md",
-        // 自定义 prose 样式
-        "prose-headings:scroll-mt-20",
-        "prose-pre:p-0 prose-pre:bg-transparent",
-        "prose-img:rounded-lg prose-img:max-h-[600px]",
-        "prose-blockquote:border-l-4 prose-blockquote:border-primary",
-        "prose-blockquote:pl-4 prose-blockquote:italic",
-        "prose-a:text-primary prose-a:no-underline hover:prose-a:underline",
-        "prose-p:my-2",
-        "h-full",
-        className
-      )}
-    >
-      {markdown}
-    </div>
-  );
+  return markdown;
 }
