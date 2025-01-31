@@ -50,6 +50,7 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
     setIsOpen,
     setOnClose,
   } = useMarkdownEditor();
+  const editorRef = React.useRef<{ reset: () => void }>(null);
 
   React.useEffect(() => {
     setIsOpen(open);
@@ -206,6 +207,7 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
   const resetAllStates = React.useCallback(() => {
     setTitle("");
     setContent("");
+    editorRef.current?.reset?.();
     setSelectedBoard(0);
     setSelectedChildBoard(undefined);
     setAttachments([]);
@@ -221,7 +223,7 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
     setShowConfirmDialog(false);
     setPendingAction(null);
     setHasUnsavedContent(false);
-  }, [setHasUnsavedContent]);
+  }, [setContent, setHasUnsavedContent]);
 
   const handlePublish = async () => {
     if (!title.trim()) {
@@ -420,9 +422,12 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
               </div>
 
               <Editor
+                ref={editorRef}
                 placeholder="开始编写正文..."
                 className="min-h-[400px] mt-4"
                 attachmentType={AttachmentType.TOPIC}
+                initialContent={content}
+                onChange={setContent}
               />
             </div>
           </div>

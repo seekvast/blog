@@ -7,15 +7,13 @@ import { api } from "@/lib/api";
 
 async function getDiscussion(slug: string) {
   try {
-      const response = await api.discussions.get(slug);
-    console.log(response, "--------------------detail");
+    const response = await api.discussions.get(slug);
     return response;
   } catch (error: any) {
-    console.log(error, "--------------------detail");
     if (error.status === 404) {
       notFound();
     }
-    throw error; // 其他错误继续抛出
+    throw error;
   }
 }
 

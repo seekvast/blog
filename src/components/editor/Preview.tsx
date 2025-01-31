@@ -136,7 +136,7 @@ export function Preview({ content, className }: PreviewProps) {
     <div
       className={cn(
         "prose-sm dark:prose-invert max-w-none",
-        "min-h-[100%] p-3 rounded-md",
+        "min-h-[100%] rounded-md",
         // 自定义 prose 样式
         "prose-headings:scroll-mt-20",
         "prose-pre:p-0 prose-pre:bg-transparent",

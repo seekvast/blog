@@ -17,14 +17,22 @@ interface EditorProps {
   onSave?: () => void;
 }
 
-export function Editor({
-  className,
-  placeholder,
-  attachmentType,
-  initialContent = "",
-  onChange,
-  onSave,
-}: EditorProps) {
+export const Editor = React.forwardRef<
+  {
+    reset: () => void;
+  },
+  EditorProps
+>(function Editor(
+  {
+    className,
+    placeholder,
+    attachmentType,
+    initialContent = "",
+    onChange,
+    onSave,
+  }: EditorProps,
+  ref
+) {
   const [content, setContent] = React.useState(initialContent);
   const [selection, setSelection] = React.useState<{ start: number; end: number }>({
     start: 0,
@@ -53,6 +61,20 @@ export function Editor({
   });
 
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+  // 暴露重置方法
+  React.useImperativeHandle(ref, () => ({
+    reset: () => {
+      setContent("");
+      setHistory({
+        past: [],
+        future: [],
+        current: "",
+      });
+      setHasUnsavedContent(false);
+      onChange?.("");
+    },
+  }));
 
   const handleSelect = React.useCallback(() => {
     if (!textareaRef.current) return;
@@ -343,4 +365,4 @@ export function Editor({
       </div>
     </div>
   );
-}
+});

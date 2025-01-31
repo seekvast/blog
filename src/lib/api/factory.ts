@@ -64,15 +64,16 @@ export function createApi(options: ApiOptions = {}) {
 
       create: (data: any) =>
         http.post<Discussion>(`${prefix}/discussions`, data),
-
+      createPost: (data: any) =>
+        http.post<Post>(`${prefix}/discussion/post`, data),
       update: (slug: string, data: any) =>
         http.patch<Discussion>(`${prefix}/discussions/${slug}`, data),
 
       delete: (slug: string) => http.delete(`${prefix}/discussions/${slug}`),
 
-      posts: (slug: string, params?: QueryParams) =>
+      posts: (params?: QueryParams) =>
         http.get<Pagination<Post>>(
-          `${prefix}/discussions/${slug}/posts`,
+          `${prefix}/discussion/posts`,
           params,
           { next }
         ),

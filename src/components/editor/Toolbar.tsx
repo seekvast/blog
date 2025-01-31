@@ -290,7 +290,7 @@ export function Toolbar({
           </Tooltip>
         </TooltipProvider>
       ))}
-      <div className="flex items-center gap-0.5">
+      {/* <div className="flex items-center gap-0.5">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -312,7 +312,7 @@ export function Toolbar({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      </div>
+      </div> */}
       <div className={cn("flex items-center gap-0.5 ml-auto", isFullscreen && "pr-4")}>
         <TooltipProvider>
           <Tooltip>

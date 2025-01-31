@@ -43,6 +43,7 @@ export interface Category extends BaseModel {
 export type SortOrder = "asc" | "desc";
 
 export interface QueryParams extends PaginationParams {
+  slug?: string;
   sort?: string;
   name?: string;
   keyword?: string;

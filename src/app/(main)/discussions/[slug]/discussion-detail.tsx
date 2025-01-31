@@ -37,6 +37,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   const [commentContent, setCommentContent] = React.useState("");
   const { setContent } = useMarkdownEditor();
   const [replyTo, setReplyTo] = React.useState<any | null>(null);
+  const editorRef = React.useRef<any>(null);
   const [comments, setComments] = React.useState<Pagination<Post>>({
     items: [],
     code: 0,
@@ -44,7 +45,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     per_page: 0,
     current_page: 0,
     last_page: 0,
-    message: ''
+    message: "",
   });
 
   React.useEffect(() => {
@@ -60,13 +61,8 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     const fetchComments = async () => {
       if (!currentDiscussion) return;
       try {
-        const response = await fetch(
-          `/api/discussion/posts?slug=${currentDiscussion.slug}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setComments(data);
-        }
+        const data = await api.discussions.posts({ slug });
+        setComments(data);
       } catch (error) {
         console.error("Failed to fetch comments:", error);
       }
@@ -85,40 +81,25 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     }
 
     try {
-      const response = await fetch("/api/discussion/post", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          slug: currentDiscussion?.slug,
-          content: content.trim(),
-          parent_id: replyTo?.id,
-          quote: replyTo
-            ? {
-                username: replyTo.user.username,
-                content: replyTo.content,
-              }
-            : undefined,
-        }),
+      const data = await api.discussions.createPost({
+        slug: currentDiscussion?.slug,
+        content: content.trim(),
+        parent_id: replyTo?.id,
+        quote: replyTo
+          ? {
+              username: replyTo.user.username,
+              content: replyTo.content,
+            }
+          : undefined,
       });
 
-      if (response.ok) {
-        setCommentContent("");
-        setReplyTo(null);
-        // 刷新评论列表
-        const commentsRes = await fetch(
-          `/api/discussion/posts?slug=${encodeURIComponent(slug)}`
-        );
-        const commentsData = await api.discussions.posts(slug);
-        setComments(commentsData);
-        if (commentsRes.ok) {
-          const commentsData = await commentsRes.json();
-          setComments(commentsData);
-        }
-      } else {
-        throw new Error("Failed to submit comment");
-      }
+      setCommentContent("");
+      setReplyTo(null);
+      // 重置编辑器内容
+      editorRef.current?.reset?.();
+      // 刷新评论列表
+      const commentsData = await api.discussions.posts({ slug });
+      setComments(commentsData);
     } catch (err) {
       console.error("Failed to post comment:", err);
     }
@@ -232,11 +213,11 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                           <div className="flex items-center gap-2 space-x-8">
                             <div className="flex items-center h-6 space-x-1 cursor-pointer">
                               <ThumbsUp className="h-4 w-4" />
-                              <span className="text-sm">{1000}</span>
+                              <span className="text-sm">{}</span>
                             </div>
                             <div className="flex items-center h-6 space-x-1 cursor-pointer">
                               <ThumbsDown className="h-4 w-4" />
-                              <span className="text-sm">{10}</span>
+                              <span className="text-sm">{}</span>
                             </div>
                           </div>
 
@@ -262,9 +243,27 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             )}
 
             {/* 评论预览 */}
-            {commentContent && (
-              <div className="mt-6">
-                <Preview content={commentContent} />
+            {user && commentContent && (
+              <div className="mt-6 pt-2 pb-4 border-b">
+                <div className="flex items-start space-x-3 px-2">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={user.avatar_url} />
+                    <AvatarFallback>
+                      {user.name?.[0] || user.email?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center">
+                      <span className="font-medium">
+                        {user.nickname || user.username}
+                      </span>
+                    </div>
+                    {/* 预览内容 */}
+                    <div className="mt-1 text-gray-900">
+                      <Preview content={commentContent} />
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -283,6 +282,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             ) : (
               <div className="mt-6">
                 <Editor
+                  ref={editorRef}
                   className="rounded-lg border border-gray-200 bg-background"
                   attachmentType={AttachmentType.TOPIC}
                   placeholder="写下你的评论..."
