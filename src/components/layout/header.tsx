@@ -64,7 +64,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto w-[1360px] flex h-14 px-4">
+      <div className="mx-auto max-w-7xl flex h-14 px-4">
         <div className="flex justify-between w-full items-center ">
           {/* Logo */}
           <div className="flex justify-between gap-4">

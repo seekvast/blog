@@ -32,7 +32,7 @@ export default function MainLayout({
     <div className="min-h-screen">
       <RouteProgress />
       <Header />
-      <div className="mx-auto max-w-7xl flex pt-8">
+      <div className="mx-auto max-w-7xl flex pt-8 scroll-smooth">
         <div className="sticky top-[88px] w-[300px] h-[calc(100vh-88px)]">
           <LeftSidebar className="hidden lg:block" />
         </div>

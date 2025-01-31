@@ -240,10 +240,14 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
                       <ThumbsUp className="h-4 w-4 text-base cursor-pointer" />
                       <span>{discussion.votes}</span>
                     </div>
-                    <div className="flex items-center space-x-1 text-muted-foreground">
+                    <Link
+                      href={`/discussions/${discussion.slug}#comment`}
+                      className="flex items-center space-x-1 text-muted-foreground"
+                    >
                       <MessageSquare className="h-4 w-4 text-base cursor-pointer" />
                       <span>{discussion.comment_count}</span>
-                    </div>
+                    </Link>
+
                     <div className="flex items-center space-x-1 text-muted-foreground">
                       <span>{discussion.diff_humans}</span>
                     </div>
