@@ -247,8 +247,16 @@ export function Editor({
         )}
 
         {previewMode && (
-          <div className="min-h-[200px]">
-            <Preview content={content} />
+          <div className={cn(
+            "min-h-[200px]",
+            isFullscreen && "h-full"
+          )}>
+            <Preview 
+              content={content} 
+              className={cn(
+                isFullscreen && "h-full"
+              )}
+            />
           </div>
         )}
       </div>

@@ -138,6 +138,7 @@ export function Preview({ content, className }: PreviewProps) {
         "prose-blockquote:border-l-4 prose-blockquote:border-primary",
         "prose-blockquote:pl-4 prose-blockquote:italic",
         "prose-a:text-primary prose-a:no-underline hover:prose-a:underline",
+        "h-full",  // 添加高度自适应
         className
       )}
     >
