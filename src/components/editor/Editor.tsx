@@ -39,6 +39,7 @@ export function Editor({
     top: 0,
     left: 0,
   });
+  const [isFullscreen, setIsFullscreen] = React.useState(false);
 
   const handleSelect = React.useCallback(() => {
     if (!textareaRef.current) return;
@@ -195,48 +196,61 @@ export function Editor({
   }, [selection]);
 
   return (
-    <div className={cn("flex flex-col", className)}>
-      <div className="border rounded-md focus-within:ring-2 focus-within:ring-primary">
-        <Toolbar
-          className="border-b rounded-t-md"
-          textareaRef={textareaRef}
-          onImageUpload={handleImageUpload}
-        />
+    <div
+      className={cn(
+        "relative border rounded-md bg-background",
+        isFullscreen && "fixed inset-0 z-50 m-0 h-screen w-screen rounded-none",
+        className
+      )}
+    >
+      <Toolbar
+        className={cn(
+          "border-b rounded-t-md",
+          isFullscreen && "sticky top-0 z-10 bg-background"
+        )}
+        textareaRef={textareaRef}
+        onImageUpload={handleImageUpload}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+      />
 
-        <div className="relative">
-          {!previewMode && (
-            <>
-              <textarea
-                ref={textareaRef}
-                value={content}
-                onChange={handleInput}
-                onSelect={handleSelect}
-                onKeyDown={handleKeyDown}
-                onPaste={handlePaste}
-                placeholder={placeholder}
-                className={cn(
-                  "w-full min-h-[200px] p-3",
-                  "focus:outline-none",
-                  "resize-y bg-background",
-                  hasUnsavedContent
-                )}
-              />
-              {showMentionPicker && (
-                <MentionPicker
-                  position={mentionPosition}
-                  query={mentionQuery}
-                  onClose={() => setShowMentionPicker(false)}
-                />
+      <div className={cn(
+        "relative",
+        isFullscreen && "h-[calc(100vh-3.5rem)] overflow-auto"
+      )}>
+        {!previewMode && (
+          <>
+            <textarea
+              ref={textareaRef}
+              value={content}
+              onChange={handleInput}
+              onSelect={handleSelect}
+              onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
+              placeholder={placeholder}
+              className={cn(
+                "w-full min-h-[200px] p-3",
+                "focus:outline-none",
+                "resize-y bg-background",
+                isFullscreen && "h-full resize-none",
+                hasUnsavedContent
               )}
-            </>
-          )}
+            />
+            {showMentionPicker && (
+              <MentionPicker
+                position={mentionPosition}
+                query={mentionQuery}
+                onClose={() => setShowMentionPicker(false)}
+              />
+            )}
+          </>
+        )}
 
-          {previewMode && (
-            <div className="min-h-[200px]">
-              <Preview content={content} />
-            </div>
-          )}
-        </div>
+        {previewMode && (
+          <div className="min-h-[200px]">
+            <Preview content={content} />
+          </div>
+        )}
       </div>
     </div>
   );

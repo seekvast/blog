@@ -16,6 +16,8 @@ import {
   Redo,
   Heading,
   Strikethrough,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 import {
   Tooltip,
@@ -30,6 +32,8 @@ interface ToolbarProps {
   className?: string;
   textareaRef: React.RefObject<HTMLTextAreaElement>;
   onImageUpload: (file: File) => Promise<void>;
+  isFullscreen: boolean;
+  onToggleFullscreen: () => void;
 }
 
 function wordSelectionStart(text: string, i: number): number {
@@ -57,6 +61,8 @@ export function Toolbar({
   className,
   textareaRef,
   onImageUpload,
+  isFullscreen,
+  onToggleFullscreen,
 }: ToolbarProps) {
   const {
     content,
@@ -265,12 +271,10 @@ export function Toolbar({
   ];
 
   return (
-    <TooltipProvider>
-      <div
-        className={cn("flex items-center space-x-1 border-b p-1", className)}
-      >
-        {tools.map((tool, index) => (
-          <Tooltip key={index}>
+    <div className={cn("flex items-center gap-0.5 p-1", className)}>
+      {tools.map((tool, index) => (
+        <TooltipProvider key={index}>
+          <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
@@ -285,64 +289,54 @@ export function Toolbar({
               <p>{tool.tooltip}</p>
             </TooltipContent>
           </Tooltip>
-        ))}
-
-        {/* <div className="h-4 w-px bg-border mx-2" /> */}
-
-        {/* <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={undo}
-              className="h-8 w-8 p-0"
-            >
-              <Undo className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>撤销 (Ctrl+Z)</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={redo}
-              className="h-8 w-8 p-0"
-            >
-              <Redo className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>重做 (Ctrl+Y)</p>
-          </TooltipContent>
-        </Tooltip> */}
-
-        <div className="h-4 w-px bg-border mx-2" />
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setPreviewMode(!previewMode)}
-              className="h-8 w-8 p-0"
-            >
-              {previewMode ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{previewMode ? "编辑" : "预览"}</p>
-          </TooltipContent>
-        </Tooltip>
+        </TooltipProvider>
+      ))}
+      <div className="flex items-center gap-0.5">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPreviewMode(!previewMode)}
+                className="px-2"
+              >
+                {previewMode ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{previewMode ? "编辑模式" : "预览模式"}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
-    </TooltipProvider>
+      <div className="flex items-center gap-0.5 ml-auto">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onToggleFullscreen}
+                className="px-2"
+              >
+                {isFullscreen ? (
+                  <Minimize2 className="h-4 w-4" />
+                ) : (
+                  <Maximize2 className="h-4 w-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{isFullscreen ? "退出全屏" : "全屏编辑"}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+    </div>
   );
 }
