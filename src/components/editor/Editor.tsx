@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useMarkdownEditor } from "@/store/md-editor";
 import { Toolbar } from "./Toolbar";
 import { Preview } from "./Preview";
 import { MentionPicker } from "./MentionPicker";
@@ -13,26 +12,27 @@ interface EditorProps {
   className?: string;
   placeholder?: string;
   attachmentType: AttachmentType;
+  initialContent?: string;
+  onChange?: (content: string) => void;
+  onSave?: () => void;
 }
 
 export function Editor({
   className,
   placeholder,
   attachmentType,
+  initialContent = "",
+  onChange,
+  onSave,
 }: EditorProps) {
-  const {
-    content,
-    setContent,
-    selection,
-    setSelection,
-    previewMode,
-    hasUnsavedContent,
-    addMention,
-    addUploadingFile,
-    removeUploadingFile,
-  } = useMarkdownEditor();
-
-  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const [content, setContent] = React.useState(initialContent);
+  const [selection, setSelection] = React.useState<{ start: number; end: number }>({
+    start: 0,
+    end: 0,
+  });
+  const [previewMode, setPreviewMode] = React.useState(false);
+  const [hasUnsavedContent, setHasUnsavedContent] = React.useState(false);
+  const [uploadingFiles, setUploadingFiles] = React.useState<File[]>([]);
   const [showMentionPicker, setShowMentionPicker] = React.useState(false);
   const [mentionQuery, setMentionQuery] = React.useState("");
   const [mentionPosition, setMentionPosition] = React.useState({
@@ -41,6 +41,19 @@ export function Editor({
   });
   const [isFullscreen, setIsFullscreen] = React.useState(false);
 
+  // 历史记录状态
+  const [history, setHistory] = React.useState<{
+    past: string[];
+    future: string[];
+    current: string;
+  }>({
+    past: [],
+    future: [],
+    current: initialContent,
+  });
+
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+
   const handleSelect = React.useCallback(() => {
     if (!textareaRef.current) return;
 
@@ -48,7 +61,20 @@ export function Editor({
       start: textareaRef.current.selectionStart,
       end: textareaRef.current.selectionEnd,
     });
-  }, [setSelection]);
+  }, []);
+
+  const handleContentChange = React.useCallback((newContent: string) => {
+    setContent(newContent);
+    setHasUnsavedContent(true);
+    onChange?.(newContent);
+    
+    // 更新历史记录
+    setHistory(prev => ({
+      past: [...prev.past, prev.current],
+      current: newContent,
+      future: [],
+    }));
+  }, [onChange]);
 
   const handleInput = React.useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -112,12 +138,11 @@ export function Editor({
         }
       }
 
-      setContent(newContent);
+      handleContentChange(newContent);
     },
-    [setContent, setMentionPosition, setMentionQuery, setShowMentionPicker]
+    [handleContentChange]
   );
 
-  // 处理键盘事件，包括 @ 提及的处理
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Tab") {
       e.preventDefault();
@@ -126,7 +151,7 @@ export function Editor({
 
       if (start === end) {
         const newContent = content.slice(0, start) + "  " + content.slice(end);
-        setContent(newContent);
+        handleContentChange(newContent);
         setTimeout(() => {
           if (textareaRef.current) {
             textareaRef.current.selectionStart =
@@ -137,6 +162,15 @@ export function Editor({
     } else if (showMentionPicker && e.key === "Escape") {
       e.preventDefault();
       setShowMentionPicker(false);
+    } else if (e.metaKey || e.ctrlKey) {
+      if (e.key === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          redo();
+        } else {
+          undo();
+        }
+      }
     }
   };
 
@@ -152,39 +186,54 @@ export function Editor({
     }
   };
 
-  const insertText = React.useCallback(
-    (text: string) => {
-      if (!textareaRef.current) return;
-
-      const start = textareaRef.current.selectionStart;
-      const end = textareaRef.current.selectionEnd;
-
-      const newContent = content.slice(0, start) + text + content.slice(end);
-      setContent(newContent);
-
-      // 更新光标位置
-      const newPosition = start + text.length;
-      requestAnimationFrame(() => {
-        if (!textareaRef.current) return;
-        textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(newPosition, newPosition);
-        setSelection({ start: newPosition, end: newPosition });
-      });
-    },
-    [content, setContent, setSelection]
-  );
-
   const handleImageUpload = async (file: File) => {
     try {
-      addUploadingFile(file);
+      setUploadingFiles(prev => [...prev, file]);
       const url = await uploadFile(file, attachmentType);
-      insertText(`![${file.name}](${url})`);
+      const imageMarkdown = `![${file.name}](${url})`;
+      handleContentChange(content + imageMarkdown);
     } catch (error) {
       console.error("Failed to upload image:", error);
     } finally {
-      removeUploadingFile(file);
+      setUploadingFiles(prev => prev.filter(f => f !== file));
     }
   };
+
+  const undo = React.useCallback(() => {
+    setHistory(prev => {
+      if (prev.past.length === 0) return prev;
+      
+      const newPast = prev.past.slice(0, -1);
+      const newCurrent = prev.past[prev.past.length - 1];
+      
+      setContent(newCurrent);
+      onChange?.(newCurrent);
+      
+      return {
+        past: newPast,
+        current: newCurrent,
+        future: [prev.current, ...prev.future],
+      };
+    });
+  }, [onChange]);
+
+  const redo = React.useCallback(() => {
+    setHistory(prev => {
+      if (prev.future.length === 0) return prev;
+      
+      const newFuture = prev.future.slice(1);
+      const newCurrent = prev.future[0];
+      
+      setContent(newCurrent);
+      onChange?.(newCurrent);
+      
+      return {
+        past: [...prev.past, prev.current],
+        current: newCurrent,
+        future: newFuture,
+      };
+    });
+  }, [onChange]);
 
   // 保持选择范围同步
   React.useEffect(() => {
@@ -194,6 +243,21 @@ export function Editor({
     textarea.selectionStart = selection.start;
     textarea.selectionEnd = selection.end;
   }, [selection]);
+
+  // 监听快捷键
+  React.useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey) {
+        if (e.key === 's') {
+          e.preventDefault();
+          onSave?.();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    return () => document.removeEventListener('keydown', handleKeyPress);
+  }, [onSave]);
 
   return (
     <div
@@ -212,6 +276,12 @@ export function Editor({
         onImageUpload={handleImageUpload}
         isFullscreen={isFullscreen}
         onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+        content={content}
+        selection={selection}
+        previewMode={previewMode}
+        onContentChange={handleContentChange}
+        onSelectionChange={setSelection}
+        onPreviewModeChange={setPreviewMode}
       />
 
       <div className={cn(
@@ -233,14 +303,25 @@ export function Editor({
                 "focus:outline-none",
                 "resize-y bg-background",
                 isFullscreen && "h-full resize-none",
-                hasUnsavedContent
+                hasUnsavedContent && "border-primary"
               )}
             />
             {showMentionPicker && (
               <MentionPicker
                 position={mentionPosition}
                 query={mentionQuery}
+                content={content}
+                cursorPosition={textareaRef.current?.selectionStart ?? 0}
                 onClose={() => setShowMentionPicker(false)}
+                onMention={(newContent, newPosition) => {
+                  handleContentChange(newContent);
+                  requestAnimationFrame(() => {
+                    if (!textareaRef.current) return;
+                    textareaRef.current.focus();
+                    textareaRef.current.setSelectionRange(newPosition, newPosition);
+                    setSelection({ start: newPosition, end: newPosition });
+                  });
+                }}
               />
             )}
           </>

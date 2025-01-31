@@ -1,5 +1,4 @@
 import React from "react";
-import { useMarkdownEditor } from "@/store/md-editor";
 import { Button } from "@/components/ui/button";
 import {
   Bold,
@@ -26,7 +25,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { uploadFile } from "@/lib/utils/upload";
 
 interface ToolbarProps {
   className?: string;
@@ -34,6 +32,12 @@ interface ToolbarProps {
   onImageUpload: (file: File) => Promise<void>;
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
+  content: string;
+  selection: { start: number; end: number };
+  previewMode: boolean;
+  onContentChange: (content: string) => void;
+  onSelectionChange: (selection: { start: number; end: number }) => void;
+  onPreviewModeChange: (mode: boolean) => void;
 }
 
 function wordSelectionStart(text: string, i: number): number {
@@ -63,18 +67,13 @@ export function Toolbar({
   onImageUpload,
   isFullscreen,
   onToggleFullscreen,
+  content,
+  selection,
+  previewMode,
+  onContentChange,
+  onSelectionChange,
+  onPreviewModeChange,
 }: ToolbarProps) {
-  const {
-    content,
-    setContent,
-    selection,
-    setSelection,
-    previewMode,
-    setPreviewMode,
-    undo,
-    redo,
-  } = useMarkdownEditor();
-
   const wrapText = React.useCallback(
     (before: string, after: string) => {
       const textarea = textareaRef.current;
@@ -102,7 +101,7 @@ export function Toolbar({
           content.slice(formatStart + before.length, formatEnd - after.length) +
           content.slice(formatEnd);
 
-        setContent(newText);
+        onContentChange(newText);
 
         // 设置新的光标位置
         const newSelection = {
@@ -113,7 +112,7 @@ export function Toolbar({
         requestAnimationFrame(() => {
           textarea.focus();
           textarea.setSelectionRange(newSelection.start, newSelection.end);
-          setSelection(newSelection);
+          onSelectionChange(newSelection);
         });
       } else {
         // 没有找到格式标记，添加新格式
@@ -135,15 +134,15 @@ export function Toolbar({
           end: selectionEnd + before.length,
         };
 
-        setContent(newText);
+        onContentChange(newText);
         requestAnimationFrame(() => {
           textarea.focus();
           textarea.setSelectionRange(newSelection.start, newSelection.end);
-          setSelection(newSelection);
+          onSelectionChange(newSelection);
         });
       }
     },
-    [content, setContent, setSelection, textareaRef]
+    [content, onContentChange, onSelectionChange, textareaRef]
   );
 
   // 特殊处理单行格式（如列表、引用）
@@ -186,7 +185,7 @@ export function Toolbar({
         };
       }
 
-      setContent(newContent);
+      onContentChange(newContent);
 
       if (textareaRef?.current) {
         requestAnimationFrame(() => {
@@ -195,11 +194,11 @@ export function Toolbar({
             newCursorPos.start,
             newCursorPos.end
           );
-          setSelection(newCursorPos);
+          onSelectionChange(newCursorPos);
         });
       }
     },
-    [content, selection, setContent, setSelection, textareaRef]
+    [content, selection, onContentChange, onSelectionChange, textareaRef]
   );
 
   // 添加图片上传处理函数
@@ -298,7 +297,7 @@ export function Toolbar({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setPreviewMode(!previewMode)}
+                onClick={() => onPreviewModeChange(!previewMode)}
                 className="px-2"
               >
                 {previewMode ? (
@@ -314,7 +313,7 @@ export function Toolbar({
           </Tooltip>
         </TooltipProvider>
       </div>
-          <div className={cn("flex items-center gap-0.5 ml-auto", isFullscreen && "pr-4")}>
+      <div className={cn("flex items-center gap-0.5 ml-auto", isFullscreen && "pr-4")}>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>

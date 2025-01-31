@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useMarkdownEditor } from "@/store/md-editor";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { User } from "@/types";
@@ -9,6 +8,10 @@ interface MentionPickerProps {
   position: { top: number; left: number };
   query: string;
   onClose: () => void;
+  onSelect: (user: { username: string; hashid: string }) => void;
+  content: string;
+  cursorPosition: number;
+  onMention: (newContent: string, newPosition: number) => void;
 }
 
 const SEARCH_THROTTLE = 250;
@@ -18,8 +21,11 @@ export function MentionPicker({
   position,
   query,
   onClose,
+  onSelect,
+  content,
+  cursorPosition,
+  onMention,
 }: MentionPickerProps) {
-  const { insertText } = useMarkdownEditor();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -67,20 +73,25 @@ export function MentionPicker({
   // 处理选择用户
   const handleSelect = useCallback(
     (user: User) => {
-      // 使用 Flarum 格式: @"username"#hashid
-      // 第一个参数是要插入的文本
-      // 第二个参数是光标位置（undefined 表示使用当前光标位置）
-      // 第三个参数是删除光标前的字符数（@+已输入的查询词）
-      // 第四个参数是删除光标后的字符数（0，因为我们不需要删除后面的内容）
-      insertText(
-        `@"${user.username}"#${user.hashid}`,
-        undefined,
-        -(query.length + 1),
-        0
-      );
-      onClose();
+      const textBeforeCursor = content.slice(0, cursorPosition);
+      const atIndex = textBeforeCursor.lastIndexOf("@");
+      
+      if (atIndex !== -1) {
+        // 使用 Flarum 格式: @"username"#hashid
+        const mentionText = `@"${user.username}"#${user.hashid}`;
+        const newContent = 
+          content.slice(0, atIndex) +
+          mentionText +
+          content.slice(cursorPosition);
+        
+        // 计算新的光标位置（在提及文本之后）
+        const newPosition = atIndex + mentionText.length;
+        
+        onMention(newContent, newPosition);
+        onClose();
+      }
     },
-    [insertText, query, onClose]
+    [content, cursorPosition, onMention, onClose]
   );
 
   // 处理键盘导航

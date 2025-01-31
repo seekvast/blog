@@ -14,6 +14,7 @@ interface PreviewProps {
 const youtubeRegex = /https?:\/\/(?:www\.)?youtube\.com\/watch\?v=([^&\s]+)/;
 
 export function Preview({ content, className }: PreviewProps) {
+    console.log(content, 'Preview content...........')
   // 使用 useMemo 缓存渲染结果，避免不必要的重渲染
   const markdown = React.useMemo(
     () => (
