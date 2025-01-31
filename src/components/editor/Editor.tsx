@@ -34,7 +34,10 @@ export const Editor = React.forwardRef<
   ref
 ) {
   const [content, setContent] = React.useState(initialContent);
-  const [selection, setSelection] = React.useState<{ start: number; end: number }>({
+  const [selection, setSelection] = React.useState<{
+    start: number;
+    end: number;
+  }>({
     start: 0,
     end: 0,
   });
@@ -85,18 +88,21 @@ export const Editor = React.forwardRef<
     });
   }, []);
 
-  const handleContentChange = React.useCallback((newContent: string) => {
-    setContent(newContent);
-    setHasUnsavedContent(true);
-    onChange?.(newContent);
-    
-    // 更新历史记录
-    setHistory(prev => ({
-      past: [...prev.past, prev.current],
-      current: newContent,
-      future: [],
-    }));
-  }, [onChange]);
+  const handleContentChange = React.useCallback(
+    (newContent: string) => {
+      setContent(newContent);
+      setHasUnsavedContent(true);
+      onChange?.(newContent);
+
+      // 更新历史记录
+      setHistory((prev) => ({
+        past: [...prev.past, prev.current],
+        current: newContent,
+        future: [],
+      }));
+    },
+    [onChange]
+  );
 
   const handleInput = React.useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -185,7 +191,7 @@ export const Editor = React.forwardRef<
       e.preventDefault();
       setShowMentionPicker(false);
     } else if (e.metaKey || e.ctrlKey) {
-      if (e.key === 'z') {
+      if (e.key === "z") {
         e.preventDefault();
         if (e.shiftKey) {
           redo();
@@ -210,27 +216,27 @@ export const Editor = React.forwardRef<
 
   const handleImageUpload = async (file: File) => {
     try {
-      setUploadingFiles(prev => [...prev, file]);
+      setUploadingFiles((prev) => [...prev, file]);
       const url = await uploadFile(file, attachmentType);
       const imageMarkdown = `![${file.name}](${url})`;
       handleContentChange(content + imageMarkdown);
     } catch (error) {
       console.error("Failed to upload image:", error);
     } finally {
-      setUploadingFiles(prev => prev.filter(f => f !== file));
+      setUploadingFiles((prev) => prev.filter((f) => f !== file));
     }
   };
 
   const undo = React.useCallback(() => {
-    setHistory(prev => {
+    setHistory((prev) => {
       if (prev.past.length === 0) return prev;
-      
+
       const newPast = prev.past.slice(0, -1);
       const newCurrent = prev.past[prev.past.length - 1];
-      
+
       setContent(newCurrent);
       onChange?.(newCurrent);
-      
+
       return {
         past: newPast,
         current: newCurrent,
@@ -240,15 +246,15 @@ export const Editor = React.forwardRef<
   }, [onChange]);
 
   const redo = React.useCallback(() => {
-    setHistory(prev => {
+    setHistory((prev) => {
       if (prev.future.length === 0) return prev;
-      
+
       const newFuture = prev.future.slice(1);
       const newCurrent = prev.future[0];
-      
+
       setContent(newCurrent);
       onChange?.(newCurrent);
-      
+
       return {
         past: [...prev.past, prev.current],
         current: newCurrent,
@@ -270,15 +276,15 @@ export const Editor = React.forwardRef<
   React.useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey) {
-        if (e.key === 's') {
+        if (e.key === "s") {
           e.preventDefault();
           onSave?.();
         }
       }
     };
 
-    document.addEventListener('keydown', handleKeyPress);
-    return () => document.removeEventListener('keydown', handleKeyPress);
+    document.addEventListener("keydown", handleKeyPress);
+    return () => document.removeEventListener("keydown", handleKeyPress);
   }, [onSave]);
 
   return (
@@ -306,10 +312,12 @@ export const Editor = React.forwardRef<
         onPreviewModeChange={setPreviewMode}
       />
 
-      <div className={cn(
-        "relative",
-        isFullscreen && "h-[calc(100vh-3.5rem)] overflow-auto"
-      )}>
+      <div
+        className={cn(
+          "relative",
+          isFullscreen && "h-[calc(100vh-3.5rem)] overflow-auto"
+        )}
+      >
         {!previewMode && (
           <>
             <textarea
@@ -323,8 +331,9 @@ export const Editor = React.forwardRef<
               className={cn(
                 "w-full min-h-[200px] p-3",
                 "focus:outline-none",
-                "resize-y bg-background",
-                isFullscreen && "h-full resize-none",
+                "bg-background",
+                "resize-none",
+                isFullscreen && "h-full",
                 hasUnsavedContent && "border-primary"
               )}
             />
@@ -340,7 +349,10 @@ export const Editor = React.forwardRef<
                   requestAnimationFrame(() => {
                     if (!textareaRef.current) return;
                     textareaRef.current.focus();
-                    textareaRef.current.setSelectionRange(newPosition, newPosition);
+                    textareaRef.current.setSelectionRange(
+                      newPosition,
+                      newPosition
+                    );
                     setSelection({ start: newPosition, end: newPosition });
                   });
                 }}
@@ -350,15 +362,10 @@ export const Editor = React.forwardRef<
         )}
 
         {previewMode && (
-          <div className={cn(
-            "min-h-[200px]",
-            isFullscreen && "h-full"
-          )}>
-            <Preview 
-              content={content} 
-              className={cn(
-                isFullscreen && "h-full"
-              )}
+          <div className={cn("min-h-[200px]", isFullscreen && "h-full")}>
+            <Preview
+              content={content}
+              className={cn(isFullscreen && "h-full")}
             />
           </div>
         )}
