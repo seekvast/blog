@@ -18,6 +18,7 @@ import {
 import type { Discussion } from "@/types/discussion";
 import type { Paginate } from "@/types";
 import { api } from "@/lib/api";
+import { DiscussionPreview } from "@/components/post/discussion-preview";
 
 interface DiscussionsListProps {
   initialDiscussions: Paginate<Discussion>;
@@ -203,9 +204,9 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
             <article
               key={discussion.slug}
               ref={isLastItem ? lastItemRef : null}
-              className="py-4"
+              className="py-4 w-full"
             >
-              <div className="flex space-x-3">
+              <div className="flex space-x-3 w-full">
                 {/* 作者头像 */}
                 <Avatar className="h-12 w-12 flex-shrink-0">
                   <AvatarImage
@@ -215,60 +216,26 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
                   <AvatarFallback>{discussion.user.username[0]}</AvatarFallback>
                 </Avatar>
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center space-x-2">
-                    <Link
-                      href={`/discussions/${discussion.slug}`}
-                      className="text-xl font-medium text-foreground hover:text-primary"
-                    >
-                      {discussion.title}
-                    </Link>
+                <div className="min-w-0 flex-1 w-full">
+                  <div className="flex items-center w-full">
+                    <h2 className="min-w-0 flex-1 w-full">
+                      <Link
+                        href={`/discussions/${discussion.slug}`}
+                        className="text-xl font-medium text-foreground hover:text-primary line-clamp-1 block w-full overflow-hidden text-ellipsis"
+                      >
+                        {discussion.title}
+                      </Link>
+                    </h2>
                   </div>
 
                   <div className="mt-1">
-                    {displayMode === "image-text" ? (
-                      <div className="flex gap-3 items-start">
-                        {(() => {
-                          // 使用更精确的正则表达式匹配图片URL
-                          const regex = /!\[(?:.*?)\]\((https?:\/\/[^)]+)\)/;
-                          const matches =
-                            discussion.main_post?.content?.match(regex);
-                          const imgUrl = matches
-                            ? matches[1].split(" ")[0]
-                            : null;
-
-                          return imgUrl ? (
-                            <div className="flex-shrink-0">
-                              <Image
-                                src={imgUrl}
-                                alt=""
-                                width={120}
-                                height={80}
-                                className="object-cover rounded-lg"
-                              />
-                            </div>
-                          ) : null;
-                        })()}
-                        <div className="flex-1 text-sm line-clamp-3 whitespace-pre-line">
-                          <MarkdownRenderer
-                            content={discussion.main_post.content}
-                            skipMedia={true}
-                            className="prose-sm prose-a:text-primary max-w-none [&>p]:!m-0"
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="mt-2 text-sm line-clamp-2">
-                        <MarkdownRenderer
-                          content={discussion.main_post.content}
-                          skipMedia={true}
-                          className="prose-sm prose-a:text-primary max-w-none [&>p]:!m-0"
-                        />
-                      </div>
-                    )}
+                    <DiscussionPreview
+                      content={discussion.main_post.content}
+                      displayMode={displayMode}
+                    />
                   </div>
 
-                  <div className="mt-3 flex items-center space-x-4 text-xs">
+                  <div className="mt-3 flex items-center space-x-4 text-xs text-center">
                     <div className="flex items-center space-x-1 text-muted-foreground">
                       <ThumbsUp className="h-4 w-4 text-base cursor-pointer" />
                       <span>{discussion.votes}</span>
