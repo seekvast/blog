@@ -14,7 +14,6 @@ interface PreviewProps {
 const youtubeRegex = /https?:\/\/(?:www\.)?youtube\.com\/watch\?v=([^&\s]+)/;
 
 export function Preview({ content, className }: PreviewProps) {
-    console.log(content, 'Preview content...........')
   // 使用 useMemo 缓存渲染结果，避免不必要的重渲染
   const markdown = React.useMemo(
     () => (
@@ -101,8 +100,10 @@ export function Preview({ content, className }: PreviewProps) {
           td: ({ node, ...props }) => (
             <td {...props} className="border border-border p-2" />
           ),
+          // 自定义段落渲染，优化普通文本显示
           p: ({ children }) => {
             const child = children[0];
+            // 处理 YouTube 链接
             if (typeof child === 'string') {
               const match = child.match(youtubeRegex);
               if (match) {
@@ -118,6 +119,10 @@ export function Preview({ content, className }: PreviewProps) {
                 );
               }
             }
+            // 普通文本段落
+            return (
+              <p className="whitespace-pre-wrap break-words">{children}</p>
+            );
           },
         }}
       >
@@ -130,8 +135,8 @@ export function Preview({ content, className }: PreviewProps) {
   return (
     <div
       className={cn(
-        "prose prose-sm dark:prose-invert max-w-none",
-        "min-h-[200px] p-3 rounded-md border bg-muted",
+        "prose-sm dark:prose-invert max-w-none",
+        "min-h-[100%] p-3 rounded-md",
         // 自定义 prose 样式
         "prose-headings:scroll-mt-20",
         "prose-pre:p-0 prose-pre:bg-transparent",
@@ -139,7 +144,8 @@ export function Preview({ content, className }: PreviewProps) {
         "prose-blockquote:border-l-4 prose-blockquote:border-primary",
         "prose-blockquote:pl-4 prose-blockquote:italic",
         "prose-a:text-primary prose-a:no-underline hover:prose-a:underline",
-        "h-full",  // 添加高度自适应
+        "prose-p:my-2",
+        "h-full",
         className
       )}
     >

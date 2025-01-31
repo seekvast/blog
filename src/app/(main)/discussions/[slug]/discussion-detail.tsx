@@ -18,6 +18,7 @@ import { useLoginModal } from "@/components/providers/login-modal-provider";
 import { PostContent } from "@/components/post/post-content";
 import { api } from "@/lib/api";
 import { AttachmentType } from "@/constants/attachment-type";
+import { Preview } from "@/components/editor/Preview"; // Add Preview component import
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
 }
@@ -260,6 +261,13 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               </div>
             )}
 
+            {/* 评论预览 */}
+            {commentContent && (
+              <div className="mt-6">
+                <Preview content={commentContent} />
+              </div>
+            )}
+
             {/* 评论编辑器 */}
             {!user ? (
               <div className="mt-6 w-full flex justify-center p-8">
@@ -278,6 +286,8 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   className="rounded-lg border border-gray-200 bg-background"
                   attachmentType={AttachmentType.TOPIC}
                   placeholder="写下你的评论..."
+                  initialContent={commentContent}
+                  onChange={setCommentContent}
                 />
                 <div className="mt-2 flex items-center justify-between">
                   <div></div>
