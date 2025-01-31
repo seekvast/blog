@@ -1,4 +1,3 @@
-import { discussionService } from "@/services/discussion";
 import { DiscussionsList } from "@/components/home/discussions-list";
 import { api } from "@/lib/api";
 
@@ -13,7 +12,6 @@ async function getDiscussions() {
     });
     return response;
   } catch (error) {
-      console.log(error, 'error home.............')
     // Return an empty paginated result in case of error
     return {
       code: -1,

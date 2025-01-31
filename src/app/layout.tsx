@@ -24,12 +24,6 @@ export default async function RootLayout({
 
   return (
     <html lang="zh-CN" suppressHydrationWarning>
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,0"
-        />
-      </head>
       <body className={cn("min-h-screen bg-background antialiased", fontSans.variable)}>
         <ThemeProvider
           attribute="class"

@@ -96,7 +96,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                   "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
                   pathname === item.href
                     ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    : "hover:bg-accent hover:text-accent-foreground"
                 )}
               >
                 {item.icon === "home" && <Home className="mr-2 text-[20px] leading-none" />}

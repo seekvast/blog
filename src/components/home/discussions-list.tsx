@@ -152,13 +152,13 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
               </Button>
               <Button
                 variant="ghost"
-                className="h-8 px-1 font-medium text-muted-foreground hover:bg-transparent hover:text-foreground"
+                className="h-8 px-1 font-medium hover:bg-transparent hover:text-foreground"
               >
                 追踪
               </Button>
               <Button
                 variant="ghost"
-                className="h-8 px-1 font-medium text-muted-foreground hover:bg-transparent hover:text-foreground"
+                className="h-8 px-1 font-medium hover:bg-transparent hover:text-foreground"
               >
                 标签
               </Button>
@@ -167,7 +167,7 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 space-x-2 text-muted-foreground hover:bg-transparent hover:text-foreground"
+                className="h-8 space-x-2 hover:bg-transparent hover:text-foreground"
               >
                 热门
                 <ChevronDown className="h-4 w-4" />

@@ -38,7 +38,7 @@ export default function MainLayout({
         </div>
         <div className="w-full flex px-4">
           <main className="w-full ml-4">
-            <div className="container py-6">
+            <div className="container">
               {children}
             </div>
           </main>
