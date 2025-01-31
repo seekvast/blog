@@ -218,7 +218,7 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
 
                 <div className="min-w-0 flex-1 w-full">
                   <div className="flex items-center w-full">
-                    <h2 className="min-w-0 flex-1 w-full">
+                    <h2 className="min-w-0 flex-1 w-0">
                       <Link
                         href={`/discussions/${discussion.slug}`}
                         className="text-xl font-medium text-foreground hover:text-primary line-clamp-1 block w-full overflow-hidden text-ellipsis"
