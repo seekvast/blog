@@ -67,13 +67,13 @@ export function MentionPicker({
   // 处理选择用户
   const handleSelect = useCallback(
     (user: User) => {
-      // 使用 Flarum 格式: @"username#hashid"
+      // 使用 Flarum 格式: @"username"#hashid
       // 第一个参数是要插入的文本
       // 第二个参数是光标位置（undefined 表示使用当前光标位置）
       // 第三个参数是删除光标前的字符数（@+已输入的查询词）
       // 第四个参数是删除光标后的字符数（0，因为我们不需要删除后面的内容）
       insertText(
-        `@"${user.username}#${user.hashid}"`,
+        `@"${user.username}"#${user.hashid}`,
         undefined,
         -(query.length + 1),
         0

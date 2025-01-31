@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { api } from "./api";
-import type { LoginResponse } from "@/types/common";
+import type { LoginResponse } from "@/types/user";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -28,13 +28,13 @@ export const authOptions: NextAuthOptions = {
         });
 
         return {
-          id: response.hashid,
-          hashid: response.hashid,
-          name: response.nickname,
-          email: response.email,
-          image: response.avatar_url,
-          username: response.nickname,
-          token: response.token,
+          id: response.data.hashid,
+          hashid: response.data.hashid,
+          name: response.data.nickname,
+          email: response.data.email,
+          image: response.data.avatar_url,
+          username: response.data.nickname,
+          token: response.data.token,
         };
         // } catch (error) {
         //   console.error('Login error:', error);

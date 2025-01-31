@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Icon } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { ToolbarButton } from "./create-post-modal";
+import { Button } from "@/components/ui/button";
 
 interface EditorToolbarProps {
   onAction: (action: string) => void;
@@ -50,70 +50,120 @@ export function EditorToolbar({
         className="hidden"
       />
       <div className="flex items-center gap-0.5 border-b bg-gray-50/50 p-2">
-        <ToolbarButton
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 py-1"
           onClick={() => onAction("h1")}
-          icon={<Icon name="format_h1" className="text-2xl" />}
-        />
-        <ToolbarButton
+        >
+          <Icon name="format_h1" className="text-2xl" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 py-1"
           onClick={() => onAction("h2")}
-          icon={<Icon name="format_h2" className="text-2xl" />}
-        />
-        <ToolbarButton
+        >
+          <Icon name="format_h2" className="text-2xl" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 py-1"
           onClick={() => onAction("h3")}
-          icon={<Icon name="format_h3" className="text-2xl" />}
-        />
+        >
+          <Icon name="format_h3" className="text-2xl" />
+        </Button>
         <div className="mx-1 h-8 w-px bg-gray-200" />
-        <ToolbarButton
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 py-1"
           onClick={() => onAction("bold")}
-          icon={<Icon name="format_bold" className="text-2xl" />}
-        />
-        <ToolbarButton
+        >
+          <Icon name="format_bold" className="text-2xl" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 py-1"
           onClick={() => onAction("italic")}
-          icon={<Icon name="format_italic" className="text-2xl" />}
-        />
+        >
+          <Icon name="format_italic" className="text-2xl" />
+        </Button>
         <div className="mx-1 h-8 w-px bg-gray-200" />
-        <ToolbarButton
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 py-1"
           onClick={() => onAction("list-ul")}
-          icon={<Icon name="format_list_bulleted" className="text-2xl" />}
-        />
-        <ToolbarButton
+        >
+          <Icon name="format_list_bulleted" className="text-2xl" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 py-1"
           onClick={() => onAction("list-ol")}
-          icon={<Icon name="format_list_numbered" className="text-2xl" />}
-        />
-        <ToolbarButton
+        >
+          <Icon name="format_list_numbered" className="text-2xl" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 py-1"
           onClick={() => onAction("quote")}
-          icon={<Icon name="format_quote" className="text-2xl" />}
-        />
+        >
+          <Icon name="format_quote" className="text-2xl" />
+        </Button>
         <div className="mx-1 h-8 w-px bg-gray-200" />
-        <ToolbarButton
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 py-1"
           onClick={handleImageUpload}
-          //@ts-ignore
           disabled={imageUploading}
-          icon={<Icon name="image" className="text-2xl" />}
-        />
-        <ToolbarButton
+        >
+          <Icon name="image" className="text-2xl" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 py-1"
           onClick={() => onAction("link")}
-          icon={<Icon name="link" className="text-2xl" />}
-        />
-        <ToolbarButton
+        >
+          <Icon name="link" className="text-2xl" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 px-2 py-1"
           onClick={() => onAction("code")}
-          icon={<Icon name="code" className="text-2xl" />}
-        />
+        >
+          <Icon name="code" className="text-2xl" />
+        </Button>
         <div className="ml-auto flex items-center gap-0.5">
-          <ToolbarButton
-            onClick={onSplitViewToggle}
-            icon={<Icon name="splitscreen" className="text-2xl" />}
-          />
-          {/* <button
-            type="button"
-            onClick={onPreviewToggle}
+          <Button
+            variant="ghost"
+            size="sm"
             className={cn(
-              "rounded p-1.5 hover:bg-accent",
-              previewMode && "bg-accent"
+              "h-8 px-2 py-1",
+              previewMode && !splitView && "bg-accent"
             )}
+            onClick={onPreviewToggle}
           >
-            <Icon name="preview" className="text-2xl" />
-          </button> */}
+            <Icon name="eye" className="mr-1 h-4 w-4" />
+            预览
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn("h-8 px-2 py-1", splitView && "bg-accent")}
+            onClick={onSplitViewToggle}
+          >
+            <Icon name="columns" className="mr-1 h-4 w-4" />
+            分栏
+          </Button>
         </div>
       </div>
     </div>

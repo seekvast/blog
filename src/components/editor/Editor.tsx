@@ -78,7 +78,8 @@ export function Editor({
 
       // 检测URL并转换为Markdown链接
       const urlRegex = /(?:^|\s)(https?:\/\/[^\s]+)(?=\s|$)/g;
-      const youtubeRegex = /https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[^&\s]+/;
+      const youtubeRegex =
+        /https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[^&\s]+/;
       let newContent = value;
       let match;
 
@@ -217,7 +218,7 @@ export function Editor({
                   "w-full min-h-[200px] p-3",
                   "focus:outline-none",
                   "resize-y bg-background",
-                  hasUnsavedContent && "border-yellow-500"
+                  hasUnsavedContent
                 )}
               />
               {showMentionPicker && (

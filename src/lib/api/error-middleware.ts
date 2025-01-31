@@ -1,7 +1,7 @@
 import { signOut } from 'next-auth/react'
 import type { ApiError } from './types'
 import { useNotificationStore } from '@/store/notification'
-import { toast } from '@/components/ui/toast'
+import { toast } from '@/components/ui/use-toast'
 
 type ErrorHandler = (error: ApiError) => void | Promise<void>
 

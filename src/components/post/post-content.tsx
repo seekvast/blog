@@ -83,6 +83,11 @@ export function PostContent({ post, className }: PostContentProps) {
         // 链接样式
         "prose-a:text-primary prose-a:no-underline hover:prose-a:underline",
         
+        // 用户提及链接样式
+        "[&_.mention]:text-primary [&_.mention]:font-medium",
+        "[&_.mention]:bg-primary/10 [&_.mention]:px-1.5 [&_.mention]:py-0.5",
+        "[&_.mention]:rounded hover:[&_.mention]:bg-primary/20",
+        
         // 分割线样式
         "prose-hr:my-8 prose-hr:border-t prose-hr:border-border",
         

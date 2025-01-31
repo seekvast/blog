@@ -3,35 +3,56 @@
 import * as React from "react";
 import { useParams } from "next/navigation";
 import { useDiscussionStore } from "@/store/discussion";
-import { useAuthStore } from "@/store/auth";
-import { DetailMarkdownRenderer } from "@/components/markdown/detail-markdown-renderer";
+import { useSession } from "next-auth/react";
 import { DiscussionSidebar } from "@/components/discussion/discussion-sidebar";
-import { PostEditor } from "@/components/post/post-editor";
+import { Editor } from "@/components/editor/Editor";
+import { useMarkdownEditor } from "@/store/md-editor";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
-import type { Discussion } from "@/types";
+import type { Discussion, Pagination, Post } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ThumbsUp, ThumbsDown, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useLoginModal } from "@/components/providers/login-modal-provider";
 import { PostContent } from "@/components/post/post-content";
+import { api } from "@/lib/api";
+import { AttachmentType } from "@/constants/attachment-type";
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
 }
 
 export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   const params = useParams();
+  // Ensure params.slug exists and is a string
+  const slug = params?.slug as string;
+  if (!slug) {
+    return <div>Invalid discussion URL</div>;
+  }
   const { currentDiscussion, setDiscussion } = useDiscussionStore();
-  const user = useAuthStore((state) => state.user);
+  const { data: session } = useSession();
+  const user = session?.user;
   const { openLoginModal } = useLoginModal();
   const [commentContent, setCommentContent] = React.useState("");
+  const { setContent } = useMarkdownEditor();
   const [replyTo, setReplyTo] = React.useState<any | null>(null);
-  const [comments, setComments] = React.useState<any[]>([]);
+  const [comments, setComments] = React.useState<Pagination<Post>>({
+    items: [],
+    code: 0,
+    total: 0,
+    per_page: 0,
+    current_page: 0,
+    last_page: 0,
+    message: ''
+  });
 
   React.useEffect(() => {
     setDiscussion(initialDiscussion);
   }, [initialDiscussion, setDiscussion]);
+
+  React.useEffect(() => {
+    setContent(commentContent);
+  }, [commentContent, setContent]);
 
   // 初始化评论列表
   React.useEffect(() => {
@@ -39,7 +60,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       if (!currentDiscussion) return;
       try {
         const response = await fetch(
-          `/api/discussion/posts?slug=${encodeURIComponent(currentDiscussion.slug)}`
+          `/api/discussion/posts?slug=${currentDiscussion.slug}`
         );
         if (response.ok) {
           const data = await response.json();
@@ -86,8 +107,10 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         setReplyTo(null);
         // 刷新评论列表
         const commentsRes = await fetch(
-          `/api/discussion/posts?slug=${encodeURIComponent(params.slug as string)}`
+          `/api/discussion/posts?slug=${encodeURIComponent(slug)}`
         );
+        const commentsData = await api.discussions.posts(slug);
+        setComments(commentsData);
         if (commentsRes.ok) {
           const commentsData = await commentsRes.json();
           setComments(commentsData);
@@ -118,7 +141,9 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   src={currentDiscussion.user.avatar_url}
                   alt={currentDiscussion.user.username}
                 />
-                <AvatarFallback>{currentDiscussion.user.username[0]}</AvatarFallback>
+                <AvatarFallback>
+                  {currentDiscussion.user.username[0]}
+                </AvatarFallback>
               </Avatar>
               <div className="flex flex-col justify-center -mt-2 ml-2">
                 <div className="flex items-center space-x-2">
@@ -127,10 +152,13 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   </span>
                   <span className="mx-2 text-gray-300">·</span>
                   <span className="text-sm text-gray-500">
-                    {formatDistanceToNow(new Date(currentDiscussion.created_at), {
-                      addSuffix: true,
-                      locale: zhCN,
-                    })}
+                    {formatDistanceToNow(
+                      new Date(currentDiscussion.created_at),
+                      {
+                        addSuffix: true,
+                        locale: zhCN,
+                      }
+                    )}
                   </span>
                 </div>
                 <div className="text-xs text-muted-foreground">
@@ -151,16 +179,18 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             <div className="flex items-center py-4">
               <span>评论</span>
               <span className="w-2"></span>
-              <span className="text-blue-600">{currentDiscussion.comment_count}</span>
+              <span className="text-blue-600">
+                {currentDiscussion.comment_count}
+              </span>
             </div>
           </div>
 
           {/* 评论区 */}
           <div className="mt-4">
             {/* 评论列表 */}
-            {comments.length > 0 ? (
+            {comments?.items.length > 0 ? (
               <div className="space-y-4">
-                {comments.map((comment) => (
+                {comments.items.map((comment) => (
                   <div key={comment.id} className="pt-2 pb-4 border-b">
                     <div className="flex items-start space-x-3 px-2">
                       <Avatar className="h-12 w-12">
@@ -244,27 +274,10 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               </div>
             ) : (
               <div className="mt-6">
-                <PostEditor
-                  content={commentContent}
-                  onChange={setCommentContent}
+                <Editor
                   className="rounded-lg border border-gray-200 bg-background"
-                  replyTo={replyTo}
-                  onReplyToChange={(comment) => setReplyTo(comment ?? null)}
-                  onSubmit={handleSubmitComment}
-                  onImageUpload={async (file) => {
-                    const formData = new FormData();
-                    formData.append("image", file);
-                    formData.append("attachment_type", "comment_images");
-
-                    try {
-                      const response = await fetch("/api/upload/image", {
-                        method: "POST",
-                        body: formData,
-                      });
-                    } catch (error) {
-                      console.error("Failed to upload image:", error);
-                    }
-                  }}
+                  attachmentType={AttachmentType.TOPIC}
+                  placeholder="写下你的评论..."
                 />
                 <div className="mt-2 flex items-center justify-between">
                   <div></div>
