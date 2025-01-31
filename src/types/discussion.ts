@@ -1,4 +1,4 @@
-import type { Board, BoardChild } from "@/types";
+import type { Board, BoardChild, User } from "@/types";
 
 export interface Discussion {
   title: string;
@@ -25,7 +25,7 @@ export interface Discussion {
   view_count: number;
   votes: number;
   hotness: number;
-  main_post: MainPost;
+  main_post: Post;
   board: Board;
   board_child: BoardChild;
   created_at: string;
@@ -48,7 +48,7 @@ export interface Discussion {
   };
 }
 
-export interface MainPost {
+export interface Post {
   id: number;
   board_id: number;
   board_child_id: number;
@@ -67,6 +67,8 @@ export interface MainPost {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  parent_post: Post;
+  user: User;
 }
 
 export interface DiscussionResponse {

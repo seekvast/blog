@@ -2,10 +2,10 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { MainPost } from "@/types";
+import { Post } from "@/types";
 
 interface PostContentProps {
-  post: MainPost;
+  post: Post;   
   className?: string;
 }
 

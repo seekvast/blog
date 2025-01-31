@@ -205,7 +205,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                               回复 @{comment.parent_post.user.username}{" "}
                             </Link>
                           )}
-                          {comment.content}
+                          <PostContent post={comment} />
                         </div>
 
                         {/* 评论操作 */}
@@ -236,10 +236,12 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   </div>
                 ))}
               </div>
-            ) : !commentContent && (
-              <div className="flex items-center justify-center py-8 text-muted-foreground">
-                暂无评论
-              </div>
+            ) : (
+              !commentContent && (
+                <div className="flex items-center justify-center py-8 text-muted-foreground">
+                  暂无评论
+                </div>
+              )
             )}
 
             {/* 评论预览 */}
