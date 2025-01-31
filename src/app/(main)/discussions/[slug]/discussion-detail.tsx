@@ -286,10 +286,10 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               <span>后发表评论</span>
             </div>
           ) : (
-            <div id="comment" className="mt-6">
+            <div id="comment" className="flex flex-col mt-6 min-h-[260px]">
               <Editor
                 ref={editorRef}
-                className="rounded-lg border border-gray-200 bg-background"
+                className="flex-grow"
                 attachmentType={AttachmentType.TOPIC}
                 placeholder="写下你的评论..."
                 initialContent={commentContent}

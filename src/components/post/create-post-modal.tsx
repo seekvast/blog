@@ -314,7 +314,7 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
         )}
         style={{ height: "calc(100% - 56px)" }}
       >
-        <div className="bg-theme-background h-full flex flex-col mx-auto w-[1360px] mt-8 px-4">
+        <div className="bg-theme-background h-full flex flex-col mx-auto max-w-7xl mt-8 px-4">
           <div className="sticky-header">
             <div className="flex items-center gap-4">
               <h1 className="text-lg font-medium leading-none">发布文章</h1>
@@ -387,11 +387,10 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
 
           <div className="flex-1">
             <div className="py-4">
-              <input
-                type="text"
+              <Input
+                className="text-xl kater-focus-primary"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full text-xl p-2 rounded-lg border border-input bg-background px-3 py-2 ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-primary"
                 placeholder="输入标题..."
               />
               <div className="mt-4">

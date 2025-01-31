@@ -290,8 +290,9 @@ export const Editor = React.forwardRef<
   return (
     <div
       className={cn(
-        "relative border rounded-md bg-background",
+        "relative flex w-full h-full min-h-0 flex-col border rounded-md bg-background",
         isFullscreen && "fixed inset-0 z-50 m-0 h-screen w-screen rounded-none",
+        !isFullscreen && "kater-focus-primary",
         className
       )}
     >
@@ -314,7 +315,7 @@ export const Editor = React.forwardRef<
 
       <div
         className={cn(
-          "relative",
+          "relative flex-grow flex min-h-0",
           isFullscreen && "h-[calc(100vh-3.5rem)] overflow-auto"
         )}
       >
@@ -329,12 +330,10 @@ export const Editor = React.forwardRef<
               onPaste={handlePaste}
               placeholder={placeholder}
               className={cn(
-                "w-full min-h-[200px] p-3",
-                "focus:outline-none",
+                "w-full p-3 outline-none border-none",
                 "bg-background",
                 "resize-none",
-                isFullscreen && "h-full",
-                hasUnsavedContent && "border-primary"
+                isFullscreen && "h-full"
               )}
             />
             {showMentionPicker && (
@@ -362,7 +361,7 @@ export const Editor = React.forwardRef<
         )}
 
         {previewMode && (
-          <div className={cn("min-h-[200px]", isFullscreen && "h-full")}>
+          <div className={cn("h-full")}>
             <Preview
               content={content}
               className={cn(isFullscreen && "h-full")}

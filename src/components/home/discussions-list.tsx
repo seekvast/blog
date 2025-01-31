@@ -176,7 +176,7 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 text-muted-foreground hover:bg-transparent hover:text-foreground"
+                className="h-8 hover:bg-transparent hover:text-foreground"
                 onClick={() =>
                   setDisplayMode((prev) =>
                     prev === "image-text" ? "text-only" : "image-text"

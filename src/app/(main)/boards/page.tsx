@@ -123,7 +123,7 @@ export default function BoardsPage() {
                 className={`h-8 px-1 font-medium ${
                   activeTab === "recommended"
                     ? "text-primary hover:bg-transparent hover:text-primary"
-                    : "text-muted-foreground hover:bg-transparent hover:text-foreground"
+                    : "hover:bg-transparent hover:text-foreground"
                 }`}
                 onClick={() => setActiveTab("recommended")}
               >
@@ -134,7 +134,7 @@ export default function BoardsPage() {
                 className={`h-8 px-1 font-medium ${
                   activeTab === "joined"
                     ? "text-primary hover:bg-transparent hover:text-primary"
-                    : "text-muted-foreground hover:bg-transparent hover:text-foreground"
+                    : "hover:bg-transparent hover:text-foreground"
                 }`}
                 onClick={() => setActiveTab("joined")}
               >
@@ -144,7 +144,7 @@ export default function BoardsPage() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 space-x-2 text-muted-foreground hover:bg-transparent hover:text-foreground"
+              className="h-8 space-x-2 hover:bg-transparent hover:text-foreground"
               onClick={() => setCategoryFilter(null)}
             >
               全部
