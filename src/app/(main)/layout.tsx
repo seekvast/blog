@@ -39,17 +39,11 @@ export default function MainLayout({
         {/* 外层容器添加 min-w-0 */}
         <div className="flex-1 flex px-4 min-w-0">
           {/* main 容器添加 min-w-0 和 w-0 */}
-          <main className="flex-1 ml-4 min-w-0 w-0">
-            {/* 确保 p 标签的父容器限制宽度 */}
-            {/* <div className="w-full">
-              <p className="w-full overflow-hidden text-ellipsis whitespace-nowrap">
-                tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
-              </p>
-            </div> */}
+          <main className="flex-1 min-w-0 w-0">
             <div className="container">{children}</div>
           </main>
           {showRightSidebar && (
-            <aside className="w-60 ml-8 flex-shrink-0">
+            <aside className="ml-4 lg:w-40 xl:w-60 flex-shrink-0">
               <RightSidebar />
             </aside>
           )}
