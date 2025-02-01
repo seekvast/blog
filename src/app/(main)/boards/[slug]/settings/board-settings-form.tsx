@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -37,6 +38,8 @@ const formSchema = z.object({
   voteMethod: z.string(),
   inviteCode: z.string().optional(),
   password: z.string().optional(),
+  isAdmin: z.boolean().default(false),
+  isManager: z.boolean().default(false),
 });
 
 interface BoardSettingsFormProps {
@@ -188,7 +191,7 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
                     <div>
                       <Label>看板头像</Label>
                       <p className="text-sm text-gray-500 mt-1">
-                        网页上传格式要求：PNG、JPEG、GIF等常见png、小小2MB以内。
+                        照片上传格式要求：JPG、JPEG、GIF或PNG、大小2MB以内。
                       </p>
                     </div>
                   </div>
@@ -211,7 +214,23 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
                     </FormItem>
                   )}
                 />
-
+                {/* 看板网址 */}
+                <FormField
+                  control={form.control}
+                  name="boardUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>看板网址</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="可輸入英文大小寫+數字，长度7~25个字符"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 {/* 看板说明 */}
                 <FormField
                   control={form.control}
@@ -221,7 +240,7 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
                       <FormLabel>看板说明</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="只能输入文字，最长500字（约小小篇）"
+                          placeholder="只能输入文字，最长500字"
                           {...field}
                         />
                       </FormControl>
@@ -229,7 +248,46 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
                     </FormItem>
                   )}
                 />
-
+                {/* 管理人员徽章 */}
+                <div className="space-y-4">
+                  <FormLabel>管理人员徽章展示</FormLabel>
+                  <div className="flex items-center gap-8">
+                    <div className="flex items-center gap-2">
+                      <FormField
+                        control={form.control}
+                        name="isAdmin"
+                        render={({ field }) => (
+                          <FormItem className="flex items-center gap-2">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="!mt-0">管理</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <FormField
+                        control={form.control}
+                        name="isManager"
+                        render={({ field }) => (
+                          <FormItem className="flex items-center gap-2">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <FormLabel className="!mt-0">管理员</FormLabel>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
                 {/* 看板类型 */}
                 <FormField
                   control={form.control}
@@ -297,18 +355,17 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
                         >
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="free" id="free" />
+
                             <Label htmlFor="free">无需审核可直接加入</Label>
                           </div>
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="invite" id="invite" />
-                            <Label htmlFor="invite">
-                              输入邀请码由管理员审核
-                            </Label>
+                            <Label htmlFor="invite">输入问题由管理员审核</Label>
                           </div>
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="password" id="password" />
                             <Label htmlFor="password">
-                              输入密码系统自动审核
+                              输入问题系统自动审核
                             </Label>
                           </div>
                         </RadioGroup>
@@ -325,9 +382,9 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
                     name="inviteCode"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>邀请码</FormLabel>
+                        <FormLabel>问题</FormLabel>
                         <FormControl>
-                          <Input placeholder="请输入邀请码" {...field} />
+                          <Input placeholder="请输入问题" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -336,23 +393,38 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
                 )}
 
                 {form.watch("joinMethod") === "password" && (
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>密码</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="请输入密码"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="inviteCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>问题</FormLabel>
+                          <FormControl>
+                            <Input placeholder="请输入问题" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>答案</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="password"
+                              placeholder="请输入答案"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
                 )}
 
                 {/* 看板访问权限 */}
@@ -361,7 +433,7 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
                   name="accessMethod"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>看板访问权限</FormLabel>
+                      <FormLabel>看板被搜寻</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -387,7 +459,7 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
                   name="voteMethod"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>是否可以发起投票</FormLabel>
+                      <FormLabel>谁可以发起投票</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -408,12 +480,12 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
                 />
 
                 {/* 提示信息 */}
-                <div className="space-y-2 text-sm text-gray-500">
-                  <p>加入私钥5000人显示：触发批量审核，你需删除或添加看板</p>
+                {/* <div className="space-y-2 text-sm text-gray-500">
+                  <p>需删除或添加看板</p>
                   <p>
-                    加入私钥3000人显示：触发批量审核，你有15天时间操作，过期时间可以编辑看板加入权限
+                    你有15天时间操作，过期时间可以编辑看板加入权限
                   </p>
-                </div>
+                </div> */}
 
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? "保存中..." : "保存更改"}
