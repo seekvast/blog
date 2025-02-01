@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
+import { remarkYoutube } from './remark-youtube'
 import { cn } from "@/lib/utils";
 
 interface PreviewProps {
@@ -18,8 +19,27 @@ export function Preview({ content, className }: PreviewProps) {
   const markdown = React.useMemo(
     () => (
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw, rehypeSanitize]}
+        remarkPlugins={[remarkGfm, remarkYoutube]}
+        rehypePlugins={[
+          rehypeRaw,
+          [
+            rehypeSanitize,
+            {
+              tagNames: ["iframe"],
+              attributes: {
+                iframe: [
+                  "src",
+                  "width",
+                  "height",
+                  "frameborder",
+                  "allow",
+                  "allowfullscreen",
+                  "loading",
+                ],
+              },
+            },
+          ],
+        ]}
         className={cn(
           "min-h-[100px] w-full text-sm leading-7 text-foreground",
           // 基础文本样式
