@@ -44,7 +44,7 @@ export function PostContent({ post, className }: PostContentProps) {
     <article
       ref={contentRef}
       className={cn(
-        "min-h-[100px] w-full text-sm leading-7 text-foreground",
+        "w-full text-sm leading-7 text-foreground",
 
         // 基础文本样式
         "[&_p]:mb-4 [&_p]:last:mb-0",
@@ -58,16 +58,17 @@ export function PostContent({ post, className }: PostContentProps) {
 
         // 代码相关样式
         "[&_:not(pre)>code]:font-mono [&_:not(pre)>code]:text-[90%]",
-        "[&_:not(pre)>code]:bg-muted/30 [&_:not(pre)>code]:px-2 [&_:not(pre)>code]:py-1",
+        "[&_:not(pre)>code]:bg-muted/30 [&_:not(pre)>code]:px-1.5 [&_:not(pre)>code]:py-0.5",
+        "[&_:not(pre)>code]:sm:px-2 [&_:not(pre)>code]:sm:py-1",
         "[&_:not(pre)>code]:rounded [&_:not(pre)>code]:border [&_:not(pre)>code]:border-muted/20",
 
-        "[&_pre]:bg-muted/30 [&_pre]:p-4 [&_pre]:rounded-md",
+        "[&_pre]:bg-muted/30 [&_pre]:px-3 [&_pre]:py-2 [&_pre]:sm:p-4 [&_pre]:rounded-md",
         "[&_pre]:border [&_pre]:border-muted/20",
         "[&_pre]:overflow-x-auto [&_pre]:text-[90%]",
 
         "[&_pre>code]:p-0 [&_pre>code]:bg-transparent",
         "[&_pre>code]:border-0 [&_pre>code]:block",
-        "[&_pre>code]:max-h-[50vh] [&_pre>code]:min-h-[250px]",
+        "[&_pre>code]:max-h-[50vh]",
 
         // 引用样式
         "[&_blockquote]:border-l-4 [&_blockquote]:border-primary/50",

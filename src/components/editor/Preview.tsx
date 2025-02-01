@@ -72,7 +72,7 @@ export function Preview({ content, className }: PreviewProps) {
               <pre className="bg-muted/30 p-4 rounded-md border border-muted/20 overflow-x-auto text-[90%]">
                 <code
                   className={cn(
-                    "block p-0 bg-transparent border-0 max-h-[50vh] min-h-[250px]",
+                    "block p-0 bg-transparent border-0 max-h-[50vh]",
                     match && `language-${match[1]}`,
                     className
                   )}
