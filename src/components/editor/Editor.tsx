@@ -333,6 +333,7 @@ export const Editor = React.forwardRef<
                 "w-full p-3 outline-none border-none",
                 "bg-background",
                 "resize-none",
+                "whitespace-pre-wrap",
                 isFullscreen && "h-full"
               )}
             />

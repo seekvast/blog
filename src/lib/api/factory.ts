@@ -20,7 +20,7 @@ export function createApi(options: ApiOptions = {}) {
   const { prefix = "", next } = options;
   return {
     users: {
-      login: (data: any) => http.post<LoginResponse>(`${prefix}/login`, data),
+      login: (data: any) => http.post<User>(`${prefix}/login`, data),
       list: (params?: QueryParams) =>
         http.get<Pagination<User>>(`${prefix}/users`, params, { next }),
 

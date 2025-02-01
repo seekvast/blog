@@ -22,19 +22,18 @@ export const authOptions: NextAuthOptions = {
         }
 
         // try {
-        const response = await api.users.login({
+        const data = await api.users.login({
           email: credentials.email,
           password: credentials.password,
         });
-
         return {
-          id: response.data.hashid,
-          hashid: response.data.hashid,
-          name: response.data.nickname,
-          email: response.data.email,
-          image: response.data.avatar_url,
-          username: response.data.nickname,
-          token: response.data.token,
+          id: data.hashid,
+          hashid: data.hashid,
+          name: data.nickname,
+          email: data.email,
+          image: data.avatar_url,
+          username: data.nickname,
+          token: data.token,
         };
         // } catch (error) {
         //   console.error('Login error:', error);

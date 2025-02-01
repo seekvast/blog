@@ -219,8 +219,8 @@ export function Toolbar({
   const tools = [
     {
       icon: Heading,
-      tooltip: "标题 1",
-      onClick: () => toggleLineFormat("# "),
+      tooltip: "标题",
+      onClick: () => toggleLineFormat("### "),
     },
     {
       icon: Bold,
