@@ -38,16 +38,18 @@ export function Header() {
   const { toast } = useToast();
   const [registerOpen, setRegisterOpen] = React.useState(false);
   const [loginOpen, setLoginOpen] = React.useState(false);
-  const { hasUnsavedContent, isOpen, onClose } = usePostEditorStore();
+  const { hasUnsavedContent, isVisible, onClose, setIsVisible } =
+    usePostEditorStore();
 
   const handleLogoClick = React.useCallback(
     (e: React.MouseEvent) => {
-      if (isOpen) {
+      if (isVisible) {
+        setIsVisible(false);
         e.preventDefault();
         onClose?.(false);
       }
     },
-    [isOpen, onClose]
+    [isVisible, onClose]
   );
 
   const handleLogout = async () => {

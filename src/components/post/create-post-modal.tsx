@@ -17,6 +17,7 @@ import { Editor } from "@/components/editor/Editor";
 import { discussionService } from "@/services/discussion";
 import { AlertTriangle } from "lucide-react";
 import { AttachmentType } from "@/constants/attachment-type";
+import { usePostEditorStore } from "@/store/post-editor";
 
 import {
   Dialog,
@@ -30,12 +31,7 @@ import { PollEditor } from "./poll-editor";
 import { PollPreview } from "./poll-preview";
 import { PollData } from "./types";
 
-interface Props {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export default function CreatePostModal({ open, onOpenChange }: Props) {
+export default function CreatePostModal() {
   const { t } = useTranslation();
   const router = useRouter();
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
@@ -50,26 +46,27 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
     setIsOpen,
     setOnClose,
   } = useMarkdownEditor();
+  const { isVisible, setIsVisible } = usePostEditorStore();
   const editorRef = React.useRef<{ reset: () => void }>(null);
 
   React.useEffect(() => {
-    setIsOpen(open);
+    setIsOpen(isVisible);
     setOnClose((confirmed?: boolean) => {
       if (hasUnsavedContent && !confirmed) {
         setShowConfirmDialog(true);
         setPendingAction(() => () => {
           setShowConfirmDialog(false);
-          onOpenChange(false);
+          setIsVisible(false);
         });
       } else {
-        onOpenChange(false);
+        setIsVisible(false);
       }
     });
     return () => {
       setIsOpen(false);
       setOnClose(null);
     };
-  }, [open, hasUnsavedContent, onOpenChange, setIsOpen, setOnClose]);
+  }, [isVisible, hasUnsavedContent, setIsVisible, setIsOpen, setOnClose]);
 
   const [title, setTitle] = React.useState("");
   const [selectedBoard, setSelectedBoard] = React.useState<number | undefined>(
@@ -150,7 +147,7 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
   ]);
 
   React.useEffect(() => {
-    if (open) {
+    if (isVisible) {
       const handleBeforeUnload = (e: BeforeUnloadEvent) => {
         if (hasUnsavedContent) {
           e.preventDefault();
@@ -163,7 +160,7 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
       return () =>
         window.removeEventListener("beforeunload", handleBeforeUnload);
     }
-  }, [open, hasUnsavedContent]);
+  }, [isVisible, hasUnsavedContent]);
 
   const handlePollConfirm = () => {
     setPollData({
@@ -250,7 +247,7 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
 
       await api.discussions.create(data);
       resetAllStates();
-      onOpenChange(false);
+      setIsVisible(false);
       if (window.location.pathname !== "/") {
         router.push("/");
       }
@@ -268,8 +265,8 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
 
   const handleClose = React.useCallback(() => {
     resetAllStates();
-    onOpenChange(false);
-  }, [onOpenChange, resetAllStates]);
+    setIsVisible(false);
+  }, [resetAllStates, setIsVisible]);
 
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -278,17 +275,17 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
       }
     };
 
-    if (open) {
+    if (isVisible) {
       document.addEventListener("keydown", handleEscape);
     }
 
     return () => {
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [open, handleClose]);
+  }, [isVisible, handleClose]);
 
   React.useEffect(() => {
-    if (open) {
+    if (isVisible) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -296,23 +293,22 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [open]);
+  }, [isVisible]);
 
   // 当模态框关闭时重置状态
   React.useEffect(() => {
-    if (!open) {
+    if (!isVisible) {
       resetAllStates();
     }
-  }, [open, resetAllStates]);
+  }, [isVisible, resetAllStates]);
 
   return (
     <Portal>
       <div
         className={cn(
           "fixed inset-0 top-14 z-40 transform bg-background transition-transform duration-500 ease-out overflow-y-auto",
-          open ? "translate-y-0" : "translate-y-full"
+          isVisible ? "translate-y-0" : "translate-y-full"
         )}
-        // style={{ height: "calc(100% - 56px)" }}
       >
         <div className="bg-theme-background h-full flex flex-col mx-auto max-w-7xl pt-4 px-4">
           <div className="sticky-header">

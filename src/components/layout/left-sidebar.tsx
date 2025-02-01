@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState, Suspense, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
@@ -12,11 +12,9 @@ import { cn } from "@/lib/utils";
 import { CreateBoardModal } from "@/components/board/create-board-modal";
 import { Icon } from "@/components/icons";
 import { ModeToggle } from "@/components/mode-toggle";
+import { usePostEditorStore } from "@/store/post-editor";
 
-// 懒加载 CreatePostModal 组件
-const CreatePostModal = React.lazy(
-  () => import("@/components/post/create-post-modal")
-);
+
 
 interface NavItem {
   title: string;
@@ -54,7 +52,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const [createBoardOpen, setCreateBoardOpen] = useState(false);
-  const [createPostOpen, setCreatePostOpen] = useState(false);
+  const { setIsVisible } = usePostEditorStore();
 
   const handlePublishClick = () => {
     // 在看板列表页面，显示创建看板的模态框
@@ -63,7 +61,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
     }
     // 在其他页面，显示发布文章的模态框
     else {
-      setCreatePostOpen(true);
+      setIsVisible(true);
     }
   };
 
@@ -120,14 +118,6 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
             open={createBoardOpen}
             onOpenChange={setCreateBoardOpen}
           />
-          {createPostOpen && (
-            <Suspense fallback={null}>
-              <CreatePostModal
-                open={createPostOpen}
-                onOpenChange={setCreatePostOpen}
-              />
-            </Suspense>
-          )}
         </div>
 
         {/* 推荐看板 */}

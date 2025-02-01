@@ -1,11 +1,18 @@
 "use client";
 
 import * as React from "react";
+import { Suspense } from "react";
 import { usePathname } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { LeftSidebar } from "@/components/layout/left-sidebar";
 import { RightSidebar } from "@/components/layout/right-sidebar";
 import { RouteProgress } from "@/components/router/route-progress";
+import dynamic from "next/dynamic";
+
+const CreatePostModal = dynamic(
+  () => import("@/components/post/create-post-modal"),
+  { ssr: false }
+);
 
 export default function MainLayout({
   children,
@@ -40,6 +47,9 @@ export default function MainLayout({
           )}
         </div>
       </div>
+      <Suspense fallback={null}>
+        <CreatePostModal />
+      </Suspense>
     </div>
   );
 }

@@ -3,10 +3,10 @@ import { useMarkdownEditor } from "./md-editor";
 
 interface PostEditorStore {
   hasUnsavedContent: boolean;
-  isOpen: boolean;
+  isVisible: boolean;
   uploadingFiles: File[];
   setHasUnsavedContent: (hasUnsavedContent: boolean) => void;
-  setIsOpen: (isOpen: boolean) => void;
+  setIsVisible: (isVisible: boolean) => void;
   onClose: ((confirmed?: boolean) => void) | null;
   setOnClose: (onClose: ((confirmed?: boolean) => void) | null) => void;
   addUploadingFile: (file: File) => void;
@@ -22,11 +22,11 @@ export const usePostEditorStore = create<PostEditorStore>((set) => {
 
   return {
     hasUnsavedContent: false,
-    isOpen: false,
+    isVisible: false,
     onClose: null,
     uploadingFiles: [],
     setHasUnsavedContent: (hasUnsavedContent) => set({ hasUnsavedContent }),
-    setIsOpen: (isOpen) => set({ isOpen }),
+    setIsVisible: (isVisible) => set({ isVisible }),
     setOnClose: (onClose) => set({ onClose }),
     addUploadingFile: (file) => set((state) => ({ 
       uploadingFiles: [...state.uploadingFiles, file] 
