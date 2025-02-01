@@ -166,7 +166,7 @@ export function BoardSettingsForm({
       {/* 主内容区域 */}
       <div className="flex">
         {/* 左侧导航菜单 */}
-        <div className="w-48 bg-white border-r">
+        <div className="w-48 bg-white">
           <nav className="space-y-1 py-4">
             <a
               href="#"

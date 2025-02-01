@@ -11,7 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ImagePlus } from "lucide-react";
 import { api } from "@/lib/api";
 
@@ -44,7 +50,10 @@ interface UploadResponse {
   host: string;
 }
 
-export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) {
+export function CreateBoardModal({
+  open,
+  onOpenChange,
+}: CreateBoardModalProps) {
   const { data: session } = useSession();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -56,11 +65,13 @@ export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) 
     category_id: 1, // 默认综合分类
     is_nsfw: 0,
   });
-
-  const handleInputChange = (field: keyof BoardFormData, value: string | number) => {
-    setFormData(prev => ({
+  const handleInputChange = (
+    field: keyof BoardFormData,
+    value: string | number
+  ) => {
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -70,27 +81,21 @@ export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) 
       formData.append("image", file);
       formData.append("attachment_type", "board_avatars");
 
-      const response = await api.post(
-        "/api/upload/image",
-        formData
-      ) as { code: number; data: UploadResponse; message: string };
+      const data = await api.upload.image(formData);
 
-      if (response.code === 0) {
-        const imageUrl = `${response.data.host}${response.data.file_path}`;
-        setFormData((prev) => ({
-          ...prev,
-          attachment_id: response.data.id,
-          avatar: imageUrl,
-        }));
-        return imageUrl;
-      } else {
-        throw new Error(response.message || "Upload failed");
-      }
+      const imageUrl = `${data.host}${data.file_path}`;
+      setFormData((prev) => ({
+        ...prev,
+        attachment_id: 1,
+        avatar: imageUrl,
+      }));
+      return imageUrl;
     } catch (error) {
       console.error("Failed to upload image:", error);
       toast({
         title: "上传失败",
-        description: error instanceof Error ? error.message : "图片上传失败，请重试",
+        description:
+          error instanceof Error ? error.message : "图片上传失败，请重试",
         variant: "destructive",
       });
       return null;
@@ -98,7 +103,7 @@ export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) 
   };
 
   const handleSubmit = async () => {
-    if (!session?.accessToken) {
+    if (!session?.user.token) {
       toast({
         variant: "destructive",
         title: "未登录",
@@ -126,8 +131,8 @@ export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) 
 
     try {
       setLoading(true);
-      await api.post('/api/board', formData);
-      
+      await api.boards.create(formData);
+
       toast({
         title: "创建成功",
         description: "看板创建成功",
@@ -184,39 +189,41 @@ export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) 
 
           <div className="space-y-2">
             <Label>看板名稱</Label>
-            <Input 
-              placeholder="最長15個中文字或相同長度英文字" 
+            <Input
+              placeholder="最長15個中文字或相同長度英文字"
               maxLength={15}
               value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
+              onChange={(e) => handleInputChange("name", e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
             <Label>看板網址</Label>
-            <Input 
-              placeholder="https://kater.me/community/xxx" 
+            <Input
+              placeholder="https://kater.me/community/xxx"
               value={formData.slug}
-              onChange={(e) => handleInputChange('slug', e.target.value)}
+              onChange={(e) => handleInputChange("slug", e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
             <Label>看板簡介</Label>
-            <Textarea 
+            <Textarea
               placeholder="請輸入看板簡介"
               className="resize-none"
               rows={4}
               value={formData.desc}
-              onChange={(e) => handleInputChange('desc', e.target.value)}
+              onChange={(e) => handleInputChange("desc", e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
             <Label>看板被搜尋</Label>
-            <Select 
+            <Select
               value={String(formData.visibility)}
-              onValueChange={(value) => handleInputChange('visibility', Number(value))}
+              onValueChange={(value) =>
+                handleInputChange("visibility", Number(value))
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="選擇公開範圍" />
@@ -233,7 +240,9 @@ export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) 
               <Label>看板類型</Label>
               <Select
                 value={String(formData.category_id)}
-                onValueChange={(value) => handleInputChange('category_id', Number(value))}
+                onValueChange={(value) =>
+                  handleInputChange("category_id", Number(value))
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="選擇看板類型" />
@@ -249,7 +258,9 @@ export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) 
               <Label>討論類型</Label>
               <Select
                 value={String(formData.is_nsfw)}
-                onValueChange={(value) => handleInputChange('is_nsfw', Number(value))}
+                onValueChange={(value) =>
+                  handleInputChange("is_nsfw", Number(value))
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="選擇討論類型" />
@@ -263,7 +274,7 @@ export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) 
           </div>
         </div>
 
-        <Button 
+        <Button
           className="w-full bg-blue-600 text-white hover:bg-blue-700"
           onClick={handleSubmit}
           disabled={loading}
@@ -273,7 +284,9 @@ export function CreateBoardModal({ open, onOpenChange }: CreateBoardModalProps) 
 
         <div className="text-center text-sm text-neutral-500">
           建立看板的同時，代表您已同意《
-          <a href="#" className="text-blue-600 hover:underline">內容政策</a>
+          <a href="#" className="text-blue-600 hover:underline">
+            內容政策
+          </a>
           》
         </div>
       </DialogContent>

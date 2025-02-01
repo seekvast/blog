@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { usePostStore } from '@/store'
+// import { usePostStore } from '@/store'
 import type { Post } from '@/types'
 
 interface PostCardProps {
@@ -14,19 +14,19 @@ interface PostCardProps {
 }
 
 export function PostCard({ post }: PostCardProps) {
-  const updatePost = usePostStore(state => state.updatePost)
+//   const updatePost = usePostStore(state => state.updatePost)
 
   const handleLike = async () => {
-    await updatePost(post.id, {
-      likes: post.likes + 1
-    })
+    // await updatePost(post.id, {
+    //   likes: post.likes + 1
+    // })
   }
 
   return (
     <Card>
-      <CardHeader className="flex-row items-center space-x-4 space-y-0">
+      {/* <CardHeader className="flex-row items-center space-x-4 space-y-0">
         <Avatar>
-          <AvatarImage src={post.author.avatar} alt={post.author.username} />
+          <AvatarImage src={post.id} alt={post.author.username} />
           <AvatarFallback>{post.author.username[0]}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
@@ -43,12 +43,12 @@ export function PostCard({ post }: PostCardProps) {
             })}
           </p>
         </div>
-      </CardHeader>
+      </CardHeader> */}
       
       <CardContent>
         <Link href={`/posts/${post.id}`}>
           <h3 className="text-xl font-semibold hover:text-primary">
-            {post.title}
+            {post.id}
           </h3>
         </Link>
         <p className="mt-2 line-clamp-3 text-muted-foreground">
@@ -65,12 +65,12 @@ export function PostCard({ post }: PostCardProps) {
             onClick={handleLike}
           >
             <ThumbsUp className="h-4 w-4" />
-            <span>{post.likes}</span>
+            <span>{post.id}</span>
           </Button>
           <Button variant="ghost" size="sm" className="space-x-1" asChild>
             <Link href={`/posts/${post.id}#comments`}>
               <MessageSquare className="h-4 w-4" />
-              <span>{post.commentCount}</span>
+              <span>{post.id}</span>
             </Link>
           </Button>
         </div>

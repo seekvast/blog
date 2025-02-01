@@ -6,7 +6,6 @@ import { useDiscussionStore } from "@/store/discussion";
 import { useSession } from "next-auth/react";
 import { DiscussionSidebar } from "@/components/discussion/discussion-sidebar";
 import { Editor } from "@/components/editor/Editor";
-import { useMarkdownEditor } from "@/store/md-editor";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
@@ -19,6 +18,9 @@ import { PostContent } from "@/components/post/post-content";
 import { api } from "@/lib/api";
 import { AttachmentType } from "@/constants/attachment-type";
 import { Preview } from "@/components/editor/Preview"; // Add Preview component import
+import { toast } from "@/components/ui/use-toast"; // Add toast import
+import { useState } from "react"; // Add useState import
+
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
 }
@@ -35,7 +37,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   const user = session?.user;
   const { openLoginModal } = useLoginModal();
   const [commentContent, setCommentContent] = React.useState("");
-  const { setContent } = useMarkdownEditor();
+
   const [replyTo, setReplyTo] = React.useState<any | null>(null);
   const editorRef = React.useRef<any>(null);
   const [comments, setComments] = React.useState<Pagination<Post>>({
@@ -47,14 +49,11 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     last_page: 0,
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false); // Add isSubmitting state
 
   React.useEffect(() => {
     setDiscussion(initialDiscussion);
   }, [initialDiscussion, setDiscussion]);
-
-  React.useEffect(() => {
-    setContent(commentContent);
-  }, [commentContent, setContent]);
 
   // 初始化评论列表
   React.useEffect(() => {
@@ -71,8 +70,16 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     fetchComments();
   }, [currentDiscussion]);
 
-  const handleReplyClick = (comment: any) => {
+  const handleReplyClick = (comment: Post) => {
+    if (!user) {
+      openLoginModal();
+      return;
+    }
     setReplyTo(comment);
+    // 滚动到评论框
+    document.getElementById("comment")?.scrollIntoView({ behavior: "smooth" });
+    // 设置编辑器焦点
+    editorRef.current?.focus?.();
   };
 
   const handleSubmitComment = async (content: string) => {
@@ -81,6 +88,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     }
 
     try {
+      setIsSubmitting(true);
       const data = await api.discussions.createPost({
         slug: currentDiscussion?.slug,
         content: content.trim(),
@@ -102,6 +110,14 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       setComments(commentsData);
     } catch (err) {
       console.error("Failed to post comment:", err);
+      // 显示错误提示
+      toast({
+        title: "评论失败",
+        description: "请稍后重试",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -206,7 +222,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                             href={`#comment-${comment.parent_post.user.hashid}`}
                             className="inline-block mb-2 text-sm text-muted-foreground"
                           >
-                            回复 @{comment.parent_post.user.username}{" "}
+                            @{comment.parent_post.user.username}{" "}
                           </Link>
                         )}
                         <PostContent post={comment} />
@@ -287,11 +303,30 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             </div>
           ) : (
             <div id="comment" className="flex flex-col mt-6 min-h-[260px]">
+              {replyTo && (
+                <div className="mb-2 px-4 py-2 bg-muted/50 rounded-md flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    回复 @{replyTo.user.username}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2"
+                    onClick={() => setReplyTo(null)}
+                  >
+                    取消回复
+                  </Button>
+                </div>
+              )}
               <Editor
                 ref={editorRef}
                 className="flex-grow"
                 attachmentType={AttachmentType.TOPIC}
-                placeholder="写下你的评论..."
+                placeholder={
+                  replyTo
+                    ? `回复 @${replyTo.user.username}...`
+                    : "写下你的评论..."
+                }
                 initialContent={commentContent}
                 onChange={setCommentContent}
               />
@@ -300,8 +335,9 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 <Button
                   size="sm"
                   onClick={() => handleSubmitComment(commentContent)}
+                  disabled={isSubmitting || !commentContent.trim()}
                 >
-                  发布评论
+                  {isSubmitting ? "发送中..." : "发送"}
                 </Button>
               </div>
             </div>

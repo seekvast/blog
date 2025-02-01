@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { toast } from '@/components/ui/toast'
+import { toast } from '@/components/ui/use-toast'
 
 export class ValidationError extends Error {
   constructor(

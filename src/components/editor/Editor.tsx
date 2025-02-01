@@ -263,6 +263,27 @@ export const Editor = React.forwardRef<
     });
   }, [onChange]);
 
+  // Utility function to insert mention
+  const insertMention = React.useCallback(
+    (content: string, user: { username: string }, cursorPosition: number) => {
+      const before = content.slice(0, cursorPosition);
+      const after = content.slice(cursorPosition);
+      
+      // Find the last @ symbol before cursor
+      const lastAtPos = before.lastIndexOf("@");
+      if (lastAtPos === -1) return content;
+      
+      // Replace the @username with the markdown mention format
+      const newContent = 
+        before.slice(0, lastAtPos) +
+        `[@${user.username}](@${user.username})` +
+        after;
+      
+      return newContent;
+    },
+    []
+  );
+
   // 保持选择范围同步
   React.useEffect(() => {
     const textarea = textareaRef.current;
@@ -344,6 +365,11 @@ export const Editor = React.forwardRef<
                 content={content}
                 cursorPosition={textareaRef.current?.selectionStart ?? 0}
                 onClose={() => setShowMentionPicker(false)}
+                onSelect={(user) => {
+                  const newContent = insertMention(content, user, textareaRef.current?.selectionStart ?? 0);
+                  handleContentChange(newContent);
+                  setShowMentionPicker(false);
+                }}
                 onMention={(newContent, newPosition) => {
                   handleContentChange(newContent);
                   requestAnimationFrame(() => {

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { formatterApi } from "@/services/formatter";
+// import { formatterApi } from "@/services/formatter";
 
 interface Selection {
   start: number;
@@ -196,9 +196,10 @@ export const useMarkdownEditor = create<
   parseContent: async () => {
     const { content } = get();
     try {
-      const html = await formatterApi.parse(content);
-      set({ parsedContent: html });
-      return html;
+      //   const html = await formatterApi.parse(content);
+      return "<p>Test</p>";
+      //   set({ parsedContent: html });
+      //   return html;
     } catch (error) {
       console.error("Failed to parse content:", error);
       throw error;

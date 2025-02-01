@@ -21,7 +21,7 @@ export function NotificationProvider({
           key={notification.id}
           variant={notification.type === 'error' ? 'destructive' : 'default'}
           title={notification.title}
-          description={notification.message}
+        //   description={notification.message}
           onOpenChange={(open) => {
             if (!open) removeNotification(notification.id)
           }}

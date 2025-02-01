@@ -62,14 +62,14 @@ export async function runResponseDataInterceptors(data: ApiResponse): Promise<Ap
 addRequestInterceptor(async (options) => {
   // 处理查询参数
   if (options.params) {
-    const url = new URL(options.url || window.location.href)
+    const baseUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const url = new URL(baseUrl);
     Object.entries(options.params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         url.searchParams.append(key, String(value))
       }
     })
-    options.url = url.toString()
-    delete options.params
+    options.params = undefined; // Clear params after processing
   }
   return options
 })

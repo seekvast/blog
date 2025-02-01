@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { discussionService } from "@/services/discussion";
 import { DiscussionDetail } from "./discussion-detail";
 import { AsyncBoundary } from "@/components/ui/async-boundary";
 import { notFound } from "next/navigation";

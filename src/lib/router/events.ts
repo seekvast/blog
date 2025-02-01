@@ -1,6 +1,5 @@
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
-import { useUIStore } from '@/store'
 
 // 滚动到顶部的选项
 const scrollOptions: ScrollToOptions = {
@@ -11,7 +10,6 @@ const scrollOptions: ScrollToOptions = {
 // 路由事件处理
 export function useRouterEvents() {
   const router = useRouter()
-  const addNotification = useUIStore(state => state.addNotification)
 
   useEffect(() => {
     // 路由开始变化
@@ -30,7 +28,7 @@ export function useRouterEvents() {
     }
 
     // 路由变化完成
-    const handleComplete = (url: string) => {
+    const handleComplete = (url: string | undefined) => {
       // 滚动到顶部
       window.scrollTo(scrollOptions)
       
@@ -44,9 +42,9 @@ export function useRouterEvents() {
       }
 
       // 发送页面访问统计
-      if (process.env.NODE_ENV === 'production') {
+      if (process.env.NODE_ENV === 'production' && url) {
         try {
-          window.gtag?.('config', process.env.NEXT_PUBLIC_GA_ID, {
+          window.gtag?.('config', "q", {
             page_path: url
           })
         } catch (error) {
@@ -58,8 +56,6 @@ export function useRouterEvents() {
     // 路由变化失败
     const handleError = (error: Error) => {
       // 显示错误通知
-      addNotification('error', '页面加载失败，请稍后重试')
-      console.error('Router error:', error)
       
       // 启用表单提交
       const forms = document.getElementsByTagName('form')
@@ -82,5 +78,5 @@ export function useRouterEvents() {
       router.events.off('routeChangeComplete', handleComplete)
       router.events.off('routeChangeError', handleError)
     }
-  }, [router, addNotification])
+  }, [router])
 }

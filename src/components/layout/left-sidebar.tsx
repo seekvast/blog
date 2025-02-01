@@ -11,8 +11,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "@/components/mode-toggle";
 import { usePostEditorStore } from "@/store/post-editor";
-
-
+import { CreateBoardModal } from "@/components/board/create-board-modal";
 
 interface NavItem {
   title: string;
@@ -113,6 +112,8 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
               : t("common.publish", { defaultValue: "发表文章" })}
           </Button>
         </div>
+
+        <CreateBoardModal open={createBoardOpen} onOpenChange={setCreateBoardOpen} />
 
         {/* 推荐看板 */}
         <div className="my-4">

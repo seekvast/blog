@@ -66,9 +66,9 @@ export function Preview({ content, className }: PreviewProps) {
             );
           },
           // 自定义代码块渲染
-          code: ({ node, inline, className, children, ...props }) => {
+          code: ({ node, className, children, ...props }) => {
             const match = /language-(\w+)/.exec(className || "");
-            return !inline ? (
+            return  (
               <pre className="bg-muted/30 p-4 rounded-md border border-muted/20 overflow-x-auto text-[90%]">
                 <code
                   className={cn(
@@ -81,17 +81,7 @@ export function Preview({ content, className }: PreviewProps) {
                   {children}
                 </code>
               </pre>
-            ) : (
-              <code
-                className={cn(
-                  "font-mono text-[90%] bg-muted/30 px-2 py-1 rounded border border-muted/20",
-                  className
-                )}
-                {...props}
-              >
-                {children}
-              </code>
-            );
+            )
           },
           // 自定义图片渲染
           img: ({ node, ...props }) => (

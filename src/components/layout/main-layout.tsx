@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { RouteProgress } from '@/components/router/route-progress'
 import { useRouterEvents } from '@/lib/router/events'
 import { checkRoutePermission } from '@/config/routes'
-import { useAuthStore } from '@/store'
+// import { useAuthStore } from '@/store'
 
 interface MainLayoutProps {
   children: React.ReactNode
@@ -11,7 +11,7 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const router = useRouter()
-  const user = useAuthStore(state => state.user)
+//   const user = useAuthStore(state => state.user)
 
   // 使用路由事件
   useRouterEvents()
@@ -20,13 +20,13 @@ export function MainLayout({ children }: MainLayoutProps) {
     // 检查路由权限
     const hasPermission = checkRoutePermission(
       router.pathname,
-      user?.role
+    //   user?.hashid
     )
 
     if (!hasPermission) {
       router.replace('/403')
     }
-  }, [router.pathname, user])
+  }, [router.pathname])
 
   return (
     <>

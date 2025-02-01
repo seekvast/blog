@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import { QueryParams } from "@/types/common";
-
+import { Board } from "@/types/board";
 interface BoardSelectProps {
   value?: number;
   onChange?: (value: number) => void;

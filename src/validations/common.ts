@@ -47,7 +47,7 @@ export const errorMessages = {
 export function withErrorMessage<T extends z.ZodType>(
   schema: T,
   message: string
-): T {
+): z.ZodEffects<T> {
   return schema.superRefine((val, ctx) => {
     if (!schema.safeParse(val).success) {
       ctx.addIssue({

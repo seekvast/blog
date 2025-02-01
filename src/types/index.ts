@@ -2,7 +2,6 @@ export * from './discussion'
 export * from './Paginate'
 export * from './common'
 export * from './board'
-export * from './forum'
 export * from './user'
 
 export interface QueryParams {

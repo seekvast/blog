@@ -1,4 +1,4 @@
-import type { User, Post, Comment, Category, Tag } from '@/types'
+import type { User, Post, Category, Tag } from '@/types'
 
 export interface AuthState {
   user: User | null
@@ -7,6 +7,12 @@ export interface AuthState {
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   updateProfile: (data: Partial<User>) => Promise<void>
+  persist: {
+    rehydrate: () => void
+    hasHydrated: () => boolean
+    onHydrate: (cb: () => void) => () => void
+    onFinishHydration: (cb: () => void) => () => void
+  }
 }
 
 export interface PostState {
@@ -32,30 +38,5 @@ export interface CommentState {
   addComment: (data: Partial<Comment>) => Promise<void>
   updateComment: (id: number, content: string) => Promise<void>
   deleteComment: (id: number) => Promise<void>
-  reset: () => void
-}
-
-export interface TaxonomyState {
-  categories: Category[]
-  tags: Tag[]
-  isLoading: boolean
-  error: Error | null
-  fetchCategories: () => Promise<void>
-  fetchTags: () => Promise<void>
-  reset: () => void
-}
-
-export interface UIState {
-  theme: 'light' | 'dark'
-  sidebarOpen: boolean
-  notifications: Array<{
-    id: string
-    type: 'info' | 'success' | 'warning' | 'error'
-    message: string
-  }>
-  setTheme: (theme: 'light' | 'dark') => void
-  toggleSidebar: () => void
-  addNotification: (type: 'info' | 'success' | 'warning' | 'error', message: string) => void
-  removeNotification: (id: string) => void
   reset: () => void
 }

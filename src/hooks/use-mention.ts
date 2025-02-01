@@ -2,13 +2,7 @@
 
 import * as React from "react";
 import { api } from "@/lib/api";
-
-interface User {
-  hashid: string;
-  username: string;
-  nickname: string;
-  avatar_url: string;
-}
+import { User } from "@/types/user";
 
 export function useMention(onChange: (content: string) => void) {
   const [showUserList, setShowUserList] = React.useState(false);
@@ -28,18 +22,11 @@ export function useMention(onChange: (content: string) => void) {
 
   const searchUsers = React.useCallback(async (query: string) => {
     try {
-      setIsSearching(true);
-      const response = await api.get(
-        `/api/users?keyword=${encodeURIComponent(query)}`
-      );
-      if (response.code === 0) {
-        setUsers(response.data);
+        setIsSearching(true);
+        const  data = await api.users.list({ keyword: query });
+        setUsers(data.items);
         setShowUserList(true);
-      } else {
-        console.error("Error searching users:", response.message);
-        setUsers([]);
-        setShowUserList(true);
-      }
+  
     } catch (error) {
       console.error("Error searching users:", error);
       setUsers([]);

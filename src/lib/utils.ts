@@ -42,14 +42,17 @@ export function getCaretCoordinates(
   div.style.position = 'absolute';
   div.style.visibility = 'hidden';
   properties.forEach(prop => {
-    div.style[prop as any] = styles[prop];
+    const value = styles[prop as keyof CSSStyleDeclaration];
+    if (value && typeof value === 'string') {
+      div.style.setProperty(prop, value);
+    }
   });
 
-  div.textContent = element.value.substring(0, position);
+  div.textContent = element.value.slice(0, position);
   document.body.appendChild(div);
   
   const span = document.createElement('span');
-  span.textContent = element.value.substring(position) || '.';
+  span.textContent = element.value.slice(position) || '.';
   div.appendChild(span);
   
   const coordinates = {

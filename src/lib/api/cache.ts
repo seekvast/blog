@@ -20,7 +20,7 @@ class Cache {
     // 如果缓存已满，删除最旧的项
     if (this.storage.size >= this.maxSize) {
       const oldestKey = this.storage.keys().next().value
-      this.storage.delete(oldestKey)
+    //   this.storage.delete()
     }
 
     this.storage.set(key, {
@@ -87,13 +87,17 @@ export function generateCacheKey(
   endpoint: string,
   params?: Record<string, any>
 ): string {
-  return `${endpoint}:${params ? JSON.stringify(params) : ''}`
+  return endpoint + (params ? ':' + JSON.stringify(params) : '')
 }
 
 export async function withCache<T>(
   request: () => Promise<T>,
   options: CacheOptions
 ): Promise<T> {
+  if (!options.key) {
+    throw new Error('Cache key is required');
+  }
+  
   const cachedData = globalCache.get<T>(options.key)
   if (cachedData) {
     return cachedData
