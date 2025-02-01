@@ -208,7 +208,7 @@ function BoardContent() {
       <div className="bg-background">
         <div className="">
           <div className="flex items-start space-x-3 pb-4">
-            <Avatar className="h-12 w-12 rounded-lg">
+            <Avatar className="h-16 w-16">
               <AvatarImage src={board.avatar} alt={board.name} />
               <AvatarFallback>{board.name[0]}</AvatarFallback>
             </Avatar>
@@ -362,7 +362,7 @@ function BoardContent() {
       </div>
       {/* 4. 添加加载状态指示器 */}
       <div className="h-10 flex items-center justify-center text-muted-foreground">
-        {!hasMore && <div>No more items</div>}
+        {!hasMore && discussions.length > 0 && <div>No more items</div>}
       </div>
     </div>
   );

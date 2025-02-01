@@ -3,6 +3,8 @@
 import * as React from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -28,6 +30,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { uploadFile } from "@/lib/utils/upload";
+import { api } from "@/lib/api";
 
 const formSchema = z.object({
   name: z.string().min(1, "看板名称不能为空"),
@@ -78,7 +81,9 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
     }
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       try {
@@ -86,12 +91,12 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
         const imageUrl = await uploadFile(file, "board_avatars");
         setBoardImage(imageUrl);
       } catch (error) {
-        console.error('Upload failed:', error);
+        console.error("Upload failed:", error);
       } finally {
         setIsUploading(false);
         // 清空文件输入框，这样用户可以重新上传同一个文件
         if (fileInputRef.current) {
-          fileInputRef.current.value = '';
+          fileInputRef.current.value = "";
         }
       }
     }
@@ -121,22 +126,7 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
         ...(board.id && { id: board.id }),
         ...(boardImage && { avatar: boardImage }),
       };
-
-      const response = await fetch("/api/board", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-      if (data.code === 0) {
-        console.log("保存成功");
-      } else {
-        throw new Error(data.message || "保存失败");
-      }
+      const data = await api.boards.update(payload);
     } catch (error) {
       console.error(error);
     } finally {
@@ -150,46 +140,15 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
       <div className="flex pb-4 border-b">
         <div className="flex items-start gap-4">
           <div className="flex items-start gap-4">
-            <div 
-              onClick={handleImageClick}
-              className={`w-24 h-24 rounded-full bg-gray-100 overflow-hidden relative cursor-pointer group ${isUploading && 'pointer-events-none'}`}
-            >
-              {boardImage ? (
-                <>
-                  <Image
-                    src={boardImage}
-                    alt="Board image"
-                    fill
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="text-white text-2xl mb-1">+</div>
-                    <div className="text-white text-xs">点击更换</div>
-                  </div>
-                </>
-              ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center">
-                  <div className="text-gray-400 text-2xl mb-1">+</div>
-                  <div className="text-gray-400 text-xs">点击更换</div>
-                </div>
-              )}
-              {isUploading && (
-                <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-white"></div>
-                  <div className="text-white text-xs mt-2">上传中...</div>
-                </div>
-              )}
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleImageUpload}
-                accept="image/*"
-                className="hidden"
-              />
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold">{board.name}</h2>
-              <p className="text-sm text-gray-500 mt-1">{board.desc}</p>
+            <div className="flex items-start gap-4">
+              <Avatar className="h-16 w-16">
+                <AvatarImage src={board.avatar} alt={board.name} />
+                <AvatarFallback>{board.name[0]}</AvatarFallback>
+              </Avatar>
+              <div>
+                <h2 className="text-xl font-semibold">{board.name}</h2>
+                <p className="text-sm text-gray-500 mt-1">{board.desc}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -197,7 +156,7 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
       {/* 主内容区域 */}
       <div className="flex">
         {/* 左侧导航菜单 */}
-        <div className="w-32 bg-white border-r">
+        <div className="w-48 bg-white border-r">
           <nav className="space-y-1 py-4">
             <a
               href="#"
@@ -260,9 +219,11 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
                 {/* 看板头像 */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-4">
-                    <div 
+                    <div
                       onClick={handleImageClick}
-                      className={`w-24 h-24 rounded-full bg-gray-100 overflow-hidden relative cursor-pointer group ${isUploading && 'pointer-events-none'}`}
+                      className={`w-24 h-24 rounded-full bg-gray-100 overflow-hidden relative cursor-pointer group ${
+                        isUploading && "pointer-events-none"
+                      }`}
                     >
                       {boardImage ? (
                         <>
@@ -286,7 +247,9 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
                       {isUploading && (
                         <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center">
                           <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-white"></div>
-                          <div className="text-white text-xs mt-2">上传中...</div>
+                          <div className="text-white text-xs mt-2">
+                            上传中...
+                          </div>
                         </div>
                       )}
                       <input
@@ -494,11 +457,7 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
                         <FormItem>
                           <FormLabel>答案</FormLabel>
                           <FormControl>
-                            <Input
-                              type="password"
-                              placeholder="请输入答案"
-                              {...field}
-                            />
+                            <Input placeholder="请输入答案" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

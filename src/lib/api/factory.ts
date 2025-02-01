@@ -1,5 +1,10 @@
 import { http } from "./http";
-import type { Attachment, Pagination, QueryParams, UploadResponse } from "@/types/common";
+import type {
+  Attachment,
+  Pagination,
+  QueryParams,
+  UploadResponse,
+} from "@/types/common";
 import type {
   Discussion,
   Board,
@@ -49,6 +54,9 @@ export function createApi(options: ApiOptions = {}) {
           undefined,
           { next }
         ),
+      create: (data: any) => http.post<Board>(`${prefix}/board`, data),
+      update: (data: any) => http.post<Board>(`${prefix}/board`, data),
+      delete: (slug: string) => http.delete<void>(`${prefix}/board/${slug}`),
     },
 
     discussions: {
@@ -72,11 +80,9 @@ export function createApi(options: ApiOptions = {}) {
       delete: (slug: string) => http.delete(`${prefix}/discussions/${slug}`),
 
       posts: (params?: QueryParams) =>
-        http.get<Pagination<Post>>(
-          `${prefix}/discussion/posts`,
-          params,
-          { next }
-        ),
+        http.get<Pagination<Post>>(`${prefix}/discussion/posts`, params, {
+          next,
+        }),
 
       like: (slug: string) =>
         http.post<Discussion>(`${prefix}/discussions/${slug}/like`),
