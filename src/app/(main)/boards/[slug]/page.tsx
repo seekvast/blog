@@ -228,10 +228,17 @@ function BoardContent() {
                     <Badge variant="secondary">私密</Badge>
                   )} */}
                 </div>
-                <Button variant="outline" size="sm" className="space-x-1">
-                  已加入
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center space-x-4">
+                  <Link href={`/boards/${board.slug}/settings`}>
+                    <Button size="sm" className="space-x-1">
+                      设定
+                    </Button>
+                  </Link>
+                  <Button variant="outline" size="sm" className="space-x-1">
+                    已加入
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               <div className="mt-1 text-sm text-muted-foreground">
                 {board.visibility === 1 ? "私密" : "公开"} ·{" "}

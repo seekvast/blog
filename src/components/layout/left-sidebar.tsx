@@ -9,8 +9,6 @@ import { Plus, PenSquare, Home, User, LayoutGrid, Bookmark, RotateCcw, Users, La
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { CreateBoardModal } from "@/components/board/create-board-modal";
-import { Icon } from "@/components/icons";
 import { ModeToggle } from "@/components/mode-toggle";
 import { usePostEditorStore } from "@/store/post-editor";
 
@@ -114,10 +112,6 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
               ? t("common.createBoard", { defaultValue: "创建看板" })
               : t("common.publish", { defaultValue: "发表文章" })}
           </Button>
-          <CreateBoardModal
-            open={createBoardOpen}
-            onOpenChange={setCreateBoardOpen}
-          />
         </div>
 
         {/* 推荐看板 */}

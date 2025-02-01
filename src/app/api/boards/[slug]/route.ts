@@ -16,7 +16,7 @@ export const GET = withErrorHandler(async (request: NextRequest, { params }: { p
       throw new ApiError('Unauthorized', 401)
     }
 
-    const response = await api.get(`${API_ROUTES.BOARDS}/${params.slug}`, {
+    const response = await api.get(API_ROUTES.BOARDS.DETAIL(params.slug), {
       headers: {
         Authorization: `Bearer ${session.user.token}`
       }
