@@ -12,7 +12,6 @@ interface PageProps {
 
 export default async function BoardSettingsPage({ params }: PageProps) {
   const { slug } = params;
-  console.log("settings.....................");
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.token) {
@@ -21,7 +20,6 @@ export default async function BoardSettingsPage({ params }: PageProps) {
 
   // 在服务端直接获取数据
   const board = await api.boards.get({ slug });
-  console.log(board, "bo..........");
   if (!board) {
     notFound();
   }

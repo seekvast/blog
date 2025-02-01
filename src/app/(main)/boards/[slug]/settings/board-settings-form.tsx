@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
+import { Board } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { uploadFile } from "@/lib/utils/upload";
 import { api } from "@/lib/api";
+import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   name: z.string().min(1, "看板名称不能为空"),
@@ -50,23 +52,14 @@ const formSchema = z.object({
 });
 
 interface BoardSettingsFormProps {
-  board: {
-    id?: number;
-    name: string;
-    slug: string;
-    desc?: string;
-    visibility: number;
-    badge_visible: number[];
-    is_nsfw: number;
-    poll_role: number[];
-    approval_mode: number;
-    question?: string;
-    answer?: string;
-    avatar?: string;
-  };
+  board: Board;
+  onSuccess?: (board: Board) => void;
 }
 
-export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
+export function BoardSettingsForm({
+  board,
+  onSuccess,
+}: BoardSettingsFormProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isUploading, setIsUploading] = React.useState(false);
   const [boardImage, setBoardImage] = React.useState<string | null>(
@@ -74,6 +67,8 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
   );
   const [attachmentId, setAttachmentId] = React.useState<number | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+  const router = useRouter();
 
   const handleImageClick = () => {
     if (!isUploading) {
@@ -127,7 +122,22 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
         ...(boardImage && { avatar: boardImage }),
       };
       const data = await api.boards.update(payload);
+      onSuccess?.(data);
+
+      toast({
+        title: "保存成功",
+        description: "",
+      });
+
+      // 刷新页面以获取最新数据
+      router.refresh();
     } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "保存失败",
+        description:
+          error instanceof Error ? error.message : "服务器错误，请稍后重试",
+      });
       console.error(error);
     } finally {
       setIsSubmitting(false);
@@ -450,19 +460,21 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="answer"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>答案</FormLabel>
-                          <FormControl>
-                            <Input placeholder="请输入答案" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {form.watch("approval_mode") === 1 && (
+                      <FormField
+                        control={form.control}
+                        name="answer"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>答案</FormLabel>
+                            <FormControl>
+                              <Input placeholder="请输入答案" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                   </>
                 )}
 
@@ -498,25 +510,59 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
                   name="poll_role"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>谁可以发起投票</FormLabel>
-                      <Select
-                        onValueChange={(value) =>
-                          field.onChange([Number(value)])
-                        }
-                        defaultValue={String(field.value[0] || 0)}
-                      >
+                      <FormLabel>投票权限</FormLabel>
+                      <FormDescription>
+                        (选择允许哪些角色进行投票)
+                      </FormDescription>
+                      <div className="space-y-2">
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="选择投票权限" />
-                          </SelectTrigger>
+                          <div className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                checked={field.value.includes(3)}
+                                onCheckedChange={(checked) => {
+                                  const newValue = checked
+                                    ? [...field.value, 3]
+                                    : field.value.filter(
+                                        (v: number) => v !== 3
+                                      );
+                                  field.onChange(newValue);
+                                }}
+                              />
+                              <Label>普通用户</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                checked={field.value.includes(1)}
+                                onCheckedChange={(checked) => {
+                                  const newValue = checked
+                                    ? [...field.value, 1]
+                                    : field.value.filter(
+                                        (v: number) => v !== 1
+                                      );
+                                  field.onChange(newValue);
+                                }}
+                              />
+                              <Label>创建者</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Checkbox
+                                checked={field.value.includes(2)}
+                                onCheckedChange={(checked) => {
+                                  const newValue = checked
+                                    ? [...field.value, 2]
+                                    : field.value.filter(
+                                        (v: number) => v !== 2
+                                      );
+                                  field.onChange(newValue);
+                                }}
+                              />
+                              <Label>管理员</Label>
+                            </div>
+                          </div>
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="0">普通用户</SelectItem>
-                          <SelectItem value="1">创建者</SelectItem>
-                          <SelectItem value="2">管理员</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
+                        <FormMessage />
+                      </div>
                     </FormItem>
                   )}
                 />
@@ -529,8 +575,12 @@ export function BoardSettingsForm({ board }: BoardSettingsFormProps) {
                   </p>
                 </div> */}
 
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "保存中..." : "保存更改"}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "保存中..." : "保存"}
                 </Button>
               </form>
             </Form>
