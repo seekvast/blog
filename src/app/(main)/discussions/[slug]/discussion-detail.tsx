@@ -310,7 +310,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       </div>
 
       {/* 右侧边栏 */}
-      <aside className="sticky top-4 w-full lg:w-40 xl:w-60 flex-shrink-0">
+      <aside className="sticky top-4 w-full lg:w-40 xl:w-60 flex-shrink-0 pl-8">
         <Sidebar />
       </aside>
     </div>

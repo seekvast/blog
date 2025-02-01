@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 interface DiscussionPreviewProps {
   content: string; // 已经渲染好的 HTML
-  displayMode: "image-text" | "text-only";
+  displayMode: "grid" | "list";
   className?: string;
 }
 
@@ -42,7 +42,7 @@ export function DiscussionPreview({
 
   return (
     <div className={className}>
-      {displayMode === "image-text" ? (
+      {displayMode === "grid" ? (
         <div className="flex gap-3 items-start">
           {firstImgSrc && (
             <div className="flex-shrink-0">

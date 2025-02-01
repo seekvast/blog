@@ -40,8 +40,8 @@ export function createApi(options: ApiOptions = {}) {
       list: (params?: QueryParams) =>
         http.get<Pagination<Board>>(`${prefix}/boards`, params, { next }),
 
-      get: (slug: string) =>
-        http.get<Board>(`${prefix}/boards/${slug}`, undefined, { next }),
+      get: (params: any) =>
+        http.get<Board>(`${prefix}/board`, params, { next }),
 
       getChildren: (boardId: number) =>
         http.get<Pagination<BoardChild>>(

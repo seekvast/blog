@@ -15,7 +15,9 @@ export default function MainLayout({
   const pathname = usePathname();
   // 只在首页和搜索页显示默认的右侧边栏
   const showDefaultSidebarPaths = ["/", "/search"];
-  const showRightSidebar = pathname ? showDefaultSidebarPaths.includes(pathname) : false;
+  const showRightSidebar = pathname
+    ? showDefaultSidebarPaths.includes(pathname)
+    : false;
 
   return (
     <div className="min-h-screen">
@@ -26,13 +28,13 @@ export default function MainLayout({
           <LeftSidebar className="hidden lg:block" />
         </div>
         {/* 外层容器添加 min-w-0 */}
-        <div className="flex-1 flex px-4 min-w-0">
+        <div className="flex-1 flex px-4 min-w-0 pl-8">
           {/* main 容器添加 min-w-0 和 w-0 */}
           <main className="flex-1 min-w-0 w-0">
             <div className="">{children}</div>
           </main>
           {showRightSidebar && (
-            <aside className="ml-4 lg:w-40 xl:w-60 flex-shrink-0">
+            <aside className="ml-4 lg:w-40 xl:w-60 flex-shrink-0 pl-8">
               <RightSidebar />
             </aside>
           )}

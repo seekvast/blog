@@ -42,7 +42,9 @@ export default function BoardsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"recommended" | "joined">("recommended");
+  const [activeTab, setActiveTab] = useState<"recommended" | "joined">(
+    "recommended"
+  );
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
 
   const fetchBoards = async (page: number = 1, isReset: boolean = false) => {
@@ -54,21 +56,17 @@ export default function BoardsPage() {
         ...(categoryFilter && { category_id: String(categoryFilter) }),
       }).toString();
 
-      const response = await api.get<{
-        code: number;
-        data: BoardsResponse;
-        message: string;
-      }>(`/api/boards?${queryParams}`);
+      const data = await api.boards.list({
+        page,
+        per_page: 10,
+        // category_id: categoryFilter,
+      });
 
-      if (response.code === 0) {
-        setBoards((prevBoards) =>
-          isReset
-            ? response.data.items
-            : [...prevBoards, ...response.data.items]
-        );
-        setCurrentPage(response.data.current_page);
-        setTotalPages(response.data.last_page);
-      }
+      setBoards((prevBoards) =>
+        isReset ? data.items : [...prevBoards, ...data.items]
+      );
+      setCurrentPage(data.current_page);
+      setTotalPages(data.last_page);
     } catch (error) {
       console.error("Failed to fetch boards:", error);
     } finally {
@@ -79,7 +77,7 @@ export default function BoardsPage() {
   const handleLoadMore = async () => {
     if (loading || currentPage >= totalPages) return;
     setLoading(true);
-    
+
     try {
       const queryParams = new URLSearchParams({
         page: String(currentPage + 1),
@@ -87,19 +85,14 @@ export default function BoardsPage() {
         ...(categoryFilter && { category_id: String(categoryFilter) }),
       }).toString();
 
-      const response = await api.get<{
-        code: number;
-        data: BoardsResponse;
-        message: string;
-      }>(`/api/boards?${queryParams}`);
-
-      if (response.code === 0) {
-        setBoards((prev) => [...prev, ...response.data.items]);
-        setCurrentPage(response.data.current_page);
-        setTotalPages(response.data.last_page);
-      } else {
-        setError(response.message);
-      }
+      const data = await api.boards.list({
+        page: currentPage + 1,
+        per_page: 10,
+        // category_id: categoryFilter,
+      });
+      setBoards((prev) => [...prev, ...data.items]);
+      setCurrentPage(data.current_page);
+      setTotalPages(data.last_page);
     } catch (err) {
       setError("加载失败，请重试");
     } finally {

@@ -312,9 +312,9 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
           "fixed inset-0 top-14 z-40 transform bg-background transition-transform duration-500 ease-out overflow-y-auto",
           open ? "translate-y-0" : "translate-y-full"
         )}
-        style={{ height: "calc(100% - 56px)" }}
+        // style={{ height: "calc(100% - 56px)" }}
       >
-        <div className="bg-theme-background h-full flex flex-col mx-auto max-w-7xl mt-8 px-4">
+        <div className="bg-theme-background h-full flex flex-col mx-auto max-w-7xl pt-4 px-4">
           <div className="sticky-header">
             <div className="flex items-center gap-4">
               <h1 className="text-lg font-medium leading-none">发布文章</h1>
@@ -423,7 +423,7 @@ export default function CreatePostModal({ open, onOpenChange }: Props) {
               <Editor
                 ref={editorRef}
                 placeholder="开始编写正文..."
-                className="min-h-[400px] mt-4"
+                className="min-h-[400px]"
                 attachmentType={AttachmentType.TOPIC}
                 initialContent={content}
                 onChange={setContent}

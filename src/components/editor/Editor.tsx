@@ -291,7 +291,7 @@ export const Editor = React.forwardRef<
     <div
       className={cn(
         "relative flex w-full h-full min-h-0 flex-col border rounded-md bg-background",
-        isFullscreen && "fixed inset-0 z-50 m-0 h-screen w-screen rounded-none",
+        isFullscreen && "fixed inset-0 z-50 m-0 h-[calc(100vh-56px)] w-screen rounded-none",
         !isFullscreen && "kater-focus-primary",
         className
       )}
@@ -316,7 +316,7 @@ export const Editor = React.forwardRef<
       <div
         className={cn(
           "relative flex-grow flex min-h-0",
-          isFullscreen && "h-[calc(100vh-3.5rem)] overflow-auto"
+          isFullscreen && "h-[calc(100vh-calc(56px+3.5rem))]"
         )}
       >
         {!previewMode && (

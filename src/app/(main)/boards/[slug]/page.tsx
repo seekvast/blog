@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,6 +11,8 @@ import {
   Heart,
   Share2,
   MoreHorizontal,
+  LayoutGrid,
+  List,
   ChevronDown,
   Loader2,
 } from "lucide-react";
@@ -24,129 +26,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card } from "@/components/ui/card";
+import { Suspense } from "react";
 import { api } from "@/lib/api";
-import { useBoardChildrenStore } from "@/store/board-children";
-import { Suspense } from 'react'
-import { ErrorBoundary } from '@/components/error-boundary'
-import styles from './page.module.styl'
-
-interface Board {
-  id: number;
-  name: string;
-  avatar: string;
-  creator_hashid: string;
-  slug: string;
-  desc: string;
-  visibility: number;
-  badge_visible: number[];
-  category_id: number;
-  child_id: number;
-  is_nsfw: number;
-  approval_mode: number;
-  question: string;
-  answer: string;
-  poll_role: number[];
-  status: number;
-  hashid: string;
-  category: {
-    id: number;
-    name: string;
-  };
-}
-
-interface Post {
-  id: number;
-  board_id: number;
-  board_child_id: number;
-  number: number;
-  parent_id: number;
-  depth: number;
-  is_private: number;
-  is_approved: number;
-  user_hashid: string;
-  edited_user_hashid: string;
-  board_creator_hashid: string;
-  type: string;
-  content: string;
-  edited_at: string | null;
-  hidden_at: string | null;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
-}
-
-interface Discussion {
-  title: string;
-  comment_count: number;
-  participant_count: number;
-  post_number_index: number;
-  user_hashid: string;
-  first_post_id: number;
-  last_posted_at: string;
-  last_posted_user_hashid: string;
-  last_post_id: number;
-  last_post_number: number;
-  board_id: number;
-  board_child_id: number;
-  board_creator_hashid: string;
-  hidden_at: string | null;
-  hidden_user_hashid: string;
-  slug: string;
-  diff_humans: string;
-  is_private: number;
-  is_approved: number;
-  is_locked: number;
-  is_sticky: number;
-  view_count: number;
-  votes: number;
-  hotness: number;
-  main_post: Post;
-  board: {
-    id: number;
-    name: string;
-  };
-  board_child: {
-    id: number;
-    name: string;
-  };
-  user: {
-    id: number;
-    username: string;
-    avatar_url: string;
-  };
-}
-
-interface DiscussionsResponse {
-  current_page: number;
-  items: Discussion[];
-  total: number;
-  per_page: number;
-  last_page: number;
-}
-
-interface BoardChild {
-  board_id: number;
-  name: string;
-  creator_hashid: string;
-  is_default: number;
-  sort: number;
-  id: number;
-}
-
-interface BoardChildrenResponse {
-  items: BoardChild[];
-  total: number;
-  per_page: number;
-  current_page: number;
-  last_page: number;
-}
+import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { Board, BoardChild } from "@/types/board";
+import { Discussion } from "@/types/discussion";
+import { DiscussionItem } from "@/components/home/discussion-item";
+import { InfiniteScroll } from "@/components/common/infinite-scroll";
 
 export default function BoardPage() {
   return (
-    <ErrorBoundary>
-      <Suspense 
+    <ErrorBoundary fallback={<div>出错了，请刷新页面重试</div>}>
+      <Suspense
         fallback={
-          <div className={styles.loadingContainer}>
+          <div className="flex items-center justify-center min-h-screen">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         }
@@ -154,7 +47,7 @@ export default function BoardPage() {
         <BoardContent />
       </Suspense>
     </ErrorBoundary>
-  )
+  );
 }
 
 function BoardContent() {
@@ -167,14 +60,103 @@ function BoardContent() {
   const [totalPages, setTotalPages] = useState(1);
   const [boardChildren, setBoardChildren] = useState<BoardChild[]>([]);
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
-  const { getBoardChildren, setBoardChildren: setStoreBoardChildren } = useBoardChildrenStore();
+  const observerRef = useRef<IntersectionObserver>();
+  const [hasMore, setHasMore] = useState(true);
+  const [displayMode, setDisplayMode] = useState<"grid" | "list">("grid");
+
+  const handleLoadMore = useCallback(() => {
+    if (!discussionsLoading && hasMore) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  }, [discussionsLoading, hasMore]);
+
+  const lastItemRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (discussionsLoading) return;
+
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+
+      observerRef.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          handleLoadMore();
+        }
+      });
+
+      if (node) {
+        observerRef.current.observe(node);
+      }
+    },
+    [discussionsLoading, hasMore, handleLoadMore]
+  );
+
+  console.log({ ...params }, "params..........");
+  const fetchBoardDetail = async () => {
+    try {
+      setLoading(true);
+      //   if (!params?.slug || Array.isArray(params.slug)) {
+      //     throw new Error('Invalid board slug');
+      //   }
+      const data = await api.boards.get({ slug: params?.slug });
+      setBoard(data);
+    } catch (error) {
+      console.error("Failed to fetch board detail:", error);
+      setError("获取看板详情失败");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchBoardChildren = async () => {
+    try {
+      if (!board?.id) return;
+      const data = await api.boards.getChildren(board.id);
+      setBoardChildren(data.items);
+      if (data.items.length > 0 && !selectedChildId) {
+        setSelectedChildId(data.items[0].id);
+      }
+    } catch (error) {
+      console.error("Failed to fetch board children:", error);
+      setError("获取子板块失败");
+    }
+  };
+
+  const fetchDiscussions = async () => {
+    try {
+      setDiscussionsLoading(true);
+      if (!board?.id) return;
+
+      const data = await api.discussions.list({
+        board_id: board.id,
+        board_child_id: selectedChildId || undefined,
+        page: currentPage,
+        per_page: 10,
+      });
+
+      if (currentPage === 1) {
+        setDiscussions(data.items);
+      } else {
+        setDiscussions((prev) => [...prev, ...data.items]);
+      }
+
+      setTotalPages(data.last_page);
+      setHasMore(currentPage < data.last_page);
+    } catch (error) {
+      console.error("Failed to fetch discussions:", error);
+      setError("获取讨论列表失败");
+    } finally {
+      setDiscussionsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (params.slug) {
+    if (params?.slug) {
       fetchBoardDetail();
     }
-  }, [params.slug]);
+  }, [params?.slug]);
 
   useEffect(() => {
     if (board?.id) {
@@ -184,109 +166,41 @@ function BoardContent() {
 
   useEffect(() => {
     if (board?.id) {
+      setCurrentPage(1);
+      setDiscussions([]);
       fetchDiscussions();
     }
   }, [board?.id, selectedChildId]);
 
-  const fetchBoardDetail = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get<{
-        code: number;
-        data: Board;
-        message: string;
-      }>(`/api/board?slug=${params.slug}`);
-
-      if (response.code === 0) {
-        setBoard(response.data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch board detail:", error);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (board?.id && currentPage > 1) {
+      fetchDiscussions();
     }
-  };
-
-  const fetchBoardChildren = async () => {
-    try {
-      if (!board?.id) return;
-
-      // 先从 store 中获取
-      const cachedChildren = getBoardChildren(board.id);
-      if (cachedChildren) {
-        setBoardChildren(cachedChildren);
-        return;
-      }
-
-      // 如果 store 中没有，则请求 API
-      const response = await api.get<{
-        code: number;
-        data: BoardChildrenResponse;
-        message: string;
-      }>(`/api/board/children?board_id=${board.id}`);
-
-      if (response.code === 0) {
-        setBoardChildren(response.data.items);
-        // 缓存到 store 中
-        setStoreBoardChildren(board.id, response.data.items);
-      }
-    } catch (error) {
-      console.error("Failed to fetch board children:", error);
-    }
-  };
-
-  const fetchDiscussions = async (page: number = 1) => {
-    try {
-      setDiscussionsLoading(true);
-      if (!board?.id) return;
-
-      const response = await api.get<{
-        code: number;
-        data: DiscussionsResponse;
-        message: string;
-      }>(
-        `/api/discussions?board_id=${
-          board.id
-        }&page=${page}&per_page=10&board_child_id=${selectedChildId || ""}`
-      );
-
-      if (response.code === 0) {
-        setDiscussions((prevDiscussions) =>
-          page === 1
-            ? response.data.items
-            : [...prevDiscussions, ...response.data.items]
-        );
-        setCurrentPage(response.data.current_page);
-        setTotalPages(response.data.last_page);
-      }
-    } catch (error) {
-    //   console.error("Failed to fetch discussions:", error);
-    } finally {
-      setDiscussionsLoading(false);
-    }
-  };
+  }, [currentPage]);
 
   if (loading) {
     return (
-      <div className="flex h-[calc(100vh-60px)] items-center justify-center">
+      <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-red-500">
+        {error}
       </div>
     );
   }
 
   if (!board) {
     return (
-      <div className="flex h-[calc(100vh-60px)] items-center justify-center">
-        <p className="text-muted-foreground">看板不存在</p>
+      <div className="flex items-center justify-center min-h-screen">
+        板块不存在
       </div>
     );
   }
-
-  const handleLoadMore = () => {
-    if (currentPage < totalPages) {
-      fetchDiscussions(currentPage + 1);
-    }
-  };
 
   return (
     <div className="flex flex-col mx-auto w-full">
@@ -334,96 +248,88 @@ function BoardContent() {
       {/* 顶部导航 */}
       <div className="bg-background">
         <div className="mx-auto w-full">
-          <div className="flex h-[60px] items-center justify-between border-b border-[#EAEAEA]">
-            <div className="flex items-center space-x-8">
-              <Button
-                variant="ghost"
-                className="h-8 px-1 font-medium text-primary hover:bg-transparent hover:text-primary"
-              >
-                文章
-              </Button>
-              <Button
-                variant="ghost"
-                className="h-8 px-1 font-medium text-muted-foreground hover:bg-transparent hover:text-foreground"
-              >
-                规则
-              </Button>
-              <Button
-                variant="ghost"
-                className="h-8 px-1 font-medium text-muted-foreground hover:bg-transparent hover:text-foreground"
-              >
-                子版
-              </Button>
-              <Button
-                variant="ghost"
-                className="h-8 px-1 font-medium text-muted-foreground hover:bg-transparent hover:text-foreground"
-              >
-                讨论
-              </Button>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 space-x-2 text-muted-foreground hover:bg-transparent hover:text-foreground"
-              >
-                热门
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 space-x-2 text-muted-foreground hover:bg-transparent hover:text-foreground"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-list"
-                >
-                  <line x1="8" x2="21" y1="6" y2="6" />
-                  <line x1="8" x2="21" y1="12" y2="12" />
-                  <line x1="8" x2="21" y1="18" y2="18" />
-                  <line x1="3" x2="3.01" y1="6" y2="6" />
-                  <line x1="3" x2="3.01" y1="12" y2="12" />
-                  <line x1="3" x2="3.01" y1="18" y2="18" />
-                </svg>
-              </Button>
+          {/* 顶部导航 */}
+          <div className="bg-background">
+            <div className="mx-auto">
+              <div className="flex h-[40px] items-center justify-between border-b">
+                <div className="flex items-center space-x-8">
+                  <Button
+                    variant="ghost"
+                    className="h-8 px-1 font-medium text-primary hover:bg-transparent hover:text-primary"
+                  >
+                    文章
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="h-8 px-1 font-medium hover:bg-transparent hover:text-foreground"
+                  >
+                    规则
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="h-8 px-1 font-medium hover:bg-transparent hover:text-foreground"
+                  >
+                    子版
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="h-8 px-1 font-medium hover:bg-transparent hover:text-foreground"
+                  >
+                    讨论
+                  </Button>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 space-x-2 hover:bg-transparent hover:text-foreground"
+                  >
+                    热门
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 hover:bg-transparent hover:text-foreground"
+                    onClick={() =>
+                      setDisplayMode((prev) =>
+                        prev === "grid" ? "list" : "grid"
+                      )
+                    }
+                  >
+                    {displayMode === "grid" ? (
+                      <LayoutGrid className="h-4 w-4" />
+                    ) : (
+                      <List className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* 子导航 */}
           <div className="flex items-center space-x-4 py-3 text-sm">
-            <Button
-              variant={!selectedChildId ? "default" : "ghost"}
-              size="sm"
-              className={`rounded-full ${
-                !selectedChildId ? "text-white" : "text-muted-foreground"
+            <Badge
+              variant={!selectedChildId ? "default" : "secondary"}
+              className={`cursor-pointer hover:bg-primary/90 ${
+                !selectedChildId ? "" : "hover:bg-secondary/80"
               }`}
               onClick={() => setSelectedChildId(null)}
             >
               全部
-            </Button>
+            </Badge>
             {boardChildren.map((child) => (
-              <Button
+              <Badge
                 key={child.id}
-                variant={selectedChildId === child.id ? "default" : "ghost"}
-                size="sm"
-                className={`rounded-full ${
-                  selectedChildId === child.id
-                    ? "text-white"
-                    : "text-muted-foreground"
+                variant={selectedChildId === child.id ? "default" : "secondary"}
+                className={`cursor-pointer hover:bg-primary/90 ${
+                  selectedChildId === child.id ? "" : "hover:bg-secondary/80"
                 }`}
                 onClick={() => setSelectedChildId(child.id)}
               >
                 {child.name}
-              </Button>
+              </Badge>
             ))}
           </div>
         </div>
@@ -431,109 +337,25 @@ function BoardContent() {
 
       {/* 帖子列表 */}
       <div className="mx-auto w-full">
-        <div className="space-y-4 py-4">
-          {discussionsLoading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : discussions.length === 0 ? (
-            <div className="flex justify-center py-8 text-muted-foreground">
-              這裡空空如也
-            </div>
-          ) : (
-            discussions.map((discussion) => (
-              <div key={discussion.first_post_id} className="py-4">
-                <div className="flex items-start space-x-3">
-                  <Avatar className="h-10 w-10 rounded-lg">
-                    <AvatarImage src={discussion.user.avatar_url} />
-                    <AvatarFallback>
-                      {discussion.user.username[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-1">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Link
-                            href={`/discussions/${discussion.slug}`}
-                            className="text-lg font-medium hover:text-primary"
-                          >
-                            {discussion.title}
-                          </Link>
-                          {discussion.is_private === 1 && (
-                            <Badge variant="secondary">私密</Badge>
-                          )}
-                          {discussion.is_sticky === 1 && (
-                            <Badge
-                              variant="secondary"
-                              className="bg-blue-50 text-blue-600"
-                            >
-                              置顶
-                            </Badge>
-                          )}
-                        </div>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="mt-1 text-md text-muted-foreground line-clamp-2">
-                        {discussion.main_post.content}
-                      </p>
-                    </div>
-                    <div className="mt-3 flex items-center space-x-4 text-xs">
-                      <div className="flex items-center space-x-1 text-muted-foreground">
-                        <Heart className="h-4 w-4" />
-                        <span>{discussion.votes}</span>
-                      </div>
-                      <div className="flex items-center space-x-1 text-muted-foreground">
-                        <MessageSquare className="h-4 w-4" />
-                        <span>{discussion.comment_count}</span>
-                      </div>
-                      <div className="flex items-center space-x-1 text-muted-foreground">
-                        <span>{discussion.diff_humans}</span>
-                      </div>
-                      <div className="flex items-center space-x-1 text-muted-foreground">
-                        <span>来自 {discussion.board.name}</span>{" "}
-                        <span>#{discussion.board_child.name}</span>
-                      </div>
-                    </div>
-                    {/* <div className="mt-3 flex items-center space-x-4">
-                      <div className="flex items-center space-x-1 text-muted-foreground">
-                        <Heart className="h-4 w-4" />
-                        <span className="text-sm">{discussion.votes}</span>
-                      </div>
-                      <div className="flex items-center space-x-1 text-muted-foreground">
-                        <MessageSquare className="h-4 w-4" />
-                        <span className="text-sm">
-                          {discussion.comment_count}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-1 text-muted-foreground">
-                        <span className="text-sm">
-                          {discussion.diff_humans}
-                        </span>
-                      </div>
-                    </div> */}
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        {!discussionsLoading && currentPage < totalPages && (
-          <div className="flex justify-center py-8">
-            <Button
-              variant="outline"
-              onClick={handleLoadMore}
-              className="w-[200px]"
-            >
-              加載更多
-            </Button>
-          </div>
-        )}
+        <InfiniteScroll
+          loading={discussionsLoading}
+          hasMore={hasMore}
+          onLoadMore={handleLoadMore}
+          currentPage={currentPage}
+          className="space-y-4 py-4 divide-y"
+        >
+          {discussions.map((discussion) => (
+            <DiscussionItem
+              key={discussion.first_post_id}
+              discussion={discussion}
+              displayMode={displayMode}
+            />
+          ))}
+        </InfiniteScroll>
+      </div>
+      {/* 4. 添加加载状态指示器 */}
+      <div className="h-10 flex items-center justify-center text-muted-foreground">
+        {!hasMore && <div>No more items</div>}
       </div>
     </div>
   );

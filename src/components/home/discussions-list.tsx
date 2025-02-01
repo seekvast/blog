@@ -18,7 +18,8 @@ import {
 import type { Discussion } from "@/types/discussion";
 import type { Paginate } from "@/types";
 import { api } from "@/lib/api";
-import { DiscussionPreview } from "@/components/post/discussion-preview";
+import { DiscussionItem } from "@/components/home/discussion-item";
+import { InfiniteScroll } from "@/components/common/infinite-scroll";
 
 interface DiscussionsListProps {
   initialDiscussions: Paginate<Discussion>;
@@ -30,9 +31,7 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(2);
   const [hasMore, setHasMore] = useState(true);
-  const [displayMode, setDisplayMode] = useState<"image-text" | "text-only">(
-    "image-text"
-  );
+  const [displayMode, setDisplayMode] = useState<"grid" | "list">("grid");
   const observerRef = useRef<IntersectionObserver>();
 
   // 1. 添加调试日志
@@ -178,12 +177,10 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
                 size="sm"
                 className="h-8 hover:bg-transparent hover:text-foreground"
                 onClick={() =>
-                  setDisplayMode((prev) =>
-                    prev === "image-text" ? "text-only" : "image-text"
-                  )
+                  setDisplayMode((prev) => (prev === "grid" ? "list" : "grid"))
                 }
               >
-                {displayMode === "image-text" ? (
+                {displayMode === "grid" ? (
                   <LayoutGrid className="h-4 w-4" />
                 ) : (
                   <List className="h-4 w-4" />
@@ -196,76 +193,28 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
 
       {/* 帖子列表 */}
       <div className="divide-y">
-        {discussions.items.map((discussion, index) => {
-          const isLastItem = index === discussions.items.length - 1;
-          console.log("Rendering item", index, "isLastItem:", isLastItem);
-
-          return (
-            <article
-              key={discussion.slug}
-              ref={isLastItem ? lastItemRef : null}
-              className="py-4 w-full"
-            >
-              <div className="flex space-x-3 w-full">
-                {/* 作者头像 */}
-                <Avatar className="h-12 w-12 flex-shrink-0">
-                  <AvatarImage
-                    src={discussion.user.avatar_url}
-                    alt={discussion.user.username}
-                  />
-                  <AvatarFallback>{discussion.user.username[0]}</AvatarFallback>
-                </Avatar>
-
-                <div className="min-w-0 flex-1 w-full">
-                  <div className="flex items-center w-full">
-                    <h2 className="min-w-0 flex-1 w-0">
-                      <Link
-                        href={`/discussions/${discussion.slug}`}
-                        className="text-xl font-medium text-foreground hover:text-primary line-clamp-1 block w-full overflow-hidden text-ellipsis"
-                      >
-                        {discussion.title}
-                      </Link>
-                    </h2>
-                  </div>
-
-                  <div className="mt-1">
-                    <DiscussionPreview
-                      content={discussion.main_post.content}
-                      displayMode={displayMode}
-                    />
-                  </div>
-
-                  <div className="mt-3 flex items-center space-x-4 text-xs text-center">
-                    <div className="flex items-center space-x-1 text-muted-foreground">
-                      <ThumbsUp className="h-4 w-4 text-base cursor-pointer" />
-                      <span>{discussion.votes}</span>
-                    </div>
-                    <Link
-                      href={`/discussions/${discussion.slug}#comment`}
-                      className="flex items-center space-x-1 text-muted-foreground"
-                    >
-                      <MessageSquare className="h-4 w-4 text-base cursor-pointer" />
-                      <span>{discussion.comment_count}</span>
-                    </Link>
-
-                    <div className="flex items-center space-x-1 text-muted-foreground">
-                      <span>{discussion.diff_humans}</span>
-                    </div>
-                    <div className="flex items-center space-x-1 text-muted-foreground">
-                      <span>来自 {discussion.board?.name}</span>{" "}
-                      <span>#{discussion.board_child?.name}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </article>
-          );
-        })}
+        <InfiniteScroll
+          loading={loading}
+          hasMore={hasMore}
+          onLoadMore={loadMore}
+          currentPage={page}
+        >
+          {discussions.items.map((discussion, index) => {
+            const isLastItem = index === discussions.items.length - 1;
+            return (
+              <DiscussionItem
+                key={discussion.slug}
+                discussion={discussion}
+                displayMode={displayMode}
+                isLastItem={isLastItem}
+              />
+            );
+          })}
+        </InfiniteScroll>
       </div>
 
       {/* 4. 添加加载状态指示器 */}
-      <div className="h-10 flex items-center justify-center">
-        {loading && <div>Loading...</div>}
+      <div className="h-10 flex items-center justify-center text-muted-foreground">
         {!hasMore && <div>No more items</div>}
       </div>
     </div>
