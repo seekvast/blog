@@ -25,7 +25,6 @@ export const GET = withErrorHandler(async (request: NextRequest) => {
 
     const searchParams = request.nextUrl.searchParams;
     const keyword = searchParams.get("keyword") || "";
-console.log(keyword, 'k.............')
     const response = await api.users.list({ keyword })
 
     return NextResponse.json(response);

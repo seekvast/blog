@@ -166,7 +166,7 @@ export function BoardSettingsForm({
       {/* 主内容区域 */}
       <div className="flex">
         {/* 左侧导航菜单 */}
-        <div className="w-48 bg-white">
+        <div className="w-48">
           <nav className="space-y-1 py-4">
             <a
               href="#"
@@ -505,68 +505,67 @@ export function BoardSettingsForm({
                 />
 
                 {/* 投票权限 */}
-                <FormField
-                  control={form.control}
-                  name="poll_role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>投票权限</FormLabel>
-                      <FormDescription>
-                        (选择允许哪些角色进行投票)
-                      </FormDescription>
-                      <div className="space-y-2">
-                        <FormControl>
-                          <div className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                              <Checkbox
-                                checked={field.value.includes(3)}
-                                onCheckedChange={(checked) => {
-                                  const newValue = checked
-                                    ? [...field.value, 3]
-                                    : field.value.filter(
-                                        (v: number) => v !== 3
-                                      );
-                                  field.onChange(newValue);
-                                }}
-                              />
-                              <Label>普通用户</Label>
+                <div>
+                  <FormLabel>投票权限</FormLabel>
+                  <FormDescription>(选择允许哪些角色进行投票)</FormDescription>
+                  <FormField
+                    control={form.control}
+                    name="poll_role"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="mt-2">
+                          <FormControl>
+                            <div className="flex items-center gap-8">
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  checked={field.value.includes(3)}
+                                  onCheckedChange={(checked) => {
+                                    const newValue = checked
+                                      ? [...field.value, 3]
+                                      : field.value.filter(
+                                          (v: number) => v !== 3
+                                        );
+                                    field.onChange(newValue);
+                                  }}
+                                />
+                                <Label>普通用户</Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  checked={field.value.includes(1)}
+                                  onCheckedChange={(checked) => {
+                                    const newValue = checked
+                                      ? [...field.value, 1]
+                                      : field.value.filter(
+                                          (v: number) => v !== 1
+                                        );
+                                    field.onChange(newValue);
+                                  }}
+                                />
+                                <Label>创建者</Label>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  checked={field.value.includes(2)}
+                                  onCheckedChange={(checked) => {
+                                    const newValue = checked
+                                      ? [...field.value, 2]
+                                      : field.value.filter(
+                                          (v: number) => v !== 2
+                                        );
+                                    field.onChange(newValue);
+                                  }}
+                                />
+                                <Label>管理员</Label>
+                              </div>
                             </div>
-                            <div className="flex items-center space-x-2">
-                              <Checkbox
-                                checked={field.value.includes(1)}
-                                onCheckedChange={(checked) => {
-                                  const newValue = checked
-                                    ? [...field.value, 1]
-                                    : field.value.filter(
-                                        (v: number) => v !== 1
-                                      );
-                                  field.onChange(newValue);
-                                }}
-                              />
-                              <Label>创建者</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Checkbox
-                                checked={field.value.includes(2)}
-                                onCheckedChange={(checked) => {
-                                  const newValue = checked
-                                    ? [...field.value, 2]
-                                    : field.value.filter(
-                                        (v: number) => v !== 2
-                                      );
-                                  field.onChange(newValue);
-                                }}
-                              />
-                              <Label>管理员</Label>
-                            </div>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
+                          </FormControl>
+                          <FormMessage />
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 {/* 提示信息 */}
                 {/* <div className="space-y-2 text-sm text-gray-500">
                   <p>需删除或添加看板</p>

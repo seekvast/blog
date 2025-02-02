@@ -5,7 +5,6 @@ import { http } from './http'
 const options = { prefix: '/api' }
 // 创建基础客户端 API 实例
 const baseApi = createApi(options)
-console.log('clientApi.........................')
 export const clientApi = {
   ...baseApi,
   discussions: {

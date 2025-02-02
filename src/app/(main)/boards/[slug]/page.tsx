@@ -93,7 +93,6 @@ function BoardContent() {
     [discussionsLoading, hasMore, handleLoadMore]
   );
 
-  console.log({ ...params }, "params..........");
   const fetchBoardDetail = async () => {
     try {
       setLoading(true);

@@ -1,7 +1,5 @@
 import { createApi } from "./factory";
 
-console.log("serverApi.........................");
-
 // 服务端 API 实例
 export const serverApi = createApi({
   prefix: "/api",

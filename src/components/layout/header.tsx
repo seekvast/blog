@@ -84,7 +84,7 @@ export function Header() {
               <Input
                 type="search"
                 placeholder="搜尋關鍵字"
-                className="pl-8 bg-muted/50 rounded-full kater-focus-primary"
+                className="pl-8 bg-muted/50 rounded-full"
               />
             </div>
           </div>

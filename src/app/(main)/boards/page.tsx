@@ -166,7 +166,7 @@ export default function BoardsPage() {
                 className="flex items-center justify-between py-4"
               >
                 <div className="flex items-center space-x-4">
-                  <Avatar className="h-12 w-12">
+                  <Avatar className="h-14 w-14">
                     <AvatarImage src={board.avatar} alt={board.name} />
                     <AvatarFallback>{board.name[0]}</AvatarFallback>
                   </Avatar>

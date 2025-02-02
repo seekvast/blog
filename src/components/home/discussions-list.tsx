@@ -81,62 +81,6 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
     }
   }, [initialDiscussions]);
 
-  // 2. 修改观察者回调，添加更多调试信息
-  const lastItemRef = useCallback(
-    (node: HTMLElement | null) => {
-      console.log(
-        "lastItemRef called, node:",
-        !!node,
-        "hasMore:",
-        hasMore,
-        "loading:",
-        loading
-      );
-
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-
-      if (node && hasMore && !loading) {
-        // 创建一个新的观察者
-        observerRef.current = new IntersectionObserver(
-          (entries) => {
-            if (entries[0].isIntersecting) {
-              loadMore();
-            }
-          },
-          {
-            root: null,
-            rootMargin: "100px", // 增加触发距离
-            threshold: 0, // 降低触发阈值
-          }
-        );
-
-        // 添加一个延时，确保 DOM 完全渲染
-        setTimeout(() => {
-          if (observerRef.current && node) {
-            observerRef.current.observe(node);
-
-            // 立即检查元素是否在视口中
-            const rect = node.getBoundingClientRect();
-            const windowHeight = window.innerHeight;
-            console.log("Element position:", {
-              top: rect.top,
-              bottom: rect.bottom,
-              windowHeight,
-            });
-
-            // 如果元素已经在视口中，手动触发加载
-            if (rect.top < windowHeight) {
-              loadMore();
-            }
-          }
-        }, 100);
-      }
-    },
-    [hasMore, loading, loadMore]
-  );
-
   return (
     <div className="flex flex-col">
       {/* 顶部导航 */}

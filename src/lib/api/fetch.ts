@@ -114,7 +114,6 @@ export async function fetchApi<T>(
       }
     });
   }
-console.log(url, 'fetch,url.........................')
   // 创建请求选项
   const headers = await createHeaders(restOptions);
   const interceptedOptions = await runRequestInterceptors({

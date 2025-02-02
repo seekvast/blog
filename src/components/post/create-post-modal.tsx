@@ -254,11 +254,6 @@ export default function CreatePostModal() {
     }
   };
 
-  const handleSaveDraft = React.useCallback(() => {
-    // 处理保存草稿逻辑
-    console.log("Save draft", { title, content });
-  }, [title, content]);
-
   const handleClose = React.useCallback(() => {
     resetAllStates();
     setIsVisible(false);
@@ -338,7 +333,7 @@ export default function CreatePostModal() {
                 variant="outline"
                 size="sm"
                 className="rounded-full"
-                onClick={handleSaveDraft}
+                onClick={() => {}}
               >
                 保存草稿箱
               </Button>
@@ -380,7 +375,7 @@ export default function CreatePostModal() {
           <div className="flex-1">
             <div className="py-4">
               <Input
-                className="text-xl kater-focus-primary"
+                className="text-xl py-4"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="输入标题..."
