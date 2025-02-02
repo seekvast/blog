@@ -311,7 +311,7 @@ export const Editor = React.forwardRef<
   return (
     <div
       className={cn(
-        "relative flex w-full h-full min-h-0 flex-col border rounded-md bg-background",
+        "relative flex w-full h-full min-h-0 flex-col overflow-hidden border rounded-md bg-background",
         isFullscreen && "fixed inset-0 z-50 m-0 h-[calc(100vh-56px)] w-screen rounded-none",
         !isFullscreen && "kater-focus-primary",
         className
@@ -319,7 +319,7 @@ export const Editor = React.forwardRef<
     >
       <Toolbar
         className={cn(
-          "border-b rounded-t-md",
+          "border-b",
           isFullscreen && "sticky top-0 z-10 bg-background"
         )}
         textareaRef={textareaRef}
@@ -336,7 +336,7 @@ export const Editor = React.forwardRef<
 
       <div
         className={cn(
-          "relative flex-grow flex min-h-0",
+          "relative flex-grow flex min-h-0 overflow-hidden",
           isFullscreen && "h-[calc(100vh-calc(56px+3.5rem))]"
         )}
       >
