@@ -23,8 +23,8 @@ const stepOneSchema = z.object({
   email: z.string().email("請輸入有效的郵箱地址"),
   password: z
     .string()
-    .min(6, "密碼至少需要6個字符")
-    .max(32, "密碼最多32個字符")
+    .min(8, "密碼至少需要8個字符")
+    .max(100, "密碼最多100個字符")
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
       "密碼必須包含大小寫字母和數字"
@@ -44,7 +44,7 @@ const stepTwoSchema = z.object({
     .string()
     .min(3, "暱稱至少需要3個字符")
     .max(16, "暱稱最多32個字符"),
-  gender: z.enum(["male", "female", "other"], {
+  gender: z.enum(["0", "1", "2", "3"], {
     required_error: "請選擇性別",
   }),
   birthday: z.object({
@@ -252,16 +252,34 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
   };
 
   const handleSubmit = async () => {
-    const isValid = await validateStep2();
-    if (!isValid) return;
+    const result = stepTwoSchema.safeParse(step2Data);
+    if (!result.success) {
+      const errors = result.error.errors;
+      const newErrors: Record<string, string> = {};
+      errors.forEach((error) => {
+        const field = error.path[0];
+        newErrors[field.toString()] = error.message;
+      });
+      setErrors(newErrors);
+      return;
+    }
 
     try {
       setIsSubmitting(true);
-      const data = await api.users.signUp({ ...step1Data, ...step2Data });
+      const birthday = step2Data.birthday.year && step2Data.birthday.month && step2Data.birthday.day
+        ? `${step2Data.birthday.year}-${parseInt(step2Data.birthday.month)}-${parseInt(step2Data.birthday.day)}`
+        : undefined;
+        
+      const data = await api.users.signUp({ 
+        ...step1Data, 
+        ...step2Data,
+        gender: step2Data.gender ? parseInt(step2Data.gender) : undefined,
+        birthday 
+      });
       console.log(data, '..................data');
       toast({
         title: "註冊成功",
-        description: "請前往郵箱驗證後登錄",
+        description: "請前往登錄",
       });
       onOpenChange(false);
       setStep(1);
@@ -421,9 +439,10 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                         <SelectValue placeholder="請選擇性別" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="male">男</SelectItem>
-                        <SelectItem value="female">女</SelectItem>
-                        <SelectItem value="other">其他</SelectItem>
+                        <SelectItem value="1">男</SelectItem>
+                        <SelectItem value="2">女</SelectItem>
+                        <SelectItem value="0">其他</SelectItem>
+                        <SelectItem value="3">不願透露</SelectItem>
                       </SelectContent>
                     </Select>
                     {errors.gender && (
