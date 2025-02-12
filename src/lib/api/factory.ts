@@ -4,7 +4,7 @@ import type {
   Pagination,
   QueryParams,
   UploadResponse,
-  Category,
+    Category,
 } from "@/types/common";
 import type {
   Discussion,
@@ -14,6 +14,7 @@ import type {
   LoginResponse,
   User,
 } from "@/types";
+import { signIn } from "next-auth/react";
 
 export interface ApiOptions {
   prefix?: string;
@@ -31,6 +32,7 @@ export function createApi(options: ApiOptions = {}) {
     },
     users: {
       login: (data: any) => http.post<User>(`${prefix}/login`, data),
+      signUp: (data: any) => http.post<User>(`${prefix}/user`, data),
       list: (params?: QueryParams) =>
         http.get<Pagination<User>>(`${prefix}/users`, params, { next }),
 

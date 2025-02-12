@@ -1,5 +1,16 @@
 import { Response } from "./common";
 
+export interface UserProfile {
+    email: string;
+    username: string;
+    nickname: string;
+    password: string;
+    gender?: number;
+    birthday?: string;
+    avatar_url?: string;
+    cover?: string;
+    bio?: string;
+}
 export interface User {
   hashid: string;
   username: string;
