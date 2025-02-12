@@ -4,6 +4,8 @@ import React from "react";
 import { BaseSettings } from "./components/base-settings";
 import { RulesSettings } from "./components/rules-settings";
 import { ApprovalSettings } from "./components/approval-settings";
+import { BoardChildSettings } from "./components/board-child-settings";
+
 import { Board as BoardType } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import BoardSettingsSidebar from "./components/board-settings-sidebar";
@@ -18,14 +20,16 @@ export function BoardSettingsForm({
   onSuccess,
 }: BoardSettingsFormProps) {
   const [activeTab, setActiveTab] = React.useState<
-    "general" | "rules" | "subboards" | "approval" | "members"
+    "general" | "rules" | "child-boards" | "approval" | "members" | "content" | "records" | "blocklist"
   >("general");
 
   // 根据activeTab渲染对应的内容
   const renderContent = () => {
     switch (activeTab) {
       case "general":
-        return <BaseSettings board={board} onSuccess={onSuccess} />;
+        return <BaseSettings board={board} />;
+      case "child-boards":
+        return <BoardChildSettings board={board} />;
       case "rules":
         return <RulesSettings board={board} />;
       case "approval":

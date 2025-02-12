@@ -7,8 +7,8 @@ import { Settings, Users2 } from "lucide-react";
 
 interface BoardSettingsSidebarProps {
   board: Board;
-  activeTab?: "general" | "rules" | "subboards" | "approval" | "members" | "content" | "records" | "blocklist";
-  onTabChange?: (tab: "general" | "rules" | "subboards" | "approval" | "members" | "content" | "records" | "blocklist") => void;
+  activeTab?: "general" | "rules" | "child-boards" | "approval" | "members" | "content" | "records" | "blocklist";
+  onTabChange?: (tab: "general" | "rules" | "child-boards" | "approval" | "members" | "content" | "records" | "blocklist") => void;
   className?: string;
 }
 
@@ -50,10 +50,10 @@ export default function BoardSettingsSidebar({ board, activeTab = "general", onT
       <nav className="flex flex-col gap-1">
         <a
           href="#"
-          onClick={(e) => handleTabClick(e, "subboards")}
+          onClick={(e) => handleTabClick(e, "child-boards")}
           className={cn(
             "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
-            activeTab === "subboards"
+            activeTab === "child-boards"
               ? "bg-accent text-accent-foreground"
               : "hover:bg-accent hover:text-accent-foreground"
           )}
