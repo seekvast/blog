@@ -1,4 +1,5 @@
 import React from "react";
+import { useState, useEffect } from "react";
 import { Board } from "@/types";
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import { AttachmentType } from "@/constants/attachment-type";
 import { uploadFile } from "@/lib/utils/upload";
+import { Category } from "@/types";
 
 const formSchema = z.object({
   name: z.string().min(1, "看板名称不能为空"),
@@ -63,6 +65,9 @@ export function BaseSettings({ board, onSuccess }: BoardProps) {
   const [boardImage, setBoardImage] = React.useState<string | null>(
     board.avatar || null
   );
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const router = useRouter();
@@ -83,6 +88,24 @@ export function BaseSettings({ board, onSuccess }: BoardProps) {
       category_id: board.category_id || 0,
     },
   });
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await api.common.categories();
+        setCategories(data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        toast({
+          title: "错误",
+          description: "获取看板类型失败",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleImageClick = () => {
     fileInputRef.current?.click();
@@ -314,8 +337,11 @@ export function BaseSettings({ board, onSuccess }: BoardProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="0">非成人</SelectItem>
-                    <SelectItem value="1">成人</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={String(category.id)}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
