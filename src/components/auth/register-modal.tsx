@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
+import Link from "next/link";
 
 const stepOneSchema = z.object({
   email: z.string().email("請輸入有效的郵箱地址"),
@@ -307,9 +308,10 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] max-w-[90vw] w-full">
         <DialogHeader>
-          <DialogTitle>
-            {step === 1 ? "創建新賬號" : "完善個人信息"}
-          </DialogTitle>
+          <div className="space-y-2">
+            <p className="text-sm text-neutral-500">第{step}步，共2步</p>
+            <DialogTitle>建立一個帳號</DialogTitle>
+          </div>
         </DialogHeader>
 
         {step === 1 ? (
@@ -318,7 +320,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-sm text-neutral-500">
-                    郵箱
+                    電子郵件
                   </Label>
                   <Input
                     type="text"
@@ -338,10 +340,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="password"
-                    className="text-sm text-neutral-500"
-                  >
+                  <Label htmlFor="password" className="text-sm text-neutral-500">
                     密碼
                   </Label>
                   <Input
@@ -354,6 +353,9 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                     className="h-12"
                     autoComplete="new-password"
                   />
+                  <p className="text-sm text-neutral-500">
+                    包含至少8個字元，只能輸入英文、數字、特殊符號
+                  </p>
                   {errors.password && (
                     <p className="text-sm font-medium text-destructive">
                       {errors.password}
@@ -373,6 +375,27 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                     下一步
                   </Button>
                 </div>
+
+                <div className="text-center space-y-4">
+                  <p className="text-sm text-neutral-500">
+                    已有帳戶？
+                    <Button variant="link" className="px-1 h-auto" onClick={() => {
+                      onOpenChange(false);
+                      // TODO: 打开登录模态框
+                    }}>
+                      登入
+                    </Button>
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    註冊登入即代表同意Kater
+                    <Link href="/terms" className="text-primary hover:underline mx-1">
+                      《服務條款》
+                    </Link>
+                    <Link href="/privacy" className="text-primary hover:underline">
+                      《隱私權政策》
+                    </Link>
+                  </p>
+                </div>
               </div>
             </form>
           </div>
@@ -381,11 +404,8 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
             <form onSubmit={(e) => e.preventDefault()}>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="username"
-                    className="text-sm text-neutral-500"
-                  >
-                    使用者賬號
+                  <Label htmlFor="username" className="text-sm text-neutral-500">
+                    使用者帳號
                   </Label>
                   <Input
                     type="text"
@@ -393,7 +413,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                     name="username"
                     value={step2Data.username}
                     onChange={handleStep2Change}
-                    placeholder="請輸入3-32位英文、數字賬號"
+                    placeholder="請輸入3-32位英文、數字帳號"
                     className="h-12"
                     autoComplete="new-username"
                   />
@@ -405,10 +425,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="nickname"
-                    className="text-sm text-neutral-500"
-                  >
+                  <Label htmlFor="nickname" className="text-sm text-neutral-500">
                     暱稱
                   </Label>
                   <Input
@@ -505,7 +522,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                   </div>
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex gap-4 pt-4">
                   <Button
                     type="button"
                     onClick={prevStep}
@@ -522,6 +539,18 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                   >
                     {isSubmitting ? "註冊中..." : "完成"}
                   </Button>
+                </div>
+
+                <div className="text-center">
+                  <p className="text-xs text-neutral-500">
+                    註冊登入即代表同意Kater
+                    <Link href="/terms" className="text-primary hover:underline mx-1">
+                      《服務條款》
+                    </Link>
+                    <Link href="/privacy" className="text-primary hover:underline">
+                      《隱私權政策》
+                    </Link>
+                  </p>
                 </div>
               </div>
             </form>
