@@ -4,6 +4,7 @@ import type {
   Pagination,
   QueryParams,
   UploadResponse,
+  Category,
 } from "@/types/common";
 import type {
   Discussion,
@@ -24,6 +25,10 @@ export interface ApiOptions {
 export function createApi(options: ApiOptions = {}) {
   const { prefix = "", next } = options;
   return {
+    common: {
+      categories: () =>
+        http.get<Category[]>(`${prefix}/categories`, undefined, { next }),
+    },
     users: {
       login: (data: any) => http.post<User>(`${prefix}/login`, data),
       list: (params?: QueryParams) =>

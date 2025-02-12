@@ -6,9 +6,22 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import Image from "next/image";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -16,10 +29,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
+import { AttachmentType } from "@/constants/attachment-type";
+import { uploadFile } from "@/lib/utils/upload";
 
 const formSchema = z.object({
   name: z.string().min(1, "看板名称不能为空"),
-  slug: z.string().min(7).max(25).regex(/^[a-zA-Z0-9]+$/, "只能输入英文和数字"),
+  slug: z
+    .string()
+    .min(7)
+    .max(25)
+    .regex(/^[a-zA-Z0-9]+$/, "只能输入英文和数字"),
   desc: z.string().max(500, "看板描述不能超过500字"),
   badge_visible: z.array(z.number()),
   is_nsfw: z.number(),
@@ -28,6 +47,7 @@ const formSchema = z.object({
   approval_mode: z.number(),
   question: z.string().optional(),
   answer: z.string().optional(),
+  category_id: z.number().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -37,7 +57,7 @@ interface BoardProps {
   onSuccess?: () => void;
 }
 
-export function BoardSettings({ board, onSuccess }: BoardProps) {
+export function BaseSettings({ board, onSuccess }: BoardProps) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isUploading, setIsUploading] = React.useState(false);
   const [boardImage, setBoardImage] = React.useState<string | null>(
@@ -60,6 +80,7 @@ export function BoardSettings({ board, onSuccess }: BoardProps) {
       approval_mode: board.approval_mode || 0,
       question: board.question || "",
       answer: board.answer || "",
+      category_id: board.category_id || 0,
     },
   });
 
@@ -70,15 +91,11 @@ export function BoardSettings({ board, onSuccess }: BoardProps) {
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    const formData = new FormData();
-    formData.append("file", file);
-
     setIsUploading(true);
 
     try {
-      const response = await api.post("/upload", formData);
-      setBoardImage(response.data.url);
+      const data = await uploadFile(file, AttachmentType.BOARD_AVATAR);
+      setBoardImage(data.url);
     } catch (error) {
       console.error("Error uploading image:", error);
       toast({
@@ -95,8 +112,9 @@ export function BoardSettings({ board, onSuccess }: BoardProps) {
     setIsSubmitting(true);
 
     try {
-      await api.put(`/boards/${board.id}`, {
+      await api.boards.update({
         ...data,
+        id: board.id,
         avatar: boardImage,
       });
 
@@ -131,7 +149,7 @@ export function BoardSettings({ board, onSuccess }: BoardProps) {
             <div className="flex items-center gap-4">
               <div
                 onClick={handleImageClick}
-                className={`w-24 h-24 rounded-full bg-gray-100 overflow-hidden relative cursor-pointer group ${
+                className={`w-16 h-16 rounded-full bg-gray-100 overflow-hidden relative cursor-pointer group ${
                   isUploading && "pointer-events-none"
                 }`}
               >
@@ -157,9 +175,7 @@ export function BoardSettings({ board, onSuccess }: BoardProps) {
                 {isUploading && (
                   <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-white"></div>
-                    <div className="text-white text-xs mt-2">
-                      上传中...
-                    </div>
+                    <div className="text-white text-xs mt-2">上传中...</div>
                   </div>
                 )}
                 <input
@@ -223,10 +239,7 @@ export function BoardSettings({ board, onSuccess }: BoardProps) {
               <FormItem>
                 <FormLabel>看板说明</FormLabel>
                 <FormControl>
-                  <Textarea
-                    placeholder="只能输入文字，最长500字"
-                    {...field}
-                  />
+                  <Textarea placeholder="只能输入文字，最长500字" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -284,6 +297,31 @@ export function BoardSettings({ board, onSuccess }: BoardProps) {
             </div>
           </div>
 
+          {/* 看板类型 */}
+          <FormField
+            control={form.control}
+            name="category_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>看板类型</FormLabel>
+                <Select
+                  onValueChange={(value) => field.onChange(Number(value))}
+                  defaultValue={String(field.value)}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="选择看板类型" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="0">非成人</SelectItem>
+                    <SelectItem value="1">成人</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           {/* 讨论类型 */}
           <FormField
             control={form.control}
@@ -319,9 +357,7 @@ export function BoardSettings({ board, onSuccess }: BoardProps) {
                 <FormLabel>看板加入方式</FormLabel>
                 <FormControl>
                   <RadioGroup
-                    onValueChange={(value) =>
-                      field.onChange(Number(value))
-                    }
+                    onValueChange={(value) => field.onChange(Number(value))}
                     defaultValue={String(field.value)}
                     className="space-y-4"
                   >
@@ -422,9 +458,7 @@ export function BoardSettings({ board, onSuccess }: BoardProps) {
                             onCheckedChange={(checked) => {
                               const newValue = checked
                                 ? [...field.value, 3]
-                                : field.value.filter(
-                                    (v: number) => v !== 3
-                                  );
+                                : field.value.filter((v: number) => v !== 3);
                               field.onChange(newValue);
                             }}
                           />
@@ -436,9 +470,7 @@ export function BoardSettings({ board, onSuccess }: BoardProps) {
                             onCheckedChange={(checked) => {
                               const newValue = checked
                                 ? [...field.value, 1]
-                                : field.value.filter(
-                                    (v: number) => v !== 1
-                                  );
+                                : field.value.filter((v: number) => v !== 1);
                               field.onChange(newValue);
                             }}
                           />
@@ -450,9 +482,7 @@ export function BoardSettings({ board, onSuccess }: BoardProps) {
                             onCheckedChange={(checked) => {
                               const newValue = checked
                                 ? [...field.value, 2]
-                                : field.value.filter(
-                                    (v: number) => v !== 2
-                                  );
+                                : field.value.filter((v: number) => v !== 2);
                               field.onChange(newValue);
                             }}
                           />
@@ -467,11 +497,7 @@ export function BoardSettings({ board, onSuccess }: BoardProps) {
             />
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isSubmitting}
-          >
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? "保存中..." : "保存"}
           </Button>
         </form>

@@ -67,6 +67,7 @@ export interface Attachment {
   created_at: string;
   id: number;
   host: string;
+  url: string;
 }
 
 export type UploadResponse = Response<Attachment>;

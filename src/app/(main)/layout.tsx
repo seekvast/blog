@@ -19,18 +19,21 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  
+
   // 根据路径确定使用哪个侧边栏配置
   const getSidebarConfig = () => {
-    if (pathname?.startsWith('/boards')) {
+    // 使用正则表达式精确匹配板块设置页路径
+    if (pathname?.match(/^\/boards\/[^/]+\/settings/)) {
+      return sidebarRegistry.boardSettings;
+    }
+    if (pathname?.startsWith("/boards")) {
       return sidebarRegistry.boards;
     }
     return sidebarRegistry.default;
   };
 
-  const sidebarConfig = getSidebarConfig();
-  const LeftSidebarComponent = sidebarConfig.left;
-  const RightSidebarComponent = sidebarConfig.right;
+  const { left: LeftSidebarComponent, right: RightSidebarComponent } =
+    getSidebarConfig();
 
   // 确定是否显示右侧边栏
   const showDefaultSidebarPaths = ["/", "/search"];
@@ -42,11 +45,13 @@ export default function MainLayout({
     <div className="min-h-screen">
       <RouteProgress />
       <Header />
-      <div className="mx-auto max-w-7xl flex pt-8 scroll-smooth">
-        <div className="sticky top-[88px] w-[300px] h-[calc(100vh-88px)]">
-          <LeftSidebarComponent className="hidden lg:block" />
-        </div>
-        <div className="flex-1 flex px-4 min-w-0 pl-8">
+      <div className="mx-auto max-w-7xl flex pt-8 pr-8 scroll-smooth">
+        {LeftSidebarComponent && (
+          <div className="sticky top-[88px] w-[300px] h-[calc(100vh-88px)]">
+            <LeftSidebarComponent className="hidden lg:block" />
+          </div>
+        )}
+        <div className="flex-1 flex px-4 min-w-0">
           <main className="flex-1 min-w-0 w-0">
             <div className="">{children}</div>
           </main>

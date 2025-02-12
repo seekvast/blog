@@ -75,10 +75,10 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
 
   return (
     <aside
-      className={cn("flex w-full flex-col gap-4 h-full pb-12", className)}
+      className={cn("flex w-full flex-col gap-4 pb-12 h-full", className)}
       {...props}
     >
-      <div className="flex flex-col gap-4 pr-4">
+      <div className="flex flex-col gap-4 p-4 h-full">
         {/* 主导航 */}
         <nav className="flex flex-col gap-1">
           {mainNavItems.map((item) => {
