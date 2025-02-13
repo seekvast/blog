@@ -23,13 +23,13 @@ export default function MainLayout({
   // 根据路径确定使用哪个侧边栏配置
   const getSidebarConfig = () => {
     // 使用正则表达式精确匹配板块设置页路径
-    if (pathname?.match(/^\/boards\/[^/]+\/settings/)) {
+    if (pathname?.match(/^\/b\/[^/]+\/settings/)) {
       return sidebarRegistry.boardSettings;
     }
     if (pathname?.startsWith("/u")) {
       return sidebarRegistry.user;
     }
-    if (pathname?.startsWith("/boards")) {
+    if (pathname?.startsWith("/b")) {
       return sidebarRegistry.boards;
     }
     return sidebarRegistry.default;

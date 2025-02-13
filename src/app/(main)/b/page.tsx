@@ -173,7 +173,7 @@ export default function BoardsPage() {
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
                       <Link
-                        href={`/boards/${board.slug}`}
+                        href={`/b/${board.slug}`}
                         className="text-lg font-medium hover:text-primary"
                       >
                         {board.name}

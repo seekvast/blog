@@ -1,11 +1,11 @@
 export const API_ROUTES = {
   // 看板相关
   BOARDS: {
-    LIST: '/boards',
-    DETAIL: (id: number | string) => `/boards/${id}`,
-    CREATE: '/boards',
-    UPDATE: (id: number | string) => `/boards/${id}`,
-    DELETE: (id: number | string) => `/boards/${id}`,
+    LIST: "/b",
+    DETAIL: (id: number | string) => `/b/${id}`,
+    CREATE: "/b",
+    UPDATE: (id: number | string) => `/b/${id}`,
+    DELETE: (id: number | string) => `/b/${id}`,
     CHILDREN: '/board/children',
   },
   

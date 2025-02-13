@@ -228,7 +228,7 @@ function BoardContent() {
                   )} */}
                 </div>
                 <div className="flex items-center space-x-4">
-                  <Link href={`/boards/${board.slug}/settings`}>
+                  <Link href={`/b/${board.slug}/settings`}>
                     <Button size="sm" className="space-x-1">
                       设定
                     </Button>

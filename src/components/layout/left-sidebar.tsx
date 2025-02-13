@@ -5,7 +5,18 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
-import { Plus, PenSquare, Home, User, LayoutGrid, Bookmark, RotateCcw, Users, Languages, Globe } from "lucide-react";
+import {
+  Plus,
+  PenSquare,
+  Home,
+  User,
+  LayoutGrid,
+  Bookmark,
+  RotateCcw,
+  Users,
+  Languages,
+  Globe,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -32,7 +43,7 @@ const mainNavItems: NavItem[] = [
   },
   {
     title: "看板",
-    href: "/boards",
+    href: "/b",
     icon: "view_module",
   },
   {
@@ -64,12 +75,12 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
 
   const handleLanguageChange = () => {
     const currentLang = i18n.language;
-    if (currentLang === 'zh-Hans-CN') {
-      i18n.changeLanguage('zh-Hant-TW');
-    } else if (currentLang === 'zh-Hant-TW') {
-      i18n.changeLanguage('en');
+    if (currentLang === "zh-Hans-CN") {
+      i18n.changeLanguage("zh-Hant-TW");
+    } else if (currentLang === "zh-Hant-TW") {
+      i18n.changeLanguage("en");
     } else {
-      i18n.changeLanguage('zh-Hans-CN');
+      i18n.changeLanguage("zh-Hans-CN");
     }
   };
 
@@ -94,10 +105,18 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                     : "hover:bg-accent hover:text-accent-foreground"
                 )}
               >
-                {item.icon === "home" && <Home className="mr-2 text-[20px] leading-none" />}
-                {item.icon === "person" && <User className="mr-2 text-[20px] leading-none" />}
-                {item.icon === "view_module" && <LayoutGrid className="mr-2 text-[20px] leading-none" />}
-                {item.icon === "bookmark" && <Bookmark className="mr-2 text-[20px] leading-none" />}
+                {item.icon === "home" && (
+                  <Home className="mr-2 text-[20px] leading-none" />
+                )}
+                {item.icon === "person" && (
+                  <User className="mr-2 text-[20px] leading-none" />
+                )}
+                {item.icon === "view_module" && (
+                  <LayoutGrid className="mr-2 text-[20px] leading-none" />
+                )}
+                {item.icon === "bookmark" && (
+                  <Bookmark className="mr-2 text-[20px] leading-none" />
+                )}
                 <span>{item.title}</span>
               </Link>
             );
@@ -113,7 +132,10 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
           </Button>
         </div>
 
-        <CreateBoardModal open={createBoardOpen} onOpenChange={setCreateBoardOpen} />
+        <CreateBoardModal
+          open={createBoardOpen}
+          onOpenChange={setCreateBoardOpen}
+        />
 
         {/* 推荐看板 */}
         <div className="my-4">
@@ -153,7 +175,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                   <div>
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`/boards/${board.name}`}
+                        href={`/b/${board.name}`}
                         className="text-sm font-medium"
                       >
                         {board.name}
@@ -200,7 +222,11 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
               onClick={handleLanguageChange}
             >
               <Globe className="mr-2 leading-none" />
-              <span className="truncate">{t("common.autoDetectLanguage", { defaultValue: "自动检测语言" })}</span>
+              <span className="truncate">
+                {t("common.autoDetectLanguage", {
+                  defaultValue: "自动检测语言",
+                })}
+              </span>
             </div>
             <div>
               <ModeToggle />

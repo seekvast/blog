@@ -40,7 +40,7 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
   const loadApplications = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get(`/boards/${board.id}/applications`, {
+      const response = await api.get(`/b/${board.id}/applications`, {
         params: {
           ...filters,
           q: searchQuery,
@@ -66,7 +66,7 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
   // 处理申请
   const handleApplication = async (applicationId: number, status: "approve" | "reject") => {
     try {
-      await api.put(`/boards/${board.id}/applications/${applicationId}`, {
+      await api.put(`/b/${board.id}/applications/${applicationId}`, {
         status,
       });
       
