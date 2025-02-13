@@ -27,5 +27,9 @@ export const sidebarRegistry = {
     left: null,
     right: RightSidebar,
   },
+  user: {
+    left: null,
+    right: null,
+  },
   // 可以继续添加其他页面的配置
 } as const;

@@ -46,7 +46,11 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="font-medium">子版设置</h3>
-        <Button size="sm" className="rounded-full" onClick={() => setCreateModalOpen(true)}>
+        <Button
+          size="sm"
+          className="rounded-full"
+          onClick={() => setCreateModalOpen(true)}
+        >
           <Plus className="w-4 h-4 mr-2" />
           新增子版
         </Button>
@@ -92,9 +96,7 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
         ))}
 
         {boardChildren.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            暂无子版，点击上方按钮创建
-          </div>
+          <div className="text-center py-8 text-muted-foreground">暂无子版</div>
         )}
       </div>
     </div>

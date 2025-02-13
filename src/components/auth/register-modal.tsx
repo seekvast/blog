@@ -306,18 +306,18 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] max-w-[90vw] w-full">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[425px] w-[calc(100%-2rem)] rounded-lg p-6">
+        <DialogHeader className="mb-4">
           <div className="space-y-2">
             <p className="text-sm text-neutral-500">第{step}步，共2步</p>
-            <DialogTitle>建立一個帳號</DialogTitle>
+            <DialogTitle className="text-xl font-semibold">建立一個帳號</DialogTitle>
           </div>
         </DialogHeader>
 
         {step === 1 ? (
-          <div className="space-y-4">
+          <div className="space-y-5">
             <form onSubmit={(e) => e.preventDefault()}>
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-sm text-neutral-500">
                     電子郵件
@@ -329,7 +329,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                     value={step1Data.email}
                     onChange={handleStep1Change}
                     placeholder="請輸入電子郵箱"
-                    className="h-12"
+                    className="h-12 text-base"
                     autoComplete="new-email"
                   />
                   {errors.email && (
@@ -350,7 +350,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                     value={step1Data.password}
                     onChange={handleStep1Change}
                     placeholder="請輸入密碼"
-                    className="h-12"
+                    className="h-12 text-base"
                     autoComplete="new-password"
                   />
                   <p className="text-sm text-neutral-500">
@@ -363,20 +363,20 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                   )}
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-5">
                   <div className="h-[100px] bg-muted rounded-md">
                     {/* reCAPTCHA placeholder */}
                   </div>
                   <Button
                     type="button"
                     onClick={nextStep}
-                    className="w-full h-12"
+                    className="w-full h-12 text-base"
                   >
                     下一步
                   </Button>
                 </div>
 
-                <div className="text-center space-y-4">
+                <div className="text-center space-y-4 pt-2">
                   <p className="text-sm text-neutral-500">
                     已有帳戶？
                     <Button variant="link" className="px-1 h-auto" onClick={() => {
@@ -400,9 +400,9 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
             </form>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-5">
             <form onSubmit={(e) => e.preventDefault()}>
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div className="space-y-2">
                   <Label htmlFor="username" className="text-sm text-neutral-500">
                     使用者帳號
@@ -414,7 +414,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                     value={step2Data.username}
                     onChange={handleStep2Change}
                     placeholder="請輸入3-32位英文、數字帳號"
-                    className="h-12"
+                    className="h-12 text-base"
                     autoComplete="new-username"
                   />
                   {errors.username && (
@@ -435,7 +435,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                     value={step2Data.nickname}
                     onChange={handleStep2Change}
                     placeholder="請輸入3-32位暱稱"
-                    className="h-12"
+                    className="h-12 text-base"
                     autoComplete="new-nickname"
                   />
                   {errors.nickname && (
@@ -452,7 +452,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                       value={step2Data.gender}
                       onValueChange={handleGenderChange}
                     >
-                      <SelectTrigger className="h-12">
+                      <SelectTrigger className="h-12 text-base">
                         <SelectValue placeholder="請選擇性別" />
                       </SelectTrigger>
                       <SelectContent>
@@ -475,7 +475,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                       <Input
                         type="text"
                         placeholder="年"
-                        className="h-12"
+                        className="h-12 text-base"
                         value={step2Data.birthday.year}
                         onChange={(e) => {
                           handleBirthdayChange(
@@ -490,7 +490,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                       <Input
                         type="text"
                         placeholder="月"
-                        className="h-12"
+                        className="h-12 text-base"
                         value={step2Data.birthday.month}
                         onChange={(e) => {
                           handleBirthdayChange(
@@ -505,7 +505,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                       <Input
                         type="text"
                         placeholder="日"
-                        className="h-12"
+                        className="h-12 text-base"
                         value={step2Data.birthday.day}
                         onChange={(e) => {
                           handleBirthdayChange("day", e.target.value);
@@ -527,21 +527,21 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                     type="button"
                     onClick={prevStep}
                     variant="outline"
-                    className="flex-1 h-12"
+                    className="flex-1 h-12 text-base"
                   >
                     上一步
                   </Button>
                   <Button
                     type="button"
                     onClick={handleSubmit}
-                    className="flex-1 h-12"
+                    className="flex-1 h-12 text-base"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? "註冊中..." : "完成"}
                   </Button>
                 </div>
 
-                <div className="text-center">
+                <div className="text-center pt-2">
                   <p className="text-xs text-neutral-500">
                     註冊登入即代表同意Kater
                     <Link href="/terms" className="text-primary hover:underline mx-1">

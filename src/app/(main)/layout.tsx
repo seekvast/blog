@@ -26,6 +26,9 @@ export default function MainLayout({
     if (pathname?.match(/^\/boards\/[^/]+\/settings/)) {
       return sidebarRegistry.boardSettings;
     }
+    if (pathname?.startsWith("/u")) {
+      return sidebarRegistry.user;
+    }
     if (pathname?.startsWith("/boards")) {
       return sidebarRegistry.boards;
     }
