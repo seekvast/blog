@@ -36,7 +36,7 @@ export const DiscussionItem = React.forwardRef<
             <div className="flex items-center space-x-2 min-w-0 flex-1">
               <h2 className="min-w-0 flex-1 w-0">
                 <Link
-                  href={`/discussions/${discussion.slug}`}
+                  href={`/d/${discussion.slug}`}
                   className="text-xl font-medium text-foreground hover:text-primary line-clamp-1 block w-full overflow-hidden text-ellipsis"
                 >
                   {discussion.title}
@@ -73,7 +73,7 @@ export const DiscussionItem = React.forwardRef<
               <span>{discussion.votes}</span>
             </div>
             <Link
-              href={`/discussions/${discussion.slug}#comment`}
+              href={`/d/${discussion.slug}#comment`}
               className="flex items-center space-x-1 text-muted-foreground"
             >
               <MessageSquare className="h-4 w-4 text-base cursor-pointer" />

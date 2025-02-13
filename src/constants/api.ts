@@ -11,11 +11,11 @@ export const API_ROUTES = {
   
   // 帖子相关
   DISCUSSIONS: {
-    LIST: '/discussions',
-    DETAIL: (id: number | string) => `/discussions/${id}`,
-    CREATE: '/discussion',
-    UPDATE: (id: number | string) => `/discussions/${id}`,
-    DELETE: (id: number | string) => `/discussions/${id}`,
+    LIST: "/d",
+    DETAIL: (id: number | string) => `/d/${id}`,
+    CREATE: "/d",
+    UPDATE: (id: number | string) => `/d/${id}`,
+    DELETE: (id: number | string) => `/d/${id}`,
   },
 
   // 上传相关
