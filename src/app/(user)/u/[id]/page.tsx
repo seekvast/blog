@@ -20,9 +20,9 @@ const navItems = [
     href: "posts" as UserTabType,
   },
   {
-    label: "帖子",
+    label: "标注",
     count: 46,
-    href: "discussions" as UserTabType,
+    href: "following" as UserTabType,
   },
   {
     label: "黑名单",
@@ -30,21 +30,21 @@ const navItems = [
     href: "blacklist" as UserTabType,
   },
   {
-    label: "浏览记录",
+    label: "违规记录",
     count: 41,
-    href: "history" as UserTabType,
+    href: "violation" as UserTabType,
   },
   {
-    label: "浏览者和访问记录",
+    label: "使用者名称历史",
     count: 41,
-    href: "visitors" as UserTabType,
+    href: "history" as UserTabType,
   },
 ];
 
 export default function UserPage() {
   const params = useParams();
-    const userId = params?.id as string;
-    console.log(userId, 'usr........id');
+  const userId = params?.id as string;
+  console.log(userId, "usr........id");
   const [activeTab, setActiveTab] = React.useState<UserTabType>("posts");
 
   const mockPosts = [
@@ -94,12 +94,12 @@ export default function UserPage() {
         return <UserBlacklist />;
       case "replies":
         return <UserReplies />;
-      case "discussions":
+      case "following":
         return <div>帖子内容</div>;
+      case "violation":
+        return <div>违规记录内容</div>;
       case "history":
-        return <div>浏览记录内容</div>;
-      case "visitors":
-        return <div>访问记录内容</div>;
+        return <div>使用者名称历史内容</div>;
       default:
         return null;
     }

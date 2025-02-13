@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import React from "react";
 
-export type UserTabType = "replies" | "posts" | "discussions" | "blacklist" | "history" | "visitors";
+export type UserTabType = "replies" | "posts" | "following" | "blacklist" | "violation" |"history";
 
 interface UserSidebarProps {
   activeTab: UserTabType;
@@ -31,7 +31,7 @@ export default function UserSidebar({ activeTab, onTabChange, navItems }: UserSi
             href="#"
             onClick={(e) => handleTabClick(e, item.href)}
             className={cn(
-              "flex items-center justify-between px-4 py-3 text-sm rounded-lg transition-colors",
+              "flex items-center justify-between px-4 py-2 text-sm rounded-lg transition-colors",
               isActive
                 ? "bg-blue-50 text-blue-600 font-medium"
                 : "text-gray-600 hover:bg-gray-50"

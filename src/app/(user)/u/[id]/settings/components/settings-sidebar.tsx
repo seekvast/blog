@@ -128,7 +128,7 @@ export default function SettingsSidebar({ activeTab, onTabChange }: SettingsSide
               <Icon className="h-4 w-4" />
               <span>{group.title}</span>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 px-2">
               {group.items.map((item) => {
                 const isActive = activeTab === item.href;
                 return (
@@ -137,9 +137,9 @@ export default function SettingsSidebar({ activeTab, onTabChange }: SettingsSide
                     href="#"
                     onClick={(e) => handleTabClick(e, item.href)}
                     className={cn(
-                      "block px-4 py-2 text-sm transition-colors",
+                      "block px-4 py-2 text-sm rounded-lg transition-colors",
                       isActive
-                        ? "text-blue-600 bg-blue-50"
+                        ? "bg-blue-50 text-blue-600 font-medium"
                         : "text-gray-600 hover:bg-gray-50"
                     )}
                   >
