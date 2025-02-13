@@ -113,10 +113,12 @@ export function Header() {
                       </DropdownMenuItem>
                     </Link>
 
-                    <DropdownMenuItem className="cursor-pointer">
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>个人设定</span>
-                    </DropdownMenuItem>
+                    <Link href={`/u/${user.hashid}/settings`}>
+                      <DropdownMenuItem className="cursor-pointer">
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>个人设定</span>
+                      </DropdownMenuItem>
+                    </Link>
                     <DropdownMenuItem className="cursor-pointer">
                       <Moon className="mr-2 h-4 w-4" />
                       <span>夜间模式</span>

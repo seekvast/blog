@@ -1,8 +1,9 @@
 "use client";
 
+import React from "react";
 import { useParams } from "next/navigation";
-import { Card } from "@/components/ui/card";
-import Link from "next/link";
+import SettingsSidebar, { SettingsTabType } from "./components/settings-sidebar";
+import ProfileSettings from "./components/profile-settings"; // Add this line
 import {
   User,
   Shield,
@@ -11,7 +12,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-const settingsCards = [
+const navItems = [
   {
     title: "个人资料",
     description: "更新你的个人信息，让其他用户更好地了解你",
@@ -40,41 +41,39 @@ const settingsCards = [
 
 export default function SettingsPage() {
   const params = useParams();
-  const userId = params.id as string;
+  const userId = params?.id as string;
+  const [activeTab, setActiveTab] = React.useState<SettingsTabType>("profile");
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "profile":
+        return <ProfileSettings />;
+      case "account":
+        return <div>账号设置内容</div>;
+      case "notification":
+        return <div>通知设置内容</div>;
+      case "language":
+        return <div>语言设置内容</div>;
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">设置</h1>
-        <p className="text-sm text-muted-foreground">
-          管理你的账号设置和偏好
-        </p>
-      </div>
+    <div className="py-4">
+      <div className="flex gap-8">
+        {/* 左侧导航 */}
+        <div className="w-60 flex-shrink-0">
+          <SettingsSidebar
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {settingsCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <Link key={card.href} href={`/u/${userId}/settings/${card.href}`}>
-              <Card className="hover:bg-muted/50 transition-colors">
-                <div className="p-6">
-                  <div className="flex items-center space-x-4">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <Icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <h2 className="text-lg font-medium">{card.title}</h2>
-                      <p className="text-sm text-muted-foreground">
-                        {card.description}
-                      </p>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                </div>
-              </Card>
-            </Link>
-          );
-        })}
+        {/* 右侧内容区 */}
+        <div className="flex-1 bg-white rounded-lg p-6">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );

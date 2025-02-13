@@ -1,129 +1,124 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { Card } from "@/components/ui/card";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+import React from "react";
+import UserSidebar, { UserTabType } from "./components/user-sidebar";
+import { UserBlacklist } from "./components/user-blacklist";
+import { UserPosts } from "./components/user-posts";
+import { UserReplies } from "./components/user-replies";
 
 const navItems = [
   {
     label: "回复",
     count: 22,
-    href: "replies"
+    href: "replies" as UserTabType,
   },
   {
     label: "文章",
     count: 45,
-    href: "posts"
+    href: "posts" as UserTabType,
   },
   {
     label: "帖子",
     count: 46,
-    href: "threads"
+    href: "discussions" as UserTabType,
   },
   {
     label: "黑名单",
     count: 41,
-    href: "blacklist"
+    href: "blacklist" as UserTabType,
   },
   {
     label: "浏览记录",
     count: 41,
-    href: "history"
+    href: "history" as UserTabType,
   },
   {
     label: "浏览者和访问记录",
     count: 41,
-    href: "visitors"
-  }
+    href: "visitors" as UserTabType,
+  },
 ];
 
-interface PostCardProps {
-  title: string;
-  content: string;
-  date: string;
-  commentCount: number;
-  likeCount: number;
-}
-
-function PostCard({ title, content, date, commentCount, likeCount }: PostCardProps) {
-  return (
-    <Card className="p-4 space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium hover:text-primary cursor-pointer">
-          {title}
-        </h3>
-        <span className="text-sm text-muted-foreground">{date}</span>
-      </div>
-      <p className="text-sm text-muted-foreground line-clamp-2">{content}</p>
-      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-        <button className="hover:text-foreground">👍 {likeCount}</button>
-        <button className="hover:text-foreground">💬 {commentCount}</button>
-      </div>
-    </Card>
-  );
-}
-
-export default function UserProfilePage() {
+export default function UserPage() {
   const params = useParams();
-  const pathname = usePathname();
-  const userId = params.id as string;
+    const userId = params?.id as string;
+    console.log(userId, 'usr........id');
+  const [activeTab, setActiveTab] = React.useState<UserTabType>("posts");
 
   const mockPosts = [
     {
-      title: "《代码与评判》",
-      content: "论文是要写完的，但个性化的风格也是值得保留的。",
-      date: "2024/04/11",
-      commentCount: 5,
-      likeCount: 12
+      id: "1",
+      title: "那些喜歡小女生的根本人渣===",
+      content:
+        "那些喜歡小女生的根本人渣===,rt那些喜歡小女生的根本人渣===,rt那些喜歡小女生的根本人渣===,rt",
+      date: "今天14:15",
+      commentCount: 123,
+      likeCount: 123,
+      author: {
+        name: "用户名",
+        avatar: "/avatar.jpg",
+      },
+      board: {
+        name: "看板名称",
+        icon: "/board-icon.jpg",
+      },
+      isNsfw: true,
     },
     {
-      title: "《代码与评判》",
-      content: "论文是要写完的，但个性化的风格也是值得保留的。",
-      date: "2024/04/11",
-      commentCount: 3,
-      likeCount: 8
+      id: "2",
+      title: "那些喜歡小女生的根本人渣===",
+      content:
+        "想弄個手照集中串 大家願意分享自己的手照嗎想弄個手照集中串 大家願意分享自己的手照嗎想弄個手照集中串 大家願意分享自己的手照嗎",
+      date: "今天14:15",
+      commentCount: 123,
+      likeCount: 123,
+      author: {
+        name: "用户名",
+        avatar: "/avatar.jpg",
+      },
+      board: {
+        name: "看板名称",
+        icon: "/board-icon.jpg",
+      },
     },
-    {
-      title: "《代码与评判》",
-      content: "论文是要写完的，但个性化的风格也是值得保留的。",
-      date: "2024/04/11",
-      commentCount: 7,
-      likeCount: 15
-    }
   ];
 
+  // 根据activeTab渲染对应的内容
+  const renderContent = () => {
+    switch (activeTab) {
+      case "posts":
+        return <UserPosts posts={mockPosts} />;
+      case "blacklist":
+        return <UserBlacklist />;
+      case "replies":
+        return <UserReplies />;
+      case "discussions":
+        return <div>帖子内容</div>;
+      case "history":
+        return <div>浏览记录内容</div>;
+      case "visitors":
+        return <div>访问记录内容</div>;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <div className="py-8">
+    <div className="py-4">
       <div className="flex gap-8">
         {/* 左侧导航 */}
         <div className="w-60 flex-shrink-0">
-          <nav className="space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={`/u/${userId}/${item.href}`}
-                className={cn(
-                  "flex items-center justify-between px-4 py-2 text-sm rounded-lg",
-                  pathname === `/u/${userId}/${item.href}`
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted"
-                )}
-              >
-                <span>{item.label}</span>
-                <span>{item.count}</span>
-              </Link>
-            ))}
-          </nav>
+          <UserSidebar
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            navItems={navItems}
+          />
         </div>
 
         {/* 右侧内容区 */}
-        <div className="flex-1 space-y-4">
-          {mockPosts.map((post, index) => (
-            <PostCard key={index} {...post} />
-          ))}
-        </div>
+        <div className="flex-1">{renderContent()}</div>
       </div>
     </div>
   );
