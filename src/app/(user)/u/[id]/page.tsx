@@ -1,10 +1,8 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { cn } from "@/lib/utils";
 import React from "react";
 import UserSidebar, { UserTabType } from "./components/user-sidebar";
-import { UserBlacklist } from "./components/user-blacklist";
 import { UserPosts } from "./components/user-posts";
 import { UserReplies } from "./components/user-replies";
 
@@ -23,11 +21,6 @@ const navItems = [
     label: "标注",
     count: 46,
     href: "following" as UserTabType,
-  },
-  {
-    label: "黑名单",
-    count: 41,
-    href: "blacklist" as UserTabType,
   },
   {
     label: "违规记录",
@@ -90,8 +83,6 @@ export default function UserPage() {
     switch (activeTab) {
       case "posts":
         return <UserPosts posts={mockPosts} />;
-      case "blacklist":
-        return <UserBlacklist />;
       case "replies":
         return <UserReplies />;
       case "following":

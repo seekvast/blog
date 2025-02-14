@@ -19,120 +19,122 @@ export default function BoardSettingsSidebar({ board, activeTab = "general", onT
   };
 
   return (
-    <div className="flex flex-col gap-4 pb-12">
-      <div className="flex items-center gap-2 px-4">
-        <div className="w-6 h-6 flex items-center justify-center">
-          <Settings className="w-5 h-5" />
+    <div className={cn("space-y-4 bg-white rounded-lg p-2", className)}>
+      {/* 全域设定组 */}
+      <div>
+        <div className="flex items-center gap-2 px-4 py-2">
+          <Settings className="w-4 h-4 text-gray-500" />
+          <span className="text-sm font-medium text-gray-500">全域設定</span>
         </div>
-        <span className="text-lg font-semibold">全域設定</span>
+        <nav className="space-y-1">
+          <a
+            href="#"
+            onClick={(e) => handleTabClick(e, "general")}
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-lg transition-colors",
+              activeTab === "general"
+                ? "bg-blue-50 text-blue-600 font-medium"
+                : "text-gray-600 hover:bg-gray-50"
+            )}
+          >
+            一般設置
+          </a>
+        </nav>
       </div>
-      <nav className="flex flex-col gap-1">
-        <a
-          href="#"
-          onClick={(e) => handleTabClick(e, "general")}
-          className={cn(
-            "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
-            activeTab === "general"
-              ? "bg-accent text-accent-foreground"
-              : "hover:bg-accent hover:text-accent-foreground"
-          )}
-        >
-          一般設置
-        </a>
-      </nav>
 
-      <div className="flex items-center gap-2 px-4">
-        <div className="w-6 h-6 flex items-center justify-center">
-          <Users2 className="w-5 h-5" />
+      {/* 看板管理组 */}
+      <div>
+        <div className="flex items-center gap-2 px-4 py-2">
+          <Users2 className="w-4 h-4 text-gray-500" />
+          <span className="text-sm font-medium text-gray-500">看板管理</span>
         </div>
-        <span className="text-lg font-semibold">看板管理</span>
+        <nav className="space-y-1">
+          <a
+            href="#"
+            onClick={(e) => handleTabClick(e, "child-boards")}
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-lg transition-colors",
+              activeTab === "child-boards"
+                ? "bg-blue-50 text-blue-600 font-medium"
+                : "text-gray-600 hover:bg-gray-50"
+            )}
+          >
+            子版設定
+          </a>
+          <a
+            href="#"
+            onClick={(e) => handleTabClick(e, "rules")}
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-lg transition-colors",
+              activeTab === "rules"
+                ? "bg-blue-50 text-blue-600 font-medium"
+                : "text-gray-600 hover:bg-gray-50"
+            )}
+          >
+            規則設置
+          </a>
+          <a
+            href="#"
+            onClick={(e) => handleTabClick(e, "approval")}
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-lg transition-colors",
+              activeTab === "approval"
+                ? "bg-blue-50 text-blue-600 font-medium"
+                : "text-gray-600 hover:bg-gray-50"
+            )}
+          >
+            成員審核
+          </a>
+          <a
+            href="#"
+            onClick={(e) => handleTabClick(e, "members")}
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-lg transition-colors",
+              activeTab === "members"
+                ? "bg-blue-50 text-blue-600 font-medium"
+                : "text-gray-600 hover:bg-gray-50"
+            )}
+          >
+            成員管理
+          </a>
+          <a
+            href="#"
+            onClick={(e) => handleTabClick(e, "content")}
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-lg transition-colors",
+              activeTab === "content"
+                ? "bg-blue-50 text-blue-600 font-medium"
+                : "text-gray-600 hover:bg-gray-50"
+            )}
+          >
+            內容管理
+          </a>
+          <a
+            href="#"
+            onClick={(e) => handleTabClick(e, "records")}
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-lg transition-colors",
+              activeTab === "records"
+                ? "bg-blue-50 text-blue-600 font-medium"
+                : "text-gray-600 hover:bg-gray-50"
+            )}
+          >
+            違規記錄
+          </a>
+          <a
+            href="#"
+            onClick={(e) => handleTabClick(e, "blocklist")}
+            className={cn(
+              "flex items-center px-4 py-2 text-sm rounded-lg transition-colors",
+              activeTab === "blocklist"
+                ? "bg-blue-50 text-blue-600 font-medium"
+                : "text-gray-600 hover:bg-gray-50"
+            )}
+          >
+            黑名單
+          </a>
+        </nav>
       </div>
-      <nav className="flex flex-col gap-1">
-        <a
-          href="#"
-          onClick={(e) => handleTabClick(e, "child-boards")}
-          className={cn(
-            "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
-            activeTab === "child-boards"
-              ? "bg-accent text-accent-foreground"
-              : "hover:bg-accent hover:text-accent-foreground"
-          )}
-        >
-          子版設定
-        </a>
-        <a
-          href="#"
-          onClick={(e) => handleTabClick(e, "rules")}
-          className={cn(
-            "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
-            activeTab === "rules"
-              ? "bg-accent text-accent-foreground"
-              : "hover:bg-accent hover:text-accent-foreground"
-          )}
-        >
-          規則設置
-        </a>
-        <a
-          href="#"
-          onClick={(e) => handleTabClick(e, "approval")}
-          className={cn(
-            "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
-            activeTab === "approval"
-              ? "bg-accent text-accent-foreground"
-              : "hover:bg-accent hover:text-accent-foreground"
-          )}
-        >
-          成員審核
-        </a>
-        <a
-          href="#"
-          onClick={(e) => handleTabClick(e, "members")}
-          className={cn(
-            "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
-            activeTab === "members"
-              ? "bg-accent text-accent-foreground"
-              : "hover:bg-accent hover:text-accent-foreground"
-          )}
-        >
-          成員管理
-        </a>
-        <a
-          href="#"
-          onClick={(e) => handleTabClick(e, "content")}
-          className={cn(
-            "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
-            activeTab === "content"
-              ? "bg-accent text-accent-foreground"
-              : "hover:bg-accent hover:text-accent-foreground"
-          )}
-        >
-          榜單內容
-        </a>
-        <a
-          href="#"
-          onClick={(e) => handleTabClick(e, "records")}
-          className={cn(
-            "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
-            activeTab === "records"
-              ? "bg-accent text-accent-foreground"
-              : "hover:bg-accent hover:text-accent-foreground"
-          )}
-        >
-          審核記錄
-        </a>
-        <a
-          href="#"
-          onClick={(e) => handleTabClick(e, "blocklist")}
-          className={cn(
-            "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
-            activeTab === "blocklist"
-              ? "bg-accent text-accent-foreground"
-              : "hover:bg-accent hover:text-accent-foreground"
-          )}
-        >
-          封鎖名單
-        </a>
-      </nav>
     </div>
   );
 }

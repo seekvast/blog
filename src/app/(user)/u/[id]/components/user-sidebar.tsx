@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import React from "react";
 
-export type UserTabType = "replies" | "posts" | "following" | "blacklist" | "violation" |"history";
+export type UserTabType = "replies" | "posts" | "following" | "violation" |"history";
 
 interface UserSidebarProps {
   activeTab: UserTabType;

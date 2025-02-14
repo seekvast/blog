@@ -1,78 +1,138 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useParams } from "next/navigation";
-import SettingsSidebar, { SettingsTabType } from "./components/settings-sidebar";
-import ProfileSettings from "./components/profile-settings"; // Add this line
-import {
-  User,
-  Shield,
-  Bell,
-  Languages,
-  ChevronRight,
-} from "lucide-react";
+import SettingsSidebar, {
+  SettingsTabType,
+} from "./components/settings-sidebar";
+import ProfileSettings from "./components/profile-settings";
+import NotificationSettings from "./components/notification-settings";
+import UserBlacklist from "./components/user-blacklist";
+import ThemeSettings from "./components/theme-settings";
+import LanguageSettings from "./components/language-settings";
+import ViolationRecords from "./components/violation-records";
+import PolicySettings from "./components/policy-settings";
+import SecuritySettings from "./components/security-settings";
 
-const navItems = [
-  {
-    title: "个人资料",
-    description: "更新你的个人信息，让其他用户更好地了解你",
-    href: "profile",
-    icon: User,
-  },
-  {
-    title: "账号安全",
-    description: "管理你的密码和账号安全设置",
-    href: "account",
-    icon: Shield,
-  },
-  {
-    title: "通知设置",
-    description: "自定义你想要接收的通知类型",
-    href: "notification",
-    icon: Bell,
-  },
-  {
-    title: "语言设置",
-    description: "选择你偏好的界面语言",
-    href: "language",
-    icon: Languages,
-  },
-];
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function SettingsPage() {
   const params = useParams();
   const userId = params?.id as string;
   const [activeTab, setActiveTab] = React.useState<SettingsTabType>("profile");
+  const [blacklistType, setBlacklistType] = React.useState<"board" | "user">(
+    "board"
+  );
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case "profile":
-        return <ProfileSettings />;
-      case "account":
-        return <div>账号设置内容</div>;
-      case "notification":
-        return <div>通知设置内容</div>;
-      case "language":
-        return <div>语言设置内容</div>;
-      default:
-        return null;
+  // 监听hash变化
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1) as SettingsTabType;
+      if (hash) {
+        setActiveTab(hash);
+        // 找到对应的section并滚动
+        const section = document.getElementById(hash);
+        if (section) {
+          section.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    };
+
+    // 初始化时检查hash
+    if (window.location.hash) {
+      handleHashChange();
+    } else {
+      // 如果没有hash，设置默认hash
+      window.location.hash = "profile";
     }
-  };
+
+    // 监听hash变化
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
 
   return (
     <div className="py-4">
-      <div className="flex gap-8">
+      <div className="flex gap-8 relative">
         {/* 左侧导航 */}
         <div className="w-60 flex-shrink-0">
-          <SettingsSidebar
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
+          <div className="fixed w-60">
+            <SettingsSidebar activeTab={activeTab} />
+          </div>
         </div>
 
         {/* 右侧内容区 */}
-        <div className="flex-1 bg-white rounded-lg p-6">
-          {renderContent()}
+        <div className="flex-1">
+          <div className="space-y-8">
+            <section id="profile" className="p-4">
+              <h2 className="text-xl font-semibold mb-4">个人档案</h2>
+              <ProfileSettings />
+            </section>
+
+            <section id="security" className="p-4">
+              <h2 className="text-xl font-semibold mb-4">帳號安全</h2>
+              <SecuritySettings />
+            </section>
+
+            <section id="notification" className="p-4">
+              <h2 className="text-xl font-semibold mb-4">通知类型</h2>
+              <NotificationSettings />
+            </section>
+
+            <section id="privacy" className="p-4">
+              <h2 className="text-xl font-semibold mb-4">隐私设置</h2>
+              <div>隐私设置内容</div>
+            </section>
+
+            <section id="blacklist" className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">封锁列表</h2>
+                <Select
+                  value={blacklistType}
+                  onValueChange={(value: "board" | "user") =>
+                    setBlacklistType(value)
+                  }
+                >
+                  <SelectTrigger className="w-32 h-8 py-1">
+                    <SelectValue placeholder="选择类型" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="board">看板</SelectItem>
+                    <SelectItem value="user">用户</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <UserBlacklist
+                type={blacklistType}
+                onTypeChange={setBlacklistType}
+              />
+            </section>
+            <section id="violation" className="p-4">
+              <h2 className="text-xl font-semibold mb-4">检举记录</h2>
+              <ViolationRecords />
+            </section>
+            <section id="theme" className="p-4">
+              <h2 className="text-xl font-semibold mb-4">外观</h2>
+              <ThemeSettings />
+            </section>
+
+            <section id="language" className="p-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">语言设置</h2>
+                <LanguageSettings />
+              </div>
+            </section>
+            <section id="policy" className="p-4">
+              <h2 className="text-xl font-semibold mb-4">网站政策</h2>
+              <PolicySettings />
+            </section>
+          </div>
         </div>
       </div>
     </div>

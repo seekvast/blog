@@ -10,14 +10,24 @@ import {
   Users,
   Palette,
   Languages,
-  FileText
+  FileText,
+  Ban,
+  UserRoundX,
 } from "lucide-react";
 
-export type SettingsTabType = "profile" | "account" | "notification" | "privacy" | "blacklist" | "appearance" | "language";
+export type SettingsTabType =
+  | "profile"
+  | "security"
+  | "notification"
+  | "privacy"
+  | "blacklist"
+  | "theme"
+  | "language"
+  | "policy"
+  | "violation";
 
 interface SettingsSidebarProps {
   activeTab: SettingsTabType;
-  onTabChange: (tab: SettingsTabType) => void;
 }
 
 interface NavGroup {
@@ -36,9 +46,9 @@ const navGroups: NavGroup[] = [
     items: [
       {
         label: "个人档案",
-        href: "profile"
-      }
-    ]
+        href: "profile",
+      },
+    ],
   },
   {
     title: "帐号安全",
@@ -46,9 +56,9 @@ const navGroups: NavGroup[] = [
     items: [
       {
         label: "电子邮件",
-        href: "account"
-      }
-    ]
+        href: "security",
+      },
+    ],
   },
   {
     title: "通知",
@@ -56,29 +66,9 @@ const navGroups: NavGroup[] = [
     items: [
       {
         label: "自动通注",
-        href: "notification"
-      }
-    ]
-  },
-  {
-    title: "隐私",
-    icon: Eye,
-    items: [
-      {
-        label: "公开的墙上状态",
-        href: "privacy"
-      }
-    ]
-  },
-  {
-    title: "黑名单",
-    icon: Users,
-    items: [
-      {
-        label: "封锁列表",
-        href: "blacklist"
-      }
-    ]
+        href: "notification",
+      },
+    ],
   },
   {
     title: "外观",
@@ -86,9 +76,39 @@ const navGroups: NavGroup[] = [
     items: [
       {
         label: "日夜模模式",
-        href: "appearance"
-      }
-    ]
+        href: "theme",
+      },
+    ],
+  },
+  {
+    title: "隐私",
+    icon: Eye,
+    items: [
+      {
+        label: "公开线上状态",
+        href: "privacy",
+      },
+    ],
+  },
+  {
+    title: "黑名单",
+    icon: UserRoundX,
+    items: [
+      {
+        label: "封锁列表",
+        href: "blacklist",
+      },
+    ],
+  },
+  {
+    title: "违规",
+    icon: Ban,
+    items: [
+      {
+        label: "检举记录",
+        href: "violation",
+      },
+    ],
   },
   {
     title: "语言",
@@ -96,9 +116,9 @@ const navGroups: NavGroup[] = [
     items: [
       {
         label: "偏好语言",
-        href: "language"
-      }
-    ]
+        href: "language",
+      },
+    ],
   },
   {
     title: "网站政策",
@@ -106,20 +126,15 @@ const navGroups: NavGroup[] = [
     items: [
       {
         label: "服务条款",
-        href: "privacy"
-      }
-    ]
-  }
+        href: "policy",
+      },
+    ],
+  },
 ];
 
-export default function SettingsSidebar({ activeTab, onTabChange }: SettingsSidebarProps) {
-  const handleTabClick = (e: React.MouseEvent<HTMLAnchorElement>, tab: SettingsTabType) => {
-    e.preventDefault();
-    onTabChange(tab);
-  };
-
+export default function SettingsSidebar({ activeTab }: SettingsSidebarProps) {
   return (
-    <nav className="bg-white rounded-lg divide-y divide-gray-100">
+    <nav className="rounded-lg divide-y divide-gray-100">
       {navGroups.map((group) => {
         const Icon = group.icon;
         return (
@@ -128,14 +143,13 @@ export default function SettingsSidebar({ activeTab, onTabChange }: SettingsSide
               <Icon className="h-4 w-4" />
               <span>{group.title}</span>
             </div>
-            <div className="space-y-1 px-2">
+            <div className="space-y-1">
               {group.items.map((item) => {
                 const isActive = activeTab === item.href;
                 return (
                   <a
                     key={item.href}
-                    href="#"
-                    onClick={(e) => handleTabClick(e, item.href)}
+                    href={`#${item.href}`}
                     className={cn(
                       "block px-4 py-2 text-sm rounded-lg transition-colors",
                       isActive
