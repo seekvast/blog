@@ -7,22 +7,48 @@ import { Settings, Users2 } from "lucide-react";
 
 interface BoardSettingsSidebarProps {
   board: Board;
-  activeTab?: "general" | "rules" | "child-boards" | "approval" | "members" | "content" | "records" | "blocklist";
-  onTabChange?: (tab: "general" | "rules" | "child-boards" | "approval" | "members" | "content" | "records" | "blocklist") => void;
+  activeTab?:
+    | "general"
+    | "rules"
+    | "child-boards"
+    | "approval"
+    | "members"
+    | "content"
+    | "records"
+    | "blocklist";
+  onTabChange?: (
+    tab:
+      | "general"
+      | "rules"
+      | "child-boards"
+      | "approval"
+      | "members"
+      | "content"
+      | "records"
+      | "blocklist"
+  ) => void;
   className?: string;
 }
 
-export default function BoardSettingsSidebar({ board, activeTab = "general", onTabChange, className }: BoardSettingsSidebarProps) {
-  const handleTabClick = (e: React.MouseEvent<HTMLAnchorElement>, tab: typeof activeTab) => {
+export default function BoardSettingsSidebar({
+  board,
+  activeTab = "general",
+  onTabChange,
+  className,
+}: BoardSettingsSidebarProps) {
+  const handleTabClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    tab: typeof activeTab
+  ) => {
     e.preventDefault();
     onTabChange?.(tab);
   };
 
   return (
-    <div className={cn("space-y-4 bg-white rounded-lg p-2", className)}>
+    <div className={cn("space-y-4 rounded-lg", className)}>
       {/* 全域设定组 */}
       <div>
-        <div className="flex items-center gap-2 px-4 py-2">
+        <div className="flex items-center gap-2 pb-4">
           <Settings className="w-4 h-4 text-gray-500" />
           <span className="text-sm font-medium text-gray-500">全域設定</span>
         </div>
@@ -31,7 +57,7 @@ export default function BoardSettingsSidebar({ board, activeTab = "general", onT
             href="#"
             onClick={(e) => handleTabClick(e, "general")}
             className={cn(
-              "flex items-center px-4 py-2 text-sm rounded-lg transition-colors",
+              "flex items-center p-2 text-sm rounded-lg transition-colors",
               activeTab === "general"
                 ? "bg-blue-50 text-blue-600 font-medium"
                 : "text-gray-600 hover:bg-gray-50"

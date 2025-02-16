@@ -20,7 +20,14 @@ export function BoardSettingsForm({
   onSuccess,
 }: BoardSettingsFormProps) {
   const [activeTab, setActiveTab] = React.useState<
-    "general" | "rules" | "child-boards" | "approval" | "members" | "content" | "records" | "blocklist"
+    | "general"
+    | "rules"
+    | "child-boards"
+    | "approval"
+    | "members"
+    | "content"
+    | "records"
+    | "blocklist"
   >("general");
 
   // 根据activeTab渲染对应的内容
@@ -31,7 +38,8 @@ export function BoardSettingsForm({
       case "child-boards":
         return <BoardChildSettings board={board} />;
       case "rules":
-        return <RulesSettings board={board} />;
+        return <></>;
+      // return <RulesSettings board={board} />;
       case "approval":
         return <ApprovalSettings board={board} />;
       default:
