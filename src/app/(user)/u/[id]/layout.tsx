@@ -36,14 +36,13 @@ export default function UserLayout({
                       @Richards
                     </span>
                   </div>
-                  <p className="text-muted-foreground">加入时间：2024年1月11日</p>
+                  <p className="text-muted-foreground">
+                    加入时间：2024年1月11日
+                  </p>
                 </div>
               </div>
-              <Button variant="outline" asChild>
-                <Link href={`/u/${userId}/settings`}>
-                  <Settings className="h-4 w-4 mr-2" />
-                  设置
-                </Link>
+              <Button size="sm" className="rounded-full primary" asChild>
+                <Link href={`/u/${userId}/settings`}>修改个人信息</Link>
               </Button>
             </div>
           </div>

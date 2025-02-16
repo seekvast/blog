@@ -48,7 +48,7 @@ const navGroups: NavGroup[] = [
     href: "profile",
     items: [
       {
-        label: "个人档案",
+        label: "个人资讯",
         href: "profile",
       },
     ],
@@ -97,28 +97,28 @@ const navGroups: NavGroup[] = [
       },
     ],
   },
-  {
-    title: "黑名单",
-    icon: UserRoundX,
-    href: "blacklist",
-    items: [
-      {
-        label: "封锁列表",
-        href: "blacklist",
-      },
-    ],
-  },
-  {
-    title: "违规",
-    icon: Ban,
-    href: "violation",
-    items: [
-      {
-        label: "检举记录",
-        href: "violation",
-      },
-    ],
-  },
+//   {
+//     title: "黑名单",
+//     icon: UserRoundX,
+//     href: "blacklist",
+//     items: [
+//       {
+//         label: "封锁列表",
+//         href: "blacklist",
+//       },
+//     ],
+//   },
+//   {
+//     title: "违规",
+//     icon: Ban,
+//     href: "violation",
+//     items: [
+//       {
+//         label: "检举记录",
+//         href: "violation",
+//       },
+//     ],
+//   },
   {
     title: "语言",
     href: "language",

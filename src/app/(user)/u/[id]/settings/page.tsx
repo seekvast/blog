@@ -13,6 +13,8 @@ import LanguageSettings from "./components/language-settings";
 import ViolationRecords from "./components/violation-records";
 import PolicySettings from "./components/policy-settings";
 import SecuritySettings from "./components/security-settings";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 import {
   Select,
@@ -64,7 +66,7 @@ export default function SettingsPage() {
         {/* 右侧内容区 */}
         <div className="flex-1">
           <section id="profile" className="px-4 py-3 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold mb-4">个人档案</h2>
+            <h2 className="text-xl font-semibold mb-4">个人资讯</h2>
             <ProfileSettings />
           </section>
 
@@ -74,13 +76,18 @@ export default function SettingsPage() {
           </section>
 
           <section id="notification" className="p-4 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold mb-4">通知类型</h2>
+            <h2 className="text-xl font-semibold mb-4">通知</h2>
             <NotificationSettings />
           </section>
 
           <section id="privacy" className="p-4 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold mb-4">隐私设置</h2>
-            <div>隐私设置内容</div>
+            <h2 className="text-xl font-semibold mb-4">隐私</h2>
+            <div className="flex items-center justify-between py-3 border-b">
+              <Label className="text-sm text-gray-500">
+                當我的文章被下方推時
+              </Label>
+              <Switch />
+            </div>
           </section>
 
           <section id="blacklist" className="p-4 [scroll-margin-top:60px]">

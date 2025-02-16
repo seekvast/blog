@@ -64,7 +64,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
 
   const handlePublishClick = () => {
     // 在看板列表页面，显示创建看板的模态框
-    if (pathname === "/boards") {
+    if (pathname === "/b") {
       setCreateBoardOpen(true);
     }
     // 在其他页面，显示发布文章的模态框
@@ -126,7 +126,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
         {/* 创建看板按钮 */}
         <div className="px-3 py-2">
           <Button className="w-full text-lg" onClick={handlePublishClick}>
-            {pathname === "/boards"
+            {pathname === "/b"
               ? t("common.createBoard", { defaultValue: "创建看板" })
               : t("common.publish", { defaultValue: "发表文章" })}
           </Button>

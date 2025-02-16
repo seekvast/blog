@@ -86,11 +86,11 @@ export default function UserPage() {
       case "replies":
         return <UserReplies />;
       case "following":
-        return <div>帖子内容</div>;
+        return <div></div>;
       case "violation":
-        return <div>违规记录内容</div>;
+        return <div></div>;
       case "history":
-        return <div>使用者名称历史内容</div>;
+        return <div></div>;
       default:
         return null;
     }
