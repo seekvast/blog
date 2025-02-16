@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import SettingsSidebar, {
   SettingsTabType,
@@ -15,6 +15,7 @@ import PolicySettings from "./components/policy-settings";
 import SecuritySettings from "./components/security-settings";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { User } from "@/types/user";
 
 import {
   Select,
@@ -23,10 +24,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { api } from "@/lib/api";
 
 export default function SettingsPage() {
   const params = useParams();
   const userId = params?.id as string;
+  const [user, setUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = React.useState<SettingsTabType>("profile");
   const [blacklistType, setBlacklistType] = React.useState<"board" | "user">(
     "board"
@@ -53,6 +56,15 @@ export default function SettingsPage() {
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
+  useEffect(() => {
+    if (userId === undefined) return;
+    const fetchUser = async () => {
+      const user = await api.users.get({ hashid: userId });
+      setUser(user);
+    };
+    fetchUser();
+  }, [userId]);
+
   return (
     <div className="py-4">
       <div className="flex gap-8 relative">
@@ -67,12 +79,12 @@ export default function SettingsPage() {
         <div className="flex-1">
           <section id="profile" className="px-4 py-3 [scroll-margin-top:60px]">
             <h2 className="text-xl font-semibold mb-4">个人资讯</h2>
-            <ProfileSettings />
+            <ProfileSettings user={user} />
           </section>
 
           <section id="security" className="p-4 [scroll-margin-top:60px]">
             <h2 className="text-xl font-semibold mb-4">帳號安全</h2>
-            <SecuritySettings />
+            <SecuritySettings user={user} />
           </section>
 
           <section id="notification" className="p-4 [scroll-margin-top:60px]">

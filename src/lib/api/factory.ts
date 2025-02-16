@@ -30,19 +30,19 @@ export function createApi(options: ApiOptions = {}) {
       categories: () =>
         http.get<Category[]>(`${prefix}/categories`, undefined, { next }),
     },
-    users: {
-      login: (data: any) => http.post<User>(`${prefix}/login`, data),
-      signUp: (data: any) => http.post<User>(`${prefix}/user`, data),
-      list: (params?: QueryParams) =>
-        http.get<Pagination<User>>(`${prefix}/users`, params, { next }),
+      users: {
+          login: (data: any) => http.post<User>(`${prefix}/login`, data),
+          signUp: (data: any) => http.post<User>(`${prefix}/user`, data),
+          list: (params?: QueryParams) =>
+              http.get<Pagination<User>>(`${prefix}/users`, params, { next }),
 
-      get: (id: number) =>
-        http.get<User>(`${prefix}/users/${id}`, undefined, { next }),
+          get: (params: any) =>
+              http.get<User>(`${prefix}/user/profile`, params, { next }),
 
-      me: () => http.get<User>(`${prefix}/users/me`, undefined, { next }),
+          me: () => http.get<User>(`${prefix}/user/me`, undefined, { next }),
 
-      updateProfile: (data: any) =>
-        http.patch<User>(`${prefix}/users/me`, data),
+          update: (data: any) =>
+              http.patch<User>(`${prefix}/user`, data),
 
       changePassword: (data: any) =>
         http.post<void>(`${prefix}/users/me/password`, data),

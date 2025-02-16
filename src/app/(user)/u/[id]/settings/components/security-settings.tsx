@@ -13,13 +13,21 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { User } from "@/types/user";
 
-export default function SecuritySettings() {
+export default function SecuritySettings({ user }: { user: User | null }) {
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-muted-foreground">Loading user data...</div>
+      </div>
+    );
+  }
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [genderModalOpen, setGenderModalOpen] = useState(false);
   const [birthdayModalOpen, setBirthdayModalOpen] = useState(false);
-  const [gender, setGender] = useState("1"); // 默认为男性
-  const [birthday, setBirthday] = useState("1990-01-01");
+  const [gender, setGender] = useState(user.gender); // 默认为男性
+  const [birthday, setBirthday] = useState(user.birthday);
 
   const getGenderText = (value: string) => {
     switch (value) {
@@ -52,7 +60,7 @@ export default function SecuritySettings() {
             更改你的电子邮件地址，以确保帐户安全并接收最新通知。
           </p>
           <div className="flex items-center gap-2 cursor-pointer">
-            <span className="text-sm text-gray-500">user@example.com</span>
+            <span className="text-sm text-gray-500">{user?.email}</span>
             <ChevronRight className="h-4 w-4 text-gray-400" />
           </div>
         </div>
@@ -119,7 +127,7 @@ export default function SecuritySettings() {
       </Dialog>
 
       {/* 性别 */}
-      <div className="py-3 border-b">
+      {/* <div className="py-3 border-b">
         <Label>性别</Label>
         <div className="flex items-center justify-between gap-2">
           <p className="text-sm text-gray-500 mt-1">
@@ -133,7 +141,7 @@ export default function SecuritySettings() {
             <ChevronRight className="h-4 w-4 text-gray-400" />
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* 性别选择Modal */}
       <Dialog open={genderModalOpen} onOpenChange={setGenderModalOpen}>
