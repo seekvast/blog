@@ -79,7 +79,10 @@ export default function SettingsPage() {
             <h2 className="text-xl font-semibold mb-4">通知</h2>
             <NotificationSettings />
           </section>
-
+          <section id="theme" className="p-4 [scroll-margin-top:60px]">
+            <h2 className="text-xl font-semibold mb-4">外观</h2>
+            <ThemeSettings />
+          </section>
           <section id="privacy" className="p-4 [scroll-margin-top:60px]">
             <h2 className="text-xl font-semibold mb-4">隐私</h2>
             <div className="flex items-center justify-between py-3 border-b">
@@ -90,7 +93,7 @@ export default function SettingsPage() {
             </div>
           </section>
 
-          <section id="blacklist" className="p-4 [scroll-margin-top:60px]">
+          {/* <section id="blacklist" className="p-4 [scroll-margin-top:60px]">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">封锁列表</h2>
               <Select
@@ -112,15 +115,11 @@ export default function SettingsPage() {
               type={blacklistType}
               onTypeChange={setBlacklistType}
             />
-          </section>
-          <section id="violation" className="p-4 [scroll-margin-top:60px]">
+          </section> */}
+          {/* <section id="violation" className="p-4 [scroll-margin-top:60px]">
             <h2 className="text-xl font-semibold mb-4">检举记录</h2>
             <ViolationRecords />
-          </section>
-          <section id="theme" className="p-4 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold mb-4">外观</h2>
-            <ThemeSettings />
-          </section>
+          </section> */}
 
           <section id="language" className="p-4 [scroll-margin-top:60px]">
             <div className="flex items-center justify-between">
