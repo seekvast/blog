@@ -32,7 +32,9 @@ interface SettingsSidebarProps {
 
 interface NavGroup {
   title: string;
+  href: SettingsTabType;
   icon: React.ElementType;
+
   items: {
     label: string;
     href: SettingsTabType;
@@ -43,6 +45,7 @@ const navGroups: NavGroup[] = [
   {
     title: "个人资讯",
     icon: User,
+    href: "profile",
     items: [
       {
         label: "个人档案",
@@ -52,6 +55,7 @@ const navGroups: NavGroup[] = [
   },
   {
     title: "帐号安全",
+    href: "security",
     icon: Shield,
     items: [
       {
@@ -62,6 +66,7 @@ const navGroups: NavGroup[] = [
   },
   {
     title: "通知",
+    href: "notification",
     icon: Bell,
     items: [
       {
@@ -72,6 +77,7 @@ const navGroups: NavGroup[] = [
   },
   {
     title: "外观",
+    href: "theme",
     icon: Palette,
     items: [
       {
@@ -83,6 +89,7 @@ const navGroups: NavGroup[] = [
   {
     title: "隐私",
     icon: Eye,
+    href: "privacy",
     items: [
       {
         label: "公开线上状态",
@@ -93,6 +100,7 @@ const navGroups: NavGroup[] = [
   {
     title: "黑名单",
     icon: UserRoundX,
+    href: "blacklist",
     items: [
       {
         label: "封锁列表",
@@ -103,6 +111,7 @@ const navGroups: NavGroup[] = [
   {
     title: "违规",
     icon: Ban,
+    href: "violation",
     items: [
       {
         label: "检举记录",
@@ -112,6 +121,7 @@ const navGroups: NavGroup[] = [
   },
   {
     title: "语言",
+    href: "language",
     icon: Languages,
     items: [
       {
@@ -122,6 +132,7 @@ const navGroups: NavGroup[] = [
   },
   {
     title: "网站政策",
+    href: "policy",
     icon: FileText,
     items: [
       {
@@ -134,33 +145,30 @@ const navGroups: NavGroup[] = [
 
 export default function SettingsSidebar({ activeTab }: SettingsSidebarProps) {
   return (
-    <nav className="rounded-lg divide-y divide-gray-100">
+    <nav className="rounded-lg">
       {navGroups.map((group) => {
         const Icon = group.icon;
         return (
           <div key={group.title} className="py-2">
-            <div className="px-4 py-2 flex items-center gap-2 text-sm font-medium text-gray-500">
-              <Icon className="h-4 w-4" />
-              <span>{group.title}</span>
-            </div>
-            <div className="space-y-1">
-              {group.items.map((item) => {
-                const isActive = activeTab === item.href;
+            <div className="px-4  text-sm font-medium text-gray-500">
+              {(() => {
+                const isActive = activeTab === group.href;
                 return (
                   <a
-                    key={item.href}
-                    href={`#${item.href}`}
                     className={cn(
-                      "block px-4 py-2 text-sm rounded-lg transition-colors",
+                      "flex items-center px-4 py-2 text-sm rounded-lg transition-colors",
                       isActive
                         ? "bg-blue-50 text-blue-600 font-medium"
                         : "text-gray-600 hover:bg-gray-50"
                     )}
+                    key={group.href}
+                    href={`#${group.href}`}
                   >
-                    {item.label}
+                    <Icon className="mr-2 h-4 w-4" />
+                    <span>{group.title}</span>
                   </a>
                 );
-              })}
+              })()}
             </div>
           </div>
         );

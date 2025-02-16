@@ -69,8 +69,8 @@ export default function SettingsPage() {
 
         {/* 右侧内容区 */}
         <div className="flex-1">
-          <div className="space-y-8">
-            <section id="profile" className="p-4">
+          <div className="">
+            <section id="profile" className="px-4 py-3">
               <h2 className="text-xl font-semibold mb-4">个人档案</h2>
               <ProfileSettings />
             </section>
