@@ -16,9 +16,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { RegisterModal } from "@/components/auth/register-modal";
-import { LoginModal } from "@/components/auth/login-modal";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuthModal } from "@/components/auth/auth-modal-store";
 
 import {
   DropdownMenu,
@@ -33,8 +32,7 @@ import { usePostEditorStore } from "@/store/post-editor";
 export function Header() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [registerOpen, setRegisterOpen] = React.useState(false);
-  const [loginOpen, setLoginOpen] = React.useState(false);
+  const { openLogin, openRegister } = useAuthModal();
   const { hasUnsavedContent, isVisible, onClose, setIsVisible } =
     usePostEditorStore();
 
@@ -139,22 +137,17 @@ export function Header() {
                 <Button
                   variant="ghost"
                   className="text-base font-normal hover:bg-transparent hover:text-foreground"
-                  onClick={() => setRegisterOpen(true)}
+                  onClick={openRegister}
                 >
                   註冊
                 </Button>
                 <Button
                   variant="ghost"
                   className="text-base font-normal hover:bg-transparent hover:text-foreground"
-                  onClick={() => setLoginOpen(true)}
+                  onClick={openLogin}
                 >
                   登入
                 </Button>
-                <RegisterModal
-                  open={registerOpen}
-                  onOpenChange={setRegisterOpen}
-                />
-                <LoginModal open={loginOpen} onOpenChange={setLoginOpen} />
               </div>
             )}
           </div>

@@ -19,6 +19,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import Link from "next/link";
+import { useAuthModal } from "./auth-modal-store";
 
 const stepOneSchema = z.object({
   email: z.string().email("請輸入有效的郵箱地址"),
@@ -65,11 +66,12 @@ const stepTwoSchema = z.object({
 });
 
 interface RegisterModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
+  const { isRegisterOpen, closeRegister, openLogin } = useAuthModal();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -282,7 +284,11 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
         title: "註冊成功",
         description: "請前往登錄",
       });
-      onOpenChange(false);
+      if (onOpenChange) {
+        onOpenChange(false);
+      } else {
+        closeRegister();
+      }
       setStep(1);
       // 重置表单
       setStep1Data({ email: "", password: "" });
@@ -305,258 +311,273 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] w-[calc(100%-2rem)] rounded-lg p-6">
-        <DialogHeader className="mb-4">
-          <div className="space-y-2">
-            <p className="text-sm text-neutral-500">第{step}步，共2步</p>
-            <DialogTitle className="text-xl font-semibold">建立一個帳號</DialogTitle>
-          </div>
-        </DialogHeader>
+    <>
+      <Dialog 
+        open={open !== undefined ? open : isRegisterOpen}
+        onOpenChange={(value) => {
+          if (onOpenChange) {
+            onOpenChange(value);
+          } else {
+            if (!value) closeRegister();
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[425px] w-[calc(100%-2rem)] rounded-lg p-6">
+          <DialogHeader className="mb-4">
+            <div className="space-y-2">
+              <p className="text-sm text-neutral-500">第{step}步，共2步</p>
+              <DialogTitle className="text-xl font-semibold">建立一個帳號</DialogTitle>
+            </div>
+          </DialogHeader>
 
-        {step === 1 ? (
-          <div className="space-y-5">
-            <form onSubmit={(e) => e.preventDefault()}>
-              <div className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm text-neutral-500">
-                    電子郵件
-                  </Label>
-                  <Input
-                    type="text"
-                    id="email"
-                    name="email"
-                    value={step1Data.email}
-                    onChange={handleStep1Change}
-                    placeholder="請輸入電子郵箱"
-                    className="h-12 text-base"
-                    autoComplete="new-email"
-                  />
-                  {errors.email && (
-                    <p className="text-sm font-medium text-destructive">
-                      {errors.email}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm text-neutral-500">
-                    密碼
-                  </Label>
-                  <Input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={step1Data.password}
-                    onChange={handleStep1Change}
-                    placeholder="請輸入密碼"
-                    className="h-12 text-base"
-                    autoComplete="new-password"
-                  />
-                  <p className="text-sm text-neutral-500">
-                    包含至少8個字元，只能輸入英文、數字、特殊符號
-                  </p>
-                  {errors.password && (
-                    <p className="text-sm font-medium text-destructive">
-                      {errors.password}
-                    </p>
-                  )}
-                </div>
-
+          {step === 1 ? (
+            <div className="space-y-5">
+              <form onSubmit={(e) => e.preventDefault()}>
                 <div className="space-y-5">
-                  <div className="h-[100px] bg-muted rounded-md">
-                    {/* reCAPTCHA placeholder */}
-                  </div>
-                  <Button
-                    type="button"
-                    onClick={nextStep}
-                    className="w-full h-12 text-base"
-                  >
-                    下一步
-                  </Button>
-                </div>
-
-                <div className="text-center space-y-4 pt-2">
-                  <p className="text-sm text-neutral-500">
-                    已有帳戶？
-                    <Button variant="link" className="px-1 h-auto" onClick={() => {
-                      onOpenChange(false);
-                      // TODO: 打开登录模态框
-                    }}>
-                      登入
-                    </Button>
-                  </p>
-                  <p className="text-xs text-neutral-500">
-                    註冊登入即代表同意Kater
-                    <Link href="/terms" className="text-primary hover:underline mx-1">
-                      《服務條款》
-                    </Link>
-                    <Link href="/privacy" className="text-primary hover:underline">
-                      《隱私權政策》
-                    </Link>
-                  </p>
-                </div>
-              </div>
-            </form>
-          </div>
-        ) : (
-          <div className="space-y-5">
-            <form onSubmit={(e) => e.preventDefault()}>
-              <div className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="username" className="text-sm text-neutral-500">
-                    使用者帳號
-                  </Label>
-                  <Input
-                    type="text"
-                    id="username"
-                    name="username"
-                    value={step2Data.username}
-                    onChange={handleStep2Change}
-                    placeholder="請輸入3-32位英文、數字帳號"
-                    className="h-12 text-base"
-                    autoComplete="new-username"
-                  />
-                  {errors.username && (
-                    <p className="text-sm font-medium text-destructive">
-                      {errors.username}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="nickname" className="text-sm text-neutral-500">
-                    暱稱
-                  </Label>
-                  <Input
-                    type="text"
-                    id="nickname"
-                    name="nickname"
-                    value={step2Data.nickname}
-                    onChange={handleStep2Change}
-                    placeholder="請輸入3-32位暱稱"
-                    className="h-12 text-base"
-                    autoComplete="new-nickname"
-                  />
-                  {errors.nickname && (
-                    <p className="text-sm font-medium text-destructive">
-                      {errors.nickname}
-                    </p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-[2fr_3fr] gap-4">
                   <div className="space-y-2">
-                    <Label className="text-sm text-neutral-500">性別</Label>
-                    <Select
-                      value={step2Data.gender}
-                      onValueChange={handleGenderChange}
-                    >
-                      <SelectTrigger className="h-12 text-base">
-                        <SelectValue placeholder="請選擇性別" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">男</SelectItem>
-                        <SelectItem value="2">女</SelectItem>
-                        <SelectItem value="0">其他</SelectItem>
-                        <SelectItem value="3">不願透露</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {errors.gender && (
+                    <Label htmlFor="email" className="text-sm text-neutral-500">
+                      電子郵件
+                    </Label>
+                    <Input
+                      type="text"
+                      id="email"
+                      name="email"
+                      value={step1Data.email}
+                      onChange={handleStep1Change}
+                      placeholder="請輸入電子郵箱"
+                      className="h-12 text-base"
+                      autoComplete="new-email"
+                    />
+                    {errors.email && (
                       <p className="text-sm font-medium text-destructive">
-                        {errors.gender}
+                        {errors.email}
                       </p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-sm text-neutral-500">生日</Label>
-                    <div className="grid grid-cols-[1.2fr_0.8fr_0.8fr] gap-2">
-                      <Input
-                        type="text"
-                        placeholder="年"
-                        className="h-12 text-base"
-                        value={step2Data.birthday.year}
-                        onChange={(e) => {
-                          handleBirthdayChange(
-                            "year",
-                            e.target.value,
-                            monthInputRef
-                          );
-                        }}
-                        autoComplete="new-birthday-year"
-                        ref={yearInputRef}
-                      />
-                      <Input
-                        type="text"
-                        placeholder="月"
-                        className="h-12 text-base"
-                        value={step2Data.birthday.month}
-                        onChange={(e) => {
-                          handleBirthdayChange(
-                            "month",
-                            e.target.value,
-                            dayInputRef
-                          );
-                        }}
-                        autoComplete="new-birthday-month"
-                        ref={monthInputRef}
-                      />
-                      <Input
-                        type="text"
-                        placeholder="日"
-                        className="h-12 text-base"
-                        value={step2Data.birthday.day}
-                        onChange={(e) => {
-                          handleBirthdayChange("day", e.target.value);
-                        }}
-                        autoComplete="new-birthday-day"
-                        ref={dayInputRef}
-                      />
+                    <Label htmlFor="password" className="text-sm text-neutral-500">
+                      密碼
+                    </Label>
+                    <Input
+                      type="password"
+                      id="password"
+                      name="password"
+                      value={step1Data.password}
+                      onChange={handleStep1Change}
+                      placeholder="請輸入密碼"
+                      className="h-12 text-base"
+                      autoComplete="new-password"
+                    />
+                    <p className="text-sm text-neutral-500">
+                      包含至少8個字元，只能輸入英文、數字、特殊符號
+                    </p>
+                    {errors.password && (
+                      <p className="text-sm font-medium text-destructive">
+                        {errors.password}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-5">
+                    <div className="h-[100px] bg-muted rounded-md">
+                      {/* reCAPTCHA placeholder */}
                     </div>
-                    {errors.birthday && (
+                    <Button
+                      type="button"
+                      onClick={nextStep}
+                      className="w-full h-12 text-base"
+                    >
+                      下一步
+                    </Button>
+                  </div>
+
+                  <div className="text-center space-y-4 pt-2">
+                    <p className="text-sm text-neutral-500">
+                      已有帳戶？
+                      <Button variant="link" className="px-1 h-auto" onClick={() => {
+                        if (onOpenChange) {
+                          onOpenChange(false);
+                        } else {
+                          closeRegister();
+                        }
+                        openLogin();
+                      }}>
+                        登入
+                      </Button>
+                    </p>
+                    <p className="text-xs text-neutral-500">
+                      註冊登入即代表同意Kater
+                      <Link href="/terms" className="text-primary hover:underline mx-1">
+                        《服務條款》
+                      </Link>
+                      <Link href="/privacy" className="text-primary hover:underline">
+                        《隱私權政策》
+                      </Link>
+                    </p>
+                  </div>
+                </div>
+              </form>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              <form onSubmit={(e) => e.preventDefault()}>
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="username" className="text-sm text-neutral-500">
+                      使用者帳號
+                    </Label>
+                    <Input
+                      type="text"
+                      id="username"
+                      name="username"
+                      value={step2Data.username}
+                      onChange={handleStep2Change}
+                      placeholder="請輸入3-32位英文、數字帳號"
+                      className="h-12 text-base"
+                      autoComplete="new-username"
+                    />
+                    {errors.username && (
                       <p className="text-sm font-medium text-destructive">
-                        {errors.birthday}
+                        {errors.username}
                       </p>
                     )}
                   </div>
-                </div>
 
-                <div className="flex gap-4 pt-4">
-                  <Button
-                    type="button"
-                    onClick={prevStep}
-                    variant="outline"
-                    className="flex-1 h-12 text-base"
-                  >
-                    上一步
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={handleSubmit}
-                    className="flex-1 h-12 text-base"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "註冊中..." : "完成"}
-                  </Button>
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="nickname" className="text-sm text-neutral-500">
+                      暱稱
+                    </Label>
+                    <Input
+                      type="text"
+                      id="nickname"
+                      name="nickname"
+                      value={step2Data.nickname}
+                      onChange={handleStep2Change}
+                      placeholder="請輸入3-32位暱稱"
+                      className="h-12 text-base"
+                      autoComplete="new-nickname"
+                    />
+                    {errors.nickname && (
+                      <p className="text-sm font-medium text-destructive">
+                        {errors.nickname}
+                      </p>
+                    )}
+                  </div>
 
-                <div className="text-center pt-2">
-                  <p className="text-xs text-neutral-500">
-                    註冊登入即代表同意Kater
-                    <Link href="/terms" className="text-primary hover:underline mx-1">
-                      《服務條款》
-                    </Link>
-                    <Link href="/privacy" className="text-primary hover:underline">
-                      《隱私權政策》
-                    </Link>
-                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-[2fr_3fr] gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm text-neutral-500">性別</Label>
+                      <Select
+                        value={step2Data.gender}
+                        onValueChange={handleGenderChange}
+                      >
+                        <SelectTrigger className="h-12 text-base">
+                          <SelectValue placeholder="請選擇性別" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">男</SelectItem>
+                          <SelectItem value="2">女</SelectItem>
+                          <SelectItem value="0">其他</SelectItem>
+                          <SelectItem value="3">不願透露</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {errors.gender && (
+                        <p className="text-sm font-medium text-destructive">
+                          {errors.gender}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-sm text-neutral-500">生日</Label>
+                      <div className="grid grid-cols-[1.2fr_0.8fr_0.8fr] gap-2">
+                        <Input
+                          type="text"
+                          placeholder="年"
+                          className="h-12 text-base"
+                          value={step2Data.birthday.year}
+                          onChange={(e) => {
+                            handleBirthdayChange(
+                              "year",
+                              e.target.value,
+                              monthInputRef
+                            );
+                          }}
+                          autoComplete="new-birthday-year"
+                          ref={yearInputRef}
+                        />
+                        <Input
+                          type="text"
+                          placeholder="月"
+                          className="h-12 text-base"
+                          value={step2Data.birthday.month}
+                          onChange={(e) => {
+                            handleBirthdayChange(
+                              "month",
+                              e.target.value,
+                              dayInputRef
+                            );
+                          }}
+                          autoComplete="new-birthday-month"
+                          ref={monthInputRef}
+                        />
+                        <Input
+                          type="text"
+                          placeholder="日"
+                          className="h-12 text-base"
+                          value={step2Data.birthday.day}
+                          onChange={(e) => {
+                            handleBirthdayChange("day", e.target.value);
+                          }}
+                          autoComplete="new-birthday-day"
+                          ref={dayInputRef}
+                        />
+                      </div>
+                      {errors.birthday && (
+                        <p className="text-sm font-medium text-destructive">
+                          {errors.birthday}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                    <Button
+                      type="button"
+                      onClick={prevStep}
+                      variant="outline"
+                      className="flex-1 h-12 text-base"
+                    >
+                      上一步
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleSubmit}
+                      className="flex-1 h-12 text-base"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "註冊中..." : "完成"}
+                    </Button>
+                  </div>
+
+                  <div className="text-center pt-2">
+                    <p className="text-xs text-neutral-500">
+                      註冊登入即代表同意Kater
+                      <Link href="/terms" className="text-primary hover:underline mx-1">
+                        《服務條款》
+                      </Link>
+                      <Link href="/privacy" className="text-primary hover:underline">
+                        《隱私權政策》
+                      </Link>
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </form>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+              </form>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

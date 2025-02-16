@@ -8,6 +8,8 @@ import { RouteProgress } from "@/components/router/route-progress";
 import dynamic from "next/dynamic";
 import { sidebarRegistry } from "@/components/layout/sidebar-components";
 import { RightSidebar as RightSidebarComponent } from "@/components/layout/right-sidebar";
+import { LoginModal } from "@/components/auth/login-modal";
+import { RegisterModal } from "@/components/auth/register-modal";
 
 const CreatePostModal = dynamic(
   () => import("@/components/post/create-post-modal"),
@@ -49,7 +51,7 @@ export default function MainLayout({
     <div className="min-h-screen">
       <RouteProgress />
       <Header />
-      <div className="mx-auto max-w-7xl flex pt-8 pr-8 scroll-smooth">
+      <div className="mx-auto max-w-7xl flex pt-8 scroll-smooth">
         {LeftSidebarComponent && (
           <div className="sticky top-[88px] w-[300px] h-[calc(100vh-88px)]">
             <LeftSidebarComponent className="hidden lg:block" />
@@ -60,7 +62,7 @@ export default function MainLayout({
             <div className="">{children}</div>
           </main>
           {showRightSidebar && (
-            <aside className="ml-4 lg:w-40 xl:w-60 flex-shrink-0 pl-8">
+            <aside className="lg:w-40 xl:w-60 flex-shrink-0 pl-8">
               <RightSidebarComponent className="" />
             </aside>
           )}
@@ -69,6 +71,8 @@ export default function MainLayout({
       <Suspense fallback={null}>
         <CreatePostModal />
       </Suspense>
+      <LoginModal />
+      <RegisterModal />
     </div>
   );
 }
