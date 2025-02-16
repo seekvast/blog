@@ -39,14 +39,14 @@ export function RulesSettings({ board }: RulesSettingsProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      rules: board.rules || [],
+      rules: [],
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
-      await api.boards.updateRules({
+      await api.boards.updateRule({
         boardId: board.id,
         rules: values.rules,
       });

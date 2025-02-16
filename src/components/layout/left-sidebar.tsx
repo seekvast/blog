@@ -89,7 +89,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
       className={cn("flex w-full flex-col gap-4 pb-12 h-full", className)}
       {...props}
     >
-      <div className="flex flex-col gap-4 p-4 h-full">
+      <div className="flex flex-col gap-4 p-4">
         {/* 主导航 */}
         <nav className="flex flex-col gap-1">
           {mainNavItems.map((item) => {

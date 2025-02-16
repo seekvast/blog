@@ -82,7 +82,7 @@ export default function UserPage() {
   const renderContent = () => {
     switch (activeTab) {
       case "posts":
-        return <UserPosts posts={mockPosts} />;
+        return <UserPosts />;
       case "replies":
         return <UserReplies />;
       case "following":

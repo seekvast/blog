@@ -40,13 +40,13 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
   const loadApplications = async () => {
     try {
       setIsLoading(true);
-      const response = await api.get(`/b/${board.id}/applications`, {
+      const response = await api.boards.get({
         params: {
           ...filters,
           q: searchQuery,
         },
       });
-      setApplications(response.data);
+      setApplications([]);
     } catch (error) {
       console.error("Error loading applications:", error);
       toast({
@@ -66,7 +66,7 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
   // 处理申请
   const handleApplication = async (applicationId: number, status: "approve" | "reject") => {
     try {
-      await api.put(`/b/${board.id}/applications/${applicationId}`, {
+      await api.boards.create({
         status,
       });
       

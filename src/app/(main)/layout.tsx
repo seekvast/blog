@@ -7,6 +7,7 @@ import { Header } from "@/components/layout/header";
 import { RouteProgress } from "@/components/router/route-progress";
 import dynamic from "next/dynamic";
 import { sidebarRegistry } from "@/components/layout/sidebar-components";
+import { RightSidebar as RightSidebarComponent } from "@/components/layout/right-sidebar";
 
 const CreatePostModal = dynamic(
   () => import("@/components/post/create-post-modal"),
@@ -35,7 +36,7 @@ export default function MainLayout({
     return sidebarRegistry.default;
   };
 
-  const { left: LeftSidebarComponent, right: RightSidebarComponent } =
+  const { left: LeftSidebarComponent, right: RightSidebar } =
     getSidebarConfig();
 
   // 确定是否显示右侧边栏
@@ -60,7 +61,7 @@ export default function MainLayout({
           </main>
           {showRightSidebar && (
             <aside className="ml-4 lg:w-40 xl:w-60 flex-shrink-0 pl-8">
-              <RightSidebarComponent />
+              <RightSidebarComponent className="" />
             </aside>
           )}
         </div>

@@ -97,28 +97,28 @@ const navGroups: NavGroup[] = [
       },
     ],
   },
-//   {
-//     title: "黑名单",
-//     icon: UserRoundX,
-//     href: "blacklist",
-//     items: [
-//       {
-//         label: "封锁列表",
-//         href: "blacklist",
-//       },
-//     ],
-//   },
-//   {
-//     title: "违规",
-//     icon: Ban,
-//     href: "violation",
-//     items: [
-//       {
-//         label: "检举记录",
-//         href: "violation",
-//       },
-//     ],
-//   },
+  //   {
+  //     title: "黑名单",
+  //     icon: UserRoundX,
+  //     href: "blacklist",
+  //     items: [
+  //       {
+  //         label: "封锁列表",
+  //         href: "blacklist",
+  //       },
+  //     ],
+  //   },
+  //   {
+  //     title: "违规",
+  //     icon: Ban,
+  //     href: "violation",
+  //     items: [
+  //       {
+  //         label: "检举记录",
+  //         href: "violation",
+  //       },
+  //     ],
+  //   },
   {
     title: "语言",
     href: "language",
@@ -150,16 +150,14 @@ export default function SettingsSidebar({ activeTab }: SettingsSidebarProps) {
         const Icon = group.icon;
         return (
           <div key={group.title} className="py-2">
-            <div className="px-4  text-sm font-medium text-gray-500">
+            <div className="text-base font-medium">
               {(() => {
                 const isActive = activeTab === group.href;
                 return (
                   <a
                     className={cn(
-                      "flex items-center px-4 py-2 text-sm rounded-lg transition-colors",
-                      isActive
-                        ? "bg-blue-50 text-blue-600 font-medium"
-                        : "text-gray-600 hover:bg-gray-50"
+                      "flex items-center px-4 py-2 rounded-lg transition-colors",
+                      isActive ? "bg-blue-50 text-blue-600" : "hover:bg-gray-50"
                     )}
                     key={group.href}
                     href={`#${group.href}`}
