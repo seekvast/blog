@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import SettingsSidebar, {
   SettingsTabType,
@@ -30,17 +30,11 @@ export default function SettingsPage() {
     "board"
   );
 
-  // 监听hash变化
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.slice(1) as SettingsTabType;
       if (hash) {
         setActiveTab(hash);
-        // 找到对应的section并滚动
-        const section = document.getElementById(hash);
-        if (section) {
-          section.scrollIntoView({ behavior: "smooth" });
-        }
       }
     };
 
@@ -69,70 +63,68 @@ export default function SettingsPage() {
 
         {/* 右侧内容区 */}
         <div className="flex-1">
-          <div className="">
-            <section id="profile" className="px-4 py-3">
-              <h2 className="text-xl font-semibold mb-4">个人档案</h2>
-              <ProfileSettings />
-            </section>
+          <section id="profile" className="px-4 py-3 [scroll-margin-top:60px]">
+            <h2 className="text-xl font-semibold mb-4">个人档案</h2>
+            <ProfileSettings />
+          </section>
 
-            <section id="security" className="p-4">
-              <h2 className="text-xl font-semibold mb-4">帳號安全</h2>
-              <SecuritySettings />
-            </section>
+          <section id="security" className="p-4 [scroll-margin-top:60px]">
+            <h2 className="text-xl font-semibold mb-4">帳號安全</h2>
+            <SecuritySettings />
+          </section>
 
-            <section id="notification" className="p-4">
-              <h2 className="text-xl font-semibold mb-4">通知类型</h2>
-              <NotificationSettings />
-            </section>
+          <section id="notification" className="p-4 [scroll-margin-top:60px]">
+            <h2 className="text-xl font-semibold mb-4">通知类型</h2>
+            <NotificationSettings />
+          </section>
 
-            <section id="privacy" className="p-4">
-              <h2 className="text-xl font-semibold mb-4">隐私设置</h2>
-              <div>隐私设置内容</div>
-            </section>
+          <section id="privacy" className="p-4 [scroll-margin-top:60px]">
+            <h2 className="text-xl font-semibold mb-4">隐私设置</h2>
+            <div>隐私设置内容</div>
+          </section>
 
-            <section id="blacklist" className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">封锁列表</h2>
-                <Select
-                  value={blacklistType}
-                  onValueChange={(value: "board" | "user") =>
-                    setBlacklistType(value)
-                  }
-                >
-                  <SelectTrigger className="w-32 h-8 py-1">
-                    <SelectValue placeholder="选择类型" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="board">看板</SelectItem>
-                    <SelectItem value="user">用户</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <UserBlacklist
-                type={blacklistType}
-                onTypeChange={setBlacklistType}
-              />
-            </section>
-            <section id="violation" className="p-4">
-              <h2 className="text-xl font-semibold mb-4">检举记录</h2>
-              <ViolationRecords />
-            </section>
-            <section id="theme" className="p-4">
-              <h2 className="text-xl font-semibold mb-4">外观</h2>
-              <ThemeSettings />
-            </section>
+          <section id="blacklist" className="p-4 [scroll-margin-top:60px]">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">封锁列表</h2>
+              <Select
+                value={blacklistType}
+                onValueChange={(value: "board" | "user") =>
+                  setBlacklistType(value)
+                }
+              >
+                <SelectTrigger className="w-32 h-8 py-1">
+                  <SelectValue placeholder="选择类型" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="board">看板</SelectItem>
+                  <SelectItem value="user">用户</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <UserBlacklist
+              type={blacklistType}
+              onTypeChange={setBlacklistType}
+            />
+          </section>
+          <section id="violation" className="p-4 [scroll-margin-top:60px]">
+            <h2 className="text-xl font-semibold mb-4">检举记录</h2>
+            <ViolationRecords />
+          </section>
+          <section id="theme" className="p-4 [scroll-margin-top:60px]">
+            <h2 className="text-xl font-semibold mb-4">外观</h2>
+            <ThemeSettings />
+          </section>
 
-            <section id="language" className="p-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">语言设置</h2>
-                <LanguageSettings />
-              </div>
-            </section>
-            <section id="policy" className="p-4">
-              <h2 className="text-xl font-semibold mb-4">网站政策</h2>
-              <PolicySettings />
-            </section>
-          </div>
+          <section id="language" className="p-4 [scroll-margin-top:60px]">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">语言设置</h2>
+              <LanguageSettings />
+            </div>
+          </section>
+          <section id="policy" className="p-4 [scroll-margin-top:60px]">
+            <h2 className="text-xl font-semibold mb-4">网站政策</h2>
+            <PolicySettings />
+          </section>
         </div>
       </div>
     </div>
