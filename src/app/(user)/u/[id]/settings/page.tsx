@@ -96,10 +96,10 @@ export default function SettingsPage() {
             <ThemeSettings />
           </section>
           <section id="privacy" className="p-4 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold mb-4">隐私</h2>
+            <h2 className="text-xl font-semibold mb-4">上線狀態顯示</h2>
             <div className="flex items-center justify-between py-3 border-b">
               <Label className="text-sm text-gray-500">
-                當我的文章被下方推時
+                顯示或隱藏你的線上狀態，讓其他使用者知道你是否在線。
               </Label>
               <Switch />
             </div>

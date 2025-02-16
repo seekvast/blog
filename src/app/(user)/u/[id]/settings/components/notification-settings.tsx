@@ -22,7 +22,9 @@ export default function NotificationSettings() {
         <div className="flex items-center justify-between py-3 border-b">
           <div className="flex items-center gap-2">
             <BookmarkPlus className="w-4 h-4 text-gray-500" />
-            <Label className="text-sm text-gray-500">自动关注我回复的文章</Label>
+            <Label className="text-sm text-gray-500">
+              自动关注我回复的文章
+            </Label>
           </div>
           <Switch />
         </div>
@@ -31,7 +33,9 @@ export default function NotificationSettings() {
         <div className="flex items-center justify-between py-3 border-b">
           <div className="flex items-center gap-2">
             <ThumbsUp className="w-4 h-4 text-gray-500" />
-            <Label className="text-sm text-gray-500">當我的文章被下方推時</Label>
+            <Label className="text-sm text-gray-500">
+              當我的文章被按下推/噓時
+            </Label>
           </div>
           <Switch />
         </div>
