@@ -22,7 +22,7 @@ export default function UserSidebar({ activeTab, onTabChange, navItems }: UserSi
   };
 
   return (
-    <nav className="space-y-1 bg-white rounded-lg p-2">
+    <nav className="space-y-1 rounded-lg p-2">
       {navItems.map((item) => {
         const isActive = activeTab === item.href;
         return (

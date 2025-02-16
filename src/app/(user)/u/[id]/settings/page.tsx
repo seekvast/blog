@@ -16,6 +16,7 @@ import SecuritySettings from "./components/security-settings";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { User } from "@/types/user";
+import { useQuery } from "@tanstack/react-query";
 
 import {
   Select,
@@ -29,11 +30,16 @@ import { api } from "@/lib/api";
 export default function SettingsPage() {
   const params = useParams();
   const userId = params?.id as string;
-  const [user, setUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = React.useState<SettingsTabType>("profile");
   const [blacklistType, setBlacklistType] = React.useState<"board" | "user">(
     "board"
   );
+
+  const { data: user, isLoading } = useQuery({
+    queryKey: ["user", userId],
+    queryFn: () => api.users.get({ hashid: userId }),
+    enabled: !!userId,
+  });
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -56,14 +62,21 @@ export default function SettingsPage() {
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
-  useEffect(() => {
-    if (userId === undefined) return;
-    const fetchUser = async () => {
-      const user = await api.users.get({ hashid: userId });
-      setUser(user);
-    };
-    fetchUser();
-  }, [userId]);
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-muted-foreground">加载用户信息中...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-muted-foreground">用户不存在</div>
+      </div>
+    );
+  }
 
   return (
     <div className="py-4">
