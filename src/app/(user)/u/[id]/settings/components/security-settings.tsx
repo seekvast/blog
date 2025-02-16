@@ -3,6 +3,7 @@
 import { Label } from "@/components/ui/label";
 import { ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,28 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { User } from "@/types/user";
+import { api } from "@/lib/api";
+import { z } from "zod";
+import { signOut } from "next-auth/react";
+
+const passwordSchema = z
+  .object({
+    current_password: z.string().min(1, "请输入当前密码"),
+    password: z
+      .string()
+      .min(8, "密码长度至少为8位")
+      .regex(
+        /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[\W_]).*$/,
+        "密码必须包含数字、字母和特殊字符"
+      ),
+    password_confirm: z.string().min(1, "请输入确认密码"),
+  })
+  .refine((data) => data.password === data.password_confirm, {
+    message: "两次输入的新密码不一致",
+    path: ["password_confirm"],
+  });
+
+type PasswordSchema = z.infer<typeof passwordSchema>;
 
 export default function SecuritySettings({ user }: { user: User | null }) {
   if (!user) {
@@ -23,13 +46,19 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       </div>
     );
   }
+  const { toast } = useToast();
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [genderModalOpen, setGenderModalOpen] = useState(false);
   const [birthdayModalOpen, setBirthdayModalOpen] = useState(false);
-  const [gender, setGender] = useState(user.gender); // 默认为男性
+  const [gender, setGender] = useState(user.gender?.toString()); // Convert number to string
   const [birthday, setBirthday] = useState(user.birthday);
+  const [passwordForm, setPasswordForm] = useState<PasswordSchema>({
+    current_password: "",
+    password: "",
+    password_confirm: "",
+  });
 
-  const getGenderText = (value: string) => {
+  const getGenderText = (value: string | undefined) => {
     switch (value) {
       case "0":
         return "其他";
@@ -46,6 +75,81 @@ export default function SecuritySettings({ user }: { user: User | null }) {
 
   const handleBirthdayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBirthday(e.target.value);
+  };
+
+  const handleBirthdaySubmit = async () => {
+    if (!birthday) {
+      toast({
+        variant: "destructive",
+        title: "错误",
+        description: "请选择生日",
+      });
+      return;
+    }
+
+    try {
+      await api.users.updateBirthday({ birthday });
+      toast({
+        title: "更新成功",
+        description: "生日已更新",
+      });
+      setBirthdayModalOpen(false);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "更新失败",
+        description: error?.message || "请稍后重试",
+      });
+    }
+  };
+
+  const handlePasswordChange =
+    (field: keyof PasswordSchema) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setPasswordForm((prev) => ({
+        ...prev,
+        [field]: e.target.value,
+      }));
+    };
+
+  const handlePasswordSubmit = async () => {
+    try {
+      // 使用 zod 验证表单
+      const validatedData = passwordSchema.parse(passwordForm);
+
+      // 提交到后端
+      await api.users.changePassword(validatedData);
+      toast({
+        title: "修改成功",
+        description: "密码已更新, 请重新登录",
+      });
+      setPasswordModalOpen(false);
+      // 重置表单
+      setPasswordForm({
+        current_password: "",
+        password: "",
+        password_confirm: "",
+      });
+      await signOut({
+        redirect: true,
+        callbackUrl: "/",
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // 显示第一个验证错误
+        toast({
+          variant: "destructive",
+          title: "验证错误",
+          description: error.errors[0].message,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "修改失败",
+          description: error?.message || "请稍后重试",
+        });
+      }
+    }
   };
 
   const today = new Date().toISOString().split("T")[0];
@@ -93,34 +197,54 @@ export default function SecuritySettings({ user }: { user: User | null }) {
             {/* 当前密码 */}
             <div className="flex flex-col gap-2">
               <Label>当前密码</Label>
-              <Input type="password" placeholder="请输入当前密码" />
+              <Input
+                type="password"
+                placeholder="请输入当前密码"
+                value={passwordForm.current_password}
+                onChange={handlePasswordChange("current_password")}
+              />
             </div>
 
             {/* 新密码 */}
             <div className="flex flex-col gap-2">
               <Label>新密码</Label>
-              <Input type="password" placeholder="请输入新密码" />
+              <Input
+                type="password"
+                placeholder="请输入新密码"
+                value={passwordForm.password}
+                onChange={handlePasswordChange("password")}
+              />
               <p className="text-sm text-muted-foreground">
-                密码长度至少8位，必须包含字母和数字
+                密码长度至少8位，必须包含数字、字母和特殊字符
               </p>
             </div>
 
             {/* 确认新密码 */}
             <div className="flex flex-col gap-2">
               <Label>确认新密码</Label>
-              <Input type="password" placeholder="请再次输入新密码" />
+              <Input
+                type="password"
+                placeholder="请再次输入新密码"
+                value={passwordForm.password_confirm}
+                onChange={handlePasswordChange("password_confirm")}
+              />
             </div>
 
             <div className="flex justify-end gap-2">
               <Button
                 variant="outline"
-                onClick={() => setPasswordModalOpen(false)}
+                onClick={() => {
+                  setPasswordModalOpen(false);
+                  setPasswordForm({
+                    current_password: "",
+                    password: "",
+                    password_confirm: "",
+                  });
+                }}
               >
                 取消
               </Button>
-              <Button onClick={() => setPasswordModalOpen(false)}>
-                确认修改
-              </Button>
+              <Button onClick={handlePasswordSubmit}>确认修改</Button>
             </div>
           </div>
         </DialogContent>
@@ -218,9 +342,9 @@ export default function SecuritySettings({ user }: { user: User | null }) {
                 max={today}
                 className="w-full"
               />
-              <p className="text-sm text-muted-foreground">
+              {/* <p className="text-sm text-muted-foreground">
                 生日设置后将无法修改，请确保填写正确
-              </p>
+              </p> */}
             </div>
 
             <div className="flex justify-end gap-2 mt-6">
@@ -230,7 +354,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
               >
                 取消
               </Button>
-              <Button onClick={() => setBirthdayModalOpen(false)}>确认</Button>
+              <Button onClick={handleBirthdaySubmit}>确认</Button>
             </div>
           </div>
         </DialogContent>

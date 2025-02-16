@@ -43,9 +43,10 @@ export function createApi(options: ApiOptions = {}) {
 
           update: (data: any) =>
               http.patch<User>(`${prefix}/user`, data),
-
+          updateBirthday: (data: { birthday: string }) =>
+            http.patch<User>(`${prefix}/user/birthday`, data),
       changePassword: (data: any) =>
-        http.post<void>(`${prefix}/users/me/password`, data),
+        http.patch<void>(`${prefix}/user/password`, data),
     },
 
     boards: {
