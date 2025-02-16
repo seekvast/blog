@@ -77,7 +77,7 @@ export default function UserLayout({
       )}
 
       {/* 内容区 */}
-      <div className="mx-auto max-w-7xl">{children}</div>
+      <div className="mx-auto max-w-7xl px-4 overflow-hidden">{children}</div>
     </div>
   );
 }

@@ -109,7 +109,7 @@ export default function UserPage() {
         </div>
 
         {/* 右侧内容区 */}
-        <div className="flex-1">{renderContent()}</div>
+        <div className="flex-1 min-w-0 overflow-hidden">{renderContent()}</div>
       </div>
     </div>
   );

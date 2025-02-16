@@ -4,10 +4,11 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { DiscussionItem } from "@/components/home/discussion-item";
 import { InfiniteScroll } from "@/components/common/infinite-scroll";
+import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import type { Discussion } from "@/types/discussion";
 import type { Paginate } from "@/types";
-
+import { LayoutGrid, List } from "lucide-react";
 interface UserPostsProps {}
 
 export function UserPosts() {
@@ -20,7 +21,7 @@ export function UserPosts() {
     last_page: 1,
     total: 0,
     per_page: 10,
-    message: ''
+    message: "",
   });
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -91,25 +92,51 @@ export function UserPosts() {
   }, []);
 
   return (
-    <div className="space-y-4">
-      <InfiniteScroll
-        loading={loading}
-        hasMore={hasMore}
-        onLoadMore={loadMore}
-        currentPage={page}
-      >
-        {discussions.items.map((discussion, index) => {
-          const isLastItem = index === discussions.items.length - 1;
-          return (
-            <DiscussionItem
-              key={discussion.slug}
-              discussion={discussion}
-              displayMode={displayMode}
-              isLastItem={isLastItem}
-            />
-          );
-        })}
-      </InfiniteScroll>
+    <div className="flex flex-col min-w-0 overflow-hidden">
+      <div className="bg-background">
+        <div className="flex justify-between border-b">
+          <h3 className="text-md font-semibold">我的文章</h3>
+
+          <div className="flex h-[40px] items-center justify-between  min-w-0">
+            <div className="flex items-center space-x-8">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 hover:bg-transparent hover:text-foreground"
+                onClick={() =>
+                  setDisplayMode((prev) => (prev === "grid" ? "list" : "grid"))
+                }
+              >
+                {displayMode === "grid" ? (
+                  <LayoutGrid className="h-4 w-4" />
+                ) : (
+                  <List className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="divide-y min-w-0">
+        <InfiniteScroll
+          loading={loading}
+          hasMore={hasMore}
+          onLoadMore={loadMore}
+          currentPage={page}
+        >
+          {discussions.items.map((discussion, index) => {
+            const isLastItem = index === discussions.items.length - 1;
+            return (
+              <DiscussionItem
+                key={discussion.slug}
+                discussion={discussion}
+                displayMode={displayMode}
+                isLastItem={isLastItem}
+              />
+            );
+          })}
+        </InfiniteScroll>
+      </div>
     </div>
   );
 }
