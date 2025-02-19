@@ -178,7 +178,9 @@ export default function ProfileSettings({ user }: { user: User | null }) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-[90vw] sm:max-w-[600px] p-0 gap-0 overflow-hidden">
           <DialogHeader className="p-3">
-            <DialogTitle className="text-xl font-semibold">个人资料</DialogTitle>
+            <DialogTitle className="text-xl font-semibold">
+              个人资料
+            </DialogTitle>
           </DialogHeader>
           <div
             className={cn(
@@ -220,7 +222,7 @@ export default function ProfileSettings({ user }: { user: User | null }) {
                       className="object-cover"
                     />
                     <AvatarFallback className="bg-gray-100">
-                      <div className="text-gray-400 text-2xl">+</div>
+                      {user.username[0]}
                     </AvatarFallback>
                     {isAvatarUploading && (
                       <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full">
