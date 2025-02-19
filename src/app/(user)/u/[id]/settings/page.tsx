@@ -90,25 +90,25 @@ export default function SettingsPage() {
 
         {/* 右侧内容区 */}
         <div className="flex-1">
-          <section id="profile" className="px-4 py-3 [scroll-margin-top:60px]">
+          <section id="profile" className="py-3 [scroll-margin-top:60px]">
             <h2 className="text-xl font-semibold mb-4">个人资讯</h2>
             <ProfileSettings user={user} />
           </section>
 
-          <section id="security" className="p-4 [scroll-margin-top:60px]">
+          <section id="security" className="py-4 [scroll-margin-top:60px]">
             <h2 className="text-xl font-semibold mb-4">帳號安全</h2>
             <SecuritySettings user={user} />
           </section>
 
-          <section id="notification" className="p-4 [scroll-margin-top:60px]">
+          <section id="notification" className="py-4 [scroll-margin-top:60px]">
             <h2 className="text-xl font-semibold mb-4">通知</h2>
             <NotificationSettings />
           </section>
-          <section id="theme" className="p-4 [scroll-margin-top:60px]">
+          <section id="theme" className="py-4 [scroll-margin-top:60px]">
             <h2 className="text-xl font-semibold mb-4">外观</h2>
             <ThemeSettings />
           </section>
-          <section id="privacy" className="p-4 [scroll-margin-top:60px]">
+          <section id="privacy" className="py-4 [scroll-margin-top:60px]">
             <h2 className="text-xl font-semibold mb-4">上線狀態顯示</h2>
             <div className="flex items-center justify-between py-3 border-b">
               <Label className="text-sm text-gray-500">
@@ -146,13 +146,13 @@ export default function SettingsPage() {
             <ViolationRecords />
           </section> */}
 
-          <section id="language" className="p-4 [scroll-margin-top:60px]">
+          <section id="language" className="py-4 [scroll-margin-top:60px]">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">语言设置</h2>
               <LanguageSettings />
             </div>
           </section>
-          <section id="policy" className="p-4 [scroll-margin-top:60px]">
+          <section id="policy" className="py-4 [scroll-margin-top:60px]">
             <h2 className="text-xl font-semibold mb-4">网站政策</h2>
             <PolicySettings />
           </section>

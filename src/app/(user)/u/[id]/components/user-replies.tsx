@@ -81,7 +81,7 @@ export function UserReplies({ replies = [] }: UserRepliesProps) {
       <h3 className="pb-3 text-md font-semibold mb-6 border-b">我的回复</h3>
       <div className="space-y-4">
         {replyList.map((reply) => (
-          <div key={reply.id} className="bg-white rounded-lg py-4">
+          <div key={reply.id} className="rounded-lg py-4">
             <div className="flex gap-4">
               {/* 左侧头像 */}
               <div className="flex-shrink-0">
