@@ -212,7 +212,7 @@ export default function ProfileSettings({ user }: { user: User | null }) {
                 <div>
                   <Avatar
                     onClick={handleAvatarClick}
-                    className={`w-20 h-20 sm:w-24 sm:h-24 cursor-pointer shadow-md ${
+                    className={`w-20 h-20 sm:w-24 sm:h-24 cursor-pointer shadow-md group ${
                       isAvatarUploading && "pointer-events-none relative"
                     }`}
                   >
@@ -224,9 +224,13 @@ export default function ProfileSettings({ user }: { user: User | null }) {
                     <AvatarFallback className="bg-gray-100">
                       {user.username[0]}
                     </AvatarFallback>
+                    {/* 上传图标悬浮层 */}
+                    <div className="absolute w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/30 transition-colors shadow-sm left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                      <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                    </div>
                     {isAvatarUploading && (
                       <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full">
-                        <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-white"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-4"></div>
                       </div>
                     )}
                   </Avatar>
@@ -262,9 +266,9 @@ export default function ProfileSettings({ user }: { user: User | null }) {
               <div className="flex flex-col justify-center items-center px-4 md:p-8 sm:p-8 z-10">
                 <button
                   onClick={handleBgClick}
-                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/80 hover:bg-white transition-colors flex items-center justify-center shadow-sm"
+                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/30 transition-colors flex items-center justify-center shadow-sm"
                 >
-                  <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </button>
                 <input
                   type="file"
