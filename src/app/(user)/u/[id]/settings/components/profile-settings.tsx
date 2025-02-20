@@ -222,7 +222,7 @@ export default function ProfileSettings({ user }: { user: User | null }) {
                       className="object-cover"
                     />
                     <AvatarFallback className="bg-gray-100">
-                      {user.username[0]}
+                      {user.username[0].toUpperCase()}
                     </AvatarFallback>
                     {/* 上传图标悬浮层 */}
                     <div className="absolute w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/30 transition-colors shadow-sm left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
