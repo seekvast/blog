@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { ModeToggle } from "@/components/mode-toggle";
 import { usePostEditorStore } from "@/store/post-editor";
 import { CreateBoardModal } from "@/components/board/create-board-modal";
+import { Badge } from "@/components/ui/badge";
 
 interface NavItem {
   title: string;
@@ -151,17 +152,19 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                 name: "FTTT",
                 members: 1,
                 letter: "F",
+                is_nsfw: 1,
               },
               {
                 name: "NSFW",
                 members: 12922,
                 letter: "N",
-                tag: "成人",
+                is_nsfw: 1,
               },
               {
                 name: "TFF11",
                 members: 1,
                 letter: "T",
+                is_nsfw: 0,
               },
             ].map((board) => (
               <div
@@ -180,10 +183,10 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                       >
                         {board.name}
                       </Link>
-                      {board.tag && (
-                        <span className="rounded bg-red-500 px-1 py-0.5 text-[10px] text-white">
-                          {board.tag}
-                        </span>
+                      {board.is_nsfw === 1 && (
+                        <Badge variant="destructive" className="h-5">
+                          成人
+                        </Badge>
                       )}
                     </div>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">

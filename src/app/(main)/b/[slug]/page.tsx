@@ -217,8 +217,8 @@ function BoardContent() {
                   <h1 className="text-lg font-medium">{board.name}</h1>
                   {board.is_nsfw === 1 && (
                     <Badge
-                      variant="secondary"
-                      className="bg-red-50 text-red-600"
+                      variant="destructive"
+                      className="h-5"
                     >
                       成人
                     </Badge>

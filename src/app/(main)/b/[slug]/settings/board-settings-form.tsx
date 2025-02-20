@@ -5,10 +5,15 @@ import { BaseSettings } from "./components/base-settings";
 import { RulesSettings } from "./components/rules-settings";
 import { ApprovalSettings } from "./components/approval-settings";
 import { BoardChildSettings } from "./components/board-child-settings";
+import { useDevice } from "@/hooks/useDevice";
+import { cn } from "@/lib/utils";
 
 import { Board as BoardType } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import BoardSettingsSidebar from "./components/board-settings-sidebar";
+import { SettingMenus, SettingTab } from "./components/setting-menus";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface BoardSettingsFormProps {
   board: BoardType;
@@ -19,22 +24,15 @@ export function BoardSettingsForm({
   board,
   onSuccess,
 }: BoardSettingsFormProps) {
-  const [activeTab, setActiveTab] = React.useState<
-    | "general"
-    | "rules"
-    | "child-boards"
-    | "approval"
-    | "members"
-    | "content"
-    | "records"
-    | "blocklist"
-  >("general");
+  const { isMobile } = useDevice();
+  const router = useRouter();
+  const [activeTab, setActiveTab] = React.useState<SettingTab>("");
 
   // 根据activeTab渲染对应的内容
   const renderContent = () => {
     switch (activeTab) {
       case "general":
-        return <BaseSettings board={board} />;
+        return <BaseSettings board={board} onSuccess={onSuccess} />;
       case "child-boards":
         return <BoardChildSettings board={board} />;
       case "rules":
@@ -47,10 +45,64 @@ export function BoardSettingsForm({
     }
   };
 
+  // 移动端布局
+  if (isMobile) {
+    // 如果是 general，显示设置表单
+    if (activeTab === "general") {
+      return (
+        <div className="min-h-screen bg-background">
+          {/* 移动端顶部导航 */}
+          <div className="fixed top-0 left-0 right-0 z-50 flex items-center h-14 px-4 border-b bg-background">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.back()}
+              className="mr-2"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </Button>
+            <h1 className="text-lg font-medium">看板設定</h1>
+          </div>
+
+          {/* 移动端主要内容 */}
+          <>{renderContent()}</>
+        </div>
+      );
+    }
+
+    // 如果不是 general，显示设置菜单
+    return (
+      <div className="min-h-screen bg-background">
+        {/* 移动端顶部导航 */}
+        <div className="fixed top-0 left-0 right-0 z-50 flex items-center h-14 px-4 border-b bg-background">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.back()}
+            className="mr-2"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+          <h1 className="text-lg font-medium">設定</h1>
+        </div>
+
+        {/* 移动端菜单列表 */}
+        <>
+          <SettingMenus
+            board={board}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
+        </>
+      </div>
+    );
+  }
+
+  // 桌面端布局
   return (
     <div className="flex gap-8 pb-10">
       <div className="w-[260px] flex-shrink-0">
-        <BoardSettingsSidebar
+        <SettingMenus
           board={board}
           activeTab={activeTab}
           onTabChange={setActiveTab}

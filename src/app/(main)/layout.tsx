@@ -51,7 +51,7 @@ export default function MainLayout({
     <div className="min-h-screen">
       <RouteProgress />
       <Header />
-      <div className="mx-auto max-w-7xl flex pt-8 scroll-smooth">
+      <div className="mx-auto max-w-7xl flex md:pt-8 scroll-smooth">
         {LeftSidebarComponent && (
           <div className="sticky top-[88px] w-[300px] h-[calc(100vh-88px)]">
             <LeftSidebarComponent className="hidden lg:block" />
