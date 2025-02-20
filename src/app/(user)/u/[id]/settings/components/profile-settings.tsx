@@ -20,6 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { cn } from "@/lib/utils";
+import { AvatarUpload } from "@/components/common/avatar-upload";
 import {
   Form,
   FormControl,
@@ -61,12 +62,10 @@ export default function ProfileSettings({ user }: { user: User | null }) {
   }
 
   const [open, setOpen] = useState(false);
-  const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [isBgUploading, setIsBgUploading] = useState(false);
   const [avatar, setAvatar] = useState<string | null>(user?.avatar_url ?? null);
   const [bgImage, setBgImage] = useState<string | null>(user?.cover ?? null);
   const [birthday, setBirthday] = useState<string>(user?.birthday ?? "");
-  const avatarInputRef = useRef<HTMLInputElement>(null);
   const bgInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,32 +80,8 @@ export default function ProfileSettings({ user }: { user: User | null }) {
     },
   });
 
-  const handleAvatarClick = () => {
-    avatarInputRef.current?.click();
-  };
-
   const handleBgClick = () => {
     bgInputRef.current?.click();
-  };
-
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setIsAvatarUploading(true);
-
-    try {
-      const data = await uploadFile(file, AttachmentType.USER_AVATAR);
-      setAvatar(data.url);
-    } catch (error) {
-      console.error("Error uploading avatar:", error);
-      toast({
-        variant: "destructive",
-        title: "上传失败",
-        description: "头像上传失败，请重试",
-      });
-    } finally {
-      setIsAvatarUploading(false);
-    }
   };
 
   const handleBgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,39 +184,14 @@ export default function ProfileSettings({ user }: { user: User | null }) {
               {/* 左侧：头像和用户信息 */}
               <div className="flex items-center gap-4 sm:gap-6 md:px-8 sm:px-8">
                 {/* 头像 */}
-                <div>
-                  <Avatar
-                    onClick={handleAvatarClick}
-                    className={`w-20 h-20 sm:w-24 sm:h-24 cursor-pointer shadow-md group ${
-                      isAvatarUploading && "pointer-events-none relative"
-                    }`}
-                  >
-                    <AvatarImage
-                      src={avatar ?? ""}
-                      alt="User avatar"
-                      className="object-cover"
-                    />
-                    <AvatarFallback className="bg-gray-100">
-                      {user.username[0].toUpperCase()}
-                    </AvatarFallback>
-                    {/* 上传图标悬浮层 */}
-                    <div className="absolute w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/30 transition-colors shadow-sm left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
-                      <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                    </div>
-                    {isAvatarUploading && (
-                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full">
-                        <div className="animate-spin rounded-full h-8 w-8 border-4"></div>
-                      </div>
-                    )}
-                  </Avatar>
-                  <input
-                    type="file"
-                    ref={avatarInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleAvatarUpload}
-                  />
-                </div>
+                <AvatarUpload
+                  url={user.avatar_url ?? null}
+                  name={user.username}
+                  attachmentType={AttachmentType.USER_AVATAR}
+                  onUploadSuccess={(url) => {
+                    setAvatar(url);
+                  }}
+                />
 
                 {/* 用户信息 */}
                 <div className="flex flex-col justify-center text-white text-center sm:text-left ">

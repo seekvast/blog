@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import React from "react";
 import { Board } from "@/types";
 import { Settings, Users2, ChevronRight } from "lucide-react";
-import { useDevice } from "@/hooks/useDevice";
+import { useDevice } from "@/hooks/use-device";
 
 export type SettingTab =
   | "general"

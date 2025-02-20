@@ -18,6 +18,7 @@ export const formSchema = z.object({
   question: z.string().optional(),
   answer: z.string().optional(),
   category_id: z.number().optional(),
+  avatar: z.string().max(500).optional(),
 });
 
 export type FormData = z.infer<typeof formSchema>;
@@ -27,13 +28,12 @@ export interface BaseSettingsProps {
   onSuccess?: () => void;
 }
 
+export type BoardSettingsFormValues = FormData;
+
 export interface SharedSettingsProps {
-  form: UseFormReturn<FormData>;
+  form: UseFormReturn<BoardSettingsFormValues>;
   isSubmitting: boolean;
-  boardImage: string | null;
-  isUploading: boolean;
+  boardAvatar: string | null;
   categories: Category[];
-  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
-  handleImageClick: () => void;
-  onSubmit: (data: FormData) => Promise<void>;
+  onSubmit: (values: BoardSettingsFormValues) => Promise<void>;
 }

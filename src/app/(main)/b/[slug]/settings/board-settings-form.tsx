@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { BaseSettings } from "./components/base-settings";
 import { RulesSettings } from "./components/rules-settings";
 import { ApprovalSettings } from "./components/approval-settings";
 import { BoardChildSettings } from "./components/board-child-settings";
-import { useDevice } from "@/hooks/useDevice";
+import { useDevice } from "@/hooks/use-device";
 import { cn } from "@/lib/utils";
 
 import { Board as BoardType } from "@/types";
@@ -26,7 +26,13 @@ export function BoardSettingsForm({
 }: BoardSettingsFormProps) {
   const { isMobile } = useDevice();
   const router = useRouter();
-  const [activeTab, setActiveTab] = React.useState<SettingTab>("");
+  const [activeTab, setActiveTab] = React.useState<SettingTab>(isMobile ? "general" : "");
+
+  useEffect(() => {
+    if (isMobile && activeTab === "") {
+      setActiveTab("general");
+    }
+  }, [isMobile, activeTab]);
 
   // 根据activeTab渲染对应的内容
   const renderContent = () => {

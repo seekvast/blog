@@ -1,16 +1,16 @@
 import React from "react";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { AvatarUpload, FormFields, SharedSettingsProps } from "./shared";
+import { FormFields, SharedSettingsProps } from "./shared";
+import { AvatarUpload } from "@/components/common/avatar-upload";
+import { AttachmentType } from "@/constants/attachment-type";
+
 
 export function DesktopBaseSettings({
   form,
   isSubmitting,
-  boardImage,
-  isUploading,
+  boardAvatar,
   categories,
-  handleImageUpload,
-  handleImageClick,
   onSubmit,
 }: SharedSettingsProps) {
   return (
@@ -21,9 +21,13 @@ export function DesktopBaseSettings({
           <div className="space-y-2">
             <div className="flex items-center gap-4">
               <AvatarUpload
-                boardImage={boardImage}
-                isUploading={isUploading}
-                handleImageClick={handleImageClick}
+                url={boardAvatar}
+                name={form.getValues("name")}
+                size="sm"
+                attachmentType={AttachmentType.BOARD_AVATAR}
+                onUploadSuccess={(url) => {
+                  form.setValue("avatar", url);
+                }}
               />
               <div>
                 <div className="font-medium">看板头像</div>
@@ -35,17 +39,10 @@ export function DesktopBaseSettings({
           </div>
 
           {/* 表单字段 */}
-          <FormFields
-            form={form}
-            categories={categories}
-            variant="desktop"
-          />
+          <FormFields form={form} categories={categories} variant="desktop" />
 
           {/* 提交按钮 */}
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-          >
+          <Button type="submit" disabled={isSubmitting} className="w-full">
             {isSubmitting ? "保存中..." : "保存设置"}
           </Button>
         </form>

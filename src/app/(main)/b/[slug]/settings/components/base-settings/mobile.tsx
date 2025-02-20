@@ -3,16 +3,15 @@ import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { AvatarUpload, FormFields, SharedSettingsProps } from "./shared";
+import { AvatarUpload } from "@/components/common/avatar-upload";
+import { AttachmentType } from "@/constants/attachment-type";
+import { FormFields, SharedSettingsProps } from "./shared";
 
 export function MobileBaseSettings({
   form,
   isSubmitting,
-  boardImage,
-  isUploading,
+  boardAvatar,
   categories,
-  handleImageUpload,
-  handleImageClick,
   onSubmit,
 }: SharedSettingsProps) {
   const router = useRouter();
@@ -43,9 +42,13 @@ export function MobileBaseSettings({
             <div className="space-y-2">
               <div className="flex items-center gap-4">
                 <AvatarUpload
-                  boardImage={boardImage}
-                  isUploading={isUploading}
-                  handleImageClick={handleImageClick}
+                  url={boardAvatar}
+                  name={form.getValues("name")}
+                  size="sm"
+                  attachmentType={AttachmentType.BOARD_AVATAR}
+                  onUploadSuccess={(url) => {
+                    form.setValue("avatar", url);
+                  }}
                 />
                 <div>
                   <div className="font-medium">看板头像</div>

@@ -28,16 +28,20 @@ interface FormFieldsProps {
   variant?: "mobile" | "desktop";
 }
 
-export function FormFields({ form, categories, variant = "desktop" }: FormFieldsProps) {
+export function FormFields({
+  form,
+  categories,
+  variant = "desktop",
+}: FormFieldsProps) {
   const isMobile = variant === "mobile";
-  
+
   return (
     <>
       <FormField
         control={form.control}
         name="name"
         render={({ field }) => (
-          <FormItem className={isMobile ? "w-full" : "w-2/3"}>
+          <FormItem className="w-full">
             <FormLabel>看板名称</FormLabel>
             <FormControl>
               <Input placeholder="输入看板名称" {...field} />
@@ -51,8 +55,8 @@ export function FormFields({ form, categories, variant = "desktop" }: FormFields
         control={form.control}
         name="slug"
         render={({ field }) => (
-          <FormItem className={isMobile ? "w-full" : "w-2/3"}>
-            <FormLabel>看板标识</FormLabel>
+          <FormItem className="w-full">
+            <FormLabel>看板网址</FormLabel>
             <FormControl>
               <Input placeholder="输入看板标识" {...field} />
             </FormControl>
@@ -68,7 +72,7 @@ export function FormFields({ form, categories, variant = "desktop" }: FormFields
         control={form.control}
         name="desc"
         render={({ field }) => (
-          <FormItem className={isMobile ? "w-full" : "w-2/3"}>
+          <FormItem className="w-full">
             <FormLabel>看板描述</FormLabel>
             <FormControl>
               <Textarea
@@ -86,7 +90,7 @@ export function FormFields({ form, categories, variant = "desktop" }: FormFields
         control={form.control}
         name="category_id"
         render={({ field }) => (
-          <FormItem className={isMobile ? "w-full" : "w-2/3"}>
+          <FormItem className="w-full">
             <FormLabel>看板分类</FormLabel>
             <Select
               onValueChange={(value) => field.onChange(Number(value))}
@@ -99,10 +103,7 @@ export function FormFields({ form, categories, variant = "desktop" }: FormFields
               </FormControl>
               <SelectContent>
                 {categories.map((category) => (
-                  <SelectItem
-                    key={category.id}
-                    value={category.id.toString()}
-                  >
+                  <SelectItem key={category.id} value={category.id.toString()}>
                     {category.name}
                   </SelectItem>
                 ))}
@@ -118,30 +119,20 @@ export function FormFields({ form, categories, variant = "desktop" }: FormFields
         name="is_nsfw"
         render={({ field }) => (
           <FormItem className="space-y-3">
-            <FormLabel>内容分级</FormLabel>
+            <FormLabel>讨论类型</FormLabel>
             <FormControl>
-              <RadioGroup
+              <Select
                 onValueChange={(value) => field.onChange(Number(value))}
                 defaultValue={field.value.toString()}
-                className="flex flex-col space-y-1"
               >
-                <FormItem className="flex items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <RadioGroupItem value="0" />
-                  </FormControl>
-                  <FormLabel className="font-normal">
-                    全年龄
-                  </FormLabel>
-                </FormItem>
-                <FormItem className="flex items-center space-x-3 space-y-0">
-                  <FormControl>
-                    <RadioGroupItem value="1" />
-                  </FormControl>
-                  <FormLabel className="font-normal">
-                    成人内容
-                  </FormLabel>
-                </FormItem>
-              </RadioGroup>
+                <SelectTrigger>
+                  <SelectValue placeholder="选择讨论类型" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">非成人</SelectItem>
+                  <SelectItem value="1">成人</SelectItem>
+                </SelectContent>
+              </Select>
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -164,17 +155,13 @@ export function FormFields({ form, categories, variant = "desktop" }: FormFields
                   <FormControl>
                     <RadioGroupItem value="0" />
                   </FormControl>
-                  <FormLabel className="font-normal">
-                    公开
-                  </FormLabel>
+                  <FormLabel className="font-normal">公开</FormLabel>
                 </FormItem>
                 <FormItem className="flex items-center space-x-3 space-y-0">
                   <FormControl>
                     <RadioGroupItem value="1" />
                   </FormControl>
-                  <FormLabel className="font-normal">
-                    仅成员可见
-                  </FormLabel>
+                  <FormLabel className="font-normal">仅成员可见</FormLabel>
                 </FormItem>
               </RadioGroup>
             </FormControl>
