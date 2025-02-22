@@ -19,7 +19,7 @@ export function MobileBaseSettings({
   return (
     <div className="min-h-screen bg-background">
       {/* 头部导航 */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex items-center h-14 px-4 border-b bg-background">
+      <div className="fixed top-0 left-0 right-0 z-50 flex items-center h-14 px-4 bg-background">
         <Button
           variant="ghost"
           size="icon"

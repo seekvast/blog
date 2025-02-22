@@ -4,7 +4,7 @@ import type {
   Pagination,
   QueryParams,
   UploadResponse,
-    Category,
+  Category,
 } from "@/types/common";
 import type {
   Discussion,
@@ -30,21 +30,20 @@ export function createApi(options: ApiOptions = {}) {
       categories: () =>
         http.get<Category[]>(`${prefix}/categories`, undefined, { next }),
     },
-      users: {
-          login: (data: any) => http.post<User>(`${prefix}/login`, data),
-          signUp: (data: any) => http.post<User>(`${prefix}/user`, data),
-          list: (params?: QueryParams) =>
-              http.get<Pagination<User>>(`${prefix}/users`, params, { next }),
+    users: {
+      login: (data: any) => http.post<User>(`${prefix}/login`, data),
+      signUp: (data: any) => http.post<User>(`${prefix}/user`, data),
+      list: (params?: QueryParams) =>
+        http.get<Pagination<User>>(`${prefix}/users`, params, { next }),
 
-          get: (params: any) =>
-              http.get<User>(`${prefix}/user/profile`, params, { next }),
+      get: (params: any) =>
+        http.get<User>(`${prefix}/user/profile`, params, { next }),
 
-          me: () => http.get<User>(`${prefix}/user/me`, undefined, { next }),
+      me: () => http.get<User>(`${prefix}/user/me`, undefined, { next }),
 
-          update: (data: any) =>
-              http.patch<User>(`${prefix}/user`, data),
-          updateBirthday: (data: { birthday: string }) =>
-            http.patch<User>(`${prefix}/user/birthday`, data),
+      update: (data: any) => http.patch<User>(`${prefix}/user`, data),
+      updateBirthday: (data: { birthday: string }) =>
+        http.patch<User>(`${prefix}/user/birthday`, data),
       changePassword: (data: any) =>
         http.patch<void>(`${prefix}/user/password`, data),
     },
@@ -65,11 +64,11 @@ export function createApi(options: ApiOptions = {}) {
       create: (data: any) => http.post<Board>(`${prefix}/board`, data),
       update: (data: any) => http.post<Board>(`${prefix}/board`, data),
       delete: (slug: string) => http.delete<void>(`${prefix}/board/${slug}`),
-      createChild: (data: any) => http.post<Board>(`${prefix}/board`, data),
+      saveChild: (data: any) => http.post<Board>(`${prefix}/board/child`, data),
       updateChild: (slug: string, data: any) =>
         http.patch<Board>(`${prefix}/board/${slug}`, data),
       deleteChild: (slug: string) =>
-            http.delete<void>(`${prefix}/board/${slug}`),
+        http.delete<void>(`${prefix}/board/${slug}`),
       updateRule: (data: any) =>
         http.patch<Board>(`${prefix}/board/rule`, data),
     },
