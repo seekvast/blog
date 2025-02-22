@@ -28,13 +28,13 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
       slug: board.slug,
       desc: board.desc || "",
       badge_visible: board.badge_visible || [],
-      is_nsfw: board.is_nsfw || 0,
-      visibility: board.visibility || 0,
+      is_nsfw: board.is_nsfw ?? 0,
+      visibility: board.visibility ?? 0,
       poll_role: board.poll_role || [],
-      approval_mode: board.approval_mode || 0,
-      question: board.question || "",
+      approval_mode: board.approval_mode ?? 0,
+      question: board.desc || "",
       answer: board.answer || "",
-      category_id: board.category_id || 0,
+      category_id: board.category_id ?? 0,
       avatar: board.avatar,
     },
   });
@@ -58,13 +58,15 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
   }, []);
 
   const onSubmit = async (values: BoardSettingsFormValues) => {
+    console.log('Form values on submit:', values);
     setIsSubmitting(true);
     try {
-      await api.boards.update({
+      const updateData = {
         ...values,
-        board_id: board.id,
+        id: board.id,
         avatar: boardAvatar,
-      });
+      };
+      await api.boards.update(updateData);
       toast({
         description: "设置已保存",
       });

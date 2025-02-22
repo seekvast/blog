@@ -26,13 +26,9 @@ export function BoardSettingsForm({
 }: BoardSettingsFormProps) {
   const { isMobile } = useDevice();
   const router = useRouter();
-  const [activeTab, setActiveTab] = React.useState<SettingTab>(isMobile ? "general" : "");
-
-  useEffect(() => {
-    if (isMobile && activeTab === "") {
-      setActiveTab("general");
-    }
-  }, [isMobile, activeTab]);
+  const [activeTab, setActiveTab] = React.useState<SettingTab>(
+    isMobile ? "" : "general"
+  );
 
   // 根据activeTab渲染对应的内容
   const renderContent = () => {
@@ -54,7 +50,7 @@ export function BoardSettingsForm({
   // 移动端布局
   if (isMobile) {
     // 如果是 general，显示设置表单
-    if (activeTab === "general") {
+    if (activeTab) {
       return (
         <div className="min-h-screen bg-background">
           {/* 移动端顶部导航 */}
