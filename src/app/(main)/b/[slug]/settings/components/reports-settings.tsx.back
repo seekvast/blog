@@ -1,0 +1,98 @@
+import React from "react";
+import { Input } from "@/components/ui/input";
+import { Search, MoreHorizontal } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Board } from "@/types";
+
+interface ReportsSettingsProps {
+  board: Board;
+}
+
+export function ReportsSettings({ board }: ReportsSettingsProps) {
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [status, setStatus] = React.useState("all");
+
+  return (
+    <div className="space-y-4">
+      {/* 顶部搜索和筛选 */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <h3 className="text-lg font-medium">检举记录</h3>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative w-full sm:w-60 rounded-full">
+            <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="依昵称或账号搜索"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8 h-8 bg-muted/50 rounded-full"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* 检举列表 */}
+      <div className="space-y-4">
+        {/* 单个检举项目 */}
+        {[1, 2, 3].map((item) => (
+          <div
+            key={item}
+            className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors gap-4"
+          >
+            <div className="flex items-start gap-3 flex-1">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src="" />
+                <AvatarFallback>U</AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>用户名</span>
+                  <span>·</span>
+                  <span>2024-02-24</span>
+                  <span className="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-xs">
+                    待处理
+                  </span>
+                </div>
+                <p className="mt-1 text-sm line-clamp-2">
+                  这是一段检举内容的描述，可能会很长，需要进行截断处理...
+                </p>
+                <div className="mt-2 p-3 rounded bg-muted/70 text-sm">
+                  <p className="line-clamp-2">
+                    这是被检举的原始内容，同样可能很长需要截断...
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 md:gap-4">
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-muted">
+                  <MoreHorizontal className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>查看详情</DropdownMenuItem>
+                  <DropdownMenuItem>标记已处理</DropdownMenuItem>
+                  <DropdownMenuItem className="text-destructive">
+                    驳回检举
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

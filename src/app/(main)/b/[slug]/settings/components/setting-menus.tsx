@@ -4,6 +4,7 @@ import { Board } from "@/types";
 import { Settings, Users2, ChevronRight } from "lucide-react";
 import { useDevice } from "@/hooks/use-device";
 import { MembersSettings } from "./members-settings";
+import { ReportsSettings } from "./reports-settings";
 
 export type SettingTab =
   | "general"
@@ -11,7 +12,7 @@ export type SettingTab =
   | "child-boards"
   | "approval"
   | "members"
-  | "content"
+  | "reports"
   | "records"
   | "blocklist"
   | "";
@@ -62,7 +63,7 @@ const menuItems: MenuItem[] = [
     group: "board",
   },
   {
-    id: "content",
+    id: "reports",
     label: "檢舉內容",
     description: "查看並處理尚未解決的檢舉，確保不當內容得到及時處理。",
     group: "board",
@@ -72,6 +73,13 @@ const menuItems: MenuItem[] = [
     label: "審核記錄",
     description:
       "查看看板管理員與版主的操作日誌，了解權限變更與內容管理活動的詳細記錄。",
+    group: "board",
+  },
+  {
+    id: "blocklist",
+    label: "封鎖名單",
+    description:
+      "管理封鎖名單，限制特定用戶或 IP 地址存取看板的功能。",
     group: "board",
   },
 ];
@@ -102,7 +110,7 @@ export function SettingMenus({
             href="#"
             onClick={(e) => handleTabClick(e, item.id)}
             className="flex flex-col p-4"
-            >
+          >
             <div className="text-base font-normal">{item.label}</div>
             <div className="flex justify-center items-center">
               {item.description && (
@@ -177,21 +185,3 @@ export function SettingMenus({
     </div>
   );
 }
-
-export const settingMenus = [
-  {
-    value: "basic",
-    label: "基本设置",
-    content: <MembersSettings />,
-  },
-  {
-    value: "rules",
-    label: "规则设置",
-    content: <MembersSettings />,
-  },
-  {
-    value: "members",
-    label: "成员管理",
-    content: <MembersSettings />,
-  },
-];

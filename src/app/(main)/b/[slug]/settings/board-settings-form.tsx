@@ -6,18 +6,22 @@ import { RulesSettings } from "./components/rules-settings";
 import { ApprovalSettings } from "./components/approval-settings";
 import { BoardChildSettings } from "./components/board-child-settings";
 import { MembersSettings } from "./components/members-settings";
+import { ReportsSettings } from "./components/reports-settings";
+import { BlocklistSettings } from "./components/blocklist-settings";
 import { useDevice } from "@/hooks/use-device";
 import { cn } from "@/lib/utils";
 
 import { Board as BoardType } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SettingMenus, SettingTab } from "./components/setting-menus";
+
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+
 interface BoardSettingsFormProps {
-  board: BoardType;
+  board: BoardType;                         
   onSuccess?: (board: BoardType) => void;
 }
 
@@ -35,7 +39,7 @@ export function BoardSettingsForm({
   const renderContent = () => {
     switch (activeTab) {
       case "general":
-        return <BaseSettings board={board} onSuccess={onSuccess} />;
+        return <BaseSettings board={board} />;
       case "child-boards":
         return <BoardChildSettings board={board} />;
       case "rules":
@@ -44,6 +48,10 @@ export function BoardSettingsForm({
         return <ApprovalSettings board={board} />;
       case "members":
         return <MembersSettings board={board} />;
+      case "reports":
+        return <ReportsSettings board={board} />;
+      case "blocklist":
+        return <BlocklistSettings board={board} />;
       default:
         return null;
     }
