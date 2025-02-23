@@ -64,17 +64,20 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
   }, [board.id, filters, searchQuery]);
 
   // 处理申请
-  const handleApplication = async (applicationId: number, status: "approve" | "reject") => {
+  const handleApplication = async (
+    applicationId: number,
+    status: "approve" | "reject"
+  ) => {
     try {
       await api.boards.create({
         status,
       });
-      
+
       toast({
         title: status === "approve" ? "已通过" : "已拒绝",
         description: "申请处理成功",
       });
-      
+
       // 重新加载列表
       loadApplications();
     } catch (error) {
@@ -107,7 +110,7 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
       {/* 搜索栏 */}
       <div className="flex justify-between items-center">
         <Input
-          className="w-64"
+          className="w-full md:w-64 h-8 bg-muted/50 rounded-full"
           placeholder="依昵称或账号搜索"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -118,9 +121,11 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
       <div className="flex items-center gap-4">
         <Select
           value={filters.applyTime}
-          onValueChange={(value) => setFilters({ ...filters, applyTime: value })}
+          onValueChange={(value) =>
+            setFilters({ ...filters, applyTime: value })
+          }
         >
-          <SelectTrigger className="w-32">
+          <SelectTrigger className="w-32 h-8">
             <SelectValue placeholder="申请时间" />
           </SelectTrigger>
           <SelectContent>
@@ -132,29 +137,39 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
 
         <Select
           value={filters.registerTime}
-          onValueChange={(value) => setFilters({ ...filters, registerTime: value })}
+          onValueChange={(value) =>
+            setFilters({ ...filters, registerTime: value })
+          }
         >
-          <SelectTrigger className="w-32">
+          <SelectTrigger className="w-32 h-8">
             <SelectValue placeholder="注册时间" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="week">一周内</SelectItem>
-            <SelectItem value="month">一个月内</SelectItem>
-            <SelectItem value="year">一年内</SelectItem>
+            <SelectItem value="week" className="h-8">
+              一周内
+            </SelectItem>
+            <SelectItem value="month" className="h-8">
+              一个月内
+            </SelectItem>
+            <SelectItem value="year" className="h-8">
+              一年内
+            </SelectItem>
           </SelectContent>
         </Select>
 
         <Select
           value={filters.boardCount}
-          onValueChange={(value) => setFilters({ ...filters, boardCount: value })}
+          onValueChange={(value) =>
+            setFilters({ ...filters, boardCount: value })
+          }
         >
-          <SelectTrigger className="w-32">
+          <SelectTrigger className="w-32 h-8">
             <SelectValue placeholder="加入看板数" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="0">0个</SelectItem>
-            <SelectItem value="1-5">1-5个</SelectItem>
-            <SelectItem value="5+">5个以上</SelectItem>
+            <SelectItem value="0" className="h-8">0个</SelectItem>
+            <SelectItem value="1-5" className="h-8">1-5个</SelectItem>
+            <SelectItem value="5+" className="h-8">5个以上</SelectItem>
           </SelectContent>
         </Select>
 
@@ -162,16 +177,17 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
           value={filters.gender}
           onValueChange={(value) => setFilters({ ...filters, gender: value })}
         >
-          <SelectTrigger className="w-24">
+          <SelectTrigger className="w-24 h-8">
             <SelectValue placeholder="性别" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="male">男</SelectItem>
-            <SelectItem value="female">女</SelectItem>
+            <SelectItem value="male" className="h-8">男</SelectItem>
+            <SelectItem value="female" className="h-8">女</SelectItem>
           </SelectContent>
         </Select>
 
         <Button
+          size="sm"
           variant="outline"
           onClick={clearFilters}
           className="ml-auto"
@@ -194,9 +210,7 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
                       src={application.user.avatar}
                       alt={application.user.name}
                     />
-                    <AvatarFallback>
-                      {application.user.name[0]}
-                    </AvatarFallback>
+                    <AvatarFallback>{application.user.name[0]}</AvatarFallback>
                   </Avatar>
                   <div>
                     <div className="font-medium flex items-center gap-2">
@@ -206,9 +220,13 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
                       </span>
                     </div>
                     <div className="text-sm text-gray-500">
-                      注册时间：{new Date(application.user.created_at).toLocaleDateString()}
+                      注册时间：
+                      {new Date(
+                        application.user.created_at
+                      ).toLocaleDateString()}
                       <span className="mx-2">·</span>
-                      申请时间：{new Date(application.created_at).toLocaleDateString()}
+                      申请时间：
+                      {new Date(application.created_at).toLocaleDateString()}
                     </div>
                     {application.answer && (
                       <div className="mt-2 text-sm">

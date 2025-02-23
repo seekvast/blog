@@ -1,6 +1,7 @@
+"use client";
+
 import { signOut } from "next-auth/react";
 import type { ApiError } from "./types";
-import { useNotificationStore } from "@/store/notification";
 import { toast } from "@/components/ui/use-toast";
 
 type ErrorHandler = (error: ApiError) => void | Promise<void>;
@@ -17,39 +18,107 @@ export const errorMiddleware = {
   },
 };
 
-export async function handleApiError(error: unknown): Promise<void> {
-  const { addNotification } = useNotificationStore.getState();
+function formatValidationErrors(errors: Record<string, string[]>): string {
+  return Object.entries(errors)
+    .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
+    .join("\n");
+}
 
+export async function handleApiError(error: unknown): Promise<void> {
   if (error instanceof Error) {
     const apiError = error as ApiError;
-    console.log(apiError, "error status............");
+
+    // 处理网络错误
+    if (!window.navigator.onLine) {
+      toast({
+        title: "网络错误",
+        description: "请检查您的网络连接",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // 处理请求超时
+    if (error.name === "TimeoutError") {
+      toast({
+        title: "请求超时",
+        description: "服务器响应时间过长，请稍后重试",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // 处理 HTTP 状态错误
     if (apiError.status) {
       switch (apiError.status) {
         case 401:
           await signOut({ redirect: true });
-          addNotification("error", "登录已过期，请重新登录");
+          toast({
+            title: "登录已过期",
+            description: "请重新登录",
+            variant: "destructive",
+          });
           break;
+
         case 403:
-          addNotification("error", "没有权限执行此操作");
+          toast({
+            title: "权限不足",
+            description: "您没有权限执行此操作",
+            variant: "destructive",
+          });
           break;
+
         case 404:
-          addNotification("error", "请求的资源不存在");
+          toast({
+            title: "资源不存在",
+            description: "请求的资源不存在或已被删除",
+            variant: "destructive",
+          });
           break;
-        case 429:
-          addNotification("error", "请求过于频繁，请稍后再试");
-          break;
+
         case 422:
-          addNotification("error", apiError.message);
+          const validationErrors = apiError.data?.errors;
+          toast({
+            title: "验证错误",
+            description: validationErrors
+              ? formatValidationErrors(validationErrors)
+              : apiError.message || "请检查输入是否正确",
+            variant: "destructive",
+          });
           break;
+
+        case 429:
+          toast({
+            title: "请求过于频繁",
+            description: "请稍后再试",
+            variant: "destructive",
+          });
+          break;
+
         case 500:
-          addNotification("error", "服务器错误，请稍后再试");
+        case 502:
+        case 503:
+        case 504:
+          toast({
+            title: "服务器错误",
+            description: "服务器暂时无法处理您的请求，请稍后重试",
+            variant: "destructive",
+          });
           break;
+
         default:
           if (apiError.status >= 500) {
-            addNotification("error", "服务器错误，请稍后再试");
+            toast({
+              title: "服务器错误",
+              description: "服务器暂时无法处理您的请求，请稍后重试",
+              variant: "destructive",
+            });
           } else {
-            addNotification("error", apiError.message || "请求失败");
+            toast({
+              title: "请求失败",
+              description: apiError.message || "操作未能完成，请重试",
+              variant: "destructive",
+            });
           }
       }
       return;
@@ -59,25 +128,49 @@ export async function handleApiError(error: unknown): Promise<void> {
     if (apiError.code) {
       switch (apiError.code) {
         case 1001:
-          addNotification("error", "用户名或密码错误");
+          toast({
+            title: "登录失败",
+            description: "用户名或密码错误",
+            variant: "destructive",
+          });
           break;
         case 1002:
-          addNotification("error", "账号已被禁用");
+          toast({
+            title: "账号已禁用",
+            description: "您的账号已被禁用，请联系管理员",
+            variant: "destructive",
+          });
           break;
         case 1003:
-          addNotification("error", "验证码错误");
+          toast({
+            title: "验证码错误",
+            description: "请输入正确的验证码",
+            variant: "destructive",
+          });
           break;
         default:
-          addNotification("error", apiError.message || "操作失败");
+          toast({
+            title: "操作失败",
+            description: apiError.message || "请求未能完成，请重试",
+            variant: "destructive",
+          });
       }
       return;
     }
 
     // 处理其他错误
-    addNotification("error", apiError.message || "未知错误");
+    toast({
+      title: "错误",
+      description: apiError.message || "发生未知错误，请重试",
+      variant: "destructive",
+    });
   } else {
     // 处理非 Error 类型的错误
-    addNotification("error", "发生未知错误");
+    toast({
+      title: "错误",
+      description: "发生未知错误，请重试",
+      variant: "destructive",
+    });
   }
 
   // 运行自定义错误处理器

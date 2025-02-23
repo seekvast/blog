@@ -12,6 +12,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -68,15 +70,15 @@ function ChildModal({
     setIsSubmitting(true);
 
     // try {
-      const saveData = {
-        ...data,
-        board_id: parentId,
-        id: 0,
-      };
-      if (editingChild) {
-        saveData.id = editingChild.id;
-      }
-        console.log(saveData)
+    const saveData = {
+      ...data,
+      board_id: parentId,
+      id: 0,
+    };
+    if (editingChild) {
+      saveData.id = editingChild.id;
+    }
+    try {
       await api.boards.saveChild(saveData);
       toast({
         title: "成功",
@@ -85,16 +87,13 @@ function ChildModal({
       onOpenChange(false);
       form.reset();
       onSuccess?.();
-    // } catch (error) {
-    //   console.error("Error saving subboard:", error);
-    //   toast({
-    //     title: "错误",
-    //     description: editingChild ? "更新子版失败" : "创建子版失败",
-    //     variant: "destructive",
-    //   });
-    // } finally {
-    //   setIsSubmitting(false);
-    // }
+      setIsSubmitting(false);
+    } catch (error) {
+      throw error;
+    } finally {
+      form.reset();
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -140,9 +139,10 @@ function ChildModal({
 export function BoardChildSettings({ board }: BoardChildSettingsProps) {
   const [boardChildren, setBoardChildren] = React.useState<BoardChild[]>([]);
   const [modalOpen, setModalOpen] = React.useState(false);
-  const [editingChild, setEditingChild] = React.useState<
-    BoardChild | undefined
-  >();
+  const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
+  const [editingChild, setEditingChild] = React.useState<BoardChild | undefined>();
+  const [deletingChild, setDeletingChild] = React.useState<BoardChild | undefined>();
+  const [isDeleting, setIsDeleting] = React.useState(false);
   const { toast } = useToast();
 
   // 获取子版列表
@@ -152,11 +152,6 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
       setBoardChildren(data.items);
     } catch (error) {
       console.error("Error fetching subboards:", error);
-      toast({
-        title: "错误",
-        description: "获取子版列表失败",
-        variant: "destructive",
-      });
     }
   };
 
@@ -169,10 +164,42 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
     setModalOpen(true);
   };
 
+  const handleDelete = (child: BoardChild) => {
+    setDeletingChild(child);
+    setDeleteModalOpen(true);
+  };
+
   const handleCloseModal = (open: boolean) => {
     setModalOpen(open);
     if (!open) {
       setEditingChild(undefined);
+    }
+  };
+
+  const handleCloseDeleteModal = (open: boolean) => {
+    setDeleteModalOpen(open);
+    if (!open) {
+      setDeletingChild(undefined);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingChild) return;
+
+    setIsDeleting(true);
+    try {
+      await api.boards.deleteChild({ id: deletingChild.id, boardId: board.id });
+      toast({
+        title: "成功",
+        description: "子版删除成功",
+      });
+      setDeleteModalOpen(false);
+      fetchBoardChildren();
+    } catch (error) {
+      throw error;
+    } finally {
+      setIsDeleting(false);
+      setDeletingChild(undefined);
     }
   };
 
@@ -198,6 +225,33 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
         editingChild={editingChild}
       />
 
+      <Dialog open={deleteModalOpen} onOpenChange={handleCloseDeleteModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>删除确认</DialogTitle>
+            <DialogDescription>
+              确定要删除子版"{deletingChild?.name}"吗？此操作无法撤销。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setDeleteModalOpen(false)}
+              disabled={isDeleting}
+            >
+              取消
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "删除中..." : "确认删除"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="">
         {boardChildren.map((child) => (
           <div
@@ -217,7 +271,10 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
               >
                 <Pencil className="mr-2 h-4 w-4" />
               </button>
-              <button className="hover:text-primary">
+              <button
+                className="hover:text-destructive"
+                onClick={() => handleDelete(child)}
+              >
                 <Trash2 className="mr-2 h-4 w-4" />
               </button>
             </div>

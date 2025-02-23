@@ -38,8 +38,7 @@ export function BoardSettingsForm({
       case "child-boards":
         return <BoardChildSettings board={board} />;
       case "rules":
-        return <></>;
-      // return <RulesSettings board={board} />;
+      return <RulesSettings board={board} />;
       case "approval":
         return <ApprovalSettings board={board} />;
       default:
@@ -103,7 +102,7 @@ export function BoardSettingsForm({
   // 桌面端布局
   return (
     <div className="flex gap-8 pb-10">
-      <div className="w-[260px] flex-shrink-0">
+      <div className="w-[220px] flex-shrink-0">
         <SettingMenus
           board={board}
           activeTab={activeTab}

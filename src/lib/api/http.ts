@@ -74,11 +74,16 @@ const put = <T>(
     options
   );
 
-const delete_ = <T>(endpoint: string, options: ApiOptions = {}): ApiResult<T> =>
+const delete_ = <T>(
+  endpoint: string,
+  params?: Record<string, any>,
+  options: ApiOptions = {}
+): ApiResult<T> =>
   handleRequest(
     fetchApi<T>(endpoint, {
       ...options,
       method: "DELETE",
+      params,
     }),
     options
   );

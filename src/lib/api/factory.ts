@@ -67,8 +67,9 @@ export function createApi(options: ApiOptions = {}) {
       saveChild: (data: any) => http.post<Board>(`${prefix}/board/child`, data),
       updateChild: (slug: string, data: any) =>
         http.patch<Board>(`${prefix}/board/${slug}`, data),
-      deleteChild: (slug: string) =>
-        http.delete<void>(`${prefix}/board/${slug}`),
+      deleteChild: (data: any) =>
+            http.delete<void>(`${prefix}/board/child`, data),
+      saveRule: (data: any) => http.post<Board>(`${prefix}/board/rule`, data),
       updateRule: (data: any) =>
         http.patch<Board>(`${prefix}/board/rule`, data),
     },
