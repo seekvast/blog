@@ -5,6 +5,7 @@ import { BaseSettings } from "./components/base-settings";
 import { RulesSettings } from "./components/rules-settings";
 import { ApprovalSettings } from "./components/approval-settings";
 import { BoardChildSettings } from "./components/board-child-settings";
+import { MembersSettings } from "./components/members-settings";
 import { useDevice } from "@/hooks/use-device";
 import { cn } from "@/lib/utils";
 
@@ -38,9 +39,11 @@ export function BoardSettingsForm({
       case "child-boards":
         return <BoardChildSettings board={board} />;
       case "rules":
-      return <RulesSettings board={board} />;
+        return <RulesSettings board={board} />;
       case "approval":
         return <ApprovalSettings board={board} />;
+      case "members":
+        return <MembersSettings board={board} />;
       default:
         return null;
     }

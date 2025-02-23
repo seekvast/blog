@@ -25,6 +25,8 @@ export interface User {
   joined_at?: string;
   last_seen_at?: string;
   token?: string;
+  posts_count?: number;
+  replies_count?: number;
   created_at?: string;
   updated_at?: string;
 }

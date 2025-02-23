@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import { Card } from "@/components/ui/card";
+import { Search } from "lucide-react";
+
 import {
   Select,
   SelectContent,
@@ -106,15 +108,19 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* 搜索栏 */}
-      <div className="flex justify-between items-center">
-        <Input
-          className="w-full md:w-64 h-8 bg-muted/50 rounded-full"
-          placeholder="依昵称或账号搜索"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium">成员审核</h3>
+        <div className="relative w-60 rounded-full">
+          <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="依昵称或账号搜索"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8 h-8 bg-muted/50 rounded-full"
+          />
+        </div>
       </div>
 
       {/* 筛选栏 */}
@@ -167,9 +173,15 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
             <SelectValue placeholder="加入看板数" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="0" className="h-8">0个</SelectItem>
-            <SelectItem value="1-5" className="h-8">1-5个</SelectItem>
-            <SelectItem value="5+" className="h-8">5个以上</SelectItem>
+            <SelectItem value="0" className="h-8">
+              0个
+            </SelectItem>
+            <SelectItem value="1-5" className="h-8">
+              1-5个
+            </SelectItem>
+            <SelectItem value="5+" className="h-8">
+              5个以上
+            </SelectItem>
           </SelectContent>
         </Select>
 
@@ -181,8 +193,12 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
             <SelectValue placeholder="性别" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="male" className="h-8">男</SelectItem>
-            <SelectItem value="female" className="h-8">女</SelectItem>
+            <SelectItem value="male" className="h-8">
+              男
+            </SelectItem>
+            <SelectItem value="female" className="h-8">
+              女
+            </SelectItem>
           </SelectContent>
         </Select>
 

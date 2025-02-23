@@ -3,6 +3,7 @@ import React from "react";
 import { Board } from "@/types";
 import { Settings, Users2, ChevronRight } from "lucide-react";
 import { useDevice } from "@/hooks/use-device";
+import { MembersSettings } from "./members-settings";
 
 export type SettingTab =
   | "general"
@@ -176,3 +177,21 @@ export function SettingMenus({
     </div>
   );
 }
+
+export const settingMenus = [
+  {
+    value: "basic",
+    label: "基本设置",
+    content: <MembersSettings />,
+  },
+  {
+    value: "rules",
+    label: "规则设置",
+    content: <MembersSettings />,
+  },
+  {
+    value: "members",
+    label: "成员管理",
+    content: <MembersSettings />,
+  },
+];

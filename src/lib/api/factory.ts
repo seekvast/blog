@@ -74,7 +74,9 @@ export function createApi(options: ApiOptions = {}) {
       getRules: (data: any) =>
         http.get<BoardRule[]>(`${prefix}/board/rules`, data),
       deleteRule: (data: any) =>
-        http.delete<void>(`${prefix}/board/rule`, data),
+            http.delete<void>(`${prefix}/board/rule`, data),
+      getMembers: (data: any) =>
+        http.get<Pagination<User>>(`${prefix}/board/users`, data),
     },
 
     discussions: {
