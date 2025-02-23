@@ -101,20 +101,20 @@ function SortableRuleItem({ rule, onEdit, onDelete, isActive }: SortableRuleItem
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex items-start justify-between p-4 rounded-lg bg-muted/50 group transition-colors",
+        "flex items-center gap-3 p-4 rounded-lg bg-muted/50 group transition-colors",
         isDragging || isActive ? "opacity-50 bg-muted/70 ring-2 ring-primary" : "hover:bg-muted/70",
         "touch-none" // 防止移动端的滚动和文本选择
       )}
+      {...attributes}
     >
       <div 
-        className="flex-1 space-y-1 cursor-move" 
-        {...attributes} 
+        className="flex items-center cursor-move text-muted-foreground" 
         {...listeners}
       >
-        <div className="flex items-center gap-2">
-          <GripVertical className="h-4 w-4 text-muted-foreground" />
-          <h4 className="font-medium">{rule.title}</h4>
-        </div>
+        <GripVertical className="h-4 w-4" />
+      </div>
+      <div className="flex-1 min-h-[2rem] flex flex-col justify-center">
+        <h4 className="font-medium leading-none mb-1">{rule.title}</h4>
         <p className="text-sm text-muted-foreground whitespace-pre-line">
           {rule.content}
         </p>
