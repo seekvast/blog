@@ -13,6 +13,7 @@ import type {
   BoardChild,
   LoginResponse,
   User,
+  BoardRule,
 } from "@/types";
 import { signIn } from "next-auth/react";
 
@@ -68,10 +69,12 @@ export function createApi(options: ApiOptions = {}) {
       updateChild: (slug: string, data: any) =>
         http.patch<Board>(`${prefix}/board/${slug}`, data),
       deleteChild: (data: any) =>
-            http.delete<void>(`${prefix}/board/child`, data),
+        http.delete<void>(`${prefix}/board/child`, data),
       saveRule: (data: any) => http.post<Board>(`${prefix}/board/rule`, data),
-      updateRule: (data: any) =>
-        http.patch<Board>(`${prefix}/board/rule`, data),
+      getRules: (data: any) =>
+        http.get<BoardRule[]>(`${prefix}/board/rules`, data),
+      deleteRule: (data: any) =>
+        http.delete<void>(`${prefix}/board/rule`, data),
     },
 
     discussions: {

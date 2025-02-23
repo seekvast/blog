@@ -30,6 +30,13 @@ export interface BoardChild {
   id: number;
 }
 
+export interface BoardRule {
+  id: number;
+  title: string;
+  content: string;
+  sort: number;
+}
+
 export interface BoardChildrenResponse {
   code: number;
   data: {
