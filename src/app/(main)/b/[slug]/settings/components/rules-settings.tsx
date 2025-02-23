@@ -27,25 +27,31 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical } from "lucide-react";
 import { dataTagErrorSymbol } from "@tanstack/react-query";
 import {
   DndContext,
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
+  DragStartEvent,
+  Active,
+  Over,
 } from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  useSortable,
   verticalListSortingStrategy,
+  useSortable,
 } from "@dnd-kit/sortable";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
+import { cn } from "@/lib/utils";
 
 const ruleSchema = z.object({
   id: z.number().optional(),
@@ -62,9 +68,10 @@ interface SortableRuleItemProps {
   rule: BoardRule;
   onEdit: (rule: BoardRule) => void;
   onDelete: (rule: BoardRule) => void;
+  isActive: boolean;
 }
 
-function SortableRuleItem({ rule, onEdit, onDelete }: SortableRuleItemProps) {
+function SortableRuleItem({ rule, onEdit, onDelete, isActive }: SortableRuleItemProps) {
   const {
     attributes,
     listeners,
@@ -77,7 +84,6 @@ function SortableRuleItem({ rule, onEdit, onDelete }: SortableRuleItemProps) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
   };
 
   const handleEdit = (e: React.MouseEvent) => {
@@ -94,10 +100,21 @@ function SortableRuleItem({ rule, onEdit, onDelete }: SortableRuleItemProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-start justify-between p-4 rounded-lg bg-muted/50 group"
+      className={cn(
+        "flex items-start justify-between p-4 rounded-lg bg-muted/50 group transition-colors",
+        isDragging || isActive ? "opacity-50 bg-muted/70 ring-2 ring-primary" : "hover:bg-muted/70",
+        "touch-none" // 防止移动端的滚动和文本选择
+      )}
     >
-      <div className="flex-1 space-y-1 cursor-move" {...attributes} {...listeners}>
-        <h4 className="font-medium">{rule.title}</h4>
+      <div 
+        className="flex-1 space-y-1 cursor-move" 
+        {...attributes} 
+        {...listeners}
+      >
+        <div className="flex items-center gap-2">
+          <GripVertical className="h-4 w-4 text-muted-foreground" />
+          <h4 className="font-medium">{rule.title}</h4>
+        </div>
         <p className="text-sm text-muted-foreground whitespace-pre-line">
           {rule.content}
         </p>
@@ -105,14 +122,14 @@ function SortableRuleItem({ rule, onEdit, onDelete }: SortableRuleItemProps) {
       <div className="flex gap-3 items-center text-gray-500">
         <button
           type="button"
-          className="cursor-pointer"
+          className="cursor-pointer hover:text-primary"
           onClick={handleEdit}
         >
           <Pencil className="h-4 w-4" />
         </button>
         <button
           type="button"
-          className="cursor-pointer"
+          className="cursor-pointer hover:text-destructive"
           onClick={handleDelete}
         >
           <Trash2 className="h-4 w-4" />
@@ -129,6 +146,7 @@ export function RulesSettings({ board }: RulesSettingsProps) {
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
   const [deletingRule, setDeletingRule] = React.useState<BoardRule | null>(null);
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const [activeId, setActiveId] = React.useState<number | null>(null);
   const { toast } = useToast();
   const [rules, setRules] = React.useState<BoardRule[]>([]);
 
@@ -198,29 +216,51 @@ export function RulesSettings({ board }: RulesSettingsProps) {
   });
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px的移动距离才触发拖拽，防止误触
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250, // 增加到250ms，确保移动端有足够时间区分点击和拖动
+        tolerance: 5, // 允许5px的移动容差
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    setActiveId(active.id as number);
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
+    setActiveId(null);
+
     if (!over || active.id === over.id) return;
 
     const oldIndex = rules.findIndex((rule) => rule.id === active.id);
     const newIndex = rules.findIndex((rule) => rule.id === over.id);
 
     const newRules = arrayMove(rules, oldIndex, newIndex);
-
+    
+    // 计算新的sort值
     let newSort: number;
     if (newIndex === 0) {
+      // 移到最前面
       newSort = newRules[1].sort + BASE_SORT_GAP;
     } else if (newIndex === rules.length - 1) {
+      // 移到最后面
       newSort = newRules[newIndex - 1].sort - BASE_SORT_GAP;
     } else if (oldIndex < newIndex) {
+      // 向下移动，取目标位置前后两个规则的中间值
       newSort = Math.floor((newRules[newIndex + 1].sort + newRules[newIndex - 1].sort) / 2);
     } else {
+      // 向上移动，取目标位置和其前一个规则的中间值
       newSort = Math.floor((newRules[newIndex - 1].sort + newRules[newIndex].sort) / 2);
     }
 
@@ -236,7 +276,7 @@ export function RulesSettings({ board }: RulesSettingsProps) {
         id: active.id as number,
         sort: newSort,
       });
-
+      
       toast({
         title: "成功",
         description: "规则排序已更新",
@@ -249,6 +289,10 @@ export function RulesSettings({ board }: RulesSettingsProps) {
       });
       setRules(rules);
     }
+  };
+
+  const handleDragCancel = () => {
+    setActiveId(null);
   };
 
   const handleAddRule = () => {
@@ -361,20 +405,26 @@ export function RulesSettings({ board }: RulesSettingsProps) {
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
+          modifiers={[restrictToVerticalAxis]}
         >
           <SortableContext
             items={rules.map((rule) => rule.id)}
             strategy={verticalListSortingStrategy}
           >
-            {rules.map((rule) => (
-              <SortableRuleItem
-                key={rule.id}
-                rule={rule}
-                onEdit={handleEditRule}
-                onDelete={handleDeleteRule}
-              />
-            ))}
+            <div className="space-y-2">
+              {rules.map((rule) => (
+                <SortableRuleItem
+                  key={rule.id}
+                  rule={rule}
+                  onEdit={handleEditRule}
+                  onDelete={handleDeleteRule}
+                  isActive={rule.id === activeId}
+                />
+              ))}
+            </div>
           </SortableContext>
         </DndContext>
 
