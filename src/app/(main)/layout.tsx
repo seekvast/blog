@@ -8,12 +8,11 @@ import { Header } from "@/components/layout/header";
 import { RouteProgress } from "@/components/router/route-progress";
 import dynamic from "next/dynamic";
 import { sidebarRegistry } from "@/components/layout/sidebar-components";
-import { RightSidebar as RightSidebarComponent } from "@/components/layout/right-sidebar";
 import { LoginModal } from "@/components/auth/login-modal";
 import { RegisterModal } from "@/components/auth/register-modal";
 import { MobileNav } from "@/components/layout/mobile-nav";
-import { MobileDrawer } from "@/components/layout/mobile-drawer";
-
+import { Plus } from "lucide-react";
+import { usePostEditorStore } from "@/store/post-editor";
 const CreatePostModal = dynamic(
   () => import("@/components/post/create-post-modal"),
   { ssr: false }
@@ -50,6 +49,7 @@ export default function MainLayout({
     ? showDefaultSidebarPaths.includes(pathname)
     : false;
 
+  const { setIsVisible } = usePostEditorStore();
   return (
     <div className="min-h-screen flex flex-col">
       <RouteProgress />
@@ -78,8 +78,28 @@ export default function MainLayout({
         </div>
       </div>
 
+      {pathname?.startsWith("/") && (
+        <button
+          className={cn(
+            "fixed right-4 bottom-20 lg:hidden z-9",
+            "flex items-center justify-center w-14 h-14",
+            "bg-primary text-primary-foreground rounded-full shadow-lg",
+            "hover:bg-primary/90 active:scale-95",
+            "transition-all duration-200",
+            "touch-none"
+          )}
+          onClick={() => setIsVisible(true)}
+          onTouchStart={(e) => {
+            e.preventDefault();
+            setIsVisible(true);
+          }}
+        >
+          <Plus className="h-7 w-7 stroke-[2.5]" />
+        </button>
+      )}
       {/* 移动端底部导航 */}
       <MobileNav />
+      {/* 悬浮发帖按钮 */}
       {/* 模态框 */}
       <LoginModal />
       <RegisterModal />
