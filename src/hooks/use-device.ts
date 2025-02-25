@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 
-// 定义断点
+// 定义断点，与 Tailwind 保持一致
 const breakpoints = {
-  mobile: 640,    // sm
-  tablet: 768,    // md
-  desktop: 1024,  // lg
+  sm: 640,
+  md: 768,
+  lg: 1024,
+  xl: 1280,
+  '2xl': 1536,
 } as const;
 
 interface DeviceInfo {
@@ -35,9 +37,9 @@ export function useDevice(): DeviceInfo {
       const height = window.innerHeight;
 
       setDeviceInfo({
-        isMobile: width < breakpoints.mobile,
-        isTablet: width >= breakpoints.mobile && width < breakpoints.desktop,
-        isDesktop: width >= breakpoints.desktop,
+        isMobile: width < breakpoints.md,  // < 768px
+        isTablet: width >= breakpoints.md && width < breakpoints.lg,  // >= 768px && < 1024px
+        isDesktop: width >= breakpoints.lg, // >= 1024px
         width,
         height,
       });
@@ -49,7 +51,7 @@ export function useDevice(): DeviceInfo {
     // 添加 resize 事件监听
     window.addEventListener('resize', updateDeviceInfo);
 
-    // 清理函数
+    // 清理事件监听
     return () => window.removeEventListener('resize', updateDeviceInfo);
   }, []);
 

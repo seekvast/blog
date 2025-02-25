@@ -20,17 +20,17 @@ const navItems = [
   },
   {
     label: "看板",
-    href: "/tags",
+    href: "/b",
     icon: LayoutGrid,
   },
   {
     label: "书签",
-    href: "/search",
+    href: "/bookmarks",
     icon: Bookmark,
   },
   {
     label: "消息",
-    href: "/me",
+    href: "/notifications",
     icon: Bell,
   },
 ];
