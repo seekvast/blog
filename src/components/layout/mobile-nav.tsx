@@ -5,13 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { UserNav } from "@/components/layout/user-nav";
-import {
-  Home,
-  Heart,
-  Tag,
-  User,
-  Search,
-} from "lucide-react";
+import { Home, Heart, LayoutGrid, Bookmark, Bell } from "lucide-react";
 
 const navItems = [
   {
@@ -20,37 +14,39 @@ const navItems = [
     icon: Home,
   },
   {
-    label: "追踪",
+    label: "关注",
     href: "/following",
     icon: Heart,
   },
   {
-    label: "标签",
+    label: "看板",
     href: "/tags",
-    icon: Tag,
+    icon: LayoutGrid,
   },
   {
-    label: "搜索",
+    label: "书签",
     href: "/search",
-    icon: Search,
+    icon: Bookmark,
   },
   {
-    label: "我的",
+    label: "消息",
     href: "/me",
-    icon: User,
+    icon: Bell,
   },
 ];
 
 export function MobileNav() {
   const pathname = usePathname();
-  
+
   return (
-    <nav className={cn(
-      "lg:hidden fixed bottom-0 left-0 right-0 z-50",
-      "flex h-14 items-center justify-around",
-      "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
-      "border-t safe-area-bottom",
-    )}>
+    <nav
+      className={cn(
+        "lg:hidden fixed bottom-0 left-0 right-0 z-50",
+        "flex h-14 items-center justify-around",
+        "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        "border-t safe-area-bottom"
+      )}
+    >
       {navItems.map((item) => (
         <Link
           key={item.href}
@@ -60,11 +56,13 @@ export function MobileNav() {
             "w-16 h-full py-1",
             "text-xs font-medium transition-colors",
             "hover:text-primary",
-            pathname === item.href ? [
-              "text-primary",
-              "after:absolute after:bottom-[2px] after:w-1 after:h-1",
-              "after:rounded-full after:bg-primary",
-            ] : "text-muted-foreground"
+            pathname === item.href
+              ? [
+                  "text-primary",
+                  "after:absolute after:bottom-[2px] after:w-1 after:h-1",
+                  "after:rounded-full after:bg-primary",
+                ]
+              : "text-muted-foreground"
           )}
         >
           <item.icon className="h-5 w-5 mb-0.5" />

@@ -82,21 +82,13 @@ export function Header({ className }: HeaderProps) {
             >
               <img src="/logo-g.png" alt="Kater" className="h-8 w-auto" />
             </Link>
-
-            {/* Search - 桌面端 */}
-            <div className="relative flex-1 max-w-sm hidden md:block">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="搜尋關鍵字"
-                className="pl-8 bg-muted/50 rounded-full"
-              />
-            </div>
           </div>
 
-          {/* Search - 移动端 */}
-          <div className="relative flex-1 max-w-[240px] mx-4 md:hidden">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          {/* Search */}
+          <div className="relative flex-1 sm:max-w-[240px] mx-3">
+            <div className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-muted-foreground" />
+            </div>
             <Input
               type="search"
               placeholder="搜尋關鍵字"

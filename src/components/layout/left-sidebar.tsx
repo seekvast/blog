@@ -6,16 +6,16 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import {
-  Plus,
-  PenSquare,
   Home,
-  User,
   LayoutGrid,
   Bookmark,
-  RotateCcw,
+  Heart,
   Users,
   Languages,
   Globe,
+  Plus,
+  PenSquare,
+  RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -28,29 +28,29 @@ import { Badge } from "@/components/ui/badge";
 interface NavItem {
   title: string;
   href: string;
-  icon: string;
+  icon: React.ComponentType<any>;
 }
 
 const mainNavItems: NavItem[] = [
   {
     title: "首页",
     href: "/",
-    icon: "home",
+    icon: Home,
   },
   {
     title: "关注",
     href: "/following",
-    icon: "person",
+    icon: Heart,
   },
   {
     title: "看板",
     href: "/b",
-    icon: "view_module",
+    icon: LayoutGrid,
   },
   {
     title: "书签",
     href: "/bookmarks",
-    icon: "bookmark",
+    icon: Bookmark,
   },
 ];
 
@@ -93,35 +93,21 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
       <div className="flex flex-col gap-4 p-4">
         {/* 主导航 */}
         <nav className="flex flex-col gap-1">
-          {mainNavItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
-                  pathname === item.href
-                    ? "bg-accent text-accent-foreground"
-                    : "hover:bg-accent hover:text-accent-foreground"
-                )}
-              >
-                {item.icon === "home" && (
-                  <Home className="mr-2 text-[20px] leading-none" />
-                )}
-                {item.icon === "person" && (
-                  <User className="mr-2 text-[20px] leading-none" />
-                )}
-                {item.icon === "view_module" && (
-                  <LayoutGrid className="mr-2 text-[20px] leading-none" />
-                )}
-                {item.icon === "bookmark" && (
-                  <Bookmark className="mr-2 text-[20px] leading-none" />
-                )}
-                <span>{item.title}</span>
-              </Link>
-            );
-          })}
+          {mainNavItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
+                pathname === item.href
+                  ? "bg-accent text-accent-foreground"
+                  : "hover:bg-accent hover:text-accent-foreground"
+              )}
+            >
+              <item.icon className="mr-2 text-[20px] leading-none" />
+              <span>{item.title}</span>
+            </Link>
+          ))}
         </nav>
 
         {/* 创建看板按钮 */}
