@@ -5,7 +5,6 @@ import { Suspense } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/header";
-import { MobileHeader } from "@/components/layout/mobile-header";
 import { RouteProgress } from "@/components/router/route-progress";
 import dynamic from "next/dynamic";
 import { sidebarRegistry } from "@/components/layout/sidebar-components";
@@ -14,7 +13,6 @@ import { LoginModal } from "@/components/auth/login-modal";
 import { RegisterModal } from "@/components/auth/register-modal";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { MobileDrawer } from "@/components/layout/mobile-drawer";
-import { useDevice } from "@/hooks/use-device";
 
 const CreatePostModal = dynamic(
   () => import("@/components/post/create-post-modal"),
@@ -27,7 +25,6 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   // 根据路径确定使用哪个侧边栏配置
   const getSidebarConfig = () => {
@@ -44,7 +41,8 @@ export default function MainLayout({
     return sidebarRegistry.default;
   };
 
-  const { left: LeftSidebarComponent, right: RightSidebar } = getSidebarConfig();
+  const { left: LeftSidebarComponent, right: RightSidebar } =
+    getSidebarConfig();
 
   // 确定是否显示右侧边栏
   const showDefaultSidebarPaths = ["/", "/search"];
@@ -57,11 +55,7 @@ export default function MainLayout({
       <RouteProgress />
 
       {/* 头部 */}
-      <Header className="hidden md:flex" />
-      <MobileHeader
-        className="md:hidden"
-        onDrawerOpenChange={setDrawerOpen}
-      />
+      <Header />
 
       <div className="flex-1 flex flex-col min-h-0">
         <div className="mx-auto w-full max-w-7xl flex flex-col lg:flex-row lg:pt-8">
@@ -86,14 +80,8 @@ export default function MainLayout({
         </div>
       </div>
 
-      {/* 移动端导航 */}
+      {/* 移动端底部导航 */}
       <MobileNav />
-
-      {/* 移动端抽屉 */}
-      <MobileDrawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        {LeftSidebarComponent && <LeftSidebarComponent />}
-      </MobileDrawer>
-
       {/* 模态框 */}
       <LoginModal />
       <RegisterModal />

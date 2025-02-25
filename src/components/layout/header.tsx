@@ -72,7 +72,7 @@ export function Header({ className }: HeaderProps) {
       )}
     >
       <div className="mx-auto w-full max-w-7xl flex h-14 px-4">
-        <div className="flex justify-between w-full items-center ">
+        <div className="flex justify-between w-full items-center">
           {/* Logo */}
           <div className="flex justify-between gap-4">
             <Link
@@ -80,11 +80,11 @@ export function Header({ className }: HeaderProps) {
               className="flex items-center gap-2"
               onClick={handleLogoClick}
             >
-              <img src="/logo-g.png" alt="Kater" className="h-8 w--full" />
+              <img src="/logo-g.png" alt="Kater" className="h-8 w-auto" />
             </Link>
 
-            {/* Search */}
-            <div className="relative flex-1 max-w-sm">
+            {/* Search - 桌面端 */}
+            <div className="relative flex-1 max-w-sm hidden md:block">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
@@ -94,14 +94,32 @@ export function Header({ className }: HeaderProps) {
             </div>
           </div>
 
+          {/* Search - 移动端 */}
+          <div className="relative flex-1 max-w-[240px] mx-4 md:hidden">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="搜尋關鍵字"
+              className="pl-8 bg-muted/50 rounded-full h-8"
+            />
+          </div>
+
           {/* Actions */}
           <div className="ml-auto flex items-center gap-4">
             {user ? (
               <>
-                <Button variant="ghost" size="icon" className="hover:bg-muted">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hover:bg-muted hidden lg:flex"
+                >
                   <PenSquare className="h-5 w-5" />
                 </Button>
-                <Button variant="ghost" size="icon" className="hover:bg-muted">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="hover:bg-muted hidden lg:flex"
+                >
                   <Bell className="h-5 w-5" />
                 </Button>
                 <DropdownMenu>
@@ -146,14 +164,14 @@ export function Header({ className }: HeaderProps) {
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
-                  className="text-base font-normal hover:bg-transparent hover:text-foreground"
+                  className="text-base font-normal hover:bg-transparent hover:text-foreground hidden md:flex"
                   onClick={openRegister}
                 >
                   註冊
                 </Button>
                 <Button
                   variant="ghost"
-                  className="text-base font-normal hover:bg-transparent hover:text-foreground"
+                  className="text-base font-normal hover:bg-transparent hover:text-foreground hidden md:flex"
                   onClick={openLogin}
                 >
                   登入

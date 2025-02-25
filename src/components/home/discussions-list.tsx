@@ -85,9 +85,9 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
   return (
     <div className="flex flex-col">
       {/* 顶部导航 - 仅在非移动端显示 */}
-      <div className="hidden md:block bg-background">
+      <div className="bg-background">
         <div className="mx-auto">
-          <div className="flex h-[40px] items-center justify-between border-b">
+          <div className="flex h-[40px] items-center justify-between lg:border-b">
             <div className="flex items-center space-x-8">
               <Button
                 variant="ghost"
