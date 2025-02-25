@@ -1,28 +1,24 @@
 "use client";
 
 import * as React from "react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
 interface MobileDrawerProps {
   children: React.ReactNode;
   className?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function MobileDrawer({ children, className }: MobileDrawerProps) {
+export function MobileDrawer({ 
+  children, 
+  className,
+  open,
+  onOpenChange
+}: MobileDrawerProps) {
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="fixed left-4 top-2 lg:hidden z-50"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-      </SheetTrigger>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent 
         side="left" 
         className={cn(

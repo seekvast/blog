@@ -20,21 +20,24 @@ import type { Paginate } from "@/types";
 import { api } from "@/lib/api";
 import { DiscussionItem } from "@/components/home/discussion-item";
 import { InfiniteScroll } from "@/components/common/infinite-scroll";
+import { useDevice } from "@/hooks/use-device";
+import { cn } from "@/lib/utils";
 
 interface DiscussionsListProps {
   initialDiscussions: Paginate<Discussion>;
 }
 
+type DisplayMode = "list" | "grid";
+
 export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
-  const [discussions, setDiscussions] =
-    useState<Paginate<Discussion>>(initialDiscussions);
-  const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(2);
-  const [hasMore, setHasMore] = useState(true);
-  const [displayMode, setDisplayMode] = useState<"grid" | "list">("grid");
+  const { isMobile } = useDevice();
+  const [displayMode, setDisplayMode] = React.useState<DisplayMode>("grid");
+  const [discussions, setDiscussions] = React.useState(initialDiscussions);
+  const [page, setPage] = React.useState(2);
+  const [loading, setLoading] = React.useState(false);
+  const [hasMore, setHasMore] = React.useState(true);
   const observerRef = useRef<IntersectionObserver>();
 
-  // 1. 添加调试日志
   const loadMore = useCallback(async () => {
     if (loading || !hasMore) return;
     setLoading(true);
@@ -62,7 +65,6 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
     }
   }, [loading, hasMore, page]);
 
-  // 2. 清理逻辑
   useEffect(() => {
     return () => {
       if (observerRef.current) {
@@ -71,7 +73,6 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
     };
   }, []);
 
-  // 3. 初始数据变化处理
   useEffect(() => {
     setDiscussions(initialDiscussions);
     setPage(2);
@@ -83,8 +84,8 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
 
   return (
     <div className="flex flex-col">
-      {/* 顶部导航 */}
-      <div className="bg-background">
+      {/* 顶部导航 - 仅在非移动端显示 */}
+      <div className="hidden md:block bg-background">
         <div className="mx-auto">
           <div className="flex h-[40px] items-center justify-between border-b">
             <div className="flex items-center space-x-8">
@@ -107,6 +108,7 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
                 标签
               </Button>
             </div>
+
             <div className="flex items-center space-x-2">
               <Button
                 variant="ghost"
@@ -157,7 +159,7 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
         </InfiniteScroll>
       </div>
 
-      {/* 4. 添加加载状态指示器 */}
+      {/* 加载状态指示器 */}
       <div className="h-10 flex items-center justify-center text-muted-foreground">
         {!hasMore && <div>No more items</div>}
       </div>

@@ -28,8 +28,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { api } from "@/lib/api";
 import { usePostEditorStore } from "@/store/post-editor";
+import { cn } from "@/lib/utils";
 
-export function Header() {
+interface HeaderProps {
+  className?: string;
+}
+
+export function Header({ className }: HeaderProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const { openLogin, openRegister } = useAuthModal();
@@ -60,8 +65,13 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto max-w-7xl flex h-14 px-4">
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+        className
+      )}
+    >
+      <div className="mx-auto w-full max-w-7xl flex h-14 px-4">
         <div className="flex justify-between w-full items-center ">
           {/* Logo */}
           <div className="flex justify-between gap-4">

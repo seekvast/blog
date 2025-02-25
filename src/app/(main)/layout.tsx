@@ -3,7 +3,9 @@
 import * as React from "react";
 import { Suspense } from "react";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/header";
+import { MobileHeader } from "@/components/layout/mobile-header";
 import { RouteProgress } from "@/components/router/route-progress";
 import dynamic from "next/dynamic";
 import { sidebarRegistry } from "@/components/layout/sidebar-components";
@@ -12,6 +14,7 @@ import { LoginModal } from "@/components/auth/login-modal";
 import { RegisterModal } from "@/components/auth/register-modal";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { MobileDrawer } from "@/components/layout/mobile-drawer";
+import { useDevice } from "@/hooks/use-device";
 
 const CreatePostModal = dynamic(
   () => import("@/components/post/create-post-modal"),
@@ -24,6 +27,7 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   // 根据路径确定使用哪个侧边栏配置
   const getSidebarConfig = () => {
@@ -51,44 +55,44 @@ export default function MainLayout({
   return (
     <div className="min-h-screen flex flex-col">
       <RouteProgress />
-      <Header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" />
-      
+
+      {/* 头部 */}
+      <Header className="hidden md:flex" />
+      <MobileHeader
+        className="md:hidden"
+        onDrawerOpenChange={setDrawerOpen}
+      />
+
       <div className="flex-1 flex flex-col min-h-0">
         <div className="mx-auto w-full max-w-7xl flex flex-col lg:flex-row lg:pt-8">
           {/* 左侧边栏 - 桌面端显示 */}
           {LeftSidebarComponent && (
-            <div className="hidden lg:block sticky top-[88px] w-[240px] xl:w-[300px] h-[calc(100vh-88px)] flex-shrink-0">
+            <aside className="hidden lg:block lg:w-[240px] xl:w-[300px] flex-shrink-0 lg:pr-8">
               <LeftSidebarComponent />
-            </div>
+            </aside>
           )}
 
           {/* 主内容区域 */}
           <div className="flex-1 flex flex-col min-w-0 px-4 pb-16 lg:pb-8">
-            <main className="flex-1 min-w-0 w-full">
-              {children}
-            </main>
-            
+            <main className="flex-1 min-w-0 w-full">{children}</main>
+
             {/* 右侧边栏 - 仅在桌面端显示 */}
             {showRightSidebar && (
               <aside className="hidden lg:block lg:w-[240px] xl:w-[300px] flex-shrink-0 lg:pl-8">
-                <div className="sticky top-[88px]">
-                  <RightSidebarComponent />
-                </div>
+                <RightSidebar />
               </aside>
             )}
           </div>
         </div>
       </div>
 
-      {/* 移动端底部导航 */}
-      <MobileNav className="lg:hidden" />
+      {/* 移动端导航 */}
+      <MobileNav />
 
-      {/* 移动端侧边栏抽屉 */}
-      {LeftSidebarComponent && (
-        <MobileDrawer>
-          <LeftSidebarComponent />
-        </MobileDrawer>
-      )}
+      {/* 移动端抽屉 */}
+      <MobileDrawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+        {LeftSidebarComponent && <LeftSidebarComponent />}
+      </MobileDrawer>
 
       {/* 模态框 */}
       <LoginModal />
