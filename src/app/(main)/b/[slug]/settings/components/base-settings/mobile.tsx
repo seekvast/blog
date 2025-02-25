@@ -34,10 +34,7 @@ export function MobileBaseSettings({
       {/* 主要内容 */}
       <>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 py-4"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* 头像上传 */}
             <div className="space-y-2">
               <div className="flex items-center gap-4">

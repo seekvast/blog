@@ -109,7 +109,7 @@ export function SettingMenus({
             key={item.id}
             href="#"
             onClick={(e) => handleTabClick(e, item.id)}
-            className="flex flex-col p-4"
+            className="flex flex-col px-4"
           >
             <div className="text-base font-normal">{item.label}</div>
             <div className="flex justify-center items-center">

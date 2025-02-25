@@ -19,9 +19,8 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-
 interface BoardSettingsFormProps {
-  board: BoardType;                         
+  board: BoardType;
   onSuccess?: (board: BoardType) => void;
 }
 
@@ -30,6 +29,7 @@ export function BoardSettingsForm({
   onSuccess,
 }: BoardSettingsFormProps) {
   const { isMobile } = useDevice();
+  console.log(isMobile, "ism..........");
   const router = useRouter();
   const [activeTab, setActiveTab] = React.useState<SettingTab>(
     isMobile ? "" : "general"
@@ -77,7 +77,7 @@ export function BoardSettingsForm({
           </div>
 
           {/* 移动端主要内容 */}
-          <div className="pt-4">{renderContent()}</div>
+          <>{renderContent()}</>
         </div>
       );
     }

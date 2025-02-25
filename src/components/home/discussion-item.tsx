@@ -23,7 +23,7 @@ export const DiscussionItem = React.forwardRef<
     <article ref={ref} className="py-4 w-full">
       <div className="flex space-x-3 w-full">
         {/* 作者头像 */}
-        <Avatar className="h-14 w-14 flex-shrink-0">
+        <Avatar className="h-10 w-10 lg:h-14 lg:w-14 flex-shrink-0">
           <AvatarImage
             src={discussion.user.avatar_url}
             alt={discussion.user.username}
@@ -51,13 +51,8 @@ export const DiscussionItem = React.forwardRef<
                 </Badge>
               )}
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 flex-shrink-0"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
+
+            <MoreHorizontal className="flex-shrink-0 h-4 w-4 cursor-pointer text-muted-foreground" />
           </div>
 
           <div className="mt-1">
@@ -67,24 +62,29 @@ export const DiscussionItem = React.forwardRef<
             />
           </div>
 
-          <div className="mt-3 flex items-center space-x-4 text-xs text-center">
+          <div className="mt-3 flex items-center space-x-2 lg:space-x-4 text-sm text-center">
             <div className="flex items-center space-x-1 text-muted-foreground">
-              <ThumbsUp className="h-4 w-4 text-base cursor-pointer" />
+              <ThumbsUp className="h-4 w-4 text-sm cursor-pointer" />
               <span>{discussion.votes}</span>
             </div>
             <Link
               href={`/d/${discussion.slug}#comment`}
               className="flex items-center space-x-1 text-muted-foreground"
             >
-              <MessageSquare className="h-4 w-4 text-base cursor-pointer" />
+              <MessageSquare className="h-4 w-4 text-sm cursor-pointer" />
               <span>{discussion.comment_count}</span>
             </Link>
 
             <div className="flex items-center space-x-1 text-muted-foreground">
               <span>{discussion.diff_humans}</span>
             </div>
-            <div className="flex items-center space-x-1 text-muted-foreground">
-              <span>来自 {discussion.board?.name}</span>{" "}
+            <div className="flex items-center space-x-2 text-muted-foreground">
+              <span>
+                来自
+                <span className="inline-block max-w-[8ch] lg:max-w-[20ch] truncate align-bottom">
+                  {discussion.board?.name}
+                </span>
+              </span>
               <span>#{discussion.board_child?.name}</span>
             </div>
           </div>

@@ -139,7 +139,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           </div>
 
           <div className="mt-2 flex items-start space-x-3">
-            <Avatar className="h-10 w-10 md:h-14 md:w-14 flex-shrink-0">
+            <Avatar className="h-12 w-12 md:h-14 md:w-14 flex-shrink-0">
               <AvatarImage
                 src={currentDiscussion.user.avatar_url}
                 alt={currentDiscussion.user.username}
@@ -233,23 +233,23 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                       <div className="mt-3 flex justify-between items-center space-x-4 text-sm md:text-base text-gray-500">
                         <div className="flex items-center gap-2 space-x-4 md:space-x-8">
                           <div className="flex items-center h-6 space-x-1 cursor-pointer">
-                            <ThumbsUp className="h-3 w-3 md:h-4 md:w-4" />
-                            <span className="text-xs md:text-sm">{}</span>
+                            <ThumbsUp className="h-4 w-4" />
+                            {/* <span className="text-xs md:text-sm">{}</span> */}
                           </div>
                           <div className="flex items-center h-6 space-x-1 cursor-pointer">
-                            <ThumbsDown className="h-3 w-3 md:h-4 md:w-4" />
-                            <span className="text-xs md:text-sm">{}</span>
+                            <ThumbsDown className="h-4 w-4" />
+                            {/* <span className="text-xs md:text-sm">{}</span> */}
                           </div>
                         </div>
 
                         <div className="flex items-center h-6 space-x-4 md:space-x-8">
                           <button
-                            className="text-xs md:text-sm cursor-pointer hover:text-primary"
+                            className="text-base cursor-pointer hover:text-primary"
                             onClick={() => handleReplyClick(comment)}
                           >
                             回复
                           </button>
-                          <MoreHorizontal className="h-3 w-3 md:h-4 md:w-4 cursor-pointer" />
+                          <MoreHorizontal className="h-4 w-4 cursor-pointer" />
                         </div>
                       </div>
                     </div>

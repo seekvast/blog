@@ -207,7 +207,7 @@ function BoardContent() {
       <div className="bg-background">
         <div className="">
           <div className="flex items-start space-x-3 pb-4">
-            <Avatar className="h-16 w-16">
+            <Avatar className="h-14 w-14">
               <AvatarImage src={board.avatar} alt={board.name} />
               <AvatarFallback>{board.name[0]}</AvatarFallback>
             </Avatar>
@@ -226,11 +226,19 @@ function BoardContent() {
                 </div>
                 <div className="flex items-center space-x-4">
                   <Link href={`/b/${board.slug}/settings`}>
-                    <Button size="sm" className="space-x-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="space-x-1 text-primary rounded-full"
+                    >
                       设定
                     </Button>
                   </Link>
-                  <Button variant="outline" size="sm" className="space-x-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="space-x-1 rounded-full"
+                  >
                     已加入
                     <ChevronDown className="h-4 w-4" />
                   </Button>
