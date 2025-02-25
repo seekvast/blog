@@ -90,7 +90,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
       className={cn("flex w-full flex-col gap-4 pb-12 h-full", className)}
       {...props}
     >
-      <div className="flex flex-col gap-4 p-4">
+      <div className="flex flex-col gap-4">
         {/* 主导航 */}
         <nav className="flex flex-col gap-1">
           {mainNavItems.map((item) => (
@@ -155,12 +155,15 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
             ].map((board) => (
               <div
                 key={board.name}
-                className="flex items-center justify-between rounded-lg px-2 py-2 hover:bg-accent"
+                className="flex items-center justify-between rounded-lg px-2 py-2"
               >
                 <div className="flex items-center gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback>{board.letter}</AvatarFallback>
-                  </Avatar>
+                  <Link href={`/b/${board.name}`}>
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>{board.letter}</AvatarFallback>
+                    </Avatar>
+                  </Link>
+
                   <div>
                     <div className="flex items-center gap-2">
                       <Link

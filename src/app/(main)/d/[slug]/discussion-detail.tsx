@@ -176,7 +176,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         </div>
 
         {/* 贴文底部操作栏 */}
-        <div className="mt-6 flex items-center justify-between border-b border-gray-200">
+        <div className="mt-6 flex items-center justify-between border-b">
           <div className="flex items-center py-2 md:py-4">
             <span>评论</span>
             <span className="w-2"></span>
