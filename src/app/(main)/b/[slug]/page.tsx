@@ -216,10 +216,7 @@ function BoardContent() {
                 <div className="flex items-center space-x-2">
                   <h1 className="text-lg font-medium">{board.name}</h1>
                   {board.is_nsfw === 1 && (
-                    <Badge
-                      variant="destructive"
-                      className="h-5"
-                    >
+                    <Badge variant="destructive" className="h-5">
                       成人
                     </Badge>
                   )}
@@ -258,45 +255,43 @@ function BoardContent() {
           <div className="bg-background">
             <div className="mx-auto">
               <div className="flex h-[40px] items-center justify-between border-b">
-                <div className="flex items-center space-x-8">
-                  <Button
-                    variant="ghost"
-                    className="h-8 px-1 font-medium text-primary hover:bg-transparent hover:text-primary"
+                <div className="flex items-center space-x-4 lg:space-x-8">
+                  <button
+                    type="button"
+                    className="h-8 font-medium text-primary hover:bg-transparent hover:text-primary"
                   >
                     文章
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="h-8 px-1 font-medium hover:bg-transparent hover:text-foreground"
+                  </button>
+                  <button
+                    type="button"
+                    className="h-8 font-medium text-muted-foreground hover:bg-transparent hover:text-foreground"
                   >
                     规则
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="h-8 px-1 font-medium hover:bg-transparent hover:text-foreground"
+                  </button>
+                  <button
+                    type="button"
+                    className="h-8 font-medium text-muted-foreground hover:bg-transparent hover:text-foreground"
                   >
                     子版
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="h-8 px-1 font-medium hover:bg-transparent hover:text-foreground"
+                  </button>
+                  <button
+                    type="button"
+                    className="h-8 font-medium text-muted-foreground hover:bg-transparent hover:text-foreground"
                   >
                     讨论
-                  </Button>
+                  </button>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 space-x-2 hover:bg-transparent hover:text-foreground"
+                  <button
+                    type="button"
+                    className="inline-flex items-center space-x-2 font-medium text-muted-foreground"
                   >
                     热门
                     <ChevronDown className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 hover:bg-transparent hover:text-foreground"
+                  </button>
+                  <button
+                    type="button"
+                    className="h-8 text-muted-foreground hover:bg-transparent hover:text-foreground"
                     onClick={() =>
                       setDisplayMode((prev) =>
                         prev === "grid" ? "list" : "grid"
@@ -308,7 +303,7 @@ function BoardContent() {
                     ) : (
                       <List className="h-4 w-4" />
                     )}
-                  </Button>
+                  </button>
                 </div>
               </div>
             </div>

@@ -5,7 +5,6 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { MarkdownRenderer } from "@/components/markdown/markdown-renderer";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   LayoutGrid,
@@ -88,40 +87,38 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
       <div className="bg-background">
         <div className="mx-auto">
           <div className="flex h-[40px] items-center justify-between lg:border-b">
-            <div className="flex items-center space-x-8">
-              <Button
-                variant="ghost"
-                className="h-8 px-1 font-medium text-primary hover:bg-transparent hover:text-primary"
+            <div className="flex items-center space-x-4 lg:space-x-8">
+              <button
+                type="button"
+                className="h-8 font-medium text-primary hover:text-primary/90"
               >
                 推荐
-              </Button>
-              <Button
-                variant="ghost"
-                className="h-8 px-1 font-medium hover:bg-transparent hover:text-foreground"
+              </button>
+              <button
+                type="button"
+                className="h-8 font-medium text-muted-foreground hover:text-foreground"
               >
                 追踪
-              </Button>
-              <Button
-                variant="ghost"
-                className="h-8 px-1 font-medium hover:bg-transparent hover:text-foreground"
+              </button>
+              <button
+                type="button"
+                className="h-8 font-medium text-muted-foreground hover:text-foreground"
               >
                 标签
-              </Button>
+              </button>
             </div>
 
             <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 space-x-2 hover:bg-transparent hover:text-foreground"
+              <button
+                type="button"
+                className="inline-flex items-center space-x-2 font-medium text-muted-foreground"
               >
                 热门
                 <ChevronDown className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 hover:bg-transparent hover:text-foreground"
+              </button>
+              <button
+                type="button"
+                className="inline-flex h-8 items-center justify-center font-medium text-muted-foreground"
                 onClick={() =>
                   setDisplayMode((prev) => (prev === "grid" ? "list" : "grid"))
                 }
@@ -131,7 +128,7 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
                 ) : (
                   <List className="h-4 w-4" />
                 )}
-              </Button>
+              </button>
             </div>
           </div>
         </div>

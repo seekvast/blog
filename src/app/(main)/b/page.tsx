@@ -110,10 +110,10 @@ export default function BoardsPage() {
       <div className="bg-background">
         <div className="mx-auto w-full">
           <div className="flex h-[60px] items-center justify-between lg:border-b">
-            <div className="flex items-center space-x-8">
-              <Button
-                variant="ghost"
-                className={`h-8 px-1 font-medium ${
+            <div className="flex items-center space-x-4 lg:space-x-4">
+              <button
+                type="button"
+                className={`font-medium text-muted-foreground ${
                   activeTab === "recommended"
                     ? "text-primary hover:bg-transparent hover:text-primary"
                     : "hover:bg-transparent hover:text-foreground"
@@ -121,10 +121,10 @@ export default function BoardsPage() {
                 onClick={() => setActiveTab("recommended")}
               >
                 推薦
-              </Button>
-              <Button
-                variant="ghost"
-                className={`h-8 px-1 font-medium ${
+              </button>
+              <button
+                type="button"
+                className={`font-medium text-muted-foreground ${
                   activeTab === "joined"
                     ? "text-primary hover:bg-transparent hover:text-primary"
                     : "hover:bg-transparent hover:text-foreground"
@@ -132,17 +132,15 @@ export default function BoardsPage() {
                 onClick={() => setActiveTab("joined")}
               >
                 已加入
-              </Button>
+              </button>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 space-x-2 hover:bg-transparent hover:text-foreground"
+            <button
+              className="inline-flex items-center font-medium text-muted-foreground space-x-2 hover:bg-transparent hover:text-foreground"
               onClick={() => setCategoryFilter(null)}
             >
               全部
               <ChevronDown className="h-4 w-4" />
-            </Button>
+            </button>
           </div>
         </div>
       </div>

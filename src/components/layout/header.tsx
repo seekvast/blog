@@ -154,20 +154,16 @@ export function Header({ className }: HeaderProps) {
               </>
             ) : (
               <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  className="text-base font-normal hover:bg-transparent hover:text-foreground hidden md:flex"
+                <button
+                  type="button"
+                  className="text-muted-foreground"
                   onClick={openRegister}
                 >
                   註冊
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="text-base font-normal hover:bg-transparent hover:text-foreground hidden md:flex"
-                  onClick={openLogin}
-                >
+                </button>
+                <button className="text-muted-foreground" onClick={openLogin}>
                   登入
-                </Button>
+                </button>
               </div>
             )}
           </div>
