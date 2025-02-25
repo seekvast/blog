@@ -127,19 +127,19 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
 
   return (
     // <div className=" ml-4 min-w-0 w-0">
-    <div className="flex flex-col lg:flex-row gap-6 mb-8">
+    <div className="flex flex-col lg:flex-row gap-4 md:gap-6 mb-4 md:mb-8">
       {/* 主内容区 */}
-      <div className="flex-1 min-w-0 w-0">
+      <div className="flex-1 min-w-0">
         {/* 贴文头部信息 */}
         <div className="border-b pb-4 flex-1 max-w-4xl">
           <div className="w-full">
-            <h2 className="text-xl font-medium overflow-hidden text-ellipsis whitespace-nowrap">
+            <h2 className="text-xl md:text-2xl font-medium overflow-hidden text-ellipsis whitespace-nowrap">
               {currentDiscussion.title}
             </h2>
           </div>
 
           <div className="mt-2 flex items-start space-x-3">
-            <Avatar className="h-14 w-14 flex-shrink-0">
+            <Avatar className="h-10 w-10 md:h-14 md:w-14 flex-shrink-0">
               <AvatarImage
                 src={currentDiscussion.user.avatar_url}
                 alt={currentDiscussion.user.username}
@@ -149,13 +149,13 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               </AvatarFallback>
             </Avatar>
 
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 overflow-hidden">
               <div className="flex items-center space-x-2">
-                <span className="text-lg font-medium truncate">
+                <span className="text-base md:text-lg font-medium truncate">
                   {currentDiscussion.user.username}
                 </span>
                 <span className="flex-shrink-0 mx-2 text-gray-300">·</span>
-                <span className="text-sm text-gray-500 flex-shrink-0">
+                <span className="text-xs md:text-sm text-gray-500 flex-shrink-0">
                   {formatDistanceToNow(new Date(currentDiscussion.created_at), {
                     addSuffix: true,
                     locale: zhCN,
@@ -170,15 +170,14 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           </div>
         </div>
 
-        {/* 其余内容保持不变 */}
         {/* 贴文内容 */}
-        <div className="pt-4 text-muted-foreground break-all truncate">
+        <div className="pt-4 px-2 md:px-4 text-muted-foreground w-full text-base">
           <PostContent post={currentDiscussion.main_post} />
         </div>
 
         {/* 贴文底部操作栏 */}
         <div className="mt-6 flex items-center justify-between border-b border-gray-200">
-          <div className="flex items-center py-4">
+          <div className="flex items-center py-2 md:py-4">
             <span>评论</span>
             <span className="w-2"></span>
             <span className="text-blue-600">
@@ -186,28 +185,28 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             </span>
           </div>
         </div>
-        {/* 评论区 */}
+
         {/* 评论区 */}
         <div className="mt-4">
           {/* 评论列表 */}
           {comments?.items.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-2 md:space-y-4">
               {comments.items.map((comment) => (
                 <div key={comment.id} className="pt-2 pb-4 border-b">
-                  <div className="flex items-start space-x-3 px-2">
-                    <Avatar className="h-12 w-12">
+                  <div className="flex items-start space-x-3 px-2 md:px-4 min-w-0">
+                    <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
                       <AvatarImage src={comment.user.avatar_url} />
                       <AvatarFallback>
                         {comment.user.nickname[0]}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center">
-                        <span className="font-medium">
+                    <div className="flex-1 min-w-0 overflow-hidden">
+                      <div className="flex items-center flex-wrap gap-2">
+                        <span className="font-medium text-sm md:text-base truncate">
                           {comment.user.nickname || comment.user.username}
                         </span>
-                        <span className="mx-2 text-gray-300">·</span>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-gray-300">·</span>
+                        <span className="text-xs md:text-sm text-gray-500">
                           {formatDistanceToNow(new Date(comment.created_at), {
                             addSuffix: true,
                             locale: zhCN,
@@ -216,39 +215,41 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                       </div>
 
                       {/* 评论内容 */}
-                      <div className="mt-1 text-gray-900">
+                      <div className="mt-1 text-gray-900 min-w-0">
                         {comment.parent_post && (
                           <Link
                             href={`#comment-${comment.parent_post.user.hashid}`}
-                            className="inline-block mb-2 text-sm text-muted-foreground"
+                            className="inline-block mb-2 text-xs md:text-sm text-muted-foreground"
                           >
                             @{comment.parent_post.user.username}{" "}
                           </Link>
                         )}
-                        <PostContent post={comment} />
+                        <div className="w-full text-base">
+                          <PostContent post={comment} />
+                        </div>
                       </div>
 
                       {/* 评论操作 */}
-                      <div className="mt-3 flex justify-between items-center space-x-4 text-base text-gray-500">
-                        <div className="flex items-center gap-2 space-x-8">
+                      <div className="mt-3 flex justify-between items-center space-x-4 text-sm md:text-base text-gray-500">
+                        <div className="flex items-center gap-2 space-x-4 md:space-x-8">
                           <div className="flex items-center h-6 space-x-1 cursor-pointer">
-                            <ThumbsUp className="h-4 w-4" />
-                            <span className="text-sm">{}</span>
+                            <ThumbsUp className="h-3 w-3 md:h-4 md:w-4" />
+                            <span className="text-xs md:text-sm">{}</span>
                           </div>
                           <div className="flex items-center h-6 space-x-1 cursor-pointer">
-                            <ThumbsDown className="h-4 w-4" />
-                            <span className="text-sm">{}</span>
+                            <ThumbsDown className="h-3 w-3 md:h-4 md:w-4" />
+                            <span className="text-xs md:text-sm">{}</span>
                           </div>
                         </div>
 
-                        <div className="flex items-center h-6 space-x-8">
+                        <div className="flex items-center h-6 space-x-4 md:space-x-8">
                           <button
-                            className="text-sm cursor-pointer hover:text-primary"
+                            className="text-xs md:text-sm cursor-pointer hover:text-primary"
                             onClick={() => handleReplyClick(comment)}
                           >
                             回复
                           </button>
-                          <MoreHorizontal className="h-4 w-4 cursor-pointer" />
+                          <MoreHorizontal className="h-3 w-3 md:h-4 md:w-4 cursor-pointer" />
                         </div>
                       </div>
                     </div>
@@ -258,7 +259,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             </div>
           ) : (
             !commentContent && (
-              <div className="flex items-center justify-center py-8 text-muted-foreground">
+              <div className="flex items-center justify-center py-6 md:py-8 text-sm md:text-base text-muted-foreground">
                 暂无评论
               </div>
             )
@@ -267,21 +268,21 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           {/* 评论预览 */}
           {user && commentContent && (
             <div className="mt-6 pt-2 pb-4 border-b">
-              <div className="flex items-start space-x-3 px-2">
-                <Avatar className="h-12 w-12">
+              <div className="flex items-start space-x-3 px-2 md:px-4 min-w-0">
+                <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
                   <AvatarImage src={user.avatar_url} />
                   <AvatarFallback>
                     {user.name?.[0] || user.email?.[0]}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0 overflow-hidden">
                   <div className="flex items-center">
-                    <span className="font-medium">
+                    <span className="font-medium text-sm md:text-base truncate">
                       {user.nickname || user.username}
                     </span>
                   </div>
                   {/* 预览内容 */}
-                  <div className="mt-1 text-gray-900">
+                  <div className="mt-1 text-gray-900 text-base break-words">
                     <Preview content={commentContent} />
                   </div>
                 </div>
@@ -346,7 +347,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       </div>
 
       {/* 右侧边栏 */}
-      <aside className="sticky top-4 w-full lg:w-40 xl:w-60 flex-shrink-0 pl-8">
+      <aside className="hidden lg:block sticky top-4 w-full lg:w-40 xl:w-60 flex-shrink-0 pl-8">
         <Sidebar />
       </aside>
     </div>
