@@ -92,7 +92,7 @@ export function Header({ className }: HeaderProps) {
             <Input
               type="search"
               placeholder="搜尋關鍵字"
-              className="pl-8 bg-muted/50 rounded-full h-8"
+              className="pl-8 bg-muted/50 rounded-full h-8 text-base"
             />
           </div>
 

@@ -139,7 +139,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
                 id="email"
                 type="email"
                 placeholder="請輸入電子郵箱"
-                className="h-12"
+                className="h-12 text-base"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
@@ -154,7 +154,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
                 id="password"
                 type="password"
                 placeholder="請輸入密碼"
-                className="h-12"
+                className="h-12 text-base"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
