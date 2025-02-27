@@ -43,9 +43,7 @@ export function BoardSelect({ value, onChange }: BoardSelectProps) {
         const data = await api.boards.list(queryParams);
 
         if (data.items.length > 0) {
-          setBoards((prev) =>
-            append ? [...prev, ...data.items] : data.items
-          );
+          setBoards((prev) => (append ? [...prev, ...data.items] : data.items));
           setHasMore(pageNum < data.last_page);
         }
       } catch (error) {
@@ -93,7 +91,7 @@ export function BoardSelect({ value, onChange }: BoardSelectProps) {
       onValueChange={(value) => onChange?.(parseInt(value))}
       onOpenChange={setIsOpen}
     >
-      <SelectTrigger className="w-[320px] h-auto py-2">
+      <SelectTrigger className="w-full py-2">
         <SelectValue placeholder="请选择看板">
           {selectedBoard && (
             <div className="flex items-center justify-start gap-2 w-full">

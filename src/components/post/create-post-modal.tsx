@@ -66,7 +66,7 @@ export default function CreatePostModal() {
 
   const [title, setTitle] = React.useState("");
   const [selectedBoard, setSelectedBoard] = React.useState<number | undefined>(
-    0
+    undefined
   );
   const [selectedChildBoard, setSelectedChildBoard] = React.useState<
     number | undefined
@@ -201,7 +201,7 @@ export default function CreatePostModal() {
     setTitle("");
     setContent("");
     editorRef.current?.reset?.();
-    setSelectedBoard(0);
+    setSelectedBoard(undefined);
     setSelectedChildBoard(undefined);
     setAttachments([]);
     setPollData(null);
@@ -301,50 +301,54 @@ export default function CreatePostModal() {
           isVisible ? "translate-y-0" : "translate-y-full"
         )}
       >
-        <div className="bg-theme-background h-full flex flex-col mx-auto max-w-7xl pt-4 px-4">
-          <div className="sticky-header">
-            <div className="flex items-center gap-4">
-              <h1 className="text-lg font-medium leading-none">发布文章</h1>
-              <BoardSelect value={selectedBoard} onChange={setSelectedBoard} />
-            </div>
-            <div className="flex items-center space-x-3">
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-full"
-                onClick={handleClose}
-              >
-                取消
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-full"
-                onClick={() => {
-                  if (!pollData && !isPollEditing) {
-                    setIsPollEditing(true);
-                  }
-                }}
-                disabled={!!pollData || isPollEditing}
-              >
-                投票
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-full"
-                onClick={() => {}}
-              >
-                保存草稿箱
-              </Button>
-              <Button
-                size="sm"
-                className="rounded-full"
-                onClick={handlePublish}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "发布中..." : "发布"}
-              </Button>
+        <div className="bg-theme-background min-h-[calc(100vh-3.5rem)] flex flex-col mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-4 pb-2 z-10">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <h1 className="text-lg font-medium leading-none whitespace-nowrap">发布文章</h1>
+                <div className="w-full sm:w-auto">
+                  <BoardSelect value={selectedBoard} onChange={setSelectedBoard} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center sm:justify-end gap-2 w-full">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full w-full sm:w-auto"
+                  onClick={handleClose}
+                >
+                  取消
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full w-full sm:w-auto"
+                  onClick={() => {
+                    if (!pollData && !isPollEditing) {
+                      setIsPollEditing(true);
+                    }
+                  }}
+                  disabled={!!pollData || isPollEditing}
+                >
+                  投票
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full w-full sm:w-auto"
+                  onClick={() => {}}
+                >
+                  保存草稿箱
+                </Button>
+                <Button
+                  size="sm"
+                  className="rounded-full w-full sm:w-auto"
+                  onClick={handlePublish}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "发布中..." : "发布"}
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -410,7 +414,7 @@ export default function CreatePostModal() {
               <Editor
                 ref={editorRef}
                 placeholder="开始编写正文..."
-                className="min-h-[400px]"
+                className="min-h-[300px] sm:min-h-[400px]"
                 attachmentType={AttachmentType.TOPIC}
                 initialContent={content}
                 onChange={setContent}
@@ -422,7 +426,7 @@ export default function CreatePostModal() {
 
       {/* 确认离开对话框 */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <DialogContent className="bg-white">
+        <DialogContent className="bg-white sm:max-w-md">
           <DialogHeader className="border-b border-destructive/10 pb-4">
             <DialogTitle className="text-destructive flex items-center gap-2 text-lg font-semibold">
               <AlertTriangle className="h-5 w-5 text-destructive" />
