@@ -37,7 +37,7 @@ export const PollEditor: React.FC<PollEditorProps> = ({
   onCancel,
   onConfirm,
 }) => (
-  <div className="mb-4 border rounded-lg p-4 bg-gray-50">
+  <div className="mb-4 border rounded-lg p-4">
     <div className="space-y-4">
       {pollOptions.map((option, index) => (
         <div key={index} className="relative">

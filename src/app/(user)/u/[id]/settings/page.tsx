@@ -79,10 +79,10 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="py-4">
+    <div className="px-4 lg:py-4 lg:px-0">
       <div className="flex gap-8 relative">
         {/* 左侧导航 */}
-        <div className="w-60 flex-shrink-0">
+        <div className="hidden lg:block w-60 flex-shrink-0">
           <div className="fixed w-60">
             <SettingsSidebar activeTab={activeTab} />
           </div>
