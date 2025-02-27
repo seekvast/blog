@@ -43,7 +43,14 @@ export default function CreatePostModal() {
     setOnClose,
   } = useMarkdownEditor();
   const { isVisible, setIsVisible } = usePostEditorStore();
-  const editorRef = React.useRef<{ reset: () => void }>(null);
+  const editorRef = React.useRef<{ reset: () => void; isFullscreen: boolean }>(null);
+  const boardSelectRef = React.useRef<{ reset: () => void }>(null);
+  const [isEditorFullscreen, setIsEditorFullscreen] = React.useState(false);
+
+  // 监听编辑器全屏状态变化
+  const handleFullscreenChange = React.useCallback((fullscreen: boolean) => {
+    setIsEditorFullscreen(fullscreen);
+  }, []);
 
   React.useEffect(() => {
     setIsOpen(isVisible);
@@ -201,7 +208,8 @@ export default function CreatePostModal() {
     setTitle("");
     setContent("");
     editorRef.current?.reset?.();
-    setSelectedBoard(undefined);
+    setSelectedBoard(undefined); // 确保重置 selectedBoard
+    boardSelectRef.current?.reset?.(); // 重置 BoardSelect 组件内部状态
     setSelectedChildBoard(undefined);
     setAttachments([]);
     setPollData(null);
@@ -216,7 +224,25 @@ export default function CreatePostModal() {
     setShowConfirmDialog(false);
     setPendingAction(null);
     setHasUnsavedContent(false);
-  }, [setContent, setHasUnsavedContent]);
+  }, [
+    setContent,
+    setHasUnsavedContent,
+    setTitle,
+    setSelectedBoard,
+    setSelectedChildBoard,
+    setAttachments,
+    setPollData,
+    setPollOptions,
+    setIsMultipleChoice,
+    setShowVoters,
+    setHasDeadline,
+    setPollStartTime,
+    setPollEndTime,
+    setIsPollEditing,
+    setIsSubmitting,
+    setShowConfirmDialog,
+    setPendingAction,
+  ]);
 
   const handlePublish = async () => {
     if (!title.trim()) {
@@ -242,7 +268,35 @@ export default function CreatePostModal() {
       };
 
       await api.discussions.create(data);
-      resetAllStates();
+      
+      // 先重置 selectedBoard
+      setSelectedBoard(undefined);
+      
+      // 使用 setTimeout 确保状态更新后再重置 BoardSelect 组件
+      setTimeout(() => {
+        // 重置 BoardSelect 组件内部状态
+        boardSelectRef.current?.reset?.();
+        
+        // 重置其他状态，但不包括 selectedBoard (已经重置过了)
+        setTitle("");
+        setContent("");
+        editorRef.current?.reset?.();
+        setSelectedChildBoard(undefined);
+        setAttachments([]);
+        setPollData(null);
+        setPollOptions(["", ""]);
+        setIsMultipleChoice(false);
+        setShowVoters(false);
+        setHasDeadline(false);
+        setPollStartTime("");
+        setPollEndTime("");
+        setIsPollEditing(false);
+        setIsSubmitting(false);
+        setShowConfirmDialog(false);
+        setPendingAction(null);
+        setHasUnsavedContent(false);
+      }, 0);
+      
       setIsVisible(false);
       if (window.location.pathname !== "/") {
         router.push("/");
@@ -307,7 +361,11 @@ export default function CreatePostModal() {
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <h1 className="text-lg font-medium leading-none whitespace-nowrap">发布文章</h1>
                 <div className="w-full sm:w-auto">
-                  <BoardSelect value={selectedBoard} onChange={setSelectedBoard} />
+                  <BoardSelect 
+                    ref={boardSelectRef}
+                    value={selectedBoard} 
+                    onChange={setSelectedBoard} 
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center sm:justify-end gap-2 w-full">
@@ -385,7 +443,7 @@ export default function CreatePostModal() {
                 placeholder="输入标题..."
               />
               <div className="mt-4">
-                {isPollEditing ? (
+                {isPollEditing && !isEditorFullscreen ? (
                   <PollEditor
                     pollOptions={pollOptions}
                     setPollOptions={setPollOptions}
@@ -402,22 +460,26 @@ export default function CreatePostModal() {
                     onCancel={() => setIsPollEditing(false)}
                     onConfirm={handlePollConfirm}
                   />
-                ) : (
+                ) : !isPollEditing && pollData && !isEditorFullscreen ? (
                   <PollPreview
                     pollData={pollData}
                     onDelete={handleDeletePoll}
                     onEdit={handlePollEdit}
                   />
-                )}
+                ) : null}
               </div>
 
               <Editor
                 ref={editorRef}
                 placeholder="开始编写正文..."
-                className="min-h-[300px] sm:min-h-[400px]"
+                className={cn(
+                  "min-h-[300px] sm:min-h-[400px]",
+                  isEditorFullscreen && "z-50"
+                )}
                 attachmentType={AttachmentType.TOPIC}
                 initialContent={content}
                 onChange={setContent}
+                onFullscreenChange={handleFullscreenChange}
               />
             </div>
           </div>

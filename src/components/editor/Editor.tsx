@@ -15,11 +15,13 @@ interface EditorProps {
   initialContent?: string;
   onChange?: (content: string) => void;
   onSave?: () => void;
+  onFullscreenChange?: (isFullscreen: boolean) => void;
 }
 
 export const Editor = React.forwardRef<
   {
     reset: () => void;
+    isFullscreen: boolean;
   },
   EditorProps
 >(function Editor(
@@ -30,6 +32,7 @@ export const Editor = React.forwardRef<
     initialContent = "",
     onChange,
     onSave,
+    onFullscreenChange,
   }: EditorProps,
   ref
 ) {
@@ -65,7 +68,7 @@ export const Editor = React.forwardRef<
 
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
-  // 暴露重置方法
+  // 暴露重置方法和全屏状态
   React.useImperativeHandle(ref, () => ({
     reset: () => {
       setContent("");
@@ -77,6 +80,9 @@ export const Editor = React.forwardRef<
       setHasUnsavedContent(false);
       onChange?.("");
     },
+    get isFullscreen() {
+      return isFullscreen;
+    }
   }));
 
   const handleSelect = React.useCallback(() => {
@@ -284,6 +290,14 @@ export const Editor = React.forwardRef<
     []
   );
 
+  const toggleFullscreen = React.useCallback(() => {
+    setIsFullscreen((prev) => {
+      const newState = !prev;
+      onFullscreenChange?.(newState);
+      return newState;
+    });
+  }, [onFullscreenChange]);
+
   // 保持选择范围同步
   React.useEffect(() => {
     const textarea = textareaRef.current;
@@ -325,7 +339,7 @@ export const Editor = React.forwardRef<
         textareaRef={textareaRef}
         onImageUpload={handleImageUpload}
         isFullscreen={isFullscreen}
-        onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+        onToggleFullscreen={toggleFullscreen}
         content={content}
         selection={selection}
         previewMode={previewMode}
