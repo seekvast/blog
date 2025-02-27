@@ -91,25 +91,25 @@ export default function SettingsPage() {
         {/* 右侧内容区 */}
         <div className="flex-1">
           <section id="profile" className="py-3 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold mb-4">个人资讯</h2>
+            <h2 className="text-xl font-semibold">个人资讯</h2>
             <ProfileSettings user={user} />
           </section>
 
-          <section id="security" className="py-4 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold mb-4">帳號安全</h2>
+          <section id="security" className="py-2 [scroll-margin-top:60px]">
+            <h2 className="text-xl font-semibold">帳號安全</h2>
             <SecuritySettings user={user} />
           </section>
 
-          <section id="notification" className="py-4 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold mb-4">通知</h2>
+          <section id="notification" className="py-2 [scroll-margin-top:60px]">
+            <h2 className="text-xl font-semibold">通知</h2>
             <NotificationSettings />
           </section>
-          <section id="theme" className="py-4 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold mb-4">外观</h2>
+          <section id="theme" className="py-2 [scroll-margin-top:60px]">
+            <h2 className="text-xl font-semibold">外观</h2>
             <ThemeSettings />
           </section>
-          <section id="privacy" className="py-4 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold mb-4">上線狀態顯示</h2>
+          <section id="privacy" className="py-2 [scroll-margin-top:60px]">
+            <h2 className="text-xl font-semibold">上線狀態顯示</h2>
             <div className="flex items-center justify-between py-3 border-b">
               <Label className="text-sm text-gray-500">
                 顯示或隱藏你的線上狀態，讓其他使用者知道你是否在線。

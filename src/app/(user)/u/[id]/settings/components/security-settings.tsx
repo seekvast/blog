@@ -178,7 +178,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
             更新你的密码，以提升帐户安全性并保护你的个人资料。
           </p>
           <div
-            className="flex items-center gap-2 cursor-pointer"
+            className="inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
             onClick={() => setPasswordModalOpen(true)}
           >
             <span className="text-sm text-blue-600">修改密码</span>
