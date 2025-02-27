@@ -70,7 +70,7 @@ export default function ViolationRecords() {
               <span className="text-sm text-gray-500">{record.date}</span>
               <span className="text-sm text-gray-500">·</span>
               <span className="text-sm text-gray-500">{record.type}</span>
-              <span
+              {/* <span
                 className={cn(
                   "text-sm px-2 py-0.5 rounded-full",
                   {
@@ -83,7 +83,7 @@ export default function ViolationRecords() {
                 {record.status === "pending" && "處理中"}
                 {record.status === "resolved" && "已處理"}
                 {record.status === "rejected" && "已駁回"}
-              </span>
+              </span> */}
             </div>
             <div className="text-sm">{record.content}</div>
           </div>

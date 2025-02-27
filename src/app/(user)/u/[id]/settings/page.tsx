@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { User } from "@/types/user";
 import { useQuery } from "@tanstack/react-query";
+import { ChevronRight } from "lucide-react";
 
 import {
   Select,
@@ -114,7 +115,7 @@ export default function SettingsPage() {
     switch (activeTab) {
       case "blacklist":
         return (
-          <section className="p-4">
+          <section className="pt-4 lg:px-4">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">封锁列表</h2>
               <Select
@@ -235,13 +236,36 @@ export default function SettingsPage() {
                 id="privacy"
                 className="py-2 [scroll-margin-top:80px]"
               >
-                <h2 className="text-xl font-semibold">上線狀態顯示</h2>
-                <div className="flex items-center justify-between py-3 border-b">
-                  <Label className="text-sm text-gray-500">
-                    顯示或隱藏你的線上狀態，讓其他使用者知道你是否在線。
-                  </Label>
-                  <Switch />
+                <h2 className="text-xl font-semibold">隐私</h2>
+                <div className="py-3 border-b">
+                  <Label>上線狀態顯示</Label>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm text-gray-500 mt-1">
+                      顯示或隱藏你的線上狀態，讓其他使用者知道你是否在線。
+                    </p>
+                    <Switch />
+                  </div>
                 </div>
+              </section>
+
+              <section className="lg:hidden flex justify-between items-center py-4 border-b">
+                <button
+                  className="w-full flex justify-between items-center text-left"
+                  onClick={() => handleTabChange("blacklist")}
+                >
+                  <h2 className="text-xl font-semibold">黑名单</h2>
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                </button>
+              </section>
+
+              <section className="lg:hidden flex justify-between items-center py-4 border-b">
+                <button
+                  className="w-full flex justify-between items-center text-left"
+                  onClick={() => handleTabChange("violation")}
+                >
+                  <h2 className="text-xl font-semibold">违规</h2>
+                  <ChevronRight className="h-4 w-4 text-gray-400" />
+                </button>
               </section>
 
               <section
