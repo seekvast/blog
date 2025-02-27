@@ -18,7 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { User } from "@/types/user";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ChevronLeft } from "lucide-react";
 
 import {
   Select,
@@ -117,7 +117,13 @@ export default function SettingsPage() {
         return (
           <section className="pt-4 lg:px-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">封锁列表</h2>
+              <div className="flex items-center justify-between">
+                <ChevronLeft 
+                  className="mr-2 h-5 w-5 cursor-pointer" 
+                  onClick={() => setActiveTab("")}
+                />
+                <h2 className="text-xl font-semibold">封锁列表</h2>
+              </div>
               <Select
                 value={blacklistType}
                 onValueChange={(value: "board" | "user") =>
@@ -142,7 +148,13 @@ export default function SettingsPage() {
       case "violation":
         return (
           <section className="p-4">
-            <h2 className="text-xl font-semibold mb-4">检举记录</h2>
+            <div className="flex items-center mb-4">
+              <ChevronLeft 
+                className="mr-2 h-5 w-5 cursor-pointer" 
+                onClick={() => setActiveTab("")}
+              />
+              <h2 className="text-xl font-semibold">检举记录</h2>
+            </div>
             <ViolationRecords />
           </section>
         );
