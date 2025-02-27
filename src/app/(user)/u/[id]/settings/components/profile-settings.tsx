@@ -151,7 +151,7 @@ export default function ProfileSettings({ user }: { user: User | null }) {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-[90vw] sm:max-w-[600px] p-0 gap-0 overflow-hidden">
+        <DialogContent className="sm:max-w-[600px] p-0 gap-0 overflow-hidden">
           <DialogHeader className="p-3">
             <DialogTitle className="text-xl font-semibold">
               个人资料
@@ -164,7 +164,7 @@ export default function ProfileSettings({ user }: { user: User | null }) {
             )}
           >
             {/* 背景图 */}
-            <div className="flex justify-between flex-row overflow-hidden h-[160px] sm:h-[200px] relative">
+            <div className="flex justify-between flex-row  px-4 overflow-hidden h-[160px] sm:h-[200px] relative">
               {bgImage && (
                 <div className="absolute inset-0 -z-10">
                   <Image
@@ -182,7 +182,7 @@ export default function ProfileSettings({ user }: { user: User | null }) {
               )}
 
               {/* 左侧：头像和用户信息 */}
-              <div className="flex items-center gap-4 sm:gap-6 md:px-8 sm:px-8">
+              <div className="flex items-center gap-4">
                 {/* 头像 */}
                 <AvatarUpload
                   url={user.avatar_url ?? null}
@@ -213,7 +213,7 @@ export default function ProfileSettings({ user }: { user: User | null }) {
               </div>
 
               {/* 右侧：背景上传按钮 */}
-              <div className="flex flex-col justify-center items-center px-4 md:p-8 sm:p-8 z-10">
+              <div className="flex flex-col justify-center items-center z-10">
                 <button
                   onClick={handleBgClick}
                   className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/30 transition-colors flex items-center justify-center shadow-sm"

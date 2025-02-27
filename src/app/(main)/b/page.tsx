@@ -109,7 +109,7 @@ export default function BoardsPage() {
       {/* 顶部导航 */}
       <div className="bg-background">
         <div className="mx-auto w-full">
-          <div className="flex h-[60px] items-center justify-between lg:border-b">
+          <div className="flex h-[40px] items-center justify-between lg:border-b">
             <div className="flex items-center space-x-4 lg:space-x-4">
               <button
                 type="button"
