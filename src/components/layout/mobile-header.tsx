@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, ArrowLeft, X, RotateCw, Menu } from "lucide-react";
-import { UserNav } from "./user-nav";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 
 interface MobileHeaderProps {
@@ -88,7 +87,6 @@ export function MobileHeader({
           >
             <Search className="h-4 w-4" />
           </Button>
-          <UserNav className="h-8 w-8" />
         </div>
       </nav>
     );

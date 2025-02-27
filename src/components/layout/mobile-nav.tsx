@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { UserNav } from "@/components/layout/user-nav";
 import { Home, Heart, LayoutGrid, Bookmark, Bell } from "lucide-react";
 
 const navItems = [

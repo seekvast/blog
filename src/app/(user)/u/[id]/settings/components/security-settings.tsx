@@ -318,7 +318,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
             設定你的生日，讓我們為你提供更合適的內容推薦。
           </p>
           <div
-            className="flex items-center gap-2 cursor-pointer"
+            className="inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
             onClick={() => setBirthdayModalOpen(true)}
           >
             <span className="text-sm">{birthday || "选择生日"}</span>

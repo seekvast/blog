@@ -3,9 +3,7 @@ import type { NextRequest } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { api } from '@/lib/api'
-import { validate } from '@/middleware/validate'
 import { withErrorHandler, ApiError } from '@/middleware/error'
-import { API_ROUTES } from '@/constants/api'
 
 export const dynamic = 'force-dynamic'
 
