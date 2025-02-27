@@ -97,10 +97,10 @@ export default function UserPage() {
   };
 
   return (
-    <div className="py-4">
-      <div className="flex gap-8">
+    <div className="lg:py-4">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
         {/* 左侧导航 */}
-        <div className="w-60 flex-shrink-0">
+        <div className="lg:w-60 flex-shrink-0">
           <UserSidebar
             activeTab={activeTab}
             onTabChange={setActiveTab}

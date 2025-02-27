@@ -92,29 +92,22 @@ export function UserPosts() {
   }, []);
 
   return (
-    <div className="flex flex-col min-w-0 overflow-hidden">
+    <div className="flex flex-col min-w-0 overflow-hidden px-4">
       <div className="bg-background">
-        <div className="flex justify-between border-b">
-          <h3 className="text-md font-semibold">我的文章</h3>
-
-          <div className="flex h-[40px] items-center justify-between  min-w-0">
-            <div className="flex items-center space-x-8">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 hover:bg-transparent hover:text-foreground"
-                onClick={() =>
-                  setDisplayMode((prev) => (prev === "grid" ? "list" : "grid"))
-                }
-              >
-                {displayMode === "grid" ? (
-                  <LayoutGrid className="h-4 w-4" />
-                ) : (
-                  <List className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-          </div>
+        <div className="flex justify-between items-center lg:border-b">
+          <h3 className="lg:pb-3 text-md font-semibold ">我的文章</h3>
+          <button
+            className="hover:bg-transparent hover:text-foreground"
+            onClick={() =>
+              setDisplayMode((prev) => (prev === "grid" ? "list" : "grid"))
+            }
+          >
+            {displayMode === "grid" ? (
+              <LayoutGrid className="h-4 w-4" />
+            ) : (
+              <List className="h-4 w-4" />
+            )}
+          </button>
         </div>
       </div>
       <div className="divide-y min-w-0">

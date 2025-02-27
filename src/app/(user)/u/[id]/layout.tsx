@@ -62,7 +62,7 @@ export default function UserLayout({
             <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-10">
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-4">
-                  <Avatar className="h-24 w-24 border-4 border-background">
+                  <Avatar className="h-16 w-16 lg:h-24 lg:w-24 border-4 border-background">
                     <AvatarImage src={userData.avatar_url || ""} />
                     <AvatarFallback>
                       {userData.username?.slice(0, 2).toUpperCase()}
@@ -104,7 +104,7 @@ export default function UserLayout({
       )}
 
       {/* 内容区 */}
-      <div className="mx-auto max-w-7xl px-4 overflow-hidden">{children}</div>
+      <div className="mx-auto max-w-7xl overflow-hidden">{children}</div>
     </div>
   );
 }

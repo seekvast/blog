@@ -18,12 +18,14 @@ interface UserSidebarProps {
     count: number;
     href: UserTabType;
   }>;
+  showCounts?: boolean;
 }
 
 export default function UserSidebar({
   activeTab,
   onTabChange,
   navItems,
+  showCounts = true,
 }: UserSidebarProps) {
   const handleTabClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
@@ -34,7 +36,14 @@ export default function UserSidebar({
   };
 
   return (
-    <nav className="space-y-1 rounded-lg px-2">
+    <nav
+      className={cn(
+        // 基础样式（移动端）
+        "flex overflow-x-auto border-b whitespace-nowrap scrollbar-none h-10",
+        // 桌面端样式（大屏幕）
+        "lg:flex-col lg:space-y-1 lg:space-x-0 lg:border-none lg:rounded-lg lg:px-2 lg:overflow-visible lg:whitespace-normal"
+      )}
+    >
       {navItems.map((item) => {
         const isActive = activeTab === item.href;
         return (
@@ -43,21 +52,33 @@ export default function UserSidebar({
             href="#"
             onClick={(e) => handleTabClick(e, item.href)}
             className={cn(
-              "flex items-center justify-between px-4 py-2 rounded-lg transition-colors",
+              // 基础样式（移动端）
+              "py-1 text-center text-sm font-medium transition-colors flex items-center justify-center",
               isActive
-                ? "bg-blue-50 text-blue-600 font-medium"
-                : "hover:bg-gray-50"
+                ? "text-blue-600 border-b-2 border-blue-600"
+                : "text-gray-500 hover:text-gray-700",
+
+              // 桌面端样式（大屏幕）
+              "lg:w-auto lg:flex-auto lg:flex lg:items-center lg:justify-between lg:text-left lg:py-2 lg:px-4 lg:rounded-lg lg:border-b-0 lg:min-w-0",
+              isActive
+                ? "lg:bg-blue-50 lg:text-blue-600 lg:font-medium lg:border-none"
+                : "lg:hover:bg-gray-50"
             )}
           >
-            <span>{item.label}</span>
-            <span
-              className={cn(
-                "text-xs px-2 rounded",
-                isActive ? "text-blue-600" : "text-gray-500"
-              )}
-            >
-              {item.count}
-            </span>
+            <span className="px-4 lg:px-0">{item.label}</span>
+            {showCounts && (
+              <span
+                className={cn(
+                  // 移动端样式（默认隐藏计数）
+                  "hidden",
+                  // 桌面端样式（显示计数）
+                  "lg:inline-block lg:text-xs lg:px-2 lg:rounded",
+                  isActive ? "lg:text-blue-600" : "lg:text-gray-500"
+                )}
+              >
+                {item.count}
+              </span>
+            )}
           </a>
         );
       })}

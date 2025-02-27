@@ -77,15 +77,18 @@ export function UserReplies({ replies = [] }: UserRepliesProps) {
   const replyList = replies.length > 0 ? replies : mockReplies;
 
   return (
-    <div>
-      <h3 className="pb-3 text-md font-semibold mb-6 border-b">我的回复</h3>
+    <div className="px-4">
+      <div className="flex justify-between lg:border-b">
+        <h3 className="lg:pb-3 text-md font-semibold ">我的回复</h3>
+        <span className="text-primary">22</span>
+      </div>
       <div className="space-y-4">
         {replyList.map((reply) => (
           <div key={reply.id} className="rounded-lg py-4">
             <div className="flex gap-4">
               {/* 左侧头像 */}
               <div className="flex-shrink-0">
-                <Avatar className="h-16 w-16">
+                <Avatar className="h-12 w-12 lg:h-16 lg:w-16">
                   <AvatarImage src={reply.user.avatar} alt={reply.user.name} />
                   <AvatarFallback>{reply.user.name[0]}</AvatarFallback>
                 </Avatar>
