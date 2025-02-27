@@ -95,13 +95,13 @@ export function AvatarUpload({
         </AvatarFallback>
         {/* 上传图标悬浮层 */}
         <div
-          className={`absolute rounded-full bg-black/30 transition-colors shadow-sm left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center ${sizeMap[size].overlay}`}
+          className={`absolute rounded-full bg-white/30 transition-colors shadow-sm left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center ${sizeMap[size].overlay}`}
         >
           <ImageIcon className={`text-white ${sizeMap[size].icon}`} />
         </div>
         {isUploading && (
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-4"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-blue-500"></div>
           </div>
         )}
       </Avatar>

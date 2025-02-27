@@ -24,28 +24,32 @@ export type SettingsTabType =
   | "theme"
   | "language"
   | "policy"
-  | "violation";
+  | "violation"
+  | "";
 
 interface SettingsSidebarProps {
   activeTab: SettingsTabType;
+  onTabChange?: (tab: SettingsTabType) => void;
 }
 
 interface NavGroup {
   title: string;
   href: SettingsTabType;
   icon: React.ElementType;
-
+  openTab?: boolean;
+  externalUrl?: string;
   items: {
     label: string;
     href: SettingsTabType;
   }[];
 }
 
-const navGroups: NavGroup[] = [
+export const navGroups: NavGroup[] = [
   {
     title: "个人资讯",
     icon: User,
     href: "profile",
+    openTab: false,
     items: [
       {
         label: "个人资讯",
@@ -57,6 +61,7 @@ const navGroups: NavGroup[] = [
     title: "帐号安全",
     href: "security",
     icon: Shield,
+    openTab: false,
     items: [
       {
         label: "电子邮件",
@@ -68,6 +73,7 @@ const navGroups: NavGroup[] = [
     title: "通知",
     href: "notification",
     icon: Bell,
+    openTab: false,
     items: [
       {
         label: "自动通注",
@@ -79,6 +85,7 @@ const navGroups: NavGroup[] = [
     title: "外观",
     href: "theme",
     icon: Palette,
+    openTab: false,
     items: [
       {
         label: "日夜模模式",
@@ -90,6 +97,7 @@ const navGroups: NavGroup[] = [
     title: "隐私",
     icon: Eye,
     href: "privacy",
+    openTab: false,
     items: [
       {
         label: "公开线上状态",
@@ -97,28 +105,30 @@ const navGroups: NavGroup[] = [
       },
     ],
   },
-  //   {
-  //     title: "黑名单",
-  //     icon: UserRoundX,
-  //     href: "blacklist",
-  //     items: [
-  //       {
-  //         label: "封锁列表",
-  //         href: "blacklist",
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     title: "违规",
-  //     icon: Ban,
-  //     href: "violation",
-  //     items: [
-  //       {
-  //         label: "检举记录",
-  //         href: "violation",
-  //       },
-  //     ],
-  //   },
+  {
+    title: "黑名单",
+    icon: UserRoundX,
+    href: "blacklist",
+    openTab: true,
+    items: [
+      {
+        label: "封锁列表",
+        href: "blacklist",
+      },
+    ],
+  },
+  {
+    title: "违规",
+    icon: Ban,
+    href: "violation",
+    openTab: true,
+    items: [
+      {
+        label: "检举记录",
+        href: "violation",
+      },
+    ],
+  },
   {
     title: "语言",
     href: "language",
@@ -134,6 +144,8 @@ const navGroups: NavGroup[] = [
     title: "网站政策",
     href: "policy",
     icon: FileText,
+    openTab: false,
+    externalUrl: "https://example.com/policy",
     items: [
       {
         label: "服务条款",
@@ -143,7 +155,17 @@ const navGroups: NavGroup[] = [
   },
 ];
 
-export default function SettingsSidebar({ activeTab }: SettingsSidebarProps) {
+export default function SettingsSidebar({ activeTab, onTabChange }: SettingsSidebarProps) {
+  const handleTabClick = (
+    e: React.MouseEvent<HTMLElement>,
+    tab: SettingsTabType,
+    openTab?: boolean
+  ) => {
+    // 阻止所有锚点的默认行为，统一使用 onTabChange 回调
+    e.preventDefault();
+    onTabChange?.(tab);
+  };
+
   return (
     <nav className="rounded-lg">
       {navGroups.map((group) => {
@@ -160,7 +182,8 @@ export default function SettingsSidebar({ activeTab }: SettingsSidebarProps) {
                       isActive ? "bg-blue-50 text-blue-600" : "hover:bg-gray-50"
                     )}
                     key={group.href}
-                    href={`#${group.href}`}
+                    href="#"
+                    onClick={(e) => handleTabClick(e, group.href, group.openTab)}
                   >
                     <Icon className="mr-2 h-4 w-4" />
                     <span>{group.title}</span>

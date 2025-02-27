@@ -38,9 +38,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ImageIcon } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const formSchema = z.object({
+  username: z
+    .string()
+    .min(3, "用户名至少3个字符")
+    .max(16, "用户名最多16个字符")
+    .regex(/^[a-zA-Z0-9_]+$/, "用户名只能包含字母、数字和下划线"),
   nickname: z
     .string()
     .min(1, "昵称不能为空")
@@ -73,6 +77,7 @@ export default function ProfileSettings({ user }: { user: User | null }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      username: user?.username ?? "",
       nickname: user?.nickname ?? "",
       avatar_url: user?.avatar_url,
       gender: user?.gender,
@@ -164,7 +169,7 @@ export default function ProfileSettings({ user }: { user: User | null }) {
             )}
           >
             {/* 背景图 */}
-            <div className="flex justify-between flex-row  px-4 overflow-hidden h-[160px] sm:h-[200px] relative">
+            <div className="flex justify-between flex-row  px-4 overflow-hidden h-[200px] relative">
               {bgImage && (
                 <div className="absolute inset-0 -z-10">
                   <Image
@@ -176,8 +181,8 @@ export default function ProfileSettings({ user }: { user: User | null }) {
                 </div>
               )}
               {isBgUploading && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-4"></div>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                  <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-blue-500"></div>
                 </div>
               )}
 
@@ -216,9 +221,12 @@ export default function ProfileSettings({ user }: { user: User | null }) {
               <div className="flex flex-col justify-center items-center z-10">
                 <button
                   onClick={handleBgClick}
-                  className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-black/30 transition-colors flex items-center justify-center shadow-sm"
+                  disabled={isBgUploading}
+                  className={`w-10 h-10 rounded-full ${
+                    isBgUploading ? "opacity-50" : ""
+                  } bg-white/30 transition-colors flex items-center justify-center shadow-sm`}
                 >
-                  <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                  <ImageIcon className="w-4 h-4 text-white" />
                 </button>
                 <input
                   type="file"
@@ -238,10 +246,19 @@ export default function ProfileSettings({ user }: { user: User | null }) {
               className="p-4 sm:p-8 space-y-6"
             >
               {/* 用户名 */}
-              <div className="flex flex-col gap-2">
-                <Label>用户名</Label>
-                <Input value={user.username} />
-              </div>
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>用户名</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="请输入用户名" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               {/* 昵称 */}
               <FormField

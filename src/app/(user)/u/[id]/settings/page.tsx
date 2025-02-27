@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import SettingsSidebar, {
   SettingsTabType,
+  navGroups,
 } from "./components/settings-sidebar";
 import ProfileSettings from "./components/profile-settings";
 import NotificationSettings from "./components/notification-settings";
@@ -35,6 +36,19 @@ export default function SettingsPage() {
     "board"
   );
 
+  // 创建 refs 对象来存储各个 section 的引用
+  const sectionRefs = {
+    profile: useRef<HTMLElement>(null),
+    security: useRef<HTMLElement>(null),
+    notification: useRef<HTMLElement>(null),
+    theme: useRef<HTMLElement>(null),
+    privacy: useRef<HTMLElement>(null),
+    language: useRef<HTMLElement>(null),
+    policy: useRef<HTMLElement>(null),
+    blacklist: useRef<HTMLElement>(null),
+    violation: useRef<HTMLElement>(null),
+  };
+
   const { data: user, isLoading } = useQuery({
     queryKey: ["user", userId],
     queryFn: () => api.users.get({ hashid: userId }),
@@ -46,21 +60,102 @@ export default function SettingsPage() {
       const hash = window.location.hash.slice(1) as SettingsTabType;
       if (hash) {
         setActiveTab(hash);
+
+        if (!getMenuOpenTabStatus(hash) && sectionRefs[hash]?.current) {
+          if (hash === "profile") {
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+          } else {
+            sectionRefs[hash].current?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
+        }
       }
     };
 
-    // 初始化时检查hash
     if (window.location.hash) {
-      handleHashChange();
+      setTimeout(handleHashChange, 100);
     } else {
-      // 如果没有hash，设置默认hash
-      window.location.hash = "profile";
+      window.history.pushState(null, "", "#profile");
+      setActiveTab("profile");
     }
 
     // 监听hash变化
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
+
+  // 处理 Tab 切换
+  const handleTabChange = (tab: SettingsTabType) => {
+    setActiveTab(tab);
+
+    window.history.pushState(null, "", `#${tab}`);
+    if (!getMenuOpenTabStatus(tab) && sectionRefs[tab]?.current) {
+      if (tab === "profile") {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      } else {
+        sectionRefs[tab].current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    }
+  };
+
+  // 渲染使用 Tab 切换的内容
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "blacklist":
+        return (
+          <section className="p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">封锁列表</h2>
+              <Select
+                value={blacklistType}
+                onValueChange={(value: "board" | "user") =>
+                  setBlacklistType(value)
+                }
+              >
+                <SelectTrigger className="w-32 h-8 py-1">
+                  <SelectValue placeholder="选择类型" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="board">看板</SelectItem>
+                  <SelectItem value="user">用户</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <UserBlacklist
+              type={blacklistType}
+              onTypeChange={setBlacklistType}
+            />
+          </section>
+        );
+      case "violation":
+        return (
+          <section className="p-4">
+            <h2 className="text-xl font-semibold mb-4">检举记录</h2>
+            <ViolationRecords />
+          </section>
+        );
+      default:
+        return null;
+    }
+  };
+
+  // 获取菜单项的 openTab 属性
+  const getMenuOpenTabStatus = (tab: SettingsTabType): boolean => {
+    // 从 settings-sidebar.tsx 中的 navGroups 数组获取菜单项的 openTab 属性
+    const navGroup = navGroups.find((group) => group.href === tab);
+    return !!navGroup?.openTab;
+  };
 
   if (isLoading) {
     return (
@@ -84,78 +179,92 @@ export default function SettingsPage() {
         {/* 左侧导航 */}
         <div className="hidden lg:block w-60 flex-shrink-0">
           <div className="fixed w-60">
-            <SettingsSidebar activeTab={activeTab} />
+            <SettingsSidebar
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+            />
           </div>
         </div>
 
         {/* 右侧内容区 */}
         <div className="flex-1">
-          <section id="profile" className="py-3 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold">个人资讯</h2>
-            <ProfileSettings user={user} />
-          </section>
+          {/* 使用 Tab 切换的内容 */}
+          {getMenuOpenTabStatus(activeTab) && renderTabContent()}
 
-          <section id="security" className="py-2 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold">帳號安全</h2>
-            <SecuritySettings user={user} />
-          </section>
-
-          <section id="notification" className="py-2 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold">通知</h2>
-            <NotificationSettings />
-          </section>
-          <section id="theme" className="py-2 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold">外观</h2>
-            <ThemeSettings />
-          </section>
-          <section id="privacy" className="py-2 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold">上線狀態顯示</h2>
-            <div className="flex items-center justify-between py-3 border-b">
-              <Label className="text-sm text-gray-500">
-                顯示或隱藏你的線上狀態，讓其他使用者知道你是否在線。
-              </Label>
-              <Switch />
-            </div>
-          </section>
-
-          {/* <section id="blacklist" className="p-4 [scroll-margin-top:60px]">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">封锁列表</h2>
-              <Select
-                value={blacklistType}
-                onValueChange={(value: "board" | "user") =>
-                  setBlacklistType(value)
-                }
+          {/* 使用锚点跳转的内容 - 只显示没有 openTab 属性的菜单项 */}
+          {!getMenuOpenTabStatus(activeTab) && (
+            <>
+              <section
+                ref={sectionRefs.profile}
+                id="profile"
+                className="py-3" // 为第一个 section 添加足够的顶部内边距
               >
-                <SelectTrigger className="w-32 h-8 py-1">
-                  <SelectValue placeholder="选择类型" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="board">看板</SelectItem>
-                  <SelectItem value="user">用户</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <UserBlacklist
-              type={blacklistType}
-              onTypeChange={setBlacklistType}
-            />
-          </section> */}
-          {/* <section id="violation" className="p-4 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold mb-4">检举记录</h2>
-            <ViolationRecords />
-          </section> */}
+                <h2 className="text-xl font-semibold">个人资讯</h2>
+                <ProfileSettings user={user} />
+              </section>
 
-          <section id="language" className="py-4 [scroll-margin-top:60px]">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">语言设置</h2>
-              <LanguageSettings />
-            </div>
-          </section>
-          <section id="policy" className="py-4 [scroll-margin-top:60px]">
-            <h2 className="text-xl font-semibold mb-4">网站政策</h2>
-            <PolicySettings />
-          </section>
+              <section
+                ref={sectionRefs.security}
+                id="security"
+                className="py-2 [scroll-margin-top:80px]"
+              >
+                <h2 className="text-xl font-semibold">帳號安全</h2>
+                <SecuritySettings user={user} />
+              </section>
+
+              <section
+                ref={sectionRefs.notification}
+                id="notification"
+                className="py-2 [scroll-margin-top:80px]"
+              >
+                <h2 className="text-xl font-semibold">通知</h2>
+                <NotificationSettings />
+              </section>
+
+              <section
+                ref={sectionRefs.theme}
+                id="theme"
+                className="py-2 [scroll-margin-top:80px]"
+              >
+                <h2 className="text-xl font-semibold">外观</h2>
+                <ThemeSettings />
+              </section>
+
+              <section
+                ref={sectionRefs.privacy}
+                id="privacy"
+                className="py-2 [scroll-margin-top:80px]"
+              >
+                <h2 className="text-xl font-semibold">上線狀態顯示</h2>
+                <div className="flex items-center justify-between py-3 border-b">
+                  <Label className="text-sm text-gray-500">
+                    顯示或隱藏你的線上狀態，讓其他使用者知道你是否在線。
+                  </Label>
+                  <Switch />
+                </div>
+              </section>
+
+              <section
+                ref={sectionRefs.language}
+                id="language"
+                className="py-4 [scroll-margin-top:80px]"
+              >
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">语言设置</h2>
+                  <LanguageSettings />
+                </div>
+              </section>
+
+              <section
+                ref={sectionRefs.policy}
+                id="policy"
+                className="py-4 [scroll-margin-top:80px]"
+              >
+                <h2 className="text-xl font-semibold mb-4">网站政策</h2>
+                <PolicySettings />
+              </section>
+            </>
+          )}
         </div>
       </div>
     </div>
