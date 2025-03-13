@@ -1,4 +1,5 @@
 import type { Board, BoardChild, User } from "@/types";
+import type { Response, Pagination } from "./common";
 
 export interface Discussion {
   title: string;
@@ -31,21 +32,7 @@ export interface Discussion {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
-  user: {
-    hashid: string;
-    username: string;
-    email: string;
-    image?: string;
-    nickname?: string;
-    avatar_url?: string;
-    cover?: string;
-    bio?: string;
-    gender?: number;
-    birthday?: string;
-    is_email_confirmed?: number;
-    joined_at?: string;
-    last_seen_at?: string;
-  };
+  user: User;
 }
 
 export interface Post {
@@ -71,14 +58,4 @@ export interface Post {
   user: User;
 }
 
-export interface DiscussionResponse {
-  code: number;
-  data: {
-    items: Discussion[];
-    total: number;
-    per_page: number;
-    current_page: number;
-    last_page: number;
-  };
-  message: string;
-}
+export type DiscussionResponse = Response<Pagination<Discussion>>;

@@ -14,6 +14,9 @@ import type {
   LoginResponse,
   User,
   BoardRule,
+  BoardUser,
+  BoardBlacklist,
+  Report,
 } from "@/types";
 import { signIn } from "next-auth/react";
 
@@ -30,9 +33,12 @@ export function createApi(options: ApiOptions = {}) {
     common: {
       categories: () =>
         http.get<Category[]>(`${prefix}/categories`, undefined, { next }),
+      parse: (data: any) => http.post<any>(`${prefix}/parse`, data),
+      preview: (data: any) => http.post<any>(`${prefix}/preview`, data),
     },
     users: {
       login: (data: any) => http.post<User>(`${prefix}/login`, data),
+      logout: () => http.get<void>(`${prefix}/logout`, undefined, { next }),
       signUp: (data: any) => http.post<User>(`${prefix}/user`, data),
       list: (params?: QueryParams) =>
         http.get<Pagination<User>>(`${prefix}/users`, params, { next }),
@@ -47,6 +53,10 @@ export function createApi(options: ApiOptions = {}) {
         http.patch<User>(`${prefix}/user/birthday`, data),
       changePassword: (data: any) =>
         http.patch<void>(`${prefix}/user/password`, data),
+      joinBoard: (data: any) => http.post<any>(`${prefix}/user/board`, data),
+      saveCategory: (data: any) => http.post<any>(`${prefix}/user/category`, data),
+      getCategory: (params?: QueryParams) => http.get<any>(`${prefix}/user/category`, params, { next }),
+      block: (data: any) => http.post<any>(`${prefix}/user/block`, data),
     },
 
     boards: {
@@ -77,6 +87,11 @@ export function createApi(options: ApiOptions = {}) {
             http.delete<void>(`${prefix}/board/rule`, data),
       getMembers: (data: any) =>
         http.get<Pagination<User>>(`${prefix}/board/users`, data),
+      manageUser: (data: any) =>
+            http.post<BoardUser>(`${prefix}/board/manage-user`, data),
+      getBlacklist: (data: any) =>
+            http.get<Pagination<BoardBlacklist>>(`${prefix}/board/blacklist`, data),
+      approve: (data: any) => http.post<any>(`${prefix}/board/approve`, data),
     },
 
     discussions: {
@@ -109,6 +124,12 @@ export function createApi(options: ApiOptions = {}) {
 
       unlike: (slug: string) =>
         http.delete(`${prefix}/discussions/${slug}/like`),
+      
+      saveBookmark: (data: any) => http.post<any>(`${prefix}/discussion/bookmark`, data),
+      saveFollow: (data: any) => http.post<any>(`${prefix}/discussion/follow`, data),
+      votePoll: (data: any) => http.post<any>(`${prefix}/discussion/vote-poll`, data),
+      getPollVotes: (params?: QueryParams) => http.get<any>(`${prefix}/discussion/poll-votes`, params, { next }),
+      getRandom: () => http.get<Discussion>(`${prefix}/discussion/random`, undefined, { next }),
     },
 
     posts: {
@@ -124,11 +145,20 @@ export function createApi(options: ApiOptions = {}) {
         http.patch<Post>(`${prefix}/posts/${slug}`, data),
 
       delete: (slug: string) => http.delete(`${prefix}/posts/${slug}`),
+      
+      updatePost: (data: any) => http.put<Post>(`${prefix}/post`, data),
+      vote: (data: any) => http.post<any>(`${prefix}/post/vote`, data),
     },
 
     upload: {
       image: (data: any) =>
         http.post<Attachment>(`${prefix}/upload/image`, data),
+    },
+    
+    reports: {
+      create: (data: any) => http.post<any>(`${prefix}/report`, data),
+      list: (params?: QueryParams) => http.get<Pagination<Report>>(`${prefix}/reports`, params, { next }),
+      get: (params: any) => http.get<Report>(`${prefix}/report`, params, { next }),
     },
   };
 }

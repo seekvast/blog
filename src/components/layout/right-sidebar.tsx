@@ -15,7 +15,7 @@ export function RightSidebar({ className, ...props }: RightSidebarProps) {
   return (
     <aside className={cn(className)} {...props}>
       {/* 精品专题 */}
-      <div className="">
+      {/* <div className="">
         <div className="border-b px-2">
           <h3 className="h-[40px] text-sm font-medium flex items-center">
             精品专题
@@ -38,10 +38,10 @@ export function RightSidebar({ className, ...props }: RightSidebarProps) {
             更多专题
           </Button>
         </Link>
-      </div>
+      </div> */}
 
       {/* 相关文章 */}
-      <div className="mt-4">
+      <div className="">
         <div className="flex items-center justify-between border-b px-2">
           <h3 className="h-[40px] text-sm font-medium flex items-center">
             相关文章

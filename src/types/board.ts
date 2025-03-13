@@ -1,3 +1,6 @@
+import type { Response, Pagination } from "./common";
+import type { User } from "./user";
+
 export interface Board {
   id: number;
   name: string;
@@ -37,14 +40,24 @@ export interface BoardRule {
   sort: number;
 }
 
-export interface BoardChildrenResponse {
-  code: number;
-  data: {
-    items: BoardChild[];
-    total: number;
-    per_page: number;
-    current_page: number;
-    last_page: number;
-  }
-  message: string;
+export interface BoardUser {
+  id: number;
+  board_id: number;
+  user_hashid: string;
+  role: number;
+  created_at: string;
+  updated_at: string;
+  user?: User;
 }
+
+export interface BoardBlacklist {
+  id: number;
+  board_id: number;
+  user_hashid: string;
+  reason: string;
+  created_at: string;
+  updated_at: string;
+  user?: User;
+}
+
+export type BoardChildrenResponse = Response<Pagination<BoardChild>>;
