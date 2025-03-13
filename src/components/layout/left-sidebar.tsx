@@ -24,6 +24,10 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { usePostEditorStore } from "@/store/post-editor";
 import { CreateBoardModal } from "@/components/board/create-board-modal";
 import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import { useMutation } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface NavItem {
   title: string;
@@ -62,6 +66,19 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   const { t, i18n } = useTranslation();
   const [createBoardOpen, setCreateBoardOpen] = useState(false);
   const { setIsVisible } = usePostEditorStore();
+  const queryClient = useQueryClient();
+
+  const { data: boards } = useQuery({
+    queryKey: ["recommend-boards"],
+    queryFn: () => api.boards.recommend({}),
+  });
+
+  const { mutate: refreshBoards } = useMutation({
+    mutationFn: () => api.boards.recommend({}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
+    },
+  });
 
   const handlePublishClick = () => {
     // 在看板列表页面，显示创建看板的模态框
@@ -129,30 +146,14 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
           <div className="flex items-center justify-between px-2 mb-2">
             <h3 className="text-sm font-medium">推薦看板</h3>
             <Button variant="ghost" size="icon" className="h-6 w-6">
-              <RotateCcw className="h-4 w-4" />
+              <RotateCcw
+                className="h-4 w-4 cursor-pointer"
+                onClick={() => refreshBoards()}
+              />
             </Button>
           </div>
           <div className="border-y py-3 space-y-1">
-            {[
-              {
-                name: "FTTT",
-                members: 1,
-                letter: "F",
-                is_nsfw: 1,
-              },
-              {
-                name: "NSFW",
-                members: 12922,
-                letter: "N",
-                is_nsfw: 1,
-              },
-              {
-                name: "TFF11",
-                members: 1,
-                letter: "T",
-                is_nsfw: 0,
-              },
-            ].map((board) => (
+            {boards?.map((board) => (
               <div
                 key={board.name}
                 className="flex items-center justify-between rounded-lg px-2 py-2"
@@ -160,7 +161,9 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                 <div className="flex items-center gap-3">
                   <Link href={`/b/${board.name}`}>
                     <Avatar className="h-8 w-8">
-                      <AvatarFallback>{board.letter}</AvatarFallback>
+                      <AvatarFallback>
+                        {board.name[0].toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
                   </Link>
 
@@ -180,7 +183,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                     </div>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Users className="h-3 w-3" />
-                      <span>{board.members}</span>
+                      <span>{board.users_count}</span>
                     </div>
                   </div>
                 </div>

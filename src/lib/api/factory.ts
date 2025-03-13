@@ -84,14 +84,15 @@ export function createApi(options: ApiOptions = {}) {
       getRules: (data: any) =>
         http.get<BoardRule[]>(`${prefix}/board/rules`, data),
       deleteRule: (data: any) =>
-            http.delete<void>(`${prefix}/board/rule`, data),
+        http.delete<void>(`${prefix}/board/rule`, data),
       getMembers: (data: any) =>
         http.get<Pagination<User>>(`${prefix}/board/users`, data),
       manageUser: (data: any) =>
-            http.post<BoardUser>(`${prefix}/board/manage-user`, data),
+        http.post<BoardUser>(`${prefix}/board/manage-user`, data),
       getBlacklist: (data: any) =>
-            http.get<Pagination<BoardBlacklist>>(`${prefix}/board/blacklist`, data),
+        http.get<Pagination<BoardBlacklist>>(`${prefix}/board/blacklist`, data),
       approve: (data: any) => http.post<any>(`${prefix}/board/approve`, data),
+      recommend: (params?: QueryParams) => http.get<Board[]>(`${prefix}/board/recommend`, params, { next }),
     },
 
     discussions: {
@@ -125,11 +126,12 @@ export function createApi(options: ApiOptions = {}) {
       unlike: (slug: string) =>
         http.delete(`${prefix}/discussions/${slug}/like`),
       
+      store: (data: any) => http.post<Discussion>(`${prefix}/discussion`, data),
       saveBookmark: (data: any) => http.post<any>(`${prefix}/discussion/bookmark`, data),
       saveFollow: (data: any) => http.post<any>(`${prefix}/discussion/follow`, data),
       votePoll: (data: any) => http.post<any>(`${prefix}/discussion/vote-poll`, data),
       getPollVotes: (params?: QueryParams) => http.get<any>(`${prefix}/discussion/poll-votes`, params, { next }),
-      getRandom: () => http.get<Discussion>(`${prefix}/discussion/random`, undefined, { next }),
+      getRandom: () => http.get<Discussion[]>(`${prefix}/discussion/random`, undefined, { next }),
     },
 
     posts: {

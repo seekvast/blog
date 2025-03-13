@@ -36,7 +36,7 @@ export const DiscussionItem = React.forwardRef<
             <div className="flex items-center space-x-2 min-w-0 flex-1">
               <h2 className="min-w-0 flex-1 w-0">
                 <Link
-                  href={`/d/${discussion.slug}`}
+                  href={`/d/${discussion.slug}?board_id=${discussion.board_id}`}
                   className="text-xl font-medium text-foreground hover:text-primary line-clamp-1 block w-full overflow-hidden text-ellipsis"
                 >
                   {discussion.title}
@@ -65,7 +65,7 @@ export const DiscussionItem = React.forwardRef<
           <div className="mt-3 flex items-center space-x-2 lg:space-x-4 text-sm text-center">
             <div className="flex items-center space-x-1 text-muted-foreground">
               <ThumbsUp className="h-4 w-4 text-sm cursor-pointer" />
-              <span>{discussion.votes}</span>
+              <span>{discussion.up_votes}</span>
             </div>
             <Link
               href={`/d/${discussion.slug}#comment`}

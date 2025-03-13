@@ -6,11 +6,19 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 
 interface RightSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function RightSidebar({ className, ...props }: RightSidebarProps) {
   const { data: session } = useSession();
+  //相关文章列表
+  const { data: randomDiscussions, refetch: refetchRandomDiscussions } =
+    useQuery({
+      queryKey: ["random-discussions"],
+      queryFn: () => api.discussions.getRandom(),
+    });
 
   return (
     <aside className={cn(className)} {...props}>
@@ -50,29 +58,21 @@ export function RightSidebar({ className, ...props }: RightSidebarProps) {
             variant="ghost"
             size="sm"
             className="h-auto p-0 text-xs font-normal text-muted-foreground hover:text-foreground"
+            onClick={() => refetchRandomDiscussions()}
           >
             换一换
           </Button>
         </div>
         <div className="space-y-2 p-2">
-          <Link href="#" className="block text-sm hover:text-primary">
-            最近翻译了，大家要小心不要
-          </Link>
-          <Link href="#" className="block text-sm hover:text-primary">
-            预览救命啊！公司服务器升级
-          </Link>
-          <Link href="#" className="block text-sm hover:text-primary">
-            北美性价比最高的杜甫
-          </Link>
-          <Link href="#" className="block text-sm hover:text-primary">
-            预览刚遇到一个怪事
-          </Link>
-          <Link href="#" className="block text-sm hover:text-primary">
-            不懂就问：美国商务部禁止
-          </Link>
-          <Link href="#" className="block text-sm hover:text-primary">
-            那扇局面已经控制不住了，
-          </Link>
+          {randomDiscussions?.map((discussion) => (
+            <Link
+              key={discussion.slug}
+              href={`/d/${discussion.slug}?board_id=${discussion.board_id}`}
+              className="block text-sm hover:text-primary line-clamp-1"
+            >
+              {discussion.title}
+            </Link>
+          ))}
         </div>
       </div>
 

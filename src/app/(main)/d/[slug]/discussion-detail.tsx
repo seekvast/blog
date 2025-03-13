@@ -22,10 +22,11 @@ import { toast } from "@/components/ui/use-toast"; // Add toast import
 import { useState } from "react"; // Add useState import
 
 interface DiscussionDetailProps {
-  initialDiscussion: Discussion;
+    initialDiscussion: Discussion;
+    board_id: number;
 }
 
-export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
+export function DiscussionDetail({ initialDiscussion, board_id }: DiscussionDetailProps) {
   const params = useParams();
   // Ensure params.slug exists and is a string
   const slug = params?.slug as string;
@@ -60,7 +61,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     const fetchComments = async () => {
       if (!currentDiscussion) return;
       try {
-        const data = await api.discussions.posts({ slug });
+        const data = await api.discussions.posts({ slug, board_id });
         setComments(data);
       } catch (error) {
         console.error("Failed to fetch comments:", error);

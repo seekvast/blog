@@ -24,7 +24,8 @@ export interface Discussion {
   is_locked: number;
   is_sticky: number;
   view_count: number;
-  votes: number;
+  up_votes: number;
+  down_votes: number;
   hotness: number;
   main_post: Post;
   board: Board;

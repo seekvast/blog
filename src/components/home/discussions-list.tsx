@@ -15,7 +15,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import type { Discussion } from "@/types/discussion";
-import type { Paginate } from "@/types";
+import type { Pagination } from "@/types/common";
 import { api } from "@/lib/api";
 import { DiscussionItem } from "@/components/home/discussion-item";
 import { InfiniteScroll } from "@/components/common/infinite-scroll";
@@ -23,7 +23,7 @@ import { useDevice } from "@/hooks/use-device";
 import { cn } from "@/lib/utils";
 
 interface DiscussionsListProps {
-  initialDiscussions: Paginate<Discussion>;
+  initialDiscussions: Pagination<Discussion>;
 }
 
 type DisplayMode = "list" | "grid";
