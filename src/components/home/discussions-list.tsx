@@ -41,6 +41,7 @@ interface DiscussionsListProps {
 }
 
 type DisplayMode = "list" | "grid";
+type SortBy = "hot" | "create" | "reply";
 
 export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
   const { isMobile } = useDevice();
@@ -52,28 +53,25 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
   const [activeTab, setActiveTab] = React.useState<"recommend" | "trace">(
     "recommend"
   );
-  const [sortBy, setSortBy] = React.useState<"hot" | "latest" | "last_reply">(
+  const [sortBy, setSortBy] = React.useState<SortBy>(
     "hot"
   );
   const observerRef = useRef<IntersectionObserver>();
 
   const sortOptions = {
     hot: "热门",
-    latest: "最新发表",
-    last_reply: "最后回复",
+    create: "最新发表",
+    reply: "最后回复",
   };
 
-  const fetchDiscussions = async (
-    tab: "recommend" | "trace",
-    pageNum: number = 1
-  ) => {
-    setLoading(true);
+  const fetchDiscussions = async (tab: "recommend" | "trace", pageNum: number = 1, sort: SortBy = sortBy) => {
+      setLoading(true);
     try {
       const response = await api.discussions.list({
         q: tab,
         page: pageNum,
         per_page: 10,
-        sort: sortBy,
+        sort,
       });
 
       if (pageNum === 1) {
@@ -158,7 +156,7 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="inline-flex items-center space-x-2 font-medium text-muted-foreground hover:text-foreground"
+                    className="inline-flex items-center space-x-2 font-medium text-muted-foreground"
                   >
                     <span>{sortOptions[sortBy]}</span>
                     <ChevronDown className="h-4 w-4" />
@@ -170,8 +168,8 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
                       key={key}
                       className={cn(sortBy === key && "bg-accent")}
                       onClick={() => {
-                        setSortBy(key as "hot" | "latest" | "last_reply");
-                        fetchDiscussions(activeTab, 1);
+                        setSortBy(key as SortBy);
+                        fetchDiscussions(activeTab, 1, key as SortBy);
                       }}
                     >
                       {label}

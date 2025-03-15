@@ -43,7 +43,9 @@ export default function CreatePostModal() {
     setOnClose,
   } = useMarkdownEditor();
   const { isVisible, setIsVisible } = usePostEditorStore();
-  const editorRef = React.useRef<{ reset: () => void; isFullscreen: boolean }>(null);
+  const editorRef = React.useRef<{ reset: () => void; isFullscreen: boolean }>(
+    null
+  );
   const boardSelectRef = React.useRef<{ reset: () => void }>(null);
   const [isEditorFullscreen, setIsEditorFullscreen] = React.useState(false);
 
@@ -267,16 +269,16 @@ export default function CreatePostModal() {
         poll: pollData,
       };
 
-      await api.discussions.create(data);
-      
+      const discussion = await api.discussions.create(data);
+
       // 先重置 selectedBoard
       setSelectedBoard(undefined);
-      
+
       // 使用 setTimeout 确保状态更新后再重置 BoardSelect 组件
       setTimeout(() => {
         // 重置 BoardSelect 组件内部状态
         boardSelectRef.current?.reset?.();
-        
+
         // 重置其他状态，但不包括 selectedBoard (已经重置过了)
         setTitle("");
         setContent("");
@@ -296,12 +298,9 @@ export default function CreatePostModal() {
         setPendingAction(null);
         setHasUnsavedContent(false);
       }, 0);
-      
+
+      router.push(`/d/${discussion.slug}?board_id=${discussion.board_id}`);
       setIsVisible(false);
-      if (window.location.pathname !== "/") {
-        router.push("/");
-      }
-      router.refresh();
     } catch (error) {
       console.error("发布失败", error);
       setIsSubmitting(false);
@@ -359,12 +358,14 @@ export default function CreatePostModal() {
           <div className="sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-4 pb-2 z-10">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <h1 className="text-lg font-medium leading-none whitespace-nowrap">发布文章</h1>
+                <h1 className="text-lg font-medium leading-none whitespace-nowrap">
+                  发布文章
+                </h1>
                 <div className="w-full sm:w-auto">
-                  <BoardSelect 
+                  <BoardSelect
                     ref={boardSelectRef}
-                    value={selectedBoard} 
-                    onChange={setSelectedBoard} 
+                    value={selectedBoard}
+                    onChange={setSelectedBoard}
                   />
                 </div>
               </div>

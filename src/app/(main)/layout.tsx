@@ -78,7 +78,7 @@ export default function MainLayout({
         </div>
       </div>
 
-      {pathname?.startsWith("/") && (
+      {pathname === "/" && (
         <button
           className={cn(
             "fixed right-4 bottom-20 lg:hidden z-9",
