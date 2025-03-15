@@ -107,7 +107,7 @@ export function DiscussionDetail({ initialDiscussion, board_id }: DiscussionDeta
       // 重置编辑器内容
       editorRef.current?.reset?.();
       // 刷新评论列表
-      const commentsData = await api.discussions.posts({ slug });
+      const commentsData = await api.discussions.posts({ slug, board_id });
       setComments(commentsData);
     } catch (err) {
       console.error("Failed to post comment:", err);

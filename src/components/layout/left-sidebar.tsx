@@ -80,6 +80,13 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
     },
   });
 
+  const { mutate: joinBoard } = useMutation({
+    mutationFn: (boardName: string) => api.boards.join({ name: boardName }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
+    },
+  });
+
   const handlePublishClick = () => {
     // 在看板列表页面，显示创建看板的模态框
     if (pathname === "/b") {
@@ -187,7 +194,11 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                     </div>
                   </div>
                 </div>
-                <Button size="sm" className="rounded-full">
+                <Button
+                  size="sm"
+                  className="rounded-full"
+                  onClick={() => joinBoard(board.name)}
+                >
                   加入
                 </Button>
               </div>

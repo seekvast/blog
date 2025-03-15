@@ -14,6 +14,13 @@ import {
   MessageSquare,
   ChevronDown,
 } from "lucide-react";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import { Button } from "@/components/ui/button";
 import type { Discussion } from "@/types/discussion";
 import type { Pagination } from "@/types/common";
 import { api } from "@/lib/api";
@@ -21,6 +28,13 @@ import { DiscussionItem } from "@/components/home/discussion-item";
 import { InfiniteScroll } from "@/components/common/infinite-scroll";
 import { useDevice } from "@/hooks/use-device";
 import { cn } from "@/lib/utils";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface DiscussionsListProps {
   initialDiscussions: Pagination<Discussion>;
@@ -35,42 +49,61 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
   const [page, setPage] = React.useState(2);
   const [loading, setLoading] = React.useState(false);
   const [hasMore, setHasMore] = React.useState(true);
+  const [activeTab, setActiveTab] = React.useState<"recommend" | "trace">(
+    "recommend"
+  );
+  const [sortBy, setSortBy] = React.useState<"hot" | "latest" | "last_reply">(
+    "hot"
+  );
   const observerRef = useRef<IntersectionObserver>();
 
-  const loadMore = useCallback(async () => {
-    if (loading || !hasMore) return;
-    setLoading(true);
+  const sortOptions = {
+    hot: "热门",
+    latest: "最新发表",
+    last_reply: "最后回复",
+  };
 
+  const fetchDiscussions = async (
+    tab: "recommend" | "trace",
+    pageNum: number = 1
+  ) => {
+    setLoading(true);
     try {
       const response = await api.discussions.list({
-        page,
+        q: tab,
+        page: pageNum,
         per_page: 10,
+        sort: sortBy,
       });
 
-      if (response.items.length === 0 || page >= response.last_page) {
-        setHasMore(false);
+      if (pageNum === 1) {
+        setDiscussions(response);
+        setPage(2);
+        setHasMore(true);
       } else {
-        setDiscussions((prev) => ({
-          ...prev,
-          items: [...prev.items, ...response.items],
-          current_page: page,
-          last_page: response.last_page,
-        }));
-        setPage((prev) => prev + 1);
+        if (response.items.length === 0 || pageNum >= response.last_page) {
+          setHasMore(false);
+        } else {
+          setDiscussions((prev) => ({
+            ...prev,
+            items: [...prev.items, ...response.items],
+            current_page: pageNum,
+            last_page: response.last_page,
+          }));
+          setPage((prev) => prev + 1);
+        }
       }
     } catch (error) {
+      console.error("Failed to fetch discussions:", error);
     } finally {
       setLoading(false);
     }
-  }, [loading, hasMore, page]);
+  };
 
-  useEffect(() => {
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, []);
+  const loadMore = useCallback(async () => {
+    if (loading || !hasMore) return;
+    await fetchDiscussions(activeTab, page);
+  }, [loading, hasMore, page, activeTab]);
 
   useEffect(() => {
     setDiscussions(initialDiscussions);
@@ -90,32 +123,62 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
             <div className="flex items-center space-x-4 lg:space-x-8">
               <button
                 type="button"
-                className="h-8 font-medium text-primary hover:text-primary/90"
+                className={cn(
+                  "h-8 font-medium hover:text-primary/90",
+                  activeTab === "recommend"
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                )}
+                onClick={() => {
+                  setActiveTab("recommend");
+                  fetchDiscussions("recommend", 1);
+                }}
               >
                 推荐
               </button>
               <button
                 type="button"
-                className="h-8 font-medium text-muted-foreground hover:text-foreground"
+                className={cn(
+                  "h-8 font-medium hover:text-primary/90",
+                  activeTab === "trace"
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                )}
+                onClick={() => {
+                  setActiveTab("trace");
+                  fetchDiscussions("trace", 1);
+                }}
               >
                 追踪
-              </button>
-              <button
-                type="button"
-                className="h-8 font-medium text-muted-foreground hover:text-foreground"
-              >
-                标签
               </button>
             </div>
 
             <div className="flex items-center space-x-2">
-              <button
-                type="button"
-                className="inline-flex items-center space-x-2 font-medium text-muted-foreground"
-              >
-                热门
-                <ChevronDown className="h-4 w-4" />
-              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex items-center space-x-2 font-medium text-muted-foreground hover:text-foreground"
+                  >
+                    <span>{sortOptions[sortBy]}</span>
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {Object.entries(sortOptions).map(([key, label]) => (
+                    <DropdownMenuItem
+                      key={key}
+                      className={cn(sortBy === key && "bg-accent")}
+                      onClick={() => {
+                        setSortBy(key as "hot" | "latest" | "last_reply");
+                        fetchDiscussions(activeTab, 1);
+                      }}
+                    >
+                      {label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
               <button
                 type="button"
                 className="inline-flex h-8 items-center justify-center font-medium text-muted-foreground"
@@ -124,9 +187,9 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
                 }
               >
                 {displayMode === "grid" ? (
-                  <LayoutGrid className="h-4 w-4" />
+                  <LayoutGrid className="h-5 w-5" />
                 ) : (
-                  <List className="h-4 w-4" />
+                  <List className="h-5 w-5" />
                 )}
               </button>
             </div>

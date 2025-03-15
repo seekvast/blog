@@ -1,13 +1,22 @@
 "use client";
 
 import * as React from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { ThumbsUp, MessageSquare, MoreHorizontal } from "lucide-react";
+import { ThumbsUp, MessageSquare, MoreHorizontal, Edit, Trash2, Flag, AlertTriangle, PinIcon, FolderEdit, Lock } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DiscussionPreview } from "@/components/post/discussion-preview";
 import type { Discussion } from "@/types/discussion";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ReportDialog } from "@/components/report/report-dialog";
 
 interface DiscussionItemProps {
   discussion: Discussion;
@@ -19,6 +28,19 @@ export const DiscussionItem = React.forwardRef<
   HTMLElement,
   DiscussionItemProps
 >(({ discussion, displayMode, isLastItem }, ref) => {
+  const [reportToAdminOpen, setReportToAdminOpen] = useState(false);
+  const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
+
+  const handleReportToAdmin = (reason: string) => {
+    console.log("向管理员举报:", discussion.slug, reason);
+    // 这里可以添加实际的举报API调用
+  };
+
+  const handleReportToKater = (reason: string) => {
+    console.log("向Kater举报:", discussion.slug, reason);
+    // 这里可以添加实际的举报API调用
+  };
+
   return (
     <article ref={ref} className="py-4 w-full">
       <div className="flex space-x-3 w-full">
@@ -52,7 +74,49 @@ export const DiscussionItem = React.forwardRef<
               )}
             </div>
 
-            <MoreHorizontal className="flex-shrink-0 h-4 w-4 cursor-pointer text-muted-foreground" />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <MoreHorizontal className="flex-shrink-0 h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem className="cursor-pointer">
+                  <Edit className="mr-2 h-4 w-4" />
+                  <span>編輯</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer text-destructive">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span>刪除</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => setReportToAdminOpen(true)}
+                >
+                  <Flag className="mr-2 h-4 w-4" />
+                  <span>向管理員檢舉</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="cursor-pointer"
+                  onClick={() => setReportToKaterOpen(true)}
+                >
+                  <AlertTriangle className="mr-2 h-4 w-4" />
+                  <span>向Kater檢舉</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer">
+                  <PinIcon className="mr-2 h-4 w-4" />
+                  <span>設為看板公告</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">
+                  <FolderEdit className="mr-2 h-4 w-4" />
+                  <span>更改子版</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer">
+                  <Lock className="mr-2 h-4 w-4" />
+                  <span>關閉回覆功能</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <div className="mt-1">
@@ -90,6 +154,24 @@ export const DiscussionItem = React.forwardRef<
           </div>
         </div>
       </div>
+
+      {/* 向管理员举报对话框 */}
+      <ReportDialog
+        open={reportToAdminOpen}
+        onOpenChange={setReportToAdminOpen}
+        title="向看板管理員檢舉"
+        onSubmit={handleReportToAdmin}
+        reportType="admin"
+      />
+
+      {/* 向Kater举报对话框 */}
+      <ReportDialog
+        open={reportToKaterOpen}
+        onOpenChange={setReportToKaterOpen}
+        title="向Kater檢舉"
+        onSubmit={handleReportToKater}
+        reportType="kater"
+      />
     </article>
   );
 });

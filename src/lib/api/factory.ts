@@ -90,8 +90,9 @@ export function createApi(options: ApiOptions = {}) {
       manageUser: (data: any) =>
         http.post<BoardUser>(`${prefix}/board/manage-user`, data),
       getBlacklist: (data: any) =>
-        http.get<Pagination<BoardBlacklist>>(`${prefix}/board/blacklist`, data),
+            http.get<Pagination<BoardBlacklist>>(`${prefix}/board/blacklist`, data),
       approve: (data: any) => http.post<any>(`${prefix}/board/approve`, data),
+      join: (data: any) => http.post<any>(`${prefix}/board/join`, data),
       recommend: (params?: QueryParams) => http.get<Board[]>(`${prefix}/board/recommend`, params, { next }),
     },
 
