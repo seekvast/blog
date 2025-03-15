@@ -11,7 +11,13 @@ import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import type { Discussion, Pagination, Post } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ThumbsUp, ThumbsDown, MoreHorizontal } from "lucide-react";
+import {
+  ThumbsUp,
+  ThumbsDown,
+  MoreHorizontal,
+  Star,
+  Bookmark,
+} from "lucide-react";
 import Link from "next/link";
 import { useLoginModal } from "@/components/providers/login-modal-provider";
 import { PostContent } from "@/components/post/post-content";
@@ -20,13 +26,17 @@ import { AttachmentType } from "@/constants/attachment-type";
 import { Preview } from "@/components/editor/Preview"; // Add Preview component import
 import { toast } from "@/components/ui/use-toast"; // Add toast import
 import { useState } from "react"; // Add useState import
+import { useMutation, useQueryClient } from "@tanstack/react-query"; // 添加 React Query 导入
 
 interface DiscussionDetailProps {
-    initialDiscussion: Discussion;
-    board_id: number;
+  initialDiscussion: Discussion;
+  board_id: number;
 }
 
-export function DiscussionDetail({ initialDiscussion, board_id }: DiscussionDetailProps) {
+export function DiscussionDetail({
+  initialDiscussion,
+  board_id,
+}: DiscussionDetailProps) {
   const params = useParams();
   // Ensure params.slug exists and is a string
   const slug = params?.slug as string;
@@ -50,7 +60,45 @@ export function DiscussionDetail({ initialDiscussion, board_id }: DiscussionDeta
     last_page: 0,
     message: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false); // Add isSubmitting state
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false); // 添加书签状态
+  const [isFollowed, setIsFollowed] = useState(false); // 添加关注状态
+
+  const bookmarkMutation = useMutation({
+    mutationFn: () =>
+      api.discussions.saveBookmark({
+        slug: currentDiscussion?.slug,
+      }),
+    onSuccess: (data) => {
+      setIsBookmarked(data.is_bookmarked === "yes");
+    },
+    onError: (error) => {
+      toast({
+        title: "书签操作失败",
+        description: "请稍后重试",
+        variant: "destructive",
+      });
+    },
+  });
+
+  //关注操作
+  const followMutation = useMutation({
+    mutationFn: () =>
+      api.discussions.saveFollow({
+        slug: currentDiscussion?.slug,
+      }),
+    onSuccess: (data) => {
+      setIsFollowed(data.subscription === "follow");
+    },
+    onError: (error) => {
+      toast({
+        title: "失败",
+        description: "请稍后重试",
+        variant: "destructive",
+      });
+    },
+  });
 
   React.useEffect(() => {
     setDiscussion(initialDiscussion);
@@ -70,6 +118,27 @@ export function DiscussionDetail({ initialDiscussion, board_id }: DiscussionDeta
 
     fetchComments();
   }, [currentDiscussion]);
+
+  // 检查书签状态
+  React.useEffect(() => {
+    if (!currentDiscussion || !currentDiscussion.discussion_user || !user)
+      return;
+
+    const checkBookmarkStatus = async () => {
+      setIsBookmarked(
+        currentDiscussion.discussion_user.is_bookmarked === "yes"
+      );
+    };
+
+    const checkFollowStatus = async () => {
+      setIsFollowed(
+        currentDiscussion.discussion_user.subscription === "follow"
+      );
+    };
+
+    checkBookmarkStatus();
+    checkFollowStatus();
+  }, [currentDiscussion, user]);
 
   const handleReplyClick = (comment: Post) => {
     if (!user) {
@@ -122,12 +191,31 @@ export function DiscussionDetail({ initialDiscussion, board_id }: DiscussionDeta
     }
   };
 
+  // 处理书签点击
+  const handleBookmark = () => {
+    if (!user) {
+      openLoginModal();
+      return;
+    }
+
+    bookmarkMutation.mutate();
+  };
+
+  // 处理关注点击
+  const handleFollow = () => {
+    if (!user) {
+      openLoginModal();
+      return;
+    }
+
+    followMutation.mutate();
+  };
+
   if (!currentDiscussion) {
     return null;
   }
 
   return (
-    // <div className=" ml-4 min-w-0 w-0">
     <div className="flex flex-col lg:flex-row gap-4 md:gap-6 mb-4 md:mb-8">
       {/* 主内容区 */}
       <div className="flex-1 min-w-0">
@@ -349,10 +437,47 @@ export function DiscussionDetail({ initialDiscussion, board_id }: DiscussionDeta
 
       {/* 右侧边栏 */}
       <aside className="hidden lg:block sticky top-4 w-full lg:w-40 xl:w-60 flex-shrink-0 pl-8">
-        <Sidebar />
+        <div className="flex w-full flex-col space-y-3">
+          {/* 关注按钮 */}
+          <Button
+            variant={isFollowed ? "default" : "secondary"}
+            className="w-full justify-between"
+            onClick={handleFollow}
+            disabled={followMutation.isPending}
+          >
+            <div className="flex items-center">
+              <Star
+                className={`mr-2 h-4 w-4 ${isFollowed ? "fill-current" : ""}`}
+              />
+              {followMutation.isPending
+                ? "处理中..."
+                : isFollowed
+                ? "已关注"
+                : "关注"}
+            </div>
+          </Button>
+
+          {/* 书签按钮 */}
+          <Button
+            variant={isBookmarked ? "default" : "secondary"}
+            className="w-full justify-between"
+            onClick={handleBookmark}
+            disabled={bookmarkMutation.isPending}
+          >
+            <div className="flex items-center">
+              <Bookmark
+                className={`mr-2 h-4 w-4 ${isBookmarked ? "fill-current" : ""}`}
+              />
+              {bookmarkMutation.isPending
+                ? "处理中..."
+                : isBookmarked
+                ? "已添加书签"
+                : "书签"}
+            </div>
+          </Button>
+        </div>
       </aside>
     </div>
-    // </div>
   );
 }
-const Sidebar = React.memo(DiscussionSidebar);
+// const Sidebar = React.memo(DiscussionSidebar);

@@ -1,7 +1,6 @@
 import { fetchApi } from "./fetch";
 import type { FetchOptions, ApiResult } from "./types";
 import { withCache, generateCacheKey } from "./cache";
-import { handleApiError } from "./error-middleware";
 
 interface ApiOptions extends FetchOptions {
   useCache?: boolean;
@@ -15,7 +14,13 @@ async function handleRequest<T>(
   try {
     return await promise;
   } catch (error) {
-    await handleApiError(error);
+    if (typeof window !== 'undefined') {
+      // 动态导入客户端错误处理函数
+      const { handleApiError } = await import('./error-middleware');
+      await handleApiError(error);
+    } else {
+      console.error('API Error:', error);
+    }
     throw error;
   }
 }

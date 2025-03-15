@@ -1,6 +1,12 @@
 import type { Board, BoardChild, User } from "@/types";
 import type { Response, Pagination } from "./common";
 
+export interface DiscussionUser {
+  id: number;
+  subscription: string;
+  is_bookmarked: string;
+}
+
 export interface Discussion {
   title: string;
   comment_count: number;
@@ -34,6 +40,7 @@ export interface Discussion {
   updated_at: string;
   deleted_at: string | null;
   user: User;
+  discussion_user: DiscussionUser;
 }
 
 export interface Post {
