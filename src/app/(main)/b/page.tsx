@@ -10,6 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { api } from "@/lib/api";
 import { ChevronDown } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Board {
   id: number;
@@ -19,21 +22,13 @@ interface Board {
   slug: string;
   visibility: number;
   is_nsfw: number;
+  is_joined?: number;
   category: {
     id: number;
     name: string;
   };
 }
 
-interface BoardsResponse {
-  current_page: number;
-  items: Board[];
-  from: number;
-  last_page: number;
-  per_page: number;
-  to: number;
-  total: number;
-}
 
 export default function BoardsPage() {
   const { data: session } = useSession();
@@ -45,28 +40,89 @@ export default function BoardsPage() {
   const [activeTab, setActiveTab] = useState<"recommended" | "joined">(
     "recommended"
   );
+  const queryClient = useQueryClient();
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
 
-  const fetchBoards = async (page: number = 1, isReset: boolean = false) => {
+  const { mutate: joinBoard } = useMutation({
+    mutationFn: (boardId: number) => api.boards.join({ board_id: boardId }),
+    onSuccess: (_, boardId) => {
+      // 立即使缓存失效
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+      
+      // 更新本地状态
+      setBoards(currentBoards => 
+        currentBoards.map(board => {
+          if (board.id === boardId) {
+            return { ...board, is_joined: 1 };
+          }
+          return board;
+        })
+      );
+    },
+  });
+
+  const {
+    data: queryData,
+    isLoading: queryLoading,
+    error: queryError,
+  } = useQuery({
+    queryKey: ["boards", activeTab, categoryFilter],
+    queryFn: async () => {
+      return api.boards.list({
+        page: 1,
+        per_page: 10,
+        q: activeTab,
+        ...(categoryFilter && { category_id: categoryFilter }),
+      });
+    },
+  });
+
+  useEffect(() => {
+    setLoading(queryLoading);
+
+    if (queryData && !queryLoading) {
+      setBoards(queryData.items);
+      setCurrentPage(queryData.current_page);
+      setTotalPages(queryData.last_page);
+    }
+
+    if (queryError) {
+      console.error("Failed to fetch boards:", queryError);
+      setError("加载失败，请重试");
+    }
+  }, [queryData, queryLoading, queryError]);
+
+  const fetchBoards = async (
+    page: number = 1,
+    isReset: boolean = false,
+    tabType: "recommended" | "joined" = "recommended"
+  ) => {
     try {
       setLoading(true);
-      const queryParams = new URLSearchParams({
-        page: String(page),
-        per_page: "10",
-        ...(categoryFilter && { category_id: String(categoryFilter) }),
-      }).toString();
 
-      const data = await api.boards.list({
-        page,
-        per_page: 10,
-        // category_id: categoryFilter,
-      });
+      if (tabType !== activeTab) {
+        setActiveTab(tabType);
+        return;
+      }
 
-      setBoards((prevBoards) =>
-        isReset ? data.items : [...prevBoards, ...data.items]
-      );
-      setCurrentPage(data.current_page);
-      setTotalPages(data.last_page);
+      if (page === 1 && queryData) {
+        setBoards(isReset ? queryData.items : [...boards, ...queryData.items]);
+        setCurrentPage(queryData.current_page);
+        setTotalPages(queryData.last_page);
+      } else {
+        const data = await api.boards.list({
+          page,
+          per_page: 10,
+          q: activeTab,
+          ...(categoryFilter && { category_id: categoryFilter }),
+        });
+
+        setBoards((prevBoards) =>
+          isReset ? data.items : [...prevBoards, ...data.items]
+        );
+        setCurrentPage(data.current_page);
+        setTotalPages(data.last_page);
+      }
     } catch (error) {
       console.error("Failed to fetch boards:", error);
     } finally {
@@ -79,16 +135,10 @@ export default function BoardsPage() {
     setLoading(true);
 
     try {
-      const queryParams = new URLSearchParams({
-        page: String(currentPage + 1),
-        per_page: "10",
-        ...(categoryFilter && { category_id: String(categoryFilter) }),
-      }).toString();
-
       const data = await api.boards.list({
         page: currentPage + 1,
         per_page: 10,
-        // category_id: categoryFilter,
+        q: activeTab,
       });
       setBoards((prev) => [...prev, ...data.items]);
       setCurrentPage(data.current_page);
@@ -101,7 +151,7 @@ export default function BoardsPage() {
   };
 
   useEffect(() => {
-    fetchBoards(1, true);
+    fetchBoards(1, true, activeTab);
   }, [categoryFilter, activeTab]);
 
   return (
@@ -181,11 +231,11 @@ export default function BoardsPage() {
                           成人
                         </Badge>
                       )}
-                      {board.visibility === 1 && (
+                      {/* {board.visibility === 1 && (
                         <Badge variant="secondary" className="h-5">
                           私密
                         </Badge>
-                      )}
+                      )} */}
                     </div>
                     <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                       {board.category && <span>{board.category.name}</span>}
@@ -195,9 +245,19 @@ export default function BoardsPage() {
                     </p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm">
-                  加入
-                </Button>
+                {board.is_joined ? (
+                  <Button variant="outline" size="sm">
+                    已加入
+                  </Button>
+                ) : (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => joinBoard(board.id)}
+                  >
+                    加入
+                  </Button>
+                )}
               </div>
             ))}
           </InfiniteScroll>

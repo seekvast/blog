@@ -245,7 +245,7 @@ function BoardContent() {
                 </div>
               </div>
               <div className="mt-1 text-sm text-muted-foreground">
-                {board.visibility === 1 ? "私密" : "公开"} ·{" "}
+                {/* {board.visibility === 1 ? "私密" : "公开"} ·{" "} */}
                 {board.category?.name}
               </div>
               <div className="mt-1 text-sm text-muted-foreground">

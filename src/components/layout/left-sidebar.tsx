@@ -62,7 +62,6 @@ interface LeftSidebarProps extends React.HTMLAttributes<HTMLElement> {}
 
 export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const { t, i18n } = useTranslation();
   const [createBoardOpen, setCreateBoardOpen] = useState(false);
   const { setIsVisible } = usePostEditorStore();

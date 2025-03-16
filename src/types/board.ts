@@ -19,6 +19,7 @@ export interface Board {
   poll_role: number[];
   status: number;
   users_count: number;
+  is_joined: number;
   category: {
     id: number;
     name: string;
