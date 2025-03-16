@@ -56,6 +56,7 @@ export interface QueryParams extends PaginationParams {
   board_id?: number;
   user_hashid?: string;
   q?: string;
+  from?: string;
 }
 
 export interface Attachment {

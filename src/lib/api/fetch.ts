@@ -1,11 +1,11 @@
-import { getSession } from "next-auth/react";
+import { getSession } from "@/lib/auth";
 import { ApiResponse, FetchOptions, ApiError } from "./types";
 import {
   runRequestInterceptors,
   runResponseInterceptors,
   runResponseDataInterceptors,
 } from "./interceptor";
-import { getBaseUrl, API_CONFIG } from './config';
+import { getBaseUrl, API_CONFIG } from "./config";
 
 const { DEFAULT_RETRY, DEFAULT_TIMEOUT } = API_CONFIG;
 
@@ -16,11 +16,10 @@ async function createHeaders(options: FetchOptions): Promise<Headers> {
   if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
   }
-
+  console.log(session, "ssss.........");
   if (session?.user?.token) {
     headers.set("Authorization", `Bearer ${session.user.token}`);
   }
-
   return headers;
 }
 
@@ -48,6 +47,10 @@ async function handleResponse<T>(response: Response): Promise<T> {
       error.message = Object.entries(errorData.message)
         .map(([key, value]) => `${key}: ${value}`)
         .join("\n");
+    } else if (errorData.error) {
+      // 支持标准化的错误格式
+      error.message = errorData.error;
+      error.code = errorData.code;
     } else {
       error.message =
         errorData.message ||
@@ -99,7 +102,7 @@ export async function fetchApi<T>(
   } = options;
 
   // 处理 URL
-  const isServer = typeof window === 'undefined';
+  const isServer = typeof window === "undefined";
   const baseUrl = getBaseUrl(isServer);
 
   // 在服务端必须使用完整 URL，在客户端可以使用相对路径

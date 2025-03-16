@@ -38,12 +38,16 @@ import {
 
 interface DiscussionsListProps {
   initialDiscussions: Pagination<Discussion>;
+  from: string;
 }
 
 type DisplayMode = "list" | "grid";
 type SortBy = "hot" | "create" | "reply";
 
-export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
+export function DiscussionsList({
+  initialDiscussions,
+  from,
+}: DiscussionsListProps) {
   const { isMobile } = useDevice();
   const [displayMode, setDisplayMode] = React.useState<DisplayMode>("grid");
   const [discussions, setDiscussions] = React.useState(initialDiscussions);
@@ -53,9 +57,7 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
   const [activeTab, setActiveTab] = React.useState<"recommend" | "trace">(
     "recommend"
   );
-  const [sortBy, setSortBy] = React.useState<SortBy>(
-    "hot"
-  );
+  const [sortBy, setSortBy] = React.useState<SortBy>("hot");
   const observerRef = useRef<IntersectionObserver>();
 
   const sortOptions = {
@@ -64,11 +66,16 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
     reply: "最后回复",
   };
 
-  const fetchDiscussions = async (tab: "recommend" | "trace", pageNum: number = 1, sort: SortBy = sortBy) => {
-      setLoading(true);
+  const fetchDiscussions = async (
+    tab: "recommend" | "trace",
+    pageNum: number = 1,
+    sort: SortBy = sortBy
+  ) => {
+    setLoading(true);
     try {
       const response = await api.discussions.list({
         q: tab,
+        from,
         page: pageNum,
         per_page: 10,
         sort,
@@ -118,45 +125,49 @@ export function DiscussionsList({ initialDiscussions }: DiscussionsListProps) {
       <div className="bg-background">
         <div className="mx-auto">
           <div className="flex h-[40px] items-center justify-between lg:border-b">
-            <div className="flex items-center space-x-4 lg:space-x-8">
-              <button
-                type="button"
-                className={cn(
-                  "h-8 font-medium hover:text-primary/90",
-                  activeTab === "recommend"
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                )}
-                onClick={() => {
-                  setActiveTab("recommend");
-                  fetchDiscussions("recommend", 1);
-                }}
-              >
-                推荐
-              </button>
-              <button
-                type="button"
-                className={cn(
-                  "h-8 font-medium hover:text-primary/90",
-                  activeTab === "trace"
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                )}
-                onClick={() => {
-                  setActiveTab("trace");
-                  fetchDiscussions("trace", 1);
-                }}
-              >
-                追踪
-              </button>
-            </div>
+            {from === "index" ? (
+              <div className="flex items-center space-x-4 lg:space-x-8">
+                <button
+                  type="button"
+                  className={cn(
+                    "h-8 font-medium hover:text-primary/90",
+                    activeTab === "recommend"
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  )}
+                  onClick={() => {
+                    setActiveTab("recommend");
+                    fetchDiscussions("recommend", 1);
+                  }}
+                >
+                  推荐
+                </button>
+                <button
+                  type="button"
+                  className={cn(
+                    "h-8 font-medium hover:text-primary/90",
+                    activeTab === "trace"
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  )}
+                  onClick={() => {
+                    setActiveTab("trace");
+                    fetchDiscussions("trace", 1);
+                  }}
+                >
+                  追踪
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4 lg:space-x-8"></div>
+            )}
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
-                    className="inline-flex items-center space-x-2 font-medium text-muted-foreground"
+                    className="inline-flex items-center space-x-1 font-medium text-muted-foreground"
                   >
                     <span>{sortOptions[sortBy]}</span>
                     <ChevronDown className="h-4 w-4" />

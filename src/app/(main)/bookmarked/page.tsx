@@ -9,6 +9,7 @@ async function getDiscussions() {
     const response = await api.discussions.list({ 
       page: 1, 
       per_page: 10,
+      from: 'bookmarked'
     });
     return response;
   } catch (error) {
@@ -27,5 +28,5 @@ async function getDiscussions() {
 
 export default async function HomePage() {
   const initialDiscussions = await getDiscussions();
-  return <DiscussionsList initialDiscussions={initialDiscussions} from="index" />;
+  return <DiscussionsList initialDiscussions={initialDiscussions} from="bookmarked" />;
 }

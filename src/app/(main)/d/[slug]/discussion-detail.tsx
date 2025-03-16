@@ -62,8 +62,12 @@ export function DiscussionDetail({
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false); // 添加书签状态
-  const [isFollowed, setIsFollowed] = useState(false); // 添加关注状态
+  const [isBookmarked, setIsBookmarked] = useState(
+    initialDiscussion?.discussion_user?.is_bookmarked === "yes"
+  );
+  const [isFollowed, setIsFollowed] = useState(
+    initialDiscussion?.discussion_user?.subscription === "follow"
+  );
 
   const bookmarkMutation = useMutation({
     mutationFn: () =>
@@ -121,8 +125,9 @@ export function DiscussionDetail({
 
   // 检查书签状态
   React.useEffect(() => {
-    if (!currentDiscussion || !currentDiscussion.discussion_user || !user)
+    if (!currentDiscussion || !currentDiscussion.discussion_user || !user) {
       return;
+    }
 
     const checkBookmarkStatus = async () => {
       setIsBookmarked(
@@ -468,11 +473,7 @@ export function DiscussionDetail({
               <Bookmark
                 className={`mr-2 h-4 w-4 ${isBookmarked ? "fill-current" : ""}`}
               />
-              {bookmarkMutation.isPending
-                ? "处理中..."
-                : isBookmarked
-                ? "已添加书签"
-                : "书签"}
+              {isBookmarked ? "已添加书签" : "书签"}
             </div>
           </Button>
         </div>

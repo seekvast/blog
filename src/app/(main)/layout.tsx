@@ -44,7 +44,7 @@ export default function MainLayout({
     getSidebarConfig();
 
   // 确定是否显示右侧边栏
-  const showDefaultSidebarPaths = ["/", "/search"];
+  const showDefaultSidebarPaths = ["/", "/following", "/bookmarked"];
   const showRightSidebar = pathname
     ? showDefaultSidebarPaths.includes(pathname)
     : false;

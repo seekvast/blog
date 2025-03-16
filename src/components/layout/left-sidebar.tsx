@@ -53,7 +53,7 @@ const mainNavItems: NavItem[] = [
   },
   {
     title: "书签",
-    href: "/bookmarks",
+    href: "/bookmarked",
     icon: Bookmark,
   },
 ];

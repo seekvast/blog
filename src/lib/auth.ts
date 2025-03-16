@@ -2,7 +2,6 @@ import { getServerSession } from "next-auth/next";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { api } from "./api";
-import type { LoginResponse } from "@/types/user";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -93,7 +92,12 @@ export const authOptions: NextAuthOptions = {
 };
 
 export async function getSession() {
-  return await getServerSession(authOptions);
+  if (typeof window === "undefined") {
+    return await getServerSession(authOptions);
+  } else {
+    const { getSession } = await import("next-auth/react");
+    return await getSession();
+  }
 }
 
 // 创建一个带有认证token的fetch函数
