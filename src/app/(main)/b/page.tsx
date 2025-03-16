@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,9 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { api } from "@/lib/api";
 import { ChevronDown } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { useMutation } from "@tanstack/react-query";
-import { useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface Board {
   id: number;
@@ -29,29 +27,20 @@ interface Board {
   };
 }
 
-
 export default function BoardsPage() {
   const { data: session } = useSession();
   const [boards, setBoards] = useState<Board[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"recommended" | "joined">(
-    "recommended"
-  );
+  const [activeTab, setActiveTab] = useState<"recommended" | "joined">("recommended");
   const queryClient = useQueryClient();
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
 
   const { mutate: joinBoard } = useMutation({
     mutationFn: (boardId: number) => api.boards.join({ board_id: boardId }),
     onSuccess: (_, boardId) => {
-      // 立即使缓存失效
       queryClient.invalidateQueries({ queryKey: ["boards"] });
-      
-      // 更新本地状态
-      setBoards(currentBoards => 
-        currentBoards.map(board => {
+      setBoards((currentBoards) =>
+        currentBoards.map((board) => {
           if (board.id === boardId) {
             return { ...board, is_joined: 1 };
           }
@@ -62,97 +51,47 @@ export default function BoardsPage() {
   });
 
   const {
-    data: queryData,
-    isLoading: queryLoading,
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
     error: queryError,
-  } = useQuery({
+  } = useInfiniteQuery({
     queryKey: ["boards", activeTab, categoryFilter],
-    queryFn: async () => {
+    queryFn: async ({ pageParam = 1 }) => {
       return api.boards.list({
-        page: 1,
+        page: pageParam,
         per_page: 10,
         q: activeTab,
         ...(categoryFilter && { category_id: categoryFilter }),
       });
     },
+    getNextPageParam: (data) => {
+      return data.current_page < data.last_page ? data.current_page + 1 : undefined;
+    },
+    initialPageParam: 1,
   });
 
   useEffect(() => {
-    setLoading(queryLoading);
-
-    if (queryData && !queryLoading) {
-      setBoards(queryData.items);
-      setCurrentPage(queryData.current_page);
-      setTotalPages(queryData.last_page);
+    if (data) {
+      // 合并所有页面的数据
+      const allBoards = data.pages.flatMap((page) => page.items);
+      setBoards(allBoards);
     }
 
-    if (queryError) {
+    if (isError && queryError) {
+      setError("加载失败，请重试");
       console.error("Failed to fetch boards:", queryError);
-      setError("加载失败，请重试");
     }
-  }, [queryData, queryLoading, queryError]);
+  }, [data, isLoading, isFetchingNextPage, isError, queryError]);
 
-  const fetchBoards = async (
-    page: number = 1,
-    isReset: boolean = false,
-    tabType: "recommended" | "joined" = "recommended"
-  ) => {
-    try {
-      setLoading(true);
-
-      if (tabType !== activeTab) {
-        setActiveTab(tabType);
-        return;
-      }
-
-      if (page === 1 && queryData) {
-        setBoards(isReset ? queryData.items : [...boards, ...queryData.items]);
-        setCurrentPage(queryData.current_page);
-        setTotalPages(queryData.last_page);
-      } else {
-        const data = await api.boards.list({
-          page,
-          per_page: 10,
-          q: activeTab,
-          ...(categoryFilter && { category_id: categoryFilter }),
-        });
-
-        setBoards((prevBoards) =>
-          isReset ? data.items : [...prevBoards, ...data.items]
-        );
-        setCurrentPage(data.current_page);
-        setTotalPages(data.last_page);
-      }
-    } catch (error) {
-      console.error("Failed to fetch boards:", error);
-    } finally {
-      setLoading(false);
+  const handleLoadMore = () => {
+    if (!isFetchingNextPage && hasNextPage) {
+      fetchNextPage();
     }
   };
-
-  const handleLoadMore = async () => {
-    if (loading || currentPage >= totalPages) return;
-    setLoading(true);
-
-    try {
-      const data = await api.boards.list({
-        page: currentPage + 1,
-        per_page: 10,
-        q: activeTab,
-      });
-      setBoards((prev) => [...prev, ...data.items]);
-      setCurrentPage(data.current_page);
-      setTotalPages(data.last_page);
-    } catch (err) {
-      setError("加载失败，请重试");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchBoards(1, true, activeTab);
-  }, [categoryFilter, activeTab]);
 
   return (
     <div className="flex flex-col">
@@ -197,22 +136,19 @@ export default function BoardsPage() {
 
       {/* 看板列表 */}
       <div className="mx-auto w-full">
-        {loading && boards.length === 0 ? (
+        {isLoading && boards.length === 0 ? (
           <div className="flex justify-center py-8">
             <div className="animate-spin" />
           </div>
         ) : (
           <InfiniteScroll
-            loading={loading}
-            hasMore={currentPage < totalPages}
+            loading={isFetchingNextPage}
+            hasMore={hasNextPage}
             onLoadMore={handleLoadMore}
             className="divide-y"
           >
             {boards.map((board) => (
-              <div
-                key={board.id}
-                className="flex items-center justify-between py-4"
-              >
+              <div key={board.id} className="flex items-center justify-between py-4">
                 <div className="flex items-center space-x-4">
                   <Avatar className="h-14 w-14">
                     <AvatarImage src={board.avatar} alt={board.name} />
