@@ -10,7 +10,21 @@ import { Badge } from "@/components/ui/badge";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { api } from "@/lib/api";
 import { ChevronDown } from "lucide-react";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Board {
   id: number;
@@ -31,9 +45,18 @@ export default function BoardsPage() {
   const { data: session } = useSession();
   const [boards, setBoards] = useState<Board[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"recommended" | "joined">("recommended");
+  const [activeTab, setActiveTab] = useState<"recommended" | "joined">(
+    "recommended"
+  );
   const queryClient = useQueryClient();
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
+
+  // 使用 useQuery 获取分类数据
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => api.common.categories(),
+    staleTime: 5 * 60 * 1000, // 5分钟内不重新获取
+  });
 
   const { mutate: joinBoard } = useMutation({
     mutationFn: (boardId: number) => api.boards.join({ board_id: boardId }),
@@ -69,7 +92,9 @@ export default function BoardsPage() {
       });
     },
     getNextPageParam: (data) => {
-      return data.current_page < data.last_page ? data.current_page + 1 : undefined;
+      return data.current_page < data.last_page
+        ? data.current_page + 1
+        : undefined;
     },
     initialPageParam: 1,
   });
@@ -123,13 +148,38 @@ export default function BoardsPage() {
                 已加入
               </button>
             </div>
-            <button
-              className="inline-flex items-center font-medium text-muted-foreground space-x-2 hover:bg-transparent hover:text-foreground"
-              onClick={() => setCategoryFilter(null)}
-            >
-              全部
-              <ChevronDown className="h-4 w-4" />
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="inline-flex items-center font-medium text-muted-foreground space-x-2 hover:bg-transparent hover:text-foreground ml-4">
+                  {categoryFilter
+                    ? categories.find((c) => c.id === categoryFilter)?.name ||
+                      "加载中..."
+                    : "全部"}
+                  <ChevronDown className="h-4 w-4 ml-1" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuLabel>选择分类</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => setCategoryFilter(null)}>
+                    全部
+                  </DropdownMenuItem>
+                  {categoriesLoading ? (
+                    <DropdownMenuItem disabled>加载中...</DropdownMenuItem>
+                  ) : (
+                    categories.map((category) => (
+                      <DropdownMenuItem
+                        key={category.id}
+                        onClick={() => setCategoryFilter(category.id)}
+                      >
+                        {category.name}
+                      </DropdownMenuItem>
+                    ))
+                  )}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
@@ -148,7 +198,10 @@ export default function BoardsPage() {
             className="divide-y"
           >
             {boards.map((board) => (
-              <div key={board.id} className="flex items-center justify-between py-4">
+              <div
+                key={board.id}
+                className="flex items-center justify-between py-4"
+              >
                 <div className="flex items-center space-x-4">
                   <Avatar className="h-14 w-14">
                     <AvatarImage src={board.avatar} alt={board.name} />
