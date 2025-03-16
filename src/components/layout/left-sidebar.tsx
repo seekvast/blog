@@ -81,7 +81,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   });
 
   const { mutate: joinBoard } = useMutation({
-    mutationFn: (boardName: string) => api.boards.join({ name: boardName }),
+    mutationFn: (boardId: number) => api.boards.join({ board_id: boardId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
     },
@@ -197,7 +197,10 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                 <Button
                   size="sm"
                   className="rounded-full"
-                  onClick={() => joinBoard(board.name)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    joinBoard(board.id);
+                  }}
                 >
                   加入
                 </Button>

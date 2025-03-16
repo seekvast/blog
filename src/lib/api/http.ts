@@ -14,12 +14,19 @@ async function handleRequest<T>(
   try {
     return await promise;
   } catch (error) {
-    if (typeof window !== 'undefined') {
-      // 动态导入客户端错误处理函数
-      const { handleApiError } = await import('./error-middleware');
+    if (typeof window !== "undefined") {
+      // 客户端环境
+      const { handleApiError } = await import("./error-middleware");
       await handleApiError(error);
     } else {
-      console.error('API Error:', error);
+      // 服务端环境
+      const { handleServerApiError } = await import(
+        "./server-error-middleware"
+      );
+      const formattedError = await handleServerApiError(error);
+      if (formattedError) {
+        Object.assign(error, formattedError);
+      }
     }
     throw error;
   }

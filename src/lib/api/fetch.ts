@@ -16,7 +16,6 @@ async function createHeaders(options: FetchOptions): Promise<Headers> {
   if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
   }
-  console.log(session, "ssss.........");
   if (session?.user?.token) {
     headers.set("Authorization", `Bearer ${session.user.token}`);
   }
@@ -108,7 +107,10 @@ export async function fetchApi<T>(
   // 在服务端必须使用完整 URL，在客户端可以使用相对路径
   const url = isServer
     ? new URL(endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`)
-    : new URL(endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`, window.location.origin);
+    : new URL(
+        endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`,
+        window.location.origin
+      );
   // 添加查询参数
   if (params) {
     Object.entries(params).forEach(([key, value]) => {

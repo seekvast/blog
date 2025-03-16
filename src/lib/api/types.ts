@@ -18,6 +18,40 @@ export interface ApiError extends Error {
   data?: any;
 }
 
+export class ServerError extends Error implements ApiError {
+  status?: number;
+  code?: number;
+  data?: any;
+
+  constructor(
+    message: string,
+    options?: { status?: number; code?: number; data?: any }
+  ) {
+    super(message);
+    this.name = "ServerError";
+    this.status = options?.status;
+    this.code = options?.code;
+    this.data = options?.data;
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      status: this.status,
+      code: this.code,
+      data: this.data,
+    };
+  }
+}
+
+export function createServerError(
+  message: string,
+  options?: { status?: number; code?: number; data?: any }
+): ServerError {
+  return new ServerError(message, options);
+}
+
 export interface FetchOptions extends RequestInit {
   params?: Record<string, any>;
   retry?: number;
