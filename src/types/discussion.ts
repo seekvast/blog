@@ -7,7 +7,14 @@ export interface DiscussionUser {
   is_bookmarked: string;
 }
 
+export interface PostVote {
+  id: number;
+  post_id: number;
+  vote: string;
+}
+
 export interface Discussion {
+  id: number;
   title: string;
   comment_count: number;
   participant_count: number;
@@ -33,6 +40,8 @@ export interface Discussion {
   up_votes: number;
   down_votes: number;
   hotness: number;
+  is_voted: boolean;
+  votes_count: number;
   main_post: Post;
   board: Board;
   board_child: BoardChild;
@@ -41,6 +50,7 @@ export interface Discussion {
   deleted_at: string | null;
   user: User;
   discussion_user: DiscussionUser;
+  user_voted: PostVote;
 }
 
 export interface Post {
