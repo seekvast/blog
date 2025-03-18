@@ -176,7 +176,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                   <div>
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`/b/${board.name}`}
+                        href={`/b/${board.slug}`}
                         className="text-sm font-medium"
                       >
                         {board.name}

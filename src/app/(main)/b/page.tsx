@@ -150,27 +150,46 @@ export default function BoardsPage() {
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="inline-flex items-center font-medium text-muted-foreground space-x-2 hover:bg-transparent hover:text-foreground ml-4">
+                <span className="inline-flex items-center font-medium text-muted-foreground space-x-2  ml-4 cursor-pointer">
                   {categoryFilter
                     ? categories.find((c) => c.id === categoryFilter)?.name ||
                       "加载中..."
                     : "全部"}
                   <ChevronDown className="h-4 w-4 ml-1" />
-                </button>
+                </span>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuLabel>选择分类</DropdownMenuLabel>
+              <DropdownMenuContent className="min-w-[120px]" align="end">
+                <DropdownMenuLabel className="text-center">
+                  选择分类
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <DropdownMenuItem onClick={() => setCategoryFilter(null)}>
+                  <DropdownMenuItem
+                    className={`justify-center text-center !cursor-pointer ${
+                      categoryFilter === null
+                        ? "bg-accent text-accent-foreground font-medium"
+                        : ""
+                    }`}
+                    onClick={() => setCategoryFilter(null)}
+                  >
                     全部
                   </DropdownMenuItem>
                   {categoriesLoading ? (
-                    <DropdownMenuItem disabled>加载中...</DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled
+                      className="justify-center text-center !cursor-pointer"
+                    >
+                      加载中...
+                    </DropdownMenuItem>
                   ) : (
                     categories.map((category) => (
                       <DropdownMenuItem
                         key={category.id}
+                        className={`justify-center text-center !cursor-pointer ${
+                          categoryFilter === category.id
+                            ? "bg-accent text-accent-foreground font-medium"
+                            : ""
+                        }`}
                         onClick={() => setCategoryFilter(category.id)}
                       >
                         {category.name}
