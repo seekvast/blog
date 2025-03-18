@@ -1,9 +1,9 @@
 import * as React from "react";
 import { Badge } from "@/components/ui/badge";
-import { PollData } from "./types";
+import { PollForm } from "@/validations/discussion";
 
 interface PollPreviewProps {
-  pollData: PollData | null;
+  pollData: PollForm | null;
   onDelete: () => void;
   onEdit: () => void;
 }
@@ -14,6 +14,10 @@ export const PollPreview: React.FC<PollPreviewProps> = ({
   onEdit,
 }) => {
   if (!pollData) return null;
+
+  const isMultipleChoice = pollData.is_multiple === 1;
+  const showVoters = pollData.show_voter === 1;
+  const hasDeadline = pollData.is_timed === 1;
 
   return (
     <div className="mb-4 border rounded-lg p-4 bg-gray-50 relative">
@@ -59,21 +63,21 @@ export const PollPreview: React.FC<PollPreviewProps> = ({
           ))}
         </div>
         <div className="flex flex-wrap gap-2 text-sm text-gray-500">
-          {pollData.isMultipleChoice && (
+          {isMultipleChoice && (
             <Badge variant="secondary" className="text-primary">
               多选
             </Badge>
           )}
-          {pollData.showVoters && (
+          {showVoters && (
             <Badge variant="secondary" className="text-primary">
               允许用户查看投票人
             </Badge>
           )}
-          {pollData.hasDeadline && pollData.startTime && pollData.endTime && (
+          {hasDeadline && pollData.start_time && pollData.end_time && (
             <Badge variant="secondary" className="text-primary">
               <span>限时投票：</span>
-              {new Date(pollData.startTime).toLocaleString()} -{" "}
-              {new Date(pollData.endTime).toLocaleString()}
+              {new Date(pollData.start_time).toLocaleString()} -{" "}
+              {new Date(pollData.end_time).toLocaleString()}
             </Badge>
           )}
         </div>

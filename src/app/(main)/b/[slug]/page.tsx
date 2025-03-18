@@ -12,11 +12,17 @@ import { cn } from "@/lib/utils";
 import { Suspense } from "react";
 import { api } from "@/lib/api";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
-import { Board, BoardChild } from "@/types/board";
+import { Board, BoardChild, BoardRule } from "@/types/board";
 import { Discussion } from "@/types/discussion";
 import { DiscussionItem } from "@/components/home/discussion-item";
 import { InfiniteScroll } from "@/components/common/infinite-scroll";
 import { BoardUserRole } from "@/constants/board-user-role";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +32,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 
 type SortBy = "hot" | "create" | "reply";
 
@@ -60,6 +65,9 @@ function BoardContent() {
   const observerRef = useRef<IntersectionObserver>();
   const [hasMore, setHasMore] = useState(true);
   const [displayMode, setDisplayMode] = useState<"grid" | "list">("grid");
+  const [activeTab, setActiveTab] = useState<"posts" | "rules" | "children">(
+    "posts"
+  );
   const sortOptions = {
     hot: "热门",
     create: "最新发表",
@@ -93,23 +101,19 @@ function BoardContent() {
       if (!board?.id) return;
       const data = await api.boards.getChildren(board.id);
       setBoardChildren(data.items);
-      if (data.items.length > 0 && !selectedChildId) {
-        setSelectedChildId(data.items[0].id);
-      }
     } catch (error) {
-      console.error("Failed to fetch board children:", error);
       setError("获取子板块失败");
     }
   };
 
-  const fetchDiscussions = async (sortBy: SortBy="hot") => {
+  const fetchDiscussions = async (sortBy: SortBy = "hot") => {
     try {
       setDiscussionsLoading(true);
       if (!board?.id) return;
 
       const data = await api.discussions.list({
         board_id: board.id,
-        board_child_id: selectedChildId || 0,
+        board_child_id: selectedChildId || undefined,
         page: currentPage,
         per_page: 10,
         sort: sortBy,
@@ -156,6 +160,21 @@ function BoardContent() {
       fetchDiscussions();
     }
   }, [currentPage]);
+
+  // 使用 useQuery 获取规则列表
+  const {
+    data: rules = [],
+    isLoading: rulesLoading,
+    isError: rulesError,
+  } = useQuery<BoardRule[]>({
+    queryKey: ["board-rules", board?.id],
+    queryFn: () => {
+      if (!board?.id) return [];
+      return api.boards.getRules({ board_id: board.id });
+    },
+    enabled: !!board?.id && activeTab === "rules",
+    staleTime: 5 * 60 * 1000,
+  });
 
   if (loading) {
     return (
@@ -252,123 +271,194 @@ function BoardContent() {
                 <div className="flex items-center space-x-4 lg:space-x-8">
                   <button
                     type="button"
-                    className="h-8 font-medium text-primary hover:bg-transparent hover:text-primary"
+                    className={`h-8 font-medium ${
+                      activeTab === "posts"
+                        ? "text-primary hover:bg-transparent hover:text-primary"
+                        : "text-muted-foreground hover:bg-transparent hover:text-foreground"
+                    }`}
+                    onClick={() => setActiveTab("posts")}
                   >
                     文章
                   </button>
                   <button
                     type="button"
-                    className="h-8 font-medium text-muted-foreground hover:bg-transparent hover:text-foreground"
+                    className={`h-8 font-medium ${
+                      activeTab === "rules"
+                        ? "text-primary hover:bg-transparent hover:text-primary"
+                        : "text-muted-foreground hover:bg-transparent hover:text-foreground"
+                    }`}
+                    onClick={() => setActiveTab("rules")}
                   >
                     规则
                   </button>
                   <button
                     type="button"
-                    className="h-8 font-medium text-muted-foreground hover:bg-transparent hover:text-foreground"
+                    className={`h-8 font-medium ${
+                      activeTab === "children"
+                        ? "text-primary hover:bg-transparent hover:text-primary"
+                        : "text-muted-foreground hover:bg-transparent hover:text-foreground"
+                    }`}
+                    onClick={() => setActiveTab("children")}
                   >
                     子版
                   </button>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <div
-                        className="inline-flex items-center space-x-1 font-medium text-muted-foreground cursor-pointer"
-                      >
-                        <span>{sortOptions[sortBy]}</span>
-                        <ChevronDown className="h-4 w-4" />
-                      </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {Object.entries(sortOptions).map(([key, label]) => (
-                        <DropdownMenuItem
-                          key={key}
-                          className={cn(sortBy === key && "bg-accent", "cursor-pointer")}
-                          onClick={() => {
-                            setSortBy(key as SortBy);
-                            fetchDiscussions(key as SortBy);
-                          }}
-                        >
-                          {label}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  {/* <button
-                    type="button"
-                    className="inline-flex items-center space-x-2 font-medium text-muted-foreground"
-                  >
-                    热门
-                    <ChevronDown className="h-4 w-4" />
-                  </button> */}
-                  <button
-                    type="button"
-                    className="h-8 text-muted-foreground hover:bg-transparent hover:text-foreground"
-                    onClick={() =>
-                      setDisplayMode((prev) =>
-                        prev === "grid" ? "list" : "grid"
-                      )
-                    }
-                  >
-                    {displayMode === "grid" ? (
-                      <LayoutGrid className="h-5 w-5" />
-                    ) : (
-                      <List className="h-5 w-5" />
-                    )}
-                  </button>
-                </div>
+                {activeTab === "posts" && (
+                  <div className="flex items-center space-x-2">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <div className="inline-flex items-center space-x-1 font-medium text-muted-foreground cursor-pointer">
+                          <span>{sortOptions[sortBy]}</span>
+                          <ChevronDown className="h-4 w-4" />
+                        </div>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {Object.entries(sortOptions).map(([key, label]) => (
+                          <DropdownMenuItem
+                            key={key}
+                            className={cn(
+                              sortBy === key && "bg-accent",
+                              "cursor-pointer"
+                            )}
+                            onClick={() => {
+                              setSortBy(key as SortBy);
+                              fetchDiscussions(key as SortBy);
+                            }}
+                          >
+                            {label}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <button
+                      type="button"
+                      className="h-8 text-muted-foreground hover:bg-transparent hover:text-foreground"
+                      onClick={() =>
+                        setDisplayMode((prev) =>
+                          prev === "grid" ? "list" : "grid"
+                        )
+                      }
+                    >
+                      {displayMode === "grid" ? (
+                        <LayoutGrid className="h-5 w-5" />
+                      ) : (
+                        <List className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* 子导航 */}
           <div className="flex items-center space-x-4 py-3 text-sm">
-            <Badge
-              variant={!selectedChildId ? "default" : "secondary"}
-              className={`cursor-pointer hover:bg-primary/90 ${
-                !selectedChildId ? "" : "hover:bg-secondary/80"
-              }`}
-              onClick={() => setSelectedChildId(null)}
-            >
-              全部
-            </Badge>
-            {boardChildren.map((child) => (
-              <Badge
-                key={child.id}
-                variant={selectedChildId === child.id ? "default" : "secondary"}
-                className={`cursor-pointer hover:bg-primary/90 ${
-                  selectedChildId === child.id ? "" : "hover:bg-secondary/80"
-                }`}
-                onClick={() => setSelectedChildId(child.id)}
-              >
-                {child.name}
-              </Badge>
-            ))}
+            {activeTab === "posts" && (
+              <>
+                <Badge
+                  variant={!selectedChildId ? "default" : "secondary"}
+                  className={`cursor-pointer hover:bg-primary/90 ${
+                    !selectedChildId ? "" : "hover:bg-secondary/80"
+                  }`}
+                  onClick={() => setSelectedChildId(null)}
+                >
+                  全部
+                </Badge>
+                {boardChildren.map((child) => (
+                  <Badge
+                    key={child.id}
+                    variant={
+                      selectedChildId === child.id ? "default" : "secondary"
+                    }
+                    className={`cursor-pointer hover:bg-primary/90 ${
+                      selectedChildId === child.id
+                        ? ""
+                        : "hover:bg-secondary/80"
+                    }`}
+                    onClick={() => setSelectedChildId(child.id)}
+                  >
+                    {child.name}
+                  </Badge>
+                ))}
+              </>
+            )}
           </div>
         </div>
       </div>
 
-      {/* 帖子列表 */}
+      {/* 帖子列表或规则列表 */}
       <div className="mx-auto w-full">
-        <InfiniteScroll
-          loading={discussionsLoading}
-          hasMore={hasMore}
-          onLoadMore={handleLoadMore}
-          currentPage={currentPage}
-          className="space-y-4 py-4 divide-y"
-        >
-          {discussions.map((discussion) => (
-            <DiscussionItem
-              key={discussion.first_post_id}
-              discussion={discussion}
-              displayMode={displayMode}
-            />
-          ))}
-        </InfiniteScroll>
-      </div>
-      {/* 4. 添加加载状态指示器 */}
-      <div className="h-10 flex items-center justify-center text-muted-foreground">
-        {!hasMore && discussions.length > 0 && <div>No more items</div>}
+        {activeTab === "posts" && (
+          <>
+            <InfiniteScroll
+              loading={discussionsLoading}
+              hasMore={hasMore}
+              onLoadMore={handleLoadMore}
+              currentPage={currentPage}
+              className="space-y-4 py-4 divide-y"
+            >
+              {discussions.map((discussion) => (
+                <DiscussionItem
+                  key={discussion.first_post_id}
+                  discussion={discussion}
+                  displayMode={displayMode}
+                />
+              ))}
+            </InfiniteScroll>
+            {/* 4. 添加加载状态指示器 */}
+            <div className="h-10 flex items-center justify-center text-muted-foreground">
+              {!hasMore && totalPages > 1 && <div>No more items</div>}
+            </div>
+          </>
+        )}
+
+        {activeTab === "rules" && (
+          <div className="py-4">
+            {rulesLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : rulesError ? (
+              <div className="text-center py-8 text-red-500">
+                获取规则列表失败，请重试
+              </div>
+            ) : rules.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                暂无规则
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {rules.map((rule, index) => (
+                  <div key={rule.id || index} className="border-b pb-4">
+                    <h3 className="text-lg font-medium mb-2">{rule.title}</h3>
+                    <p className="text-muted-foreground">{rule.content}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "children" && (
+          <div className="py-4">
+            {boardChildren.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                暂无子版块
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {boardChildren.map((child) => (
+                  <div key={child.id} className="border-b pb-4">
+                    <h3 className="text-lg font-medium mb-2">{child.name}</h3>
+                    <span className="text-sm text-muted-foreground">
+                      100 篇文章
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

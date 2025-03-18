@@ -148,7 +148,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
         />
 
         {/* 推荐看板 */}
-        <div className="my-4">
+        <div>
           <div className="flex items-center justify-between px-2 mb-2">
             <h3 className="text-sm font-medium">推薦看板</h3>
             <Button variant="ghost" size="icon" className="h-6 w-6">
@@ -210,17 +210,17 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
 
         {/* 页脚链接 */}
         <div className="mt-auto space-y-4">
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-            <Link href="#" className="hover:text-foreground">
+          <div className="flex w-full text-sm text-muted-foreground">
+            <Link href="#" className="flex-1 text-center hover:text-foreground">
               {t("common.termsOfService", { defaultValue: "服务条款" })}
             </Link>
-            <Link href="#" className="hover:text-foreground">
+            <Link href="#" className="flex-1 text-center hover:text-foreground">
               {t("common.privacyPolicy", { defaultValue: "隐私政策" })}
             </Link>
-            <Link href="#" className="hover:text-foreground">
+            <Link href="#" className="flex-1 text-center hover:text-foreground">
               {t("common.contactUs", { defaultValue: "联系我们" })}
             </Link>
-            <Link href="#" className="hover:text-foreground">
+            <Link href="#" className="flex-1 text-center hover:text-foreground">
               {t("common.helpCenter", { defaultValue: "帮助中心" })}
             </Link>
           </div>

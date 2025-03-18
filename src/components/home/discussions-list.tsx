@@ -229,7 +229,7 @@ export function DiscussionsList({
 
       {/* 加载状态指示器 */}
       <div className="h-10 flex items-center justify-center text-muted-foreground">
-        {!hasMore && <div>No more items</div>}
+        {!hasMore && discussions.last_page > 1 && <div>No more items</div>}
       </div>
     </div>
   );
