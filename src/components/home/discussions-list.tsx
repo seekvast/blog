@@ -165,19 +165,18 @@ export function DiscussionsList({
             <div className="flex items-center space-x-3">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="inline-flex items-center space-x-1 font-medium text-muted-foreground"
+                  <div
+                    className="inline-flex items-center space-x-1 font-medium text-muted-foreground cursor-pointer"
                   >
                     <span>{sortOptions[sortBy]}</span>
                     <ChevronDown className="h-4 w-4" />
-                  </button>
+                  </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {Object.entries(sortOptions).map(([key, label]) => (
                     <DropdownMenuItem
                       key={key}
-                      className={cn(sortBy === key && "bg-accent")}
+                      className={cn(sortBy === key && "bg-accent", "cursor-pointer")}
                       onClick={() => {
                         setSortBy(key as SortBy);
                         fetchDiscussions(activeTab, 1, key as SortBy);

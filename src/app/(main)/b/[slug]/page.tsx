@@ -3,29 +3,12 @@
 import * as React from "react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
-import { useTranslation } from "react-i18next";
-import {
-  MessageSquare,
-  Heart,
-  Share2,
-  MoreHorizontal,
-  LayoutGrid,
-  List,
-  ChevronDown,
-  Loader2,
-} from "lucide-react";
+import { LayoutGrid, List, ChevronDown, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { Suspense } from "react";
 import { api } from "@/lib/api";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
@@ -33,6 +16,19 @@ import { Board, BoardChild } from "@/types/board";
 import { Discussion } from "@/types/discussion";
 import { DiscussionItem } from "@/components/home/discussion-item";
 import { InfiniteScroll } from "@/components/common/infinite-scroll";
+import { BoardUserRole } from "@/constants/board-user-role";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+
+type SortBy = "hot" | "create" | "reply";
 
 export default function BoardPage() {
   return (
@@ -61,37 +57,20 @@ function BoardContent() {
   const [boardChildren, setBoardChildren] = useState<BoardChild[]>([]);
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { t } = useTranslation();
   const observerRef = useRef<IntersectionObserver>();
   const [hasMore, setHasMore] = useState(true);
   const [displayMode, setDisplayMode] = useState<"grid" | "list">("grid");
-
+  const sortOptions = {
+    hot: "热门",
+    create: "最新发表",
+    reply: "最后回复",
+  };
+  const [sortBy, setSortBy] = useState<SortBy>("hot");
   const handleLoadMore = useCallback(() => {
     if (!discussionsLoading && hasMore) {
       setCurrentPage((prev) => prev + 1);
     }
   }, [discussionsLoading, hasMore]);
-
-  const lastItemRef = useCallback(
-    (node: HTMLElement | null) => {
-      if (discussionsLoading) return;
-
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-
-      observerRef.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          handleLoadMore();
-        }
-      });
-
-      if (node) {
-        observerRef.current.observe(node);
-      }
-    },
-    [discussionsLoading, hasMore, handleLoadMore]
-  );
 
   const fetchBoardDetail = async () => {
     try {
@@ -123,16 +102,17 @@ function BoardContent() {
     }
   };
 
-  const fetchDiscussions = async () => {
+  const fetchDiscussions = async (sortBy: SortBy="hot") => {
     try {
       setDiscussionsLoading(true);
       if (!board?.id) return;
 
       const data = await api.discussions.list({
         board_id: board.id,
-        board_child_id: selectedChildId || undefined,
+        board_child_id: selectedChildId || 0,
         page: currentPage,
         per_page: 10,
+        sort: sortBy,
       });
 
       if (currentPage === 1) {
@@ -225,15 +205,21 @@ function BoardContent() {
                   )} */}
                 </div>
                 <div className="flex items-center space-x-4">
-                  <Link href={`/b/${board.slug}/settings`}>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="space-x-1 text-primary rounded-full"
-                    >
-                      设定
-                    </Button>
-                  </Link>
+                  {/* 如果是创建者或管理员，则显示设置按钮 */}
+                  {board.board_user &&
+                    (board.board_user?.user_role === BoardUserRole.CREATOR ||
+                      board.board_user?.user_role ===
+                        BoardUserRole.MODERATOR) && (
+                      <Link href={`/b/${board.slug}/settings`}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="space-x-1 text-primary rounded-full"
+                        >
+                          设定
+                        </Button>
+                      </Link>
+                    )}
                   <Button
                     variant="outline"
                     size="sm"
@@ -282,21 +268,39 @@ function BoardContent() {
                   >
                     子版
                   </button>
-                  <button
-                    type="button"
-                    className="h-8 font-medium text-muted-foreground hover:bg-transparent hover:text-foreground"
-                  >
-                    讨论
-                  </button>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <button
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div
+                        className="inline-flex items-center space-x-1 font-medium text-muted-foreground cursor-pointer"
+                      >
+                        <span>{sortOptions[sortBy]}</span>
+                        <ChevronDown className="h-4 w-4" />
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {Object.entries(sortOptions).map(([key, label]) => (
+                        <DropdownMenuItem
+                          key={key}
+                          className={cn(sortBy === key && "bg-accent", "cursor-pointer")}
+                          onClick={() => {
+                            setSortBy(key as SortBy);
+                            fetchDiscussions(key as SortBy);
+                          }}
+                        >
+                          {label}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  {/* <button
                     type="button"
                     className="inline-flex items-center space-x-2 font-medium text-muted-foreground"
                   >
                     热门
                     <ChevronDown className="h-4 w-4" />
-                  </button>
+                  </button> */}
                   <button
                     type="button"
                     className="h-8 text-muted-foreground hover:bg-transparent hover:text-foreground"
@@ -307,9 +311,9 @@ function BoardContent() {
                     }
                   >
                     {displayMode === "grid" ? (
-                      <LayoutGrid className="h-4 w-4" />
+                      <LayoutGrid className="h-5 w-5" />
                     ) : (
-                      <List className="h-4 w-4" />
+                      <List className="h-5 w-5" />
                     )}
                   </button>
                 </div>

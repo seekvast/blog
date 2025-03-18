@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/select";
 import { ImagePlus } from "lucide-react";
 import { api } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface CreateBoardModalProps {
   open: boolean;
@@ -37,23 +39,13 @@ interface BoardFormData {
   avatar?: string;
 }
 
-interface UploadResponse {
-  file_name: string;
-  file_path: string;
-  file_size: number;
-  mime_type: string;
-  visibility: string;
-  attachment_type: string;
-  updated_at: string;
-  created_at: string;
-  id: number;
-  host: string;
-}
-
 export function CreateBoardModal({
   open,
   onOpenChange,
 }: CreateBoardModalProps) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
   const { data: session } = useSession();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -91,7 +83,6 @@ export function CreateBoardModal({
       }));
       return imageUrl;
     } catch (error) {
-      console.error("Failed to upload image:", error);
       toast({
         title: "上传失败",
         description:
@@ -138,6 +129,9 @@ export function CreateBoardModal({
         description: "看板创建成功",
       });
       onOpenChange(false);
+      router.push(`/b/${formData.slug}`);
+      //使baords的useQuery缓存失效
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
     } catch (error: any) {
       toast({
         variant: "destructive",

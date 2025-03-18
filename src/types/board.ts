@@ -20,6 +20,13 @@ export interface Board {
   status: number;
   users_count: number;
   is_joined: number;
+  board_user: {
+    id: number;
+    user_role: number;
+    posts_count: number;
+    replies_count: number;
+    status: number;
+  };
   category: {
     id: number;
     name: string;
