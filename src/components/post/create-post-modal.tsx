@@ -25,14 +25,24 @@ import {
 
 import { PollEditor } from "./poll-editor";
 import { PollPreview } from "./poll-preview";
-import { DiscussionForm, PollForm, discussionSchema, pollSchema } from "@/validations/discussion";
+import {
+  DiscussionForm,
+  PollForm,
+  discussionSchema,
+  pollSchema,
+} from "@/validations/discussion";
 
 const initDiscussionForm: DiscussionForm = {
-    title: "",
-    content: "",
-    board_id: 0,
-    board_child_id: undefined as number | undefined,
-    attachments: [] as { id: number; file_name: string; file_type: string, file_path: string }[],
+  title: "",
+  content: "",
+  board_id: 0,
+  board_child_id: undefined as number | undefined,
+  attachments: [] as {
+    id: number;
+    file_name: string;
+    file_type: string;
+    file_path: string;
+  }[],
 };
 
 const initPollForm: PollForm = {
@@ -61,9 +71,10 @@ interface PollState {
 
 export default function CreatePostModal() {
   const router = useRouter();
-  const [pendingAction, setPendingAction] = React.useState<(() => void) | null>(null);
-  
-  // 使用 useReducer 管理复杂状态
+  const [pendingAction, setPendingAction] = React.useState<(() => void) | null>(
+    null
+  );
+
   const [modalState, dispatch] = React.useReducer(modalReducer, {
     isSubmitting: false,
     isEditorFullscreen: false,
@@ -78,7 +89,8 @@ export default function CreatePostModal() {
     isEditing: false,
   });
 
-  const [discussionForm, setDiscussionForm] = React.useState(initDiscussionForm);
+  const [discussionForm, setDiscussionForm] =
+    React.useState(initDiscussionForm);
   const {
     content,
     setContent,
@@ -104,7 +116,7 @@ export default function CreatePostModal() {
 
   // 2. 重置逻辑优化：分离不同类型的状态重置
   const resetPollState = React.useCallback(() => {
-    dispatchPoll({ type: 'RESET' });
+    dispatchPoll({ type: "RESET" });
   }, []);
 
   const resetDiscussionState = React.useCallback(() => {
@@ -114,7 +126,7 @@ export default function CreatePostModal() {
   }, []);
 
   const resetModalState = React.useCallback(() => {
-    dispatch({ type: 'RESET' });
+    dispatch({ type: "RESET" });
   }, []);
 
   const resetAllStates = React.useCallback(() => {
@@ -129,43 +141,47 @@ export default function CreatePostModal() {
   const handlePollConfirm = React.useCallback(() => {
     try {
       const validatedData = pollSchema.parse(pollState.form);
-      dispatchPoll({ type: 'SET_DATA', payload: validatedData });
-      dispatch({ type: 'SET_ERRORS', payload: null });
+      dispatchPoll({ type: "SET_DATA", payload: validatedData });
+      dispatchPoll({ type: "SET_EDITING", payload: false });
+      dispatch({ type: "SET_ERRORS", payload: null });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        dispatch({ type: 'SET_ERRORS', payload: error.errors[0].message });
+        dispatch({ type: "SET_ERRORS", payload: error.errors[0].message });
       } else {
-        dispatch({ type: 'SET_ERRORS', payload: "验证失败" });
+        dispatch({ type: "SET_ERRORS", payload: "验证失败" });
       }
     }
   }, [pollState.form]);
 
   const updatePollForm = React.useCallback((field: string, value: any) => {
-    dispatchPoll({ type: 'UPDATE_FORM', payload: { field, value } });
-    dispatch({ type: 'SET_ERRORS', payload: null });
+    dispatchPoll({ type: "UPDATE_FORM", payload: { field, value } });
+    dispatch({ type: "SET_ERRORS", payload: null });
   }, []);
 
   const handleDeletePoll = React.useCallback(() => {
-    dispatchPoll({ type: 'DELETE' });
+    dispatchPoll({ type: "DELETE" });
   }, []);
 
   const handlePollEdit = React.useCallback(() => {
     if (!pollState.data) return;
-    dispatchPoll({ type: 'EDIT' });
+    dispatchPoll({ type: "EDIT" });
   }, [pollState.data]);
 
   // 4. 加载状态优化：使用 loading 状态管理
-  const loadBoardChildren = React.useCallback(async (boardId: number) => {
-    try {
-      dispatch({ type: 'SET_LOADING_CHILDREN', payload: true });
-      const data = await api.boards.getChildren(boardId);
-      setBoardChildren(data);
-    } catch (error) {
-      console.error("Failed to load board children:", error);
-    } finally {
-      dispatch({ type: 'SET_LOADING_CHILDREN', payload: false });
-    }
-  }, [setBoardChildren]);
+  const loadBoardChildren = React.useCallback(
+    async (boardId: number) => {
+      try {
+        dispatch({ type: "SET_LOADING_CHILDREN", payload: true });
+        const data = await api.boards.getChildren(boardId);
+        setBoardChildren(data);
+      } catch (error) {
+        console.error("Failed to load board children:", error);
+      } finally {
+        dispatch({ type: "SET_LOADING_CHILDREN", payload: false });
+      }
+    },
+    [setBoardChildren]
+  );
 
   const handlePublish = React.useCallback(async () => {
     try {
@@ -175,8 +191,8 @@ export default function CreatePostModal() {
         poll: pollState.data,
       });
 
-      dispatch({ type: 'SET_SUBMITTING', payload: true });
-      
+      dispatch({ type: "SET_SUBMITTING", payload: true });
+
       const data = {
         title: validatedDiscussion.title,
         content: validatedDiscussion.content,
@@ -192,29 +208,39 @@ export default function CreatePostModal() {
       setIsVisible(false);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        dispatch({ type: 'SET_ERRORS', payload: error.errors[0].message });
+        dispatch({ type: "SET_ERRORS", payload: error.errors[0].message });
       } else {
-        dispatch({ type: 'SET_ERRORS', payload: "发布失败" });
+        dispatch({ type: "SET_ERRORS", payload: "发布失败" });
       }
     } finally {
-      dispatch({ type: 'SET_SUBMITTING', payload: false });
+      dispatch({ type: "SET_SUBMITTING", payload: false });
     }
-  }, [discussionForm, content, pollState.data, resetAllStates, router, setIsVisible]);
+  }, [
+    discussionForm,
+    content,
+    pollState.data,
+    resetAllStates,
+    router,
+    setIsVisible,
+  ]);
 
   // Reducer 函数
-  function modalReducer(state: ModalState, action: { type: string; payload?: any }): ModalState {
+  function modalReducer(
+    state: ModalState,
+    action: { type: string; payload?: any }
+  ): ModalState {
     switch (action.type) {
-      case 'SET_SUBMITTING':
+      case "SET_SUBMITTING":
         return { ...state, isSubmitting: action.payload };
-      case 'SET_EDITOR_FULLSCREEN':
+      case "SET_EDITOR_FULLSCREEN":
         return { ...state, isEditorFullscreen: action.payload };
-      case 'SET_SHOW_CONFIRM_DIALOG':
+      case "SET_SHOW_CONFIRM_DIALOG":
         return { ...state, showConfirmDialog: action.payload };
-      case 'SET_ERRORS':
+      case "SET_ERRORS":
         return { ...state, errors: action.payload };
-      case 'SET_LOADING_CHILDREN':
+      case "SET_LOADING_CHILDREN":
         return { ...state, loadingChildren: action.payload };
-      case 'RESET':
+      case "RESET":
         return {
           isSubmitting: false,
           isEditorFullscreen: false,
@@ -227,20 +253,28 @@ export default function CreatePostModal() {
     }
   }
 
-  function pollReducer(state: PollState, action: { type: string; payload?: any }): PollState {
+  function pollReducer(
+    state: PollState,
+    action: { type: string; payload?: any }
+  ): PollState {
     switch (action.type) {
-      case 'SET_DATA':
+      case "SET_DATA":
         return { ...state, data: action.payload };
-      case 'UPDATE_FORM':
+      case "SET_EDITING":
+        return { ...state, isEditing: action.payload };
+      case "UPDATE_FORM":
         return {
           ...state,
-          form: { ...state.form, [action.payload.field]: action.payload.value }
+          form: { ...state.form, [action.payload.field]: action.payload.value },
         };
-      case 'DELETE':
+      case "DELETE":
         return { ...state, data: null, form: initPollForm, isEditing: false };
-      case 'EDIT':
-        return { ...state, form: state.data!, isEditing: true };
-      case 'RESET':
+      case "EDIT":
+        if (!state.data) {
+          return { ...state, form: initPollForm, isEditing: true };
+        }
+        return { ...state, form: state.data, isEditing: true };
+      case "RESET":
         return {
           form: initPollForm,
           data: null,
@@ -346,9 +380,9 @@ export default function CreatePostModal() {
     setIsOpen(isVisible);
     setOnClose((confirmed?: boolean) => {
       if (hasUnsavedContent && !confirmed) {
-        dispatch({ type: 'SET_SHOW_CONFIRM_DIALOG', payload: true });
+        dispatch({ type: "SET_SHOW_CONFIRM_DIALOG", payload: true });
         setPendingAction(() => () => {
-          dispatch({ type: 'SET_SHOW_CONFIRM_DIALOG', payload: false });
+          dispatch({ type: "SET_SHOW_CONFIRM_DIALOG", payload: false });
           setIsVisible(false);
         });
       } else {
@@ -376,7 +410,7 @@ export default function CreatePostModal() {
                 <h1 className="text-lg font-medium leading-none whitespace-nowrap">
                   发布文章
                 </h1>
-                <div className="w-full sm:w-auto">
+                <div className="w-full min-w-[260px] sm:w-auto">
                   <BoardSelect
                     ref={boardSelectRef}
                     value={discussionForm.board_id}
@@ -404,7 +438,7 @@ export default function CreatePostModal() {
                   className="rounded-full w-full sm:w-auto"
                   onClick={() => {
                     if (!pollState.data && !pollState.isEditing) {
-                      dispatchPoll({ type: 'EDIT' });
+                      dispatchPoll({ type: "EDIT" });
                     }
                   }}
                   disabled={!!pollState.data || pollState.isEditing}
@@ -482,15 +516,17 @@ export default function CreatePostModal() {
                 </div>
               )}
               <div className="mt-4">
-                {pollState.isEditing && !isEditorFullscreen ? (
+                {pollState.isEditing && !modalState.isEditorFullscreen ? (
                   <PollEditor
-                    values={pollState.form}
+                    values={pollState.form || initPollForm}
                     onChange={updatePollForm}
                     error={modalState.errors}
-                    onCancel={() => dispatchPoll({ type: 'EDIT' })}
+                    onCancel={() => dispatchPoll({ type: "DELETE" })}
                     onConfirm={handlePollConfirm}
                   />
-                ) : !pollState.isEditing && pollState.data && !isEditorFullscreen ? (
+                ) : !pollState.isEditing &&
+                  pollState.data &&
+                  !modalState.isEditorFullscreen ? (
                   <PollPreview
                     pollData={pollState.data}
                     onDelete={handleDeletePoll}
@@ -517,7 +553,12 @@ export default function CreatePostModal() {
       </div>
 
       {/* 确认离开对话框 */}
-      <Dialog open={modalState.showConfirmDialog} onOpenChange={(value) => dispatch({ type: 'SET_SHOW_CONFIRM_DIALOG', payload: value })}>
+      <Dialog
+        open={modalState.showConfirmDialog}
+        onOpenChange={(value) =>
+          dispatch({ type: "SET_SHOW_CONFIRM_DIALOG", payload: value })
+        }
+      >
         <DialogContent className="bg-white sm:max-w-md">
           <DialogHeader className="border-b border-destructive/10 pb-4">
             <DialogTitle className="text-destructive flex items-center gap-2 text-lg font-semibold">
@@ -538,7 +579,9 @@ export default function CreatePostModal() {
           <DialogFooter className="gap-2 sm:gap-0">
             <Button
               variant="outline"
-              onClick={() => dispatch({ type: 'SET_SHOW_CONFIRM_DIALOG', payload: false })}
+              onClick={() =>
+                dispatch({ type: "SET_SHOW_CONFIRM_DIALOG", payload: false })
+              }
               className="border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
             >
               取消

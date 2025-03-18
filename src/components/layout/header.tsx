@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuthModal } from "@/components/auth/auth-modal-store";
+import { useRouter } from "next/navigation";
 
 import {
   DropdownMenu,
@@ -35,6 +36,7 @@ interface HeaderProps {
 }
 
 export function Header({ className }: HeaderProps) {
+  const router = useRouter();
   const { user } = useAuth();
   const { toast } = useToast();
   const { openLogin, openRegister } = useAuthModal();
@@ -45,11 +47,13 @@ export function Header({ className }: HeaderProps) {
     (e: React.MouseEvent) => {
       if (isVisible) {
         setIsVisible(false);
-        e.preventDefault();
         onClose?.(false);
+        setTimeout(() => {
+          router.push("/");
+        }, 0);
       }
     },
-    [isVisible, onClose]
+    [isVisible, onClose, router]
   );
 
   const handleLogout = async () => {

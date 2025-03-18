@@ -23,43 +23,49 @@ export const pollSchema = z
     is_multiple: z.union([z.literal(0), z.literal(1)]),
     show_voter: z.union([z.literal(0), z.literal(1)]),
     is_timed: z.union([z.literal(0), z.literal(1)]),
-    start_time: z
-      .string()
-      .optional()
-      .refine((val) => !val || new Date(val) > new Date(), {
-        message: "开始时间必须在当前时间之后",
-      }),
+    start_time: z.string().optional(),
     end_time: z.string().optional(),
   })
   .refine(
     (data) => {
-      // 验证end_time
-      if (data.is_timed !== 1 || !data.end_time) return true;
+      // 只有当 is_timed=1 时才验证时间
+      if (data.is_timed !== 1) return true;
 
-      const endTime = new Date(data.end_time);
-      // 结束时间必须在当前时间之后
-      if (endTime <= new Date()) {
-        return false;
-      }
-
-      // 结束时间必须在开始时间之后
+      // 验证 start_time
       if (data.start_time) {
         const startTime = new Date(data.start_time);
-        if (endTime <= startTime) {
+        if (startTime <= new Date()) {
           return false;
+        }
+      }
+
+      // 验证 end_time
+      if (data.end_time) {
+        const endTime = new Date(data.end_time);
+        // 结束时间必须在当前时间之后
+        if (endTime <= new Date()) {
+          return false;
+        }
+        // 结束时间必须在开始时间之后
+        if (data.start_time) {
+          const startTime = new Date(data.start_time);
+          if (endTime <= startTime) {
+            return false;
+          }
         }
       }
 
       return true;
     },
     {
-      message: "结束时间必须在开始时间之后且在当前时间之后",
-      path: ["end_time"],
+      message:
+        "当设置了截止时间时，开始时间必须在当前时间之后，结束时间必须在开始时间之后且在当前时间之后",
+      path: ["is_timed"],
     }
   )
   .refine(
     (data) => {
-      // 当is_timed为1时，start_time和end_time是必填的
+      // 当 is_timed=1 时，start_time 和 end_time 是必填的
       if (data.is_timed === 1) {
         return !!data.start_time && !!data.end_time;
       }
@@ -71,9 +77,12 @@ export const pollSchema = z
     }
   );
 
-
 export const discussionSchema = z.object({
-  title: z.string().min(3, "标题不能为空").max(100, "标题不能超过100个字符"),
+  title: z
+    .string()
+    .min(1, "标题不能为空")
+    .min(3, "标题至少需要3个字符")
+    .max(100, "标题不能超过100个字符"),
   content: z.string().min(10, "内容不能为空"),
   board_id: z.number(),
   board_child_id: z.number().optional(),
@@ -88,7 +97,7 @@ export const discussionSchema = z.object({
       })
     )
     .optional(),
-  poll: pollSchema.optional(),
+  poll: z.union([pollSchema, z.null()]).optional(),
 });
 
 export const updateDiscussionSchema = z.object({
