@@ -62,6 +62,8 @@ export interface Post {
   depth: number;
   is_private: number;
   is_approved: number;
+  up_votes_count: number;
+  down_votes_count: number;
   user_hashid: string;
   edited_user_hashid: string;
   board_creator_hashid: string;
@@ -74,6 +76,7 @@ export interface Post {
   deleted_at: string | null;
   parent_post: Post;
   user: User;
+  user_voted: PostVote | null;
 }
 
 export type DiscussionResponse = Response<Pagination<Discussion>>;

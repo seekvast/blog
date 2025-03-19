@@ -3,6 +3,9 @@
 import * as React from "react";
 import { useState, useCallback } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useRequireAuth } from "@/hooks/use-require-auth";
+
 import {
   ThumbsUp,
   MessageSquare,
@@ -33,6 +36,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { debounce } from "@/lib/utils";
+import { useLoginModal } from "@/components/providers/login-modal-provider";
 
 interface DiscussionItemProps {
   discussion: Discussion;
@@ -44,6 +48,8 @@ export const DiscussionItem = React.forwardRef<
   HTMLElement,
   DiscussionItemProps
 >(({ discussion, displayMode, isLastItem }, ref) => {
+  const { requireAuth } = useRequireAuth();
+
   const [reportToAdminOpen, setReportToAdminOpen] = useState(false);
   const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
   const [isVoted, setIsVoted] = useState(discussion.user_voted?.vote === "up");
@@ -75,27 +81,27 @@ export const DiscussionItem = React.forwardRef<
   // 使用 useCallback 和 debounce 创建防抖的点赞处理函数
   const debouncedVote = useCallback(
     debounce(() => {
-      if (!isVoting) {
-        setIsVoting(true);
-        voteMutation.mutate();
-      }
+      requireAuth(() => {
+        if (!isVoting) {
+          setIsVoting(true);
+          voteMutation.mutate();
+        }
+      });
     }, 500),
     [isVoting, voteMutation]
   );
 
   const handleReportToAdmin = (reason: string) => {
     console.log("向管理员举报:", discussion.slug, reason);
-    // 这里可以添加实际的举报API调用
   };
 
   const handleReportToKater = (reason: string) => {
     console.log("向Kater举报:", discussion.slug, reason);
-    // 这里可以添加实际的举报API调用
   };
 
   // 处理点赞点击
   const handleVote = (e: React.MouseEvent) => {
-    e.preventDefault(); // 阻止事件冒泡，避免触发链接跳转
+    e.preventDefault();
     if (isVoting) {
       toast({
         title: "操作过于频繁",
@@ -124,7 +130,7 @@ export const DiscussionItem = React.forwardRef<
             <div className="flex items-center space-x-2 min-w-0 flex-1">
               <h2 className="min-w-0 flex-1 w-0">
                 <Link
-                  href={`/d/${discussion.slug}?board_id=${discussion.board_id}`}
+                  href={`/d/${discussion.slug}`}
                   className="text-xl font-medium text-foreground hover:text-primary line-clamp-1 block w-full overflow-hidden text-ellipsis"
                 >
                   {discussion.title}

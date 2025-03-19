@@ -4,12 +4,11 @@ import * as React from "react";
 import { useParams } from "next/navigation";
 import { useDiscussionStore } from "@/store/discussion";
 import { useSession } from "next-auth/react";
-import { DiscussionSidebar } from "@/components/discussion/discussion-sidebar";
 import { Editor } from "@/components/editor/Editor";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
-import type { Discussion, Pagination, Post } from "@/types";
+import type { Discussion, Pagination } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   ThumbsUp,
@@ -23,30 +22,31 @@ import { useLoginModal } from "@/components/providers/login-modal-provider";
 import { PostContent } from "@/components/post/post-content";
 import { api } from "@/lib/api";
 import { AttachmentType } from "@/constants/attachment-type";
-import { Preview } from "@/components/editor/Preview"; // Add Preview component import
-import { toast } from "@/components/ui/use-toast"; // Add toast import
-import { useState } from "react"; // Add useState import
-import { useMutation, useQueryClient } from "@tanstack/react-query"; // 添加 React Query 导入
+import { Preview } from "@/components/editor/Preview";
+import { toast } from "@/components/ui/use-toast";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { cn, debounce } from "@/lib/utils";
+import type { Post } from "@/types/discussion";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
-  board_id: number;
 }
 
-export function DiscussionDetail({
-  initialDiscussion,
-  board_id,
-}: DiscussionDetailProps) {
+export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   const params = useParams();
-  // Ensure params.slug exists and is a string
   const slug = params?.slug as string;
   if (!slug) {
     return <div>Invalid discussion URL</div>;
   }
-  const { currentDiscussion, setDiscussion } = useDiscussionStore();
   const { data: session } = useSession();
+  const { requireAuth } = useRequireAuth();
   const user = session?.user;
   const { openLoginModal } = useLoginModal();
+
+  const { currentDiscussion, setDiscussion } = useDiscussionStore();
+
   const [commentContent, setCommentContent] = React.useState("");
 
   const [replyTo, setReplyTo] = React.useState<any | null>(null);
@@ -68,6 +68,8 @@ export function DiscussionDetail({
   const [isFollowed, setIsFollowed] = useState(
     initialDiscussion?.discussion_user?.subscription === "follow"
   );
+
+  const queryClient = useQueryClient();
 
   const bookmarkMutation = useMutation({
     mutationFn: () =>
@@ -104,6 +106,86 @@ export function DiscussionDetail({
     },
   });
 
+  // 投票 mutation
+  const voteMutation = useMutation({
+    mutationFn: async ({
+      postId,
+      vote,
+    }: {
+      postId: number;
+      vote: "up" | "down";
+    }) => {
+      return await api.posts.vote({ id: postId, vote });
+    },
+    onSuccess: (_, { postId, vote }) => {
+      // 更新评论列表中对应 post 的投票状态
+      setComments((prev) => ({
+        ...prev,
+        items: prev.items.map((post) => {
+          if (post.id === postId) {
+            // 取消投票
+            if (post.user_voted?.vote === vote) {
+              return {
+                ...post,
+                up_votes_count:
+                  vote === "up" ? post.up_votes_count - 1 : post.up_votes_count,
+                down_votes_count:
+                  vote === "down"
+                    ? post.down_votes_count - 1
+                    : post.down_votes_count,
+                user_voted: null,
+              };
+            }
+            //切换投票
+            if (post.user_voted && post.user_voted?.vote !== vote) {
+              return {
+                ...post,
+                up_votes_count:
+                  vote === "up"
+                    ? post.up_votes_count + 1
+                    : post.up_votes_count - 1,
+                down_votes_count:
+                  vote === "down"
+                    ? post.down_votes_count + 1
+                    : post.down_votes_count - 1,
+                user_voted: {
+                  id: postId,
+                  post_id: postId,
+                  vote: vote,
+                },
+              };
+            }
+            // 更新投票状态
+            return {
+              ...post,
+              up_votes_count:
+                vote === "up" ? post.up_votes_count + 1 : post.up_votes_count,
+              down_votes_count:
+                vote === "down"
+                  ? post.down_votes_count + 1
+                  : post.down_votes_count,
+              user_voted: {
+                id: postId,
+                post_id: postId,
+                vote: vote,
+              },
+            };
+          }
+          return post;
+        }),
+      }));
+
+      queryClient.invalidateQueries({ queryKey: ["discussion-posts", slug] });
+    },
+    onError: (error) => {
+      toast({
+        title: "操作失败",
+        description: error instanceof Error ? error.message : "请稍后重试",
+        variant: "destructive",
+      });
+    },
+  });
+
   React.useEffect(() => {
     setDiscussion(initialDiscussion);
   }, [initialDiscussion, setDiscussion]);
@@ -113,7 +195,10 @@ export function DiscussionDetail({
     const fetchComments = async () => {
       if (!currentDiscussion) return;
       try {
-        const data = await api.discussions.posts({ slug, board_id });
+        const data = await api.discussions.posts({
+          slug,
+          board_id: initialDiscussion.board_id,
+        });
         setComments(data);
       } catch (error) {
         console.error("Failed to fetch comments:", error);
@@ -146,15 +231,15 @@ export function DiscussionDetail({
   }, [currentDiscussion, user]);
 
   const handleReplyClick = (comment: Post) => {
-    if (!user) {
-      openLoginModal();
-      return;
-    }
-    setReplyTo(comment);
-    // 滚动到评论框
-    document.getElementById("comment")?.scrollIntoView({ behavior: "smooth" });
-    // 设置编辑器焦点
-    editorRef.current?.focus?.();
+    requireAuth(() => {
+      setReplyTo(comment);
+      // 滚动到评论框
+      document
+        .getElementById("comment")
+        ?.scrollIntoView({ behavior: "smooth" });
+      // 设置编辑器焦点
+      editorRef.current?.focus?.();
+    });
   };
 
   const handleSubmitComment = async (content: string) => {
@@ -181,7 +266,10 @@ export function DiscussionDetail({
       // 重置编辑器内容
       editorRef.current?.reset?.();
       // 刷新评论列表
-      const commentsData = await api.discussions.posts({ slug, board_id });
+      const commentsData = await api.discussions.posts({
+        slug,
+        board_id: initialDiscussion.board_id,
+      });
       setComments(commentsData);
     } catch (err) {
       console.error("Failed to post comment:", err);
@@ -198,23 +286,27 @@ export function DiscussionDetail({
 
   // 处理书签点击
   const handleBookmark = () => {
-    if (!user) {
-      openLoginModal();
-      return;
-    }
-
-    bookmarkMutation.mutate();
+    requireAuth(() => {
+      bookmarkMutation.mutate();
+    });
   };
 
   // 处理关注点击
   const handleFollow = () => {
-    if (!user) {
-      openLoginModal();
-      return;
-    }
-
-    followMutation.mutate();
+    requireAuth(() => {
+      followMutation.mutate();
+    });
   };
+
+  // 处理投票点击
+  const handleVote = React.useCallback(
+    debounce((postId: number, vote: "up" | "down") => {
+      requireAuth(() => {
+        voteMutation.mutate({ postId, vote });
+      });
+    }, 500),
+    [voteMutation, requireAuth]
+  );
 
   if (!currentDiscussion) {
     return null;
@@ -288,57 +380,81 @@ export function DiscussionDetail({
               {comments.items.map((comment) => (
                 <div key={comment.id} className="pt-2 pb-4 border-b">
                   <div className="flex items-start space-x-3 px-2 md:px-4 min-w-0">
-                    <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
-                      <AvatarImage src={comment.user.avatar_url} />
-                      <AvatarFallback>
-                        {comment.user.nickname[0]}
-                      </AvatarFallback>
-                    </Avatar>
+                    <Link href={`/u/${comment.user.hashid}`}>
+                      <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
+                        <AvatarImage src={comment.user.avatar_url} />
+                        <AvatarFallback>
+                          {comment.user.nickname[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Link>
                     <div className="flex-1 min-w-0 overflow-hidden">
-                      <div className="flex items-center flex-wrap gap-2">
-                        <span className="font-medium text-sm md:text-base truncate">
-                          {comment.user.nickname || comment.user.username}
-                        </span>
-                        <span className="text-gray-300">·</span>
-                        <span className="text-xs md:text-sm text-gray-500">
-                          {formatDistanceToNow(new Date(comment.created_at), {
-                            addSuffix: true,
-                            locale: zhCN,
-                          })}
-                        </span>
-                      </div>
-
-                      {/* 评论内容 */}
-                      <div className="mt-1 text-gray-900 min-w-0">
-                        {comment.parent_post && (
-                          <Link
-                            href={`#comment-${comment.parent_post.user.hashid}`}
-                            className="inline-block mb-2 text-xs md:text-sm text-muted-foreground"
-                          >
-                            @{comment.parent_post.user.username}{" "}
+                      <div className="flex justify-between w-full items-center">
+                        <div className="flex items-center gap-2">
+                          <Link href={`/u/${comment.user.hashid}`}>
+                            <span className="font-medium text-base truncate">
+                              {comment.user.nickname || comment.user.username}
+                            </span>
                           </Link>
-                        )}
-                        <div className="w-full text-base">
-                          <PostContent post={comment} />
+                          {comment.parent_post && (
+                            <Link
+                              href={`#comment-${comment.parent_post.id}`}
+                              className="text-primary"
+                            >
+                              @{comment.parent_post.user.username}{" "}
+                            </Link>
+                          )}
+                          <span className="text-gray-300">·</span>
+                          <span className="text-xs md:text-sm text-gray-500">
+                            {formatDistanceToNow(new Date(comment.created_at), {
+                              addSuffix: true,
+                              locale: zhCN,
+                            })}
+                          </span>
                         </div>
+                        <span className="text-xs md:text-sm text-gray-500">
+                          #{comment.number}
+                        </span>
                       </div>
 
                       {/* 评论操作 */}
                       <div className="mt-3 flex justify-between items-center space-x-4 text-sm md:text-base text-gray-500">
-                        <div className="flex items-center gap-2 space-x-4 md:space-x-8">
-                          <div className="flex items-center h-6 space-x-1 cursor-pointer">
-                            <ThumbsUp className="h-4 w-4" />
-                            {/* <span className="text-xs md:text-sm">{}</span> */}
+                        <div className="flex items-center gap-2 space-x-3 md:space-x-6">
+                          <div
+                            className="flex items-center space-x-1 cursor-pointer"
+                            onClick={() => handleVote(comment.id, "up")}
+                          >
+                            <ThumbsUp
+                              className={cn(
+                                "h-4 w-4",
+                                comment.user_voted?.vote === "up" &&
+                                  "text-primary fill-primary"
+                              )}
+                            />
+                            <span className="text-xs md:text-sm">
+                              {comment.up_votes_count}
+                            </span>
                           </div>
-                          <div className="flex items-center h-6 space-x-1 cursor-pointer">
-                            <ThumbsDown className="h-4 w-4" />
-                            {/* <span className="text-xs md:text-sm">{}</span> */}
+                          <div
+                            className="flex items-center space-x-1 cursor-pointer"
+                            onClick={() => handleVote(comment.id, "down")}
+                          >
+                            <ThumbsDown
+                              className={cn(
+                                "h-4 w-4",
+                                comment.user_voted?.vote === "down" &&
+                                  "text-destructive fill-destructive"
+                              )}
+                            />
+                            <span className="text-xs md:text-sm">
+                              {comment.down_votes_count}
+                            </span>
                           </div>
                         </div>
 
-                        <div className="flex items-center h-6 space-x-4 md:space-x-8">
+                        <div className="flex items-center space-x-3">
                           <button
-                            className="text-base cursor-pointer hover:text-primary"
+                            className="text-sm cursor-pointer hover:text-primary"
                             onClick={() => handleReplyClick(comment)}
                           >
                             回复
