@@ -195,7 +195,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                 </div>
                 <Button
                   size="sm"
-                  className="rounded-full"
+                  className="rounded-full h-6"
                   onClick={(e) => {
                     e.preventDefault();
                     joinBoard(board.id);

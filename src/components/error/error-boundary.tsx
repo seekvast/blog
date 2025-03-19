@@ -1,13 +1,11 @@
 "use client";
 
-import React, { Component, ErrorInfo, ReactNode } from "react";
-import { toast } from "@/components/ui/use-toast";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { AlertCircle } from "lucide-react";
 
 interface ErrorBoundaryProps {
-  children: ReactNode;
-  fallback?: ReactNode;
-  onError?: (error: Error, errorInfo: ErrorInfo) => void;
+  children: React.ReactNode;
 }
 
 interface ErrorBoundaryState {
@@ -15,58 +13,37 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
-export class ErrorBoundary extends Component<
+export class ErrorBoundary extends React.Component<
   ErrorBoundaryProps,
   ErrorBoundaryState
 > {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = {
-      hasError: false,
-      error: null,
-    };
+    this.state = { hasError: false, error: null };
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    // 更新状态，下次渲染时显示备用 UI
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // 记录错误信息
-    console.error("组件错误:", error, errorInfo);
-
-    // 显示错误提示
-    toast({
-      title: "组件错误",
-      description: error.message || "渲染过程中发生错误",
-      variant: "destructive",
-    });
-
-    // 调用自定义错误处理函数
-    if (this.props.onError) {
-      this.props.onError(error, errorInfo);
-    }
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("Error caught by boundary:", error, errorInfo);
   }
 
-  render(): ReactNode {
+  render() {
     if (this.state.hasError) {
-      // 显示备用 UI
-      if (this.props.fallback) {
-        return this.props.fallback;
-      }
-
-      // 默认错误 UI
       return (
-        <div className="p-4 border border-red-300 bg-red-50 rounded-md">
-          <h3 className="text-lg font-medium text-red-800">出错了</h3>
-          <p className="mt-2 text-red-600">
-            {this.state.error?.message || "组件渲染错误"}
+        <div className="flex flex-col items-center justify-center min-h-[400px] p-4">
+          <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+          <h2 className="text-xl font-semibold mb-2">出错了</h2>
+          <p className="text-muted-foreground mb-4 text-center">
+            {this.state.error?.message || "发生了一些错误"}
           </p>
           <Button
-            className="mt-4"
-            variant="outline"
-            onClick={() => this.setState({ hasError: false, error: null })}
+            onClick={() => {
+              this.setState({ hasError: false, error: null });
+              window.location.reload();
+            }}
           >
             重试
           </Button>
