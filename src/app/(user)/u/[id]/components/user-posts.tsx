@@ -7,14 +7,14 @@ import { InfiniteScroll } from "@/components/common/infinite-scroll";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import type { Discussion } from "@/types/discussion";
-import type { Paginate } from "@/types";
+import type { Pagination } from "@/types/common";
 import { LayoutGrid, List } from "lucide-react";
 interface UserPostsProps {}
 
 export function UserPosts() {
   const params = useParams();
   const userId = params?.id as string;
-  const [discussions, setDiscussions] = useState<Paginate<Discussion>>({
+  const [discussions, setDiscussions] = useState<Pagination<Discussion>>({
     code: 0,
     items: [],
     current_page: 1,

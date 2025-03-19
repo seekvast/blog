@@ -128,14 +128,14 @@ export function Header({ className }: HeaderProps) {
                     </Avatar>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
-                    <Link href={`/u/${user.hashid}`}>
+                    <Link href={`/u/${user.username}`}>
                       <DropdownMenuItem className="cursor-pointer">
                         <User2 className="mr-2 h-4 w-4" />
                         <span>基本资料</span>
                       </DropdownMenuItem>
                     </Link>
 
-                    <Link href={`/u/${user.hashid}/settings`}>
+                    <Link href={`/u/${user.username}/settings`}>
                       <DropdownMenuItem className="cursor-pointer">
                         <Settings className="mr-2 h-4 w-4" />
                         <span>个人设定</span>

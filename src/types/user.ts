@@ -10,11 +10,15 @@ export interface UserProfile {
   avatar_url?: string;
   cover?: string;
   bio?: string;
+  blocked?: {
+    id: number;
+    blocked_id: number;
+  };
 }
 export interface User {
   hashid: string;
   username: string;
-  email: string;
+  email?: string;
   nickname: string;
   avatar_url?: string;
   cover?: string;
@@ -27,6 +31,11 @@ export interface User {
   token?: string;
   posts_count?: number;
   replies_count?: number;
+  blocked?: {
+    id: number;
+    user_hashid: string;
+    blocked_hashid: string;
+  };
   created_at?: string;
   updated_at?: string;
 }

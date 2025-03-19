@@ -2,6 +2,15 @@ import { getServerSession } from "next-auth/next";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { api } from "./api";
+import { User as ApiUser } from "@/types/user";
+
+type NextAuthUser = ApiUser & {
+  id: string;
+};
+
+declare module "next-auth" {
+  interface User extends NextAuthUser {}
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -20,7 +29,6 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Please enter your email and password");
         }
 
-        // try {
         const data = await api.users.login({
           email: credentials.email,
           password: credentials.password,
@@ -28,20 +36,19 @@ export const authOptions: NextAuthOptions = {
         return {
           id: data.hashid,
           hashid: data.hashid,
-          name: data.nickname,
+          username: data.username,
           email: data.email,
-          image: data.avatar_url,
-          username: data.nickname,
+          nickname: data.nickname,
+          avatar_url: data.avatar_url,
+          cover: data.cover,
+          bio: data.bio,
+          gender: data.gender,
+          birthday: data.birthday,
+          is_email_confirmed: data.is_email_confirmed,
+          joined_at: data.joined_at,
+          last_seen_at: data.last_seen_at,
           token: data.token,
         };
-        // } catch (error) {
-        //   console.error('Login error:', error);
-        //   // API 客户端会自动处理错误，这里只需要抛出错误消息
-        //   if (error instanceof Error) {
-        //     throw error;
-        //   }
-        //   throw new Error('Login failed');
-        // }
       },
     }),
   ],
@@ -67,6 +74,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token) {
         session.user = {
+          id: token.hashid as string,
           hashid: token.hashid as string,
           username: token.username as string,
           email: token.email as string,

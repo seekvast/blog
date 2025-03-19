@@ -27,7 +27,7 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
       setUser({
         hashid: session.user.hashid,
         username: session.user.username,
-        email: session.user.email,
+        email: session.user.email || "",
         nickname: session.user.nickname || "",
         avatar_url: session.user.avatar_url || "",
         cover: session.user.cover || "",

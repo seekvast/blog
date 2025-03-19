@@ -117,13 +117,15 @@ export const DiscussionItem = React.forwardRef<
     <article ref={ref} className="py-4 w-full">
       <div className="flex space-x-3 w-full">
         {/* 作者头像 */}
-        <Avatar className="h-10 w-10 lg:h-14 lg:w-14 flex-shrink-0">
-          <AvatarImage
-            src={discussion.user.avatar_url}
+        <Link href={`/u/${discussion.user.username}`}>
+          <Avatar className="h-10 w-10 lg:h-14 lg:w-14 flex-shrink-0">
+            <AvatarImage
+              src={discussion.user.avatar_url}
             alt={discussion.user.username}
           />
-          <AvatarFallback>{discussion.user.username[0]}</AvatarFallback>
-        </Avatar>
+            <AvatarFallback>{discussion.user.username[0]}</AvatarFallback>
+          </Avatar>
+        </Link>
 
         <div className="min-w-0 flex-1 w-full">
           <div className="flex items-center justify-between w-full">
@@ -248,8 +250,13 @@ export const DiscussionItem = React.forwardRef<
         open={reportToAdminOpen}
         onOpenChange={setReportToAdminOpen}
         title="向看板管理員檢舉"
-        onSubmit={handleReportToAdmin}
-        reportType="admin"
+        form={{
+          user_hashid: discussion.user.hashid,
+          board_id: discussion.board_id,
+          discussion_slug: discussion.slug,
+          target: 1,
+          reported_to: "admin",
+        }}
       />
 
       {/* 向Kater举报对话框 */}
@@ -257,8 +264,13 @@ export const DiscussionItem = React.forwardRef<
         open={reportToKaterOpen}
         onOpenChange={setReportToKaterOpen}
         title="向Kater檢舉"
-        onSubmit={handleReportToKater}
-        reportType="kater"
+        form={{
+          user_hashid: discussion.user.hashid,
+          board_id: discussion.board_id,
+          discussion_slug: discussion.slug,
+          target: 1,
+          reported_to: "moderator",
+        }}
       />
     </article>
   );

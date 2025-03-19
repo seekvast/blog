@@ -3,12 +3,23 @@
 import { useParams, usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
+import { Settings, Flag, AlertTriangle, Ban, Unlock } from "lucide-react";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { api } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ChevronDown } from "lucide-react";
+import { ReportDialog } from "@/components/report/report-dialog";
+import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function UserLayout({
   children,
@@ -17,18 +28,58 @@ export default function UserLayout({
 }) {
   const params = useParams();
   const pathname = usePathname();
-  const userId = params?.id as string;
-  const isSettingsPage = pathname?.includes(`/u/${userId}/settings`) ?? false;
+  const username = params?.id as string;
+  const isSettingsPage = pathname?.includes(`/u/${username}/settings`) ?? false;
   const { data: session } = useSession();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
 
   // 获取用户详细信息
   const { data: userData } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: () => api.users.get({ hashid: userId }),
-    enabled: !!userId,
+    queryKey: ["user", username],
+    queryFn: () => api.users.get({ username: username }),
+    enabled: !!username,
   });
-  console.log(userData?.created_at, "ullll");
-  const isCurrentUser = session?.user?.hashid === userId;
+  const isCurrentUser = session?.user?.hashid === userData?.hashid;
+
+  // 使用 useEffect 处理 blocked 状态
+  useEffect(() => {
+    if (userData?.blocked) {
+      setIsBlocked(true);
+    }
+  }, [userData?.blocked]);
+
+  // 拉黑用户
+  const blockMutation = useMutation({
+    mutationFn: (block_user_hashid: string) =>
+      api.users.block({ block_user_hashid }),
+    onSuccess: (response) => {
+      setIsBlocked(!isBlocked);
+      toast({
+        title: "成功",
+        description: isBlocked
+          ? "已将该用户从黑名单中移除"
+          : "已将该用户加入黑名单",
+      });
+
+      // 刷新用户数据
+      queryClient.invalidateQueries({ queryKey: ["user", username] });
+    },
+    onError: (error) => {
+      toast({
+        title: "拉黑失败",
+        description: error.message || "操作失败，请稍后重试",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleBlock = (block_user_hashid: string) => {
+    blockMutation.mutate(block_user_hashid);
+  };
 
   if (!userData) {
     return (
@@ -92,10 +143,47 @@ export default function UserLayout({
                     </div>
                   </div>
                 </div>
-                {isCurrentUser && (
+                {isCurrentUser ? (
                   <Button size="sm" className="rounded-full primary" asChild>
-                    <Link href={`/u/${userId}/settings`}>修改个人信息</Link>
+                    <Link href={`/u/${username}/settings`}>修改个人信息</Link>
                   </Button>
+                ) : (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="rounded-full"
+                      >
+                        操作
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setReportToKaterOpen(true);
+                        }}
+                      >
+                        <AlertTriangle className="mr-2 h-4 w-4" />
+                        <span>向Kater檢舉</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => {
+                          handleBlock(userData.hashid);
+                        }}
+                      >
+                        {isBlocked ? (
+                          <Unlock className="mr-2 h-4 w-4" />
+                        ) : (
+                          <Ban className="mr-2 h-4 w-4" />
+                        )}
+                        <span>{isBlocked ? "取消拉黑" : "拉黑"}</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
               </div>
             </div>
@@ -105,6 +193,20 @@ export default function UserLayout({
 
       {/* 内容区 */}
       <div className="mx-auto max-w-7xl overflow-hidden">{children}</div>
+
+      {/* 向Kater举报对话框 */}
+      <ReportDialog
+        open={reportToKaterOpen}
+        onOpenChange={setReportToKaterOpen}
+        title="向Kater檢舉"
+        form={{
+          user_hashid: userData.hashid,
+          board_id: 0,
+          post_id: 0,
+          reported_to: "moderator",
+          target: 3, // 3 表示用户
+        }}
+      />
     </div>
   );
 }

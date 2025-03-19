@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { CommentList } from "@/components/post/comment-list";
 import { CommentEditor } from "@/components/post/comment-editor";
 import { ErrorBoundary } from "@/components/error/error-boundary";
+import { ReportDialog } from "@/components/report/report-dialog";
 
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
@@ -52,6 +53,8 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   const [isFollowed, setIsFollowed] = useState(
     initialDiscussion?.discussion_user?.subscription === "follow"
   );
+  const [reportToAdminOpen, setReportToAdminOpen] = useState(false);
+  const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
 
   const queryClient = useQueryClient();
 

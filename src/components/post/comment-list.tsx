@@ -2,11 +2,25 @@ import * as React from "react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
-import { ThumbsUp, ThumbsDown, MoreHorizontal } from "lucide-react";
+import {
+  ThumbsUp,
+  ThumbsDown,
+  MoreHorizontal,
+  Flag,
+  AlertTriangle,
+} from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { PostContent } from "@/components/post/post-content";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types/discussion";
+import { ReportDialog } from "@/components/report/report-dialog";
+import { useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface CommentListProps {
   comments: Post[];
@@ -17,6 +31,14 @@ interface CommentListProps {
 
 export const CommentList = React.memo(
   ({ comments, isLoading, onReply, onVote }: CommentListProps) => {
+    const [reportToAdminOpen, setReportToAdminOpen] = useState(false);
+    const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
+    const [reportComment, setReportComment] = useState<Post | null>(null);
+
+    const handleReportClick = (comment: Post) => {
+      setReportComment(comment);
+    };
+
     if (!comments || comments.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-8 text-sm md:text-base text-muted-foreground">
@@ -31,7 +53,7 @@ export const CommentList = React.memo(
           {comments.map((comment) => (
             <div key={comment.id} className="pt-2 pb-4 border-b">
               <div className="flex items-start space-x-3 px-2 md:px-4 min-w-0">
-                <Link href={`/u/${comment.user.hashid}`}>
+                <Link href={`/u/${comment.user.username}`}>
                   <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
                     <AvatarImage src={comment.user.avatar_url} />
                     <AvatarFallback>{comment.user.nickname[0]}</AvatarFallback>
@@ -40,7 +62,7 @@ export const CommentList = React.memo(
                 <div className="flex-1 min-w-0 overflow-hidden">
                   <div className="flex justify-between w-full items-center">
                     <div className="flex items-center gap-2">
-                      <Link href={`/u/${comment.user.hashid}`}>
+                      <Link href={`/u/${comment.user.username}`}>
                         <span className="font-medium text-base truncate">
                           {comment.user.nickname || comment.user.username}
                         </span>
@@ -111,7 +133,33 @@ export const CommentList = React.memo(
                       >
                         回复
                       </button>
-                      <MoreHorizontal className="h-4 w-4 cursor-pointer" />
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <MoreHorizontal className="h-4 w-4 cursor-pointer" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={() => {
+                              handleReportClick(comment);
+                              setReportToAdminOpen(true);
+                            }}
+                          >
+                            <Flag className="mr-2 h-4 w-4" />
+                            <span>向管理員檢舉</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={() => {
+                              handleReportClick(comment);
+                              setReportToKaterOpen(true);
+                            }}
+                          >
+                            <AlertTriangle className="mr-2 h-4 w-4" />
+                            <span>向Kater檢舉</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </div>
@@ -119,6 +167,38 @@ export const CommentList = React.memo(
             </div>
           ))}
         </div>
+
+        {/* 向管理员举报对话框 */}
+        {reportComment && (
+          <ReportDialog
+            open={reportToAdminOpen}
+            onOpenChange={setReportToAdminOpen}
+            title="向看板管理員檢舉"
+            form={{
+              user_hashid: reportComment.user.hashid,
+              board_id: reportComment.board_id,
+              post_id: reportComment.id,
+              reported_to: "admin",
+              target: 2, // 2 表示帖子
+            }}
+          />
+        )}
+
+        {/* 向Kater举报对话框 */}
+        {reportComment && (
+          <ReportDialog
+            open={reportToKaterOpen}
+            onOpenChange={setReportToKaterOpen}
+            title="向Kater檢舉"
+            form={{
+              user_hashid: reportComment.user.hashid,
+              board_id: reportComment.board_id,
+              post_id: reportComment.id,
+              reported_to: "moderator",
+              target: 2, // 2 表示帖子
+            }}
+          />
+        )}
       </div>
     );
   }

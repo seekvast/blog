@@ -245,7 +245,6 @@ function BoardContent() {
                     className="space-x-1 rounded-full"
                   >
                     已加入
-                    <ChevronDown className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
