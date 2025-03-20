@@ -28,9 +28,13 @@ import { useToast } from "@/components/ui/use-toast";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 interface DiscussionActionsProps {
   discussion: Discussion;
+  onDelete?: (deletedSlug: string) => void;
 }
 
-export function DiscussionActions({ discussion }: DiscussionActionsProps) {
+export function DiscussionActions({
+  discussion,
+  onDelete,
+}: DiscussionActionsProps) {
   const [reportToAdminOpen, setReportToAdminOpen] = useState(false);
   const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -141,6 +145,7 @@ export function DiscussionActions({ discussion }: DiscussionActionsProps) {
         onConfirm={() => {
           deleteMutation.mutate();
           setShowDeleteConfirm(false);
+          onDelete?.(discussion.slug);
         }}
         variant="destructive"
         loading={deleteMutation.isPending}

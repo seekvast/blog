@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useEffect } from "react";
+
 import { LayoutGrid, List, ChevronDown } from "lucide-react";
 import type { Discussion } from "@/types/discussion";
 import type { Pagination } from "@/types/common";
 import { api } from "@/lib/api";
 import { DiscussionItem } from "@/components/home/discussion-item";
 import { InfiniteScroll } from "@/components/common/infinite-scroll";
+import { useDevice } from "@/hooks/use-device";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -15,8 +17,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { useQueryClient } from "@tanstack/react-query";
 
 interface DiscussionsListProps {
   initialDiscussions: Pagination<Discussion>;
@@ -31,92 +31,16 @@ export function DiscussionsList({
   from,
 }: DiscussionsListProps) {
   const [displayMode, setDisplayMode] = React.useState<DisplayMode>("grid");
+  const [discussions, setDiscussions] = React.useState(initialDiscussions);
+  const [page, setPage] = React.useState(2);
+  const [loading, setLoading] = React.useState(false);
+  const [hasMore, setHasMore] = React.useState(
+    initialDiscussions.last_page > 1
+  );
   const [activeTab, setActiveTab] = React.useState<"recommend" | "trace">(
     "recommend"
   );
   const [sortBy, setSortBy] = React.useState<SortBy>("hot");
-
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useInfiniteQuery({
-      queryKey: ["discussions", activeTab, sortBy],
-      queryFn: async ({ pageParam = 1 }) => {
-        const response = await api.discussions.list({
-          q: activeTab,
-          from,
-          page: pageParam,
-          per_page: 10,
-          sort: sortBy,
-        });
-        return response;
-      },
-      initialData: {
-        pages: [{ ...initialDiscussions }],
-        pageParams: [1],
-      },
-      initialPageParam: 1,
-      getNextPageParam: (lastPage) => {
-        if (!lastPage || !lastPage.items || lastPage.items.length === 0) {
-          return undefined;
-        }
-        if (lastPage.current_page >= lastPage.last_page) {
-          return undefined;
-        }
-        return lastPage.current_page + 1;
-      },
-      select: (data) => {
-        return {
-          pages: data.pages,
-          pageParams: data.pageParams,
-        };
-      },
-      staleTime: 0,
-      gcTime: 0,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-    });
-
-  // 优化数据合并逻辑
-  const discussions = React.useMemo(() => {
-    if (!data?.pages) return initialDiscussions;
-
-    // 始终合并所有页面数据，保持数据引用稳定
-    const mergedData = {
-      ...data.pages[0],
-      items: data.pages.flatMap((page) => page.items),
-      current_page: data.pages[data.pages.length - 1].current_page,
-      last_page: data.pages[data.pages.length - 1].last_page,
-    };
-
-    // 确保数据引用稳定
-    return Object.freeze(mergedData);
-  }, [data, initialDiscussions]);
-
-  // 优化加载状态
-  const isPageLoading = React.useMemo(() => {
-    return isLoading || isFetchingNextPage;
-  }, [isLoading, isFetchingNextPage]);
-
-  const queryClient = useQueryClient();
-
-  // 处理 tab 切换
-  const handleTabChange = useCallback((tab: "recommend" | "trace") => {
-    setActiveTab(tab);
-  }, []);
-
-  // 处理排序切换
-  const handleSortChange = useCallback((sort: SortBy) => {
-    setSortBy(sort);
-  }, []);
-
-  // 监听 tab 和排序变化，重置数据
-  React.useEffect(() => {
-    // 使用 invalidateQueries 替代 resetQueries
-    queryClient.invalidateQueries({
-      queryKey: ["discussions", activeTab, sortBy],
-      exact: true, // 确保精确匹配查询键
-      refetchType: "active", // 只重新获取活跃的查询
-    });
-  }, [activeTab, sortBy, queryClient]);
 
   const sortOptions = {
     hot: "热门",
@@ -124,10 +48,52 @@ export function DiscussionsList({
     reply: "最后回复",
   };
 
+    const handleDeleteDiscussion = useCallback((deletedSlug: string) => {
+        // 如果删除的是下一页的第一条数据，pageNum=当前页-上一页
+    fetchDiscussions(activeTab, discussions.current_page, sortBy);
+  }, []);
+
+  const fetchDiscussions = async (
+    tab: "recommend" | "trace",
+    pageNum: number = 1,
+    sort: SortBy = sortBy
+  ) => {
+    setLoading(true);
+    try {
+      const response = await api.discussions.list({
+        q: tab,
+        from,
+        page: pageNum,
+        sort,
+      });
+
+      if (pageNum === 1) {
+        setDiscussions(response);
+        setPage(2);
+        setHasMore(response.last_page > 1);
+      } else {
+        if (response.items.length === 0 || pageNum >= response.last_page) {
+          setHasMore(false);
+          setDiscussions((prev) => ({
+            ...prev,
+            items: [...prev.items, ...response.items],
+            current_page: pageNum,
+            last_page: response.last_page,
+          }));
+          setPage((prev) => prev + 1);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch discussions:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const loadMore = useCallback(async () => {
-    if (isFetchingNextPage || !hasNextPage) return;
-    await fetchNextPage();
-  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
+    if (loading || !hasMore) return;
+    await fetchDiscussions(activeTab, page);
+  }, [loading, hasMore, page, activeTab]);
 
   return (
     <div className="flex flex-col">
@@ -145,7 +111,10 @@ export function DiscussionsList({
                       ? "text-primary"
                       : "text-muted-foreground"
                   )}
-                  onClick={() => handleTabChange("recommend")}
+                  onClick={() => {
+                    setActiveTab("recommend");
+                    fetchDiscussions("recommend", 1);
+                  }}
                 >
                   推荐
                 </button>
@@ -157,7 +126,10 @@ export function DiscussionsList({
                       ? "text-primary"
                       : "text-muted-foreground"
                   )}
-                  onClick={() => handleTabChange("trace")}
+                  onClick={() => {
+                    setActiveTab("trace");
+                    fetchDiscussions("trace", 1);
+                  }}
                 >
                   追踪
                 </button>
@@ -182,7 +154,10 @@ export function DiscussionsList({
                         sortBy === key && "bg-accent",
                         "cursor-pointer"
                       )}
-                      onClick={() => handleSortChange(key as SortBy)}
+                      onClick={() => {
+                        setSortBy(key as SortBy);
+                        fetchDiscussions(activeTab, 1, key as SortBy);
+                      }}
                     >
                       {label}
                     </DropdownMenuItem>
@@ -210,19 +185,20 @@ export function DiscussionsList({
       {/* 帖子列表 */}
       <div className="divide-y">
         <InfiniteScroll
-          loading={isPageLoading}
-          hasMore={hasNextPage ?? false}
+          loading={loading}
+          hasMore={hasMore}
           onLoadMore={loadMore}
-          currentPage={discussions.current_page}
+          currentPage={page}
         >
           {discussions.items.map((discussion, index) => {
             const isLastItem = index === discussions.items.length - 1;
             return (
               <DiscussionItem
-                key={discussion.slug}
+                key={discussion.slug + index}
                 discussion={discussion}
                 displayMode={displayMode}
                 isLastItem={isLastItem}
+                onDelete={handleDeleteDiscussion}
               />
             );
           })}
@@ -231,7 +207,7 @@ export function DiscussionsList({
 
       {/* 加载状态指示器 */}
       <div className="h-10 flex items-center justify-center text-muted-foreground">
-        {!hasNextPage && discussions.last_page > 1 && <div>No more items</div>}
+        {!hasMore && discussions.last_page > 1 && <div>No more items</div>}
       </div>
     </div>
   );

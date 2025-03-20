@@ -41,12 +41,13 @@ interface DiscussionItemProps {
   discussion: Discussion;
   displayMode: "grid" | "list";
   isLastItem?: boolean;
+  onDelete?: (deletedSlug: string) => void;
 }
 
 export const DiscussionItem = React.forwardRef<
   HTMLElement,
   DiscussionItemProps
->(({ discussion, displayMode, isLastItem }, ref) => {
+>(({ discussion, displayMode, isLastItem, onDelete }, ref) => {
   const { requireAuth } = useRequireAuth();
   const { user } = useAuth();
   const [isVoted, setIsVoted] = useState(discussion.user_voted?.vote === "up");
@@ -138,7 +139,10 @@ export const DiscussionItem = React.forwardRef<
               )}
             </div>
 
-            <DiscussionActions discussion={discussion} isAuthor={isAuthor} />
+            <DiscussionActions
+              discussion={discussion}
+              onDelete={() => onDelete?.(discussion.slug)}
+            />
           </div>
 
           <div className="mt-1">
@@ -182,7 +186,7 @@ export const DiscussionItem = React.forwardRef<
             </div>
             <div className="flex items-center space-x-2 text-muted-foreground">
               <span>
-                来自
+                来自{" "}
                 <span className="inline-block max-w-[8ch] lg:max-w-[20ch] truncate align-bottom">
                   {discussion.board?.name}
                 </span>

@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { CommentList } from "@/components/post/comment-list";
 import { CommentEditor } from "@/components/post/comment-editor";
 import { ErrorBoundary } from "@/components/error/error-boundary";
+import Link from "next/link";
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
 }
@@ -316,21 +317,25 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             </div>
 
             <div className="mt-2 flex items-start space-x-3">
-              <Avatar className="h-12 w-12 md:h-14 md:w-14 flex-shrink-0">
-                <AvatarImage
-                  src={currentDiscussion.user.avatar_url}
-                  alt={currentDiscussion.user.username}
-                />
-                <AvatarFallback>
-                  {currentDiscussion.user.username[0]}
-                </AvatarFallback>
-              </Avatar>
+              <Link href={`/u/${currentDiscussion.user.username}`}>
+                <Avatar className="h-12 w-12 md:h-14 md:w-14 flex-shrink-0">
+                  <AvatarImage
+                    src={currentDiscussion.user.avatar_url}
+                    alt={currentDiscussion.user.username}
+                  />
+                  <AvatarFallback>
+                    {currentDiscussion.user.username[0]}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
 
               <div className="flex-1 min-w-0 overflow-hidden">
                 <div className="flex items-center space-x-2">
-                  <span className="text-base md:text-lg font-medium truncate">
-                    {currentDiscussion.user.username}
-                  </span>
+                  <Link href={`/u/${currentDiscussion.user.username}`}>
+                    <span className="text-base md:text-lg font-medium truncate">
+                      {currentDiscussion.user.username}
+                    </span>
+                  </Link>
                   <span className="flex-shrink-0 mx-2 text-gray-300">·</span>
                   <span className="text-xs md:text-sm text-gray-500 flex-shrink-0">
                     {formatDistanceToNow(
