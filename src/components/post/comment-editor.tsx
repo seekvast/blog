@@ -34,27 +34,6 @@ export const CommentEditor = React.memo(
       onSubmit(content);
     }, [content, isSubmitting, onSubmit]);
 
-    React.useEffect(() => {
-      if (content) {
-        localStorage.setItem(`comment-draft-${replyTo?.id || "new"}`, content);
-      }
-
-      return () => {
-        if (!content) {
-          localStorage.removeItem(`comment-draft-${replyTo?.id || "new"}`);
-        }
-      };
-    }, [content, replyTo?.id]);
-
-    React.useEffect(() => {
-      const savedDraft = localStorage.getItem(
-        `comment-draft-${replyTo?.id || "new"}`
-      );
-      if (savedDraft && !content) {
-        onChange(savedDraft);
-      }
-    }, [replyTo?.id, content, onChange]);
-
     if (!user) {
       return (
         <div className="mt-6 w-full flex justify-center p-8">

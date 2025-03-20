@@ -99,6 +99,7 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
+//适用API请求调用
 export async function getSession() {
   if (typeof window === "undefined") {
     return await getServerSession(authOptions);

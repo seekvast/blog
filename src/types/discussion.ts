@@ -69,6 +69,7 @@ export interface Post {
   board_creator_hashid: string;
   type: string;
   content: string;
+  discussion_slug: string;
   edited_at: string | null;
   hidden_at: string | null;
   created_at: string;

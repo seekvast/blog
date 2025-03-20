@@ -1,6 +1,14 @@
 import type { Response, Pagination } from "./common";
 import type { User } from "./user";
 
+//看板管理员
+interface BoardManager {
+  id: number;
+  user_hashid: string;
+  board_id: number;
+  user_role: number;
+}
+
 export interface Board {
   id: number;
   name: string;
@@ -27,6 +35,7 @@ export interface Board {
     replies_count: number;
     status: number;
   };
+  manager: BoardManager;
   category: {
     id: number;
     name: string;

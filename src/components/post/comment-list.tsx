@@ -21,6 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { CommentActions } from "@/components/post/comment-actions";
 
 interface CommentListProps {
   comments: Post[];
@@ -31,14 +32,6 @@ interface CommentListProps {
 
 export const CommentList = React.memo(
   ({ comments, isLoading, onReply, onVote }: CommentListProps) => {
-    const [reportToAdminOpen, setReportToAdminOpen] = useState(false);
-    const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
-    const [reportComment, setReportComment] = useState<Post | null>(null);
-
-    const handleReportClick = (comment: Post) => {
-      setReportComment(comment);
-    };
-
     if (!comments || comments.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-8 text-sm md:text-base text-muted-foreground">
@@ -133,33 +126,7 @@ export const CommentList = React.memo(
                       >
                         回复
                       </button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <MoreHorizontal className="h-4 w-4 cursor-pointer" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={() => {
-                              handleReportClick(comment);
-                              setReportToAdminOpen(true);
-                            }}
-                          >
-                            <Flag className="mr-2 h-4 w-4" />
-                            <span>向管理員檢舉</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="cursor-pointer"
-                            onClick={() => {
-                              handleReportClick(comment);
-                              setReportToKaterOpen(true);
-                            }}
-                          >
-                            <AlertTriangle className="mr-2 h-4 w-4" />
-                            <span>向Kater檢舉</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <CommentActions comment={comment} />
                     </div>
                   </div>
                 </div>
@@ -167,38 +134,6 @@ export const CommentList = React.memo(
             </div>
           ))}
         </div>
-
-        {/* 向管理员举报对话框 */}
-        {reportComment && (
-          <ReportDialog
-            open={reportToAdminOpen}
-            onOpenChange={setReportToAdminOpen}
-            title="向看板管理員檢舉"
-            form={{
-              user_hashid: reportComment.user.hashid,
-              board_id: reportComment.board_id,
-              post_id: reportComment.id,
-              reported_to: "admin",
-              target: 2, // 2 表示帖子
-            }}
-          />
-        )}
-
-        {/* 向Kater举报对话框 */}
-        {reportComment && (
-          <ReportDialog
-            open={reportToKaterOpen}
-            onOpenChange={setReportToKaterOpen}
-            title="向Kater檢舉"
-            form={{
-              user_hashid: reportComment.user.hashid,
-              board_id: reportComment.board_id,
-              post_id: reportComment.id,
-              reported_to: "moderator",
-              target: 2, // 2 表示帖子
-            }}
-          />
-        )}
       </div>
     );
   }

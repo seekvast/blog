@@ -3,8 +3,8 @@
 import * as React from "react";
 import { useState, useCallback } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { useRequireAuth } from "@/hooks/use-require-auth";
+import { useAuth } from "../providers/auth-provider";
 
 import {
   ThumbsUp,
@@ -19,7 +19,6 @@ import {
   Lock,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DiscussionPreview } from "@/components/post/discussion-preview";
 import type { Discussion } from "@/types/discussion";
@@ -36,7 +35,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { debounce } from "@/lib/utils";
-import { useLoginModal } from "@/components/providers/login-modal-provider";
+import { DiscussionActions } from "@/components/post/discussion-actions";
 
 interface DiscussionItemProps {
   discussion: Discussion;
@@ -49,14 +48,13 @@ export const DiscussionItem = React.forwardRef<
   DiscussionItemProps
 >(({ discussion, displayMode, isLastItem }, ref) => {
   const { requireAuth } = useRequireAuth();
-
-  const [reportToAdminOpen, setReportToAdminOpen] = useState(false);
-  const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
+  const { user } = useAuth();
   const [isVoted, setIsVoted] = useState(discussion.user_voted?.vote === "up");
   const [isVoting, setIsVoting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  const isAuthor = user?.hashid === discussion.user.hashid;
   // 点赞 mutation
   const voteMutation = useMutation({
     mutationFn: async () => {
@@ -91,14 +89,6 @@ export const DiscussionItem = React.forwardRef<
     [isVoting, voteMutation]
   );
 
-  const handleReportToAdmin = (reason: string) => {
-    console.log("向管理员举报:", discussion.slug, reason);
-  };
-
-  const handleReportToKater = (reason: string) => {
-    console.log("向Kater举报:", discussion.slug, reason);
-  };
-
   // 处理点赞点击
   const handleVote = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -121,8 +111,8 @@ export const DiscussionItem = React.forwardRef<
           <Avatar className="h-10 w-10 lg:h-14 lg:w-14 flex-shrink-0">
             <AvatarImage
               src={discussion.user.avatar_url}
-            alt={discussion.user.username}
-          />
+              alt={discussion.user.username}
+            />
             <AvatarFallback>{discussion.user.username[0]}</AvatarFallback>
           </Avatar>
         </Link>
@@ -148,49 +138,7 @@ export const DiscussionItem = React.forwardRef<
               )}
             </div>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <MoreHorizontal className="flex-shrink-0 h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem className="cursor-pointer">
-                  <Edit className="mr-2 h-4 w-4" />
-                  <span>編輯</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer text-destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  <span>刪除</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() => setReportToAdminOpen(true)}
-                >
-                  <Flag className="mr-2 h-4 w-4" />
-                  <span>向管理員檢舉</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onClick={() => setReportToKaterOpen(true)}
-                >
-                  <AlertTriangle className="mr-2 h-4 w-4" />
-                  <span>向Kater檢舉</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
-                  <PinIcon className="mr-2 h-4 w-4" />
-                  <span>設為看板公告</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  <FolderEdit className="mr-2 h-4 w-4" />
-                  <span>更改子版</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
-                  <Lock className="mr-2 h-4 w-4" />
-                  <span>關閉回覆功能</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <DiscussionActions discussion={discussion} isAuthor={isAuthor} />
           </div>
 
           <div className="mt-1">
@@ -244,34 +192,6 @@ export const DiscussionItem = React.forwardRef<
           </div>
         </div>
       </div>
-
-      {/* 向管理员举报对话框 */}
-      <ReportDialog
-        open={reportToAdminOpen}
-        onOpenChange={setReportToAdminOpen}
-        title="向看板管理員檢舉"
-        form={{
-          user_hashid: discussion.user.hashid,
-          board_id: discussion.board_id,
-          discussion_slug: discussion.slug,
-          target: 1,
-          reported_to: "admin",
-        }}
-      />
-
-      {/* 向Kater举报对话框 */}
-      <ReportDialog
-        open={reportToKaterOpen}
-        onOpenChange={setReportToKaterOpen}
-        title="向Kater檢舉"
-        form={{
-          user_hashid: discussion.user.hashid,
-          board_id: discussion.board_id,
-          discussion_slug: discussion.slug,
-          target: 1,
-          reported_to: "moderator",
-        }}
-      />
     </article>
   );
 });

@@ -3,13 +3,12 @@
 import * as React from "react";
 import { useParams } from "next/navigation";
 import { useDiscussionStore } from "@/store/discussion";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/components/providers/auth-provider";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import type { Discussion, Pagination } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Star, Bookmark } from "lucide-react";
-import Link from "next/link";
 import { useLoginModal } from "@/components/providers/login-modal-provider";
 import { PostContent } from "@/components/post/post-content";
 import { api } from "@/lib/api";
@@ -24,8 +23,6 @@ import { Button } from "@/components/ui/button";
 import { CommentList } from "@/components/post/comment-list";
 import { CommentEditor } from "@/components/post/comment-editor";
 import { ErrorBoundary } from "@/components/error/error-boundary";
-import { ReportDialog } from "@/components/report/report-dialog";
-
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
 }
@@ -37,9 +34,8 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     return <div>Invalid discussion URL</div>;
   }
 
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const { requireAuth } = useRequireAuth();
-  const user = session?.user;
   const { openLoginModal } = useLoginModal();
   const { currentDiscussion, setDiscussion } = useDiscussionStore();
 
@@ -53,8 +49,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   const [isFollowed, setIsFollowed] = useState(
     initialDiscussion?.discussion_user?.subscription === "follow"
   );
-  const [reportToAdminOpen, setReportToAdminOpen] = useState(false);
-  const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
 
   const queryClient = useQueryClient();
 

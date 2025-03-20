@@ -31,6 +31,7 @@ import {
   discussionSchema,
   pollSchema,
 } from "@/validations/discussion";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const initDiscussionForm: DiscussionForm = {
   title: "",
@@ -553,45 +554,18 @@ export default function CreatePostModal() {
       </div>
 
       {/* 确认离开对话框 */}
-      <Dialog
+      <ConfirmDialog
         open={modalState.showConfirmDialog}
         onOpenChange={(value) =>
           dispatch({ type: "SET_SHOW_CONFIRM_DIALOG", payload: value })
         }
-      >
-        <DialogContent className="bg-white sm:max-w-md">
-          <DialogHeader className="border-b border-destructive/10 pb-4">
-            <DialogTitle className="text-destructive flex items-center gap-2 text-lg font-semibold">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-              <span>确认离开？</span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="py-6">
-            <div className="flex flex-col gap-2">
-              <p className="text-base text-foreground">
-                你有未保存的内容，确定要离开吗？
-              </p>
-              <p className="text-sm font-medium text-destructive">
-                离开后未保存的内容将会丢失
-              </p>
-            </div>
-          </div>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              variant="outline"
-              onClick={() =>
-                dispatch({ type: "SET_SHOW_CONFIRM_DIALOG", payload: false })
-              }
-              className="border-destructive/20 hover:bg-destructive/10 hover:text-destructive"
-            >
-              取消
-            </Button>
-            <Button variant="destructive" onClick={() => pendingAction?.()}>
-              确认离开
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        title="确认离开？"
+        description="你有未保存的内容，确定要离开吗？"
+        confirmText="确认离开"
+        cancelText="取消"
+        onConfirm={() => pendingAction?.()}
+        variant="destructive"
+      />
     </Portal>
   );
 }

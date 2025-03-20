@@ -114,7 +114,7 @@ export function createApi(options: ApiOptions = {}) {
       update: (slug: string, data: any) =>
         http.patch<Discussion>(`${prefix}/discussions/${slug}`, data),
 
-      delete: (slug: string) => http.delete(`${prefix}/discussions/${slug}`),
+      delete: (data: any) => http.delete(`${prefix}/discussion`, data),
 
       posts: (params?: QueryParams) =>
         http.get<Pagination<Post>>(`${prefix}/discussion/posts`, params, {
@@ -147,7 +147,7 @@ export function createApi(options: ApiOptions = {}) {
       update: (slug: string, data: any) =>
         http.patch<Post>(`${prefix}/posts/${slug}`, data),
 
-      delete: (slug: string) => http.delete(`${prefix}/posts/${slug}`),
+      delete: (data: any) => http.delete(`${prefix}/post`, data),
       
       updatePost: (data: any) => http.put<Post>(`${prefix}/post`, data),
       vote: (data: any) => http.post<any>(`${prefix}/post/vote`, data),

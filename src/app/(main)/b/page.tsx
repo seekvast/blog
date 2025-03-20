@@ -221,11 +221,13 @@ export default function BoardsPage() {
                 key={board.id}
                 className="flex items-center justify-between py-4"
               >
-                <div className="flex items-center space-x-4">
-                  <Avatar className="h-14 w-14">
-                    <AvatarImage src={board.avatar} alt={board.name} />
-                    <AvatarFallback>{board.name[0]}</AvatarFallback>
-                  </Avatar>
+                    <div className="flex items-center space-x-4">
+                  <Link href={`/b/${board.slug}`}>
+                    <Avatar className="h-14 w-14">
+                      <AvatarImage src={board.avatar} alt={board.name} />
+                      <AvatarFallback>{board.name[0]}</AvatarFallback>
+                    </Avatar>
+                  </Link>
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
                       <Link
