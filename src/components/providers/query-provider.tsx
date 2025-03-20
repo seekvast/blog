@@ -11,8 +11,8 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
           queries: {
             // 在开发环境下禁用重试
             retry: process.env.NODE_ENV === "production",
-            // 缓存时间5分钟
-            staleTime: 1000 * 60 * 5,
+            // 缓存时间1分钟
+            staleTime: 1000 * 60 * 1,
           },
         },
       })
