@@ -86,7 +86,7 @@ export const DiscussionItem = React.forwardRef<
         }
       });
     }, 500),
-    [isVoting, voteMutation]
+    [voteMutation]
   );
 
   // 处理点赞点击

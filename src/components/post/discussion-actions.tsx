@@ -21,19 +21,58 @@ import {
 import { ReportDialog } from "@/components/report/report-dialog";
 import { useState } from "react";
 import type { Discussion } from "@/types/discussion";
-
+import { useAuth } from "@/components/providers/auth-provider";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import { useToast } from "@/components/ui/use-toast";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 interface DiscussionActionsProps {
   discussion: Discussion;
-  isAuthor: boolean;
 }
 
-export function DiscussionActions({
-  discussion,
-  isAuthor,
-}: DiscussionActionsProps) {
+export function DiscussionActions({ discussion }: DiscussionActionsProps) {
   const [reportToAdminOpen, setReportToAdminOpen] = useState(false);
   const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
-
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const { user } = useAuth();
+  const isAuthor = user?.hashid === discussion.user.hashid;
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  //通过useMutation删除评论
+  const deleteMutation = useMutation({
+    mutationFn: () => api.discussions.delete({ slug: discussion.slug }),
+    onSuccess: () => {
+      toast({
+        title: "刪除成功",
+        description: "刪除成功",
+      });
+      // 更新所有相关的查询缓存
+      queryClient.invalidateQueries({
+        queryKey: ["discussions", discussion.slug, discussion.board_id],
+      });
+      // 更新首页的讨论列表
+      queryClient.invalidateQueries({
+        queryKey: ["discussions", "list"],
+      });
+      // 更新推荐列表
+      queryClient.invalidateQueries({
+        queryKey: ["discussions", "recommend"],
+      });
+      // 更新追踪列表
+      queryClient.invalidateQueries({
+        queryKey: ["discussions", "trace"],
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "刪除失敗",
+        description: error.message,
+      });
+    },
+  });
+  const handleDelete = () => {
+    setShowDeleteConfirm(true);
+  };
   return (
     <>
       <DropdownMenu>
@@ -47,7 +86,10 @@ export function DiscussionActions({
                 <Edit className="mr-2 h-4 w-4" />
                 <span>編輯</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer text-destructive">
+              <DropdownMenuItem
+                className="cursor-pointer text-destructive"
+                onClick={handleDelete}
+              >
                 <Trash2 className="mr-2 h-4 w-4" />
                 <span>刪除</span>
               </DropdownMenuItem>
@@ -88,6 +130,21 @@ export function DiscussionActions({
         </DropdownMenuContent>
       </DropdownMenu>
 
+      {/* 删除确认对话框 */}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="删除评论"
+        description="确定要删除这条评论吗？"
+        confirmText="删除"
+        cancelText="取消"
+        onConfirm={() => {
+          deleteMutation.mutate();
+          setShowDeleteConfirm(false);
+        }}
+        variant="destructive"
+        loading={deleteMutation.isPending}
+      />
       {/* 向管理员举报对话框 */}
       <ReportDialog
         open={reportToAdminOpen}

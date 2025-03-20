@@ -1,18 +1,20 @@
 import { DiscussionsList } from "@/components/home/discussions-list";
 import { api } from "@/lib/api";
+import type { Pagination } from "@/types/common";
+import type { Discussion } from "@/types/discussion";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-async function getDiscussions() {
+async function getDiscussions(): Promise<Pagination<Discussion>> {
   try {
-    const response = await api.discussions.list({ 
-      page: 1, 
+    const response = await api.discussions.list({
+      page: 1,
       per_page: 10,
     });
     return response;
   } catch (error) {
-    // Return an empty paginated result in case of error
+    console.error("Failed to fetch discussions:", error);
     return {
       code: -1,
       items: [],
@@ -20,12 +22,14 @@ async function getDiscussions() {
       per_page: 10,
       current_page: 1,
       last_page: 1,
-      message: error instanceof Error ? error.message : 'Failed to fetch discussions'
+      message: error instanceof Error ? error.message : "获取数据失败",
     };
   }
 }
 
 export default async function HomePage() {
   const initialDiscussions = await getDiscussions();
-  return <DiscussionsList initialDiscussions={initialDiscussions} from="index" />;
+  return (
+    <DiscussionsList initialDiscussions={initialDiscussions} from="index" />
+  );
 }
