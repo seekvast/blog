@@ -13,6 +13,52 @@ export interface PostVote {
   vote: string;
 }
 
+export interface PollOption {
+  id: number;
+  poll_id: number;
+  votes: number;
+  sort: number;
+  option: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
+export interface Poll {
+  id: number;
+  discussion_slug: string;
+  user_hashid: string;
+  title: string;
+  board_id: number;
+  board_child_id: number;
+  votes_count: number;
+  is_multiple: number;
+  show_voter: number;
+  is_timed: number;
+  start_time: string;
+  end_time: string;
+  ext: any;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  options: PollOption[];
+  user_voted: {
+    id: number;
+    poll_id: number;
+    user_id: number;
+    options: number[];
+  };
+}
+
+export interface PollVoter {
+  id: number;
+  poll_id: number;
+  user_hashid: string;
+  option: string;
+  created_at: string;
+  user: User;
+}
+
 export interface Discussion {
   id: number;
   title: string;
@@ -51,6 +97,7 @@ export interface Discussion {
   user: User;
   discussion_user: DiscussionUser;
   user_voted: PostVote;
+  poll?: Poll;
 }
 
 export interface Post {

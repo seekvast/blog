@@ -3,7 +3,6 @@ import type {
   Attachment,
   Pagination,
   QueryParams,
-  UploadResponse,
   Category,
 } from "@/types/common";
 import type {
@@ -17,8 +16,8 @@ import type {
   BoardUser,
   BoardBlacklist,
   Report,
+  PollVoter,
 } from "@/types";
-import { signIn } from "next-auth/react";
 
 export interface ApiOptions {
   prefix?: string;
@@ -131,7 +130,7 @@ export function createApi(options: ApiOptions = {}) {
       saveBookmark: (data: any) => http.post<any>(`${prefix}/discussion/bookmark`, data),
       saveFollow: (data: any) => http.post<any>(`${prefix}/discussion/follow`, data),
       votePoll: (data: any) => http.post<any>(`${prefix}/discussion/vote-poll`, data),
-      getPollVotes: (params?: QueryParams) => http.get<any>(`${prefix}/discussion/poll-votes`, params, { next }),
+      getPollVotes: (params?: QueryParams) => http.get<Pagination<PollVoter>>(`${prefix}/discussion/poll-votes`, params, { next }),
       getRandom: () => http.get<Discussion[]>(`${prefix}/discussion/random`, undefined, { next }),
     },
 

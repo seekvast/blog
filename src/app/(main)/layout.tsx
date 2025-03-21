@@ -58,7 +58,7 @@ export default function MainLayout({
       <Header />
 
       <div className="flex-1 flex flex-col min-h-0">
-        <div className="mx-auto w-full max-w-7xl flex flex-col lg:flex-row pt-4">
+        <div className="mx-auto w-full lg:max-w-7xl flex flex-col lg:flex-row pt-4">
           {/* 左侧边栏 - 桌面端显示 */}
           {LeftSidebarComponent && (
             <aside className="hidden lg:block lg:w-[300px] flex-shrink-0 px-4">

@@ -24,6 +24,8 @@ import { CommentList } from "@/components/post/comment-list";
 import { CommentEditor } from "@/components/post/comment-editor";
 import { ErrorBoundary } from "@/components/error/error-boundary";
 import Link from "next/link";
+import { PollContent } from "@/components/post/poll-content";
+
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
 }
@@ -80,7 +82,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       }
     },
     enabled: !!currentDiscussion,
-    staleTime: 60 * 1000,
+    staleTime: 10 * 1000,
   });
 
   // 使用 useMutation 优化书签操作
@@ -361,6 +363,33 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
 
           <div className="py-4 px-2 md:px-4 text-muted-foreground w-full text-base">
             <PostContent post={currentDiscussion.main_post} />
+            {currentDiscussion.poll && (
+              <PollContent
+                poll={currentDiscussion.poll}
+                onVote={async (optionIds) => {
+                  try {
+                    await api.discussions.votePoll({
+                      slug: currentDiscussion.slug,
+                      poll_id: currentDiscussion.poll?.id,
+                      options: optionIds,
+                    });
+                    queryClient.invalidateQueries({
+                      queryKey: ["discussion", slug],
+                    });
+                    toast({
+                      title: "投票成功",
+                      variant: "default",
+                    });
+                  } catch (error) {
+                    toast({
+                      title: "投票失败",
+                      description: "请稍后重试",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              />
+            )}
           </div>
 
           <div className="flex items-center justify-between border-b">
