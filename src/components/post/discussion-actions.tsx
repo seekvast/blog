@@ -138,9 +138,9 @@ export function DiscussionActions({
       <ConfirmDialog
         open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}
-        title="删除討論"
-        description="确定要删除这则讨论吗？"
-        confirmText="删除"
+        title="刪除討論"
+        description="確定要刪除這則討論嗎？"
+        confirmText="刪除"
         cancelText="取消"
         onConfirm={() => {
           deleteMutation.mutate();

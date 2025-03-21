@@ -22,14 +22,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { DiscussionPreview } from "@/components/post/discussion-preview";
 import type { Discussion } from "@/types/discussion";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ReportDialog } from "@/components/report/report-dialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
@@ -49,13 +41,11 @@ export const DiscussionItem = React.forwardRef<
   DiscussionItemProps
 >(({ discussion, displayMode, isLastItem, onDelete }, ref) => {
   const { requireAuth } = useRequireAuth();
-  const { user } = useAuth();
   const [isVoted, setIsVoted] = useState(discussion.user_voted?.vote === "up");
   const [isVoting, setIsVoting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const isAuthor = user?.hashid === discussion.user.hashid;
   // 点赞 mutation
   const voteMutation = useMutation({
     mutationFn: async () => {

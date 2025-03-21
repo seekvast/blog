@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import { Card } from "@/components/ui/card";
-import { Search } from "lucide-react";
 import { BoardHistory } from "@/types/board";
 import { Pagination } from "@/types/common";
+import { InfiniteScroll } from "@/components/common/infinite-scroll";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   Select,
@@ -18,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { SearchInput } from "@/components/search/search-input";
 import { formatDate } from "@/lib/utils";
 
@@ -27,67 +27,76 @@ interface ApprovalSettingsProps {
 }
 
 export function ApprovalSettings({ board }: ApprovalSettingsProps) {
-  const [applications, setApplications] =
-    React.useState<Pagination<BoardHistory>>();
-  const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
-
+  const queryClient = useQueryClient();
   // 筛选条件
   const [filters, setFilters] = React.useState({
-    applyTime: "",
-    registerTime: "",
-    boardCount: "",
+    apply_time: "",
+    register_time: "",
+    board_count: "",
     gender: "",
   });
 
   // 搜索关键词
   const [searchQuery, setSearchQuery] = React.useState("");
 
-  // 加载申请列表
-  const loadApplications = async () => {
-    try {
-      setIsLoading(true);
-      const response = await api.boards.getHistory({
-        params: {
+  // 使用 useInfiniteQuery 获取申请列表
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ["board-applications", board.id, filters, searchQuery],
+    queryFn: async ({ pageParam = 1 }) => {
+      try {
+        const response = await api.boards.getHistory({
           ...filters,
-          q: searchQuery,
-        },
-      });
-      setApplications(response);
-    } catch (error) {
-      console.error("Error loading applications:", error);
-      toast({
-        variant: "destructive",
-        title: "加载失败",
-        description: "无法加载申请列表，请重试",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  React.useEffect(() => {
-    loadApplications();
-  }, [board.id, filters]);
+          status: 0,
+          keyword: searchQuery,
+          page: pageParam,
+          per_page: 10,
+        });
+        return response;
+      } catch (error) {
+        console.error("Error loading applications:", error);
+        toast({
+          variant: "destructive",
+          title: "加载失败",
+          description: "无法加载申请列表，请重试",
+        });
+        throw error;
+      }
+    },
+    getNextPageParam: (lastPage) => {
+      if (lastPage.current_page < lastPage.last_page) {
+        return lastPage.current_page + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 1,
+  });
 
   // 处理申请
-  const handleApplication = async (
-    applicationId: number,
-    status: "approve" | "reject"
-  ) => {
+  const handleApplication = async (applicationId: number, status: 1 | 2) => {
     try {
       await api.boards.approve({
-        application_id: applicationId,
+        history_id: applicationId,
         status,
       });
-
+      //使缓存失效
+      queryClient.invalidateQueries({
+        queryKey: ["board-applications", board.id, filters, searchQuery],
+      });
       toast({
-        title: status === "approve" ? "已通过" : "已拒绝",
+        title: status === 1 ? "已通过" : "已拒绝",
         description: "申请处理成功",
       });
 
       // 重新加载列表
-      loadApplications();
+      refetch();
     } catch (error) {
       console.error("Error handling application:", error);
       toast({
@@ -101,31 +110,26 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
   // 清空筛选条件
   const clearFilters = () => {
     setFilters({
-      applyTime: "",
-      registerTime: "",
-      boardCount: "",
+      apply_time: "",
+      register_time: "",
+      board_count: "",
       gender: "",
     });
     setSearchQuery("");
   };
 
-  const handleSearch = async (value: string) => {
-    try {
-      const data = await api.boards.getMembers({
-        board_id: board.id,
-        keyword: value,
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "搜索失败",
-      });
+  // 加载更多
+  const handleLoadMore = () => {
+    if (!isFetchingNextPage && hasNextPage) {
+      fetchNextPage();
     }
   };
 
-  if (isLoading) {
-    return <div className="flex justify-center py-8">加载中...</div>;
-  }
+  // 从分页数据中提取所有申请项
+  const applications = React.useMemo(() => {
+    if (!data) return [];
+    return data.pages.flatMap((page) => page.items);
+  }, [data]);
 
   return (
     <div className="space-y-4">
@@ -135,7 +139,7 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
         <SearchInput
           value={searchQuery}
           onChange={setSearchQuery}
-          onSearch={handleSearch}
+          onSearch={() => {}} // 不需要额外搜索，useInfiniteQuery 会处理
           placeholder="依昵称或账号搜索"
           className="w-full md:w-auto"
         />
@@ -144,9 +148,9 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
       {/* 筛选栏 */}
       <div className="flex items-center gap-4">
         <Select
-          value={filters.applyTime}
+          value={filters.apply_time}
           onValueChange={(value) =>
-            setFilters({ ...filters, applyTime: value })
+            setFilters({ ...filters, apply_time: value })
           }
         >
           <SelectTrigger className="w-32 h-8">
@@ -160,9 +164,9 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
         </Select>
 
         <Select
-          value={filters.registerTime}
+          value={filters.register_time}
           onValueChange={(value) =>
-            setFilters({ ...filters, registerTime: value })
+            setFilters({ ...filters, register_time: value })
           }
         >
           <SelectTrigger className="w-32 h-8">
@@ -182,9 +186,9 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
         </Select>
 
         <Select
-          value={filters.boardCount}
+          value={filters.board_count}
           onValueChange={(value) =>
-            setFilters({ ...filters, boardCount: value })
+            setFilters({ ...filters, board_count: value })
           }
         >
           <SelectTrigger className="w-32 h-8">
@@ -211,11 +215,14 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
             <SelectValue placeholder="性别" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="male" className="h-8">
+            <SelectItem value="1" className="h-8">
               男
             </SelectItem>
-            <SelectItem value="female" className="h-8">
+            <SelectItem value="2" className="h-8">
               女
+            </SelectItem>
+            <SelectItem value="0" className="h-8">
+              其他
             </SelectItem>
           </SelectContent>
         </Select>
@@ -231,72 +238,80 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
       </div>
 
       {/* 申请列表 */}
-      {applications?.items.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">暂无待审核的申请</div>
-      ) : (
-        <div className="space-y-4">
-          {applications?.items.map((application) => (
-            <Card key={application.id} className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage
-                      src={application.user?.avatar_url}
-                      alt={application.user?.nickname}
-                    />
-                    <AvatarFallback>
-                      {application.user?.nickname[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium">
-                      {application.user?.nickname}
-                      <span className="ml-2 text-sm text-muted-foreground">
-                        @{application.user?.username}
-                      </span>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      注册时间：
-                      {application.user?.created_at
-                        ? formatDate(application.user.created_at)
-                        : "-"}
-                      <span className="mx-2">·</span>
-                      申请时间：
-                      {application.created_at
-                        ? formatDate(application.created_at)
-                        : "-"}
-                    </div>
-                    <div className="mt-2">
-                      <div className="text-sm">
-                        看板问题：{board.question}？
+      <InfiniteScroll
+        loading={isLoading || isFetchingNextPage}
+        hasMore={!!hasNextPage}
+        onLoadMore={handleLoadMore}
+        currentPage={data?.pageParams?.length || 1}
+        disableInitialCheck={true}
+      >
+        {applications.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">暂无待审核的申请</div>
+        ) : (
+          <div className="space-y-4">
+            {applications.map((application) => (
+              <Card key={application.id} className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage
+                        src={application.user?.avatar_url}
+                        alt={application.user?.nickname}
+                      />
+                      <AvatarFallback>
+                        {application.user?.nickname[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">
+                        {application.user?.nickname}
+                        <span className="ml-2 text-sm text-muted-foreground">
+                          @{application.user?.username}
+                        </span>
                       </div>
-                      <div className="text-sm">
-                        看板答案：{application.user_answer}
+                      <div className="text-sm text-muted-foreground">
+                        注册时间：
+                        {application.user?.created_at
+                          ? formatDate(application.user.created_at)
+                          : "-"}
+                        <span className="mx-2">·</span>
+                        申请时间：
+                        {application.created_at
+                          ? formatDate(application.created_at)
+                          : "-"}
+                      </div>
+                      <div className="mt-2">
+                        <div className="text-sm">
+                          看板问题：{board.question}？
+                        </div>
+                        <div className="text-sm">
+                          看板答案：{application.user_answer}
+                        </div>
                       </div>
                     </div>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={() => handleApplication(application.id, 1)}
+                    >
+                      通过
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleApplication(application.id, 2)}
+                    >
+                      拒绝
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="default"
-                    onClick={() => handleApplication(application.id, "approve")}
-                  >
-                    通过
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleApplication(application.id, "reject")}
-                  >
-                    拒绝
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
+              </Card>
+            ))}
+          </div>
+        )}
+      </InfiniteScroll>
     </div>
   );
 }

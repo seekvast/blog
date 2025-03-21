@@ -17,6 +17,7 @@ import type {
   BoardBlacklist,
   Report,
   PollVoter,
+  BoardHistory,
 } from "@/types";
 
 export interface ApiOptions {

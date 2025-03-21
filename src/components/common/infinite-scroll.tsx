@@ -12,6 +12,7 @@ interface InfiniteScrollProps {
   currentPage: number;
   className?: string;
   loadingIndicator?: React.ReactNode;
+  disableInitialCheck?: boolean;
 }
 
 export function InfiniteScroll({
@@ -26,6 +27,7 @@ export function InfiniteScroll({
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
     </div>
   ),
+  disableInitialCheck = false,
 }: InfiniteScrollProps) {
   const observerRef = useRef<IntersectionObserver>();
 
@@ -52,22 +54,24 @@ export function InfiniteScroll({
 
       if (node) {
         observerRef.current.observe(node);
-        
+
         // 立即检查元素是否在视口中
-        const rect = node.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-        if (rect.top < windowHeight) {
-          onLoadMore();
+        if (!disableInitialCheck) {
+          const rect = node.getBoundingClientRect();
+          const windowHeight = window.innerHeight;
+          if (rect.top < windowHeight) {
+            onLoadMore();
+          }
         }
       }
     },
-    [loading, hasMore, onLoadMore]
+    [loading, hasMore, onLoadMore, disableInitialCheck]
   );
 
   // 克隆最后一个子元素并添加 ref
   const childrenArray = React.Children.toArray(children);
   const lastChild = childrenArray[childrenArray.length - 1];
-  
+
   const enhancedChildren = childrenArray.map((child, index) => {
     if (index === childrenArray.length - 1) {
       return React.cloneElement(child as React.ReactElement, {
