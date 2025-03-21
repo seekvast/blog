@@ -132,8 +132,8 @@ export function SettingMenus({
       {/* 全域设定组 */}
       <div>
         <div className="flex items-center gap-2 pb-4">
-          <Settings className="w-4 h-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-500">全域設定</span>
+          <Settings className="w-4 h-4" />
+          <span className="text-sm font-medium">全域設定</span>
         </div>
         <nav className="space-y-1">
           {menuItems
@@ -159,8 +159,8 @@ export function SettingMenus({
       {/* 看板管理组 */}
       <div>
         <div className="flex items-center gap-2 pb-4">
-          <Users2 className="w-4 h-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-500">看板管理</span>
+          <Users2 className="w-4 h-4" />
+          <span className="text-sm font-medium">看板管理</span>
         </div>
         <nav className="space-y-1">
           {menuItems

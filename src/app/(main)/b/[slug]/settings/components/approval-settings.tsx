@@ -8,7 +8,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import { Card } from "@/components/ui/card";
 import { Search } from "lucide-react";
-
 import {
   Select,
   SelectContent,
@@ -17,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { SearchInput } from "@/components/search/search-input";
 
 interface ApprovalSettingsProps {
   board: Board;
@@ -24,7 +24,7 @@ interface ApprovalSettingsProps {
 
 export function ApprovalSettings({ board }: ApprovalSettingsProps) {
   const [applications, setApplications] = React.useState<any[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
 
   // 筛选条件
@@ -61,9 +61,9 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
     }
   };
 
-  React.useEffect(() => {
-    loadApplications();
-  }, [board.id, filters, searchQuery]);
+  //   React.useEffect(() => {
+  //     loadApplications();
+  //   }, [board.id, filters, searchQuery]);
 
   // 处理申请
   const handleApplication = async (
@@ -103,6 +103,20 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
     setSearchQuery("");
   };
 
+  const handleSearch = async (value: string) => {
+    try {
+      const data = await api.boards.getMembers({
+        board_id: board.id,
+        keyword: value,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "搜索失败",
+      });
+    }
+  };
+
   if (isLoading) {
     return <div className="flex justify-center py-8">加载中...</div>;
   }
@@ -112,15 +126,13 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
       {/* 搜索栏 */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">成员审核</h3>
-        <div className="relative w-60 rounded-full">
-          <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="依昵称或账号搜索"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 h-8 bg-muted/50 rounded-full"
-          />
-        </div>
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSearch={handleSearch}
+          placeholder="依昵称或账号搜索"
+          className="w-full md:w-auto"
+        />
       </div>
 
       {/* 筛选栏 */}

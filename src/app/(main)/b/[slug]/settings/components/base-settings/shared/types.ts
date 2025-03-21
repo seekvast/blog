@@ -8,7 +8,7 @@ export const formSchema = z.object({
     .string()
     .min(7)
     .max(25)
-    .regex(/^[a-zA-Z0-9]+$/, "只能输入英文和数字"),
+    .regex(/^[a-zA-Z0-9_-]+$/, "只能输入英文、数字和下划线"),
   desc: z.string().max(500, "看板描述不能超过500字"),
   badge_visible: z.array(z.number()),
   is_nsfw: z.number(),

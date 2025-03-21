@@ -29,12 +29,13 @@ export function BoardSettingsForm({
   onSuccess,
 }: BoardSettingsFormProps) {
   const { isMobile } = useDevice();
-  console.log(isMobile, "ism..........");
   const router = useRouter();
   const [activeTab, setActiveTab] = React.useState<SettingTab>(
     isMobile ? "" : "general"
   );
-
+  useEffect(() => {
+    setActiveTab(isMobile ? "" : "general");
+  }, [isMobile]);
   // 根据activeTab渲染对应的内容
   const renderContent = () => {
     switch (activeTab) {

@@ -110,16 +110,16 @@ function ChildModal({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>看板名称</FormLabel>
+                  <FormLabel>名称</FormLabel>
                   <FormControl>
-                    <Input placeholder="输入看板名称" {...field} />
+                    <Input placeholder="输入子板名称" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <div className="flex justify-end">
-              <Button type="submit" disabled={isSubmitting}>
+              <Button size="sm" type="submit" disabled={isSubmitting}>
                 {isSubmitting
                   ? editingChild
                     ? "更新中..."
@@ -140,8 +140,12 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
   const [boardChildren, setBoardChildren] = React.useState<BoardChild[]>([]);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
-  const [editingChild, setEditingChild] = React.useState<BoardChild | undefined>();
-  const [deletingChild, setDeletingChild] = React.useState<BoardChild | undefined>();
+  const [editingChild, setEditingChild] = React.useState<
+    BoardChild | undefined
+  >();
+  const [deletingChild, setDeletingChild] = React.useState<
+    BoardChild | undefined
+  >();
   const [isDeleting, setIsDeleting] = React.useState(false);
   const { toast } = useToast();
 
@@ -260,19 +264,21 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
           >
             <div className="flex-1 min-w-0">
               <div className="flex items-center">
-                <h4 className="text-base font-medium truncate">{child.name}</h4>
+                <span className="text-sm text-gray-600 truncate">
+                  {child.name}
+                </span>
               </div>
             </div>
 
-            <div className="flex items-center text-gray-500">
+            <div className="flex gap-3 items-center text-gray-600">
               <button
-                className="hover:text-primary"
+                className="text-primary"
                 onClick={() => handleEdit(child)}
               >
                 <Pencil className="mr-2 h-4 w-4" />
               </button>
               <button
-                className="hover:text-destructive"
+                className="text-destructive"
                 onClick={() => handleDelete(child)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />

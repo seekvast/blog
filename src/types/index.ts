@@ -16,3 +16,14 @@ export interface CreateDiscussionDto {
 export interface UpdateDiscussionDto extends Partial<CreateDiscussionDto> {
   slug: string;
 }
+
+export interface User {
+  id: number;
+  hashid: string;
+  username: string;
+  nickname: string;
+  avatar_url: string;
+  posts_count: number;
+  replies_count: number;
+  user_role: number;
+}

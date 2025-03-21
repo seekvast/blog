@@ -87,7 +87,9 @@ export function createApi(options: ApiOptions = {}) {
       getMembers: (data: any) =>
         http.get<Pagination<User>>(`${prefix}/board/users`, data),
       manageUser: (data: any) =>
-        http.post<BoardUser>(`${prefix}/board/manage-user`, data),
+            http.post<BoardUser>(`${prefix}/board/manage-user`, data),
+      changeUserRole: (data: any) =>
+        http.post<BoardUser>(`${prefix}/board/user-role`, data),
       getBlacklist: (data: any) =>
             http.get<Pagination<BoardBlacklist>>(`${prefix}/board/blacklist`, data),
       approve: (data: any) => http.post<any>(`${prefix}/board/approve`, data),

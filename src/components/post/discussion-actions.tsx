@@ -138,8 +138,8 @@ export function DiscussionActions({
       <ConfirmDialog
         open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}
-        title="删除评论"
-        description="确定要删除这条评论吗？"
+        title="删除討論"
+        description="确定要删除这则讨论吗？"
         confirmText="删除"
         cancelText="取消"
         onConfirm={() => {

@@ -71,7 +71,12 @@ interface SortableRuleItemProps {
   isActive: boolean;
 }
 
-function SortableRuleItem({ rule, onEdit, onDelete, isActive }: SortableRuleItemProps) {
+function SortableRuleItem({
+  rule,
+  onEdit,
+  onDelete,
+  isActive,
+}: SortableRuleItemProps) {
   const {
     attributes,
     listeners,
@@ -102,13 +107,15 @@ function SortableRuleItem({ rule, onEdit, onDelete, isActive }: SortableRuleItem
       style={style}
       className={cn(
         "flex items-center gap-3 p-4 rounded-lg bg-muted/50 group transition-colors",
-        isDragging || isActive ? "opacity-50 bg-muted/70 ring-2 ring-primary" : "hover:bg-muted/70",
+        isDragging || isActive
+          ? "opacity-50 bg-muted/70 ring-2 ring-primary"
+          : "hover:bg-muted/70",
         "touch-none" // 防止移动端的滚动和文本选择
       )}
       {...attributes}
     >
-      <div 
-        className="flex items-center cursor-move text-muted-foreground" 
+      <div
+        className="flex items-center cursor-move text-muted-foreground"
         {...listeners}
       >
         <GripVertical className="h-4 w-4" />
@@ -120,16 +127,11 @@ function SortableRuleItem({ rule, onEdit, onDelete, isActive }: SortableRuleItem
         </p>
       </div>
       <div className="flex gap-3 items-center text-gray-500">
-        <button
-          type="button"
-          className="cursor-pointer hover:text-primary"
-          onClick={handleEdit}
-        >
+        <button className="cursor-pointer text-primary" onClick={handleEdit}>
           <Pencil className="h-4 w-4" />
         </button>
         <button
-          type="button"
-          className="cursor-pointer hover:text-destructive"
+          className="cursor-pointer text-destructive"
           onClick={handleDelete}
         >
           <Trash2 className="h-4 w-4" />
@@ -144,7 +146,9 @@ export function RulesSettings({ board }: RulesSettingsProps) {
   const [modalOpen, setModalOpen] = React.useState(false);
   const [editingRule, setEditingRule] = React.useState<BoardRule | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
-  const [deletingRule, setDeletingRule] = React.useState<BoardRule | null>(null);
+  const [deletingRule, setDeletingRule] = React.useState<BoardRule | null>(
+    null
+  );
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [activeId, setActiveId] = React.useState<number | null>(null);
   const { toast } = useToast();
@@ -247,7 +251,7 @@ export function RulesSettings({ board }: RulesSettingsProps) {
     const newIndex = rules.findIndex((rule) => rule.id === over.id);
 
     const newRules = arrayMove(rules, oldIndex, newIndex);
-    
+
     // 计算新的sort值
     let newSort: number;
     if (newIndex === 0) {
@@ -258,10 +262,14 @@ export function RulesSettings({ board }: RulesSettingsProps) {
       newSort = newRules[newIndex - 1].sort - BASE_SORT_GAP;
     } else if (oldIndex < newIndex) {
       // 向下移动，取目标位置前后两个规则的中间值
-      newSort = Math.floor((newRules[newIndex + 1].sort + newRules[newIndex - 1].sort) / 2);
+      newSort = Math.floor(
+        (newRules[newIndex + 1].sort + newRules[newIndex - 1].sort) / 2
+      );
     } else {
       // 向上移动，取目标位置和其前一个规则的中间值
-      newSort = Math.floor((newRules[newIndex - 1].sort + newRules[newIndex].sort) / 2);
+      newSort = Math.floor(
+        (newRules[newIndex - 1].sort + newRules[newIndex].sort) / 2
+      );
     }
 
     const updatedRules = newRules.map((rule) =>
@@ -276,7 +284,7 @@ export function RulesSettings({ board }: RulesSettingsProps) {
         id: active.id as number,
         sort: newSort,
       });
-      
+
       toast({
         title: "成功",
         description: "规则排序已更新",
@@ -285,7 +293,8 @@ export function RulesSettings({ board }: RulesSettingsProps) {
       toast({
         variant: "destructive",
         title: "更新失败",
-        description: error instanceof Error ? error.message : "服务器错误，请稍后重试",
+        description:
+          error instanceof Error ? error.message : "服务器错误，请稍后重试",
       });
       setRules(rules);
     }
@@ -296,7 +305,8 @@ export function RulesSettings({ board }: RulesSettingsProps) {
   };
 
   const handleAddRule = () => {
-    const maxSort = rules.length > 0 ? Math.max(...rules.map(rule => rule.sort)) : 0;
+    const maxSort =
+      rules.length > 0 ? Math.max(...rules.map((rule) => rule.sort)) : 0;
     ruleForm.reset({
       title: "",
       content: "",
@@ -347,7 +357,8 @@ export function RulesSettings({ board }: RulesSettingsProps) {
       toast({
         variant: "destructive",
         title: "删除失败",
-        description: error instanceof Error ? error.message : "服务器错误，请稍后重试",
+        description:
+          error instanceof Error ? error.message : "服务器错误，请稍后重试",
       });
     } finally {
       setIsDeleting(false);
@@ -436,13 +447,14 @@ export function RulesSettings({ board }: RulesSettingsProps) {
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {editingRule ? "编辑规则" : "添加规则"}
-            </DialogTitle>
+            <DialogTitle>{editingRule ? "编辑规则" : "添加规则"}</DialogTitle>
           </DialogHeader>
 
           <Form {...ruleForm}>
-            <form onSubmit={ruleForm.handleSubmit(handleSaveRule)} className="space-y-4">
+            <form
+              onSubmit={ruleForm.handleSubmit(handleSaveRule)}
+              className="space-y-4"
+            >
               <FormField
                 control={ruleForm.control}
                 name="title"
@@ -483,7 +495,7 @@ export function RulesSettings({ board }: RulesSettingsProps) {
 
               <DialogFooter className="gap-2">
                 <Button
-                  type="button"
+                  size="sm"
                   variant="outline"
                   onClick={() => setModalOpen(false)}
                   disabled={isSubmitting}
@@ -491,8 +503,10 @@ export function RulesSettings({ board }: RulesSettingsProps) {
                   取消
                 </Button>
                 <Button
+                  size="sm"
                   type="submit"
                   disabled={isSubmitting}
+                  className="gap-1"
                 >
                   {isSubmitting ? "保存中..." : "保存"}
                 </Button>
@@ -512,6 +526,7 @@ export function RulesSettings({ board }: RulesSettingsProps) {
           </DialogHeader>
           <DialogFooter className="gap-2">
             <Button
+              size="sm"
               variant="outline"
               onClick={() => setDeleteModalOpen(false)}
               disabled={isDeleting}
@@ -519,6 +534,7 @@ export function RulesSettings({ board }: RulesSettingsProps) {
               取消
             </Button>
             <Button
+              size="sm"
               variant="destructive"
               onClick={confirmDelete}
               disabled={isDeleting}
