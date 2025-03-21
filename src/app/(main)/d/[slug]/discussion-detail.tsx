@@ -368,7 +368,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 poll={currentDiscussion.poll}
                 onVote={async (optionIds) => {
                   try {
-                    await api.discussions.votePoll({
+                    const response = await api.discussions.votePoll({
                       slug: currentDiscussion.slug,
                       poll_id: currentDiscussion.poll?.id,
                       options: optionIds,
@@ -380,12 +380,14 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                       title: "投票成功",
                       variant: "default",
                     });
+                    return response;
                   } catch (error) {
                     toast({
                       title: "投票失败",
                       description: "请稍后重试",
                       variant: "destructive",
                     });
+                    return null;
                   }
                 }}
               />

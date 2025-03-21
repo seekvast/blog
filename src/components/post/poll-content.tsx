@@ -10,21 +10,24 @@ import { useEffect } from "react";
 
 interface PollContentProps {
   poll: Poll;
-  onVote?: (optionIds: number[]) => void;
+  onVote?: (optionIds: number[]) => Promise<Poll | null>;
 }
 
-export function PollContent({ poll, onVote }: PollContentProps) {
+export function PollContent({ poll: initialPoll, onVote }: PollContentProps) {
+  const [poll, setPoll] = React.useState(initialPoll);
   const [selectedOptions, setSelectedOptions] = React.useState<number[]>(
-    poll.user_voted?.options || []
+    initialPoll.user_voted?.options || []
+  );
+  const [isVoted, setIsVoted] = React.useState(
+    initialPoll.user_voted && initialPoll.user_voted.options.length > 0
   );
   const isMultiple = poll.is_multiple === 1;
   const isTimed = poll.is_timed === 1;
-  const isVoted = poll.user_voted && poll.user_voted.options.length > 0;
   const now = new Date();
   const startTime = new Date(poll.start_time);
   const endTime = new Date(poll.end_time);
-  const isStarted = now >= startTime;
-  const isEnded = now >= endTime;
+  const isStarted = !isTimed || (isTimed && now >= startTime);
+  const isEnded = isTimed && now >= endTime;
   const totalVotes = poll.votes_count;
 
   const handleVoteChange = (optionId: number) => {
@@ -39,17 +42,25 @@ export function PollContent({ poll, onVote }: PollContentProps) {
     }
   };
 
-  const handleSubmitVote = () => {
+  const handleSubmitVote = async () => {
     if (selectedOptions.length > 0 && onVote) {
-      onVote(selectedOptions);
+      const updatedPoll = await onVote(selectedOptions);
+      if (updatedPoll) {
+        setPoll(updatedPoll);
+        setIsVoted(true);
+      }
     }
   };
 
   const [showVoters, setShowVoters] = React.useState(false);
 
-//   useEffect(() => {
-//     console.log(poll, isVoted);
-//   }, [poll]);
+    useEffect(() => {
+      console.log(isEnded, isStarted, "isEnded, isStarted");
+    if (poll.user_voted) {
+      setSelectedOptions(poll.user_voted.options);
+      setIsVoted(true);
+    }
+  }, [poll]);
 
   return (
     <div className="border rounded-lg p-4">
