@@ -21,7 +21,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
   return (
     <AsyncBoundary>
-      <Suspense fallback={<div>Loading...</div>}>
+      <Suspense fallback={<div className="text-center">Loading...</div>}>
         <DiscussionDetail initialDiscussion={discussion} />
       </Suspense>
     </AsyncBoundary>

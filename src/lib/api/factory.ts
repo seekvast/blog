@@ -94,7 +94,9 @@ export function createApi(options: ApiOptions = {}) {
       getBlacklist: (data: any) =>
             http.get<Pagination<BoardBlacklist>>(`${prefix}/board/blacklist`, data),
       getHistory: (data: any) =>
-        http.get<Pagination<BoardHistory>>(`${prefix}/board/history`, data),
+            http.get<Pagination<BoardHistory>>(`${prefix}/board/history`, data),
+      getManagers: (data: any) =>
+            http.get<BoardUser[]>(`${prefix}/board/managers`, data),
       approve: (data: any) => http.post<any>(`${prefix}/board/approve`, data),
       join: (data: any) => http.post<any>(`${prefix}/board/join`, data),
       recommend: (params?: QueryParams) => http.get<Board[]>(`${prefix}/board/recommend`, params, { next }),

@@ -25,6 +25,8 @@ interface DiscussionsListProps {
 
 type DisplayMode = "list" | "grid";
 type SortBy = "hot" | "create" | "reply";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export function DiscussionsList({
   initialDiscussions,
@@ -48,10 +50,17 @@ export function DiscussionsList({
     reply: "最后回复",
   };
 
-    const handleDeleteDiscussion = useCallback((deletedSlug: string) => {
-        // 如果删除的是下一页的第一条数据，pageNum=当前页-上一页
-    fetchDiscussions(activeTab, discussions.current_page, sortBy);
-  }, []);
+  const handleDeleteDiscussion = useCallback(
+    (deletedSlug: string) => {
+    //   // 如果删除的是下一页的第一条数据，pageNum=当前页-上一页
+      //   setDiscussions((prev) => ({
+      //     ...prev,
+      //     items: prev.items.filter((item) => item.slug !== deletedSlug),
+      //   }));
+      fetchDiscussions(activeTab, discussions.current_page, sortBy);
+    },
+    [activeTab, discussions.current_page, sortBy]
+  );
 
   const fetchDiscussions = async (
     tab: "recommend" | "trace",

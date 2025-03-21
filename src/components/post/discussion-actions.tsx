@@ -54,10 +54,6 @@ export function DiscussionActions({
       queryClient.invalidateQueries({
         queryKey: ["discussions", discussion.slug, discussion.board_id],
       });
-      // 更新首页的讨论列表
-      queryClient.invalidateQueries({
-        queryKey: ["discussions", "list"],
-      });
       // 更新推荐列表
       queryClient.invalidateQueries({
         queryKey: ["discussions", "recommend"],
@@ -66,6 +62,7 @@ export function DiscussionActions({
       queryClient.invalidateQueries({
         queryKey: ["discussions", "trace"],
       });
+      onDelete?.(discussion.slug);
     },
     onError: (error) => {
       toast({
@@ -145,7 +142,6 @@ export function DiscussionActions({
         onConfirm={() => {
           deleteMutation.mutate();
           setShowDeleteConfirm(false);
-          onDelete?.(discussion.slug);
         }}
         variant="destructive"
         loading={deleteMutation.isPending}
@@ -159,6 +155,7 @@ export function DiscussionActions({
           user_hashid: discussion.user.hashid,
           board_id: discussion.board_id,
           discussion_slug: discussion.slug,
+          post_id: discussion.main_post.id,
           target: 1,
           reported_to: "admin",
         }}
@@ -173,6 +170,7 @@ export function DiscussionActions({
           user_hashid: discussion.user.hashid,
           board_id: discussion.board_id,
           discussion_slug: discussion.slug,
+          post_id: discussion.main_post.id,
           target: 1,
           reported_to: "moderator",
         }}

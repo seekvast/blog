@@ -1,3 +1,6 @@
+import { User } from "./user";
+import { Discussion, Post } from "./discussion";
+
 export interface Report {
   id: number;
   user_hashid: string;
@@ -7,6 +10,10 @@ export interface Report {
   status: number;
   created_at: string;
   updated_at: string;
+  user: User;
+  reporter: User;
+  discussion: Discussion;
+  post: Post;
 }
 
 export interface ReportForm {

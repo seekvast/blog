@@ -21,7 +21,7 @@ import {
 import { ImagePlus } from "lucide-react";
 import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 
 interface CreateBoardModalProps {
   open: boolean;
@@ -57,6 +57,13 @@ export function CreateBoardModal({
     category_id: 1, // 默认综合分类
     is_nsfw: 0,
   });
+
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => api.common.categories(),
+    staleTime: 1 * 60 * 1000,
+  });
+
   const handleInputChange = (
     field: keyof BoardFormData,
     value: string | number
@@ -123,15 +130,15 @@ export function CreateBoardModal({
     try {
       setLoading(true);
       await api.boards.create(formData);
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
 
+      router.push(`/b/${formData.slug}`);
       toast({
         title: "创建成功",
         description: "看板创建成功",
       });
       onOpenChange(false);
-      router.push(`/b/${formData.slug}`);
       //使baords的useQuery缓存失效
-      queryClient.invalidateQueries({ queryKey: ["boards"] });
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -242,9 +249,20 @@ export function CreateBoardModal({
                   <SelectValue placeholder="選擇看板類型" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="1">綜合</SelectItem>
-                  <SelectItem value="2">科技</SelectItem>
-                  <SelectItem value="3">生活</SelectItem>
+                  {categoriesLoading ? (
+                    <SelectItem disabled value="1">
+                      加载中...
+                    </SelectItem>
+                  ) : (
+                    categories.map((category) => (
+                      <SelectItem
+                        key={category.id}
+                        value={category.id.toString()}
+                      >
+                        {category.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>

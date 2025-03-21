@@ -12,6 +12,7 @@ import { authOptions } from "@/lib/auth";
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata = {
+  cache: "no-cache", //TODO: 测试环境禁用缓存
   title: "Forum System",
   description: "A modern forum system built with Next.js",
 };
@@ -27,7 +28,10 @@ export default async function RootLayout({
     <html lang="zh-CN" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.png" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
       </head>
       <body
         className={cn(

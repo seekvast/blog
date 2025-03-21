@@ -14,7 +14,7 @@ import { Board, Pagination, User } from "@/types";
 import Link from "next/link";
 import { SearchInput } from "@/components/search/search-input";
 import { ChangeRoleDialog } from "@/components/board/change-role-dialog";
-
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 interface SettingsProps {
   board: Board;
 }
@@ -28,7 +28,9 @@ export function MembersSettings({ board }: SettingsProps) {
   const [isSearching, setIsSearching] = useState(false);
   const [selectedMember, setSelectedMember] = useState<User | null>(null);
   const [isChangeRoleOpen, setIsChangeRoleOpen] = useState(false);
-
+  const [isMuteOpen, setIsMuteOpen] = useState(false);
+  const [isMangerOpen, setIsMangerOpen] = useState(false);
+  const [action, setAction] = useState(0);
   // 展开搜索框
   const expandSearch = () => {
     setIsSearchExpanded(true);
@@ -80,9 +82,50 @@ export function MembersSettings({ board }: SettingsProps) {
     }
   };
 
+  const handleMuteConfirm = () => {
+    if (!selectedMember) return;
+    api.boards.manageUser({
+      board_id: board.id,
+      user_hashid: selectedMember.hashid,
+      action: 2,
+    });
+    toast({
+      title: "禁言成功",
+    });
+    setIsMuteOpen(false);
+    fetchMembers();
+  };
+
   const handleChangeRole = (member: User) => {
     setSelectedMember(member);
     setIsChangeRoleOpen(true);
+  };
+
+  const handleMute = (member: User) => {
+    setSelectedMember(member);
+    setIsMuteOpen(true);
+  };
+
+  const handleManger = (member: User, action: number) => {
+    setSelectedMember(member);
+    setAction(action);
+    setIsMangerOpen(true);
+  };
+
+  const handleMangerConfirm = () => {
+    if (!selectedMember) return;
+    api.boards.manageUser({
+      board_id: board.id,
+      user_hashid: selectedMember.hashid,
+      action: action,
+    });
+    toast({
+      title: "操作成功",
+    });
+    setIsMangerOpen(false);
+    setSelectedMember(null);
+    setAction(0);
+    fetchMembers();
   };
 
   return (
@@ -151,10 +194,16 @@ export function MembersSettings({ board }: SettingsProps) {
                   >
                     变更身份组
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer">
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => handleManger(member, 2)}
+                  >
                     禁言
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="cursor-pointer text-destructive">
+                  <DropdownMenuItem
+                    className="cursor-pointer text-destructive"
+                    onClick={() => handleManger(member, 3)}
+                  >
                     踢出并封禁
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -174,6 +223,16 @@ export function MembersSettings({ board }: SettingsProps) {
           onSuccess={fetchMembers}
         />
       )}
+
+      <ConfirmDialog
+        open={isMangerOpen}
+        onOpenChange={setIsMangerOpen}
+        title={action === 2 ? "禁言" : "踢出并封禁"}
+        description={
+          action === 2 ? "确定要禁言该成员吗？" : "确定要踢出并封禁该成员吗？"
+        }
+        onConfirm={handleMangerConfirm}
+      />
     </div>
   );
 }
