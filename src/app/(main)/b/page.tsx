@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { api } from "@/lib/api";
+import { Board } from "@/types/board";
 import { ChevronDown } from "lucide-react";
 import {
   useInfiniteQuery,
@@ -25,24 +26,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-interface Board {
-  id: number;
-  name: string;
-  avatar: string;
-  desc: string;
-  slug: string;
-  visibility: number;
-  is_nsfw: number;
-  is_joined?: number;
-  category: {
-    id: number;
-    name: string;
-  };
-}
+import { JoinBoardDialog } from "@/components/board/join-board-dialog";
+import { BoardApprovalMode } from "@/constants/board-approval-mode";
 
 export default function BoardsPage() {
-  const { data: session } = useSession();
   const [boards, setBoards] = useState<Board[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"recommended" | "joined">(
@@ -50,12 +37,13 @@ export default function BoardsPage() {
   );
   const queryClient = useQueryClient();
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
+  const [joinBoardOpen, setJoinBoardOpen] = useState(false);
+  const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
 
-  // 使用 useQuery 获取分类数据
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: () => api.common.categories(),
-    staleTime: 5 * 60 * 1000, // 5分钟内不重新获取
+    staleTime: 1 * 60 * 1000,
   });
 
   const { mutate: joinBoard } = useMutation({
@@ -118,6 +106,14 @@ export default function BoardsPage() {
     }
   };
 
+  const handleJoinBoard = (board: Board) => {
+    if (board.approval_mode === BoardApprovalMode.APPROVAL) {
+      setSelectedBoard(board);
+      setJoinBoardOpen(true);
+    } else {
+      joinBoard(board.id);
+    }
+  };
   return (
     <div className="flex flex-col">
       {/* 顶部导航 */}
@@ -221,7 +217,7 @@ export default function BoardsPage() {
                 key={board.id}
                 className="flex items-center justify-between py-4"
               >
-                    <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4">
                   <Link href={`/b/${board.slug}`}>
                     <Avatar className="h-14 w-14">
                       <AvatarImage src={board.avatar} alt={board.name} />
@@ -263,7 +259,7 @@ export default function BoardsPage() {
                   <Button
                     variant="default"
                     size="sm"
-                    onClick={() => joinBoard(board.id)}
+                    onClick={() => handleJoinBoard(board)}
                   >
                     加入
                   </Button>
@@ -273,6 +269,18 @@ export default function BoardsPage() {
           </InfiniteScroll>
         )}
       </div>
+      {/* 加入看板对话框 */}
+      {selectedBoard && (
+        <JoinBoardDialog
+          open={joinBoardOpen}
+          onOpenChange={setJoinBoardOpen}
+          boardId={selectedBoard.id}
+          question={selectedBoard.question}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
+          }}
+        />
+      )}
     </div>
   );
 }

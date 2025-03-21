@@ -8,6 +8,9 @@ import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import { Card } from "@/components/ui/card";
 import { Search } from "lucide-react";
+import { BoardHistory } from "@/types/board";
+import { Pagination } from "@/types/common";
+
 import {
   Select,
   SelectContent,
@@ -17,13 +20,15 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { SearchInput } from "@/components/search/search-input";
+import { formatDate } from "@/lib/utils";
 
 interface ApprovalSettingsProps {
   board: Board;
 }
 
 export function ApprovalSettings({ board }: ApprovalSettingsProps) {
-  const [applications, setApplications] = React.useState<any[]>([]);
+  const [applications, setApplications] =
+    React.useState<Pagination<BoardHistory>>();
   const [isLoading, setIsLoading] = React.useState(false);
   const { toast } = useToast();
 
@@ -42,13 +47,13 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
   const loadApplications = async () => {
     try {
       setIsLoading(true);
-      const response = await api.boards.get({
+      const response = await api.boards.getHistory({
         params: {
           ...filters,
           q: searchQuery,
         },
       });
-      setApplications([]);
+      setApplications(response);
     } catch (error) {
       console.error("Error loading applications:", error);
       toast({
@@ -61,9 +66,9 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
     }
   };
 
-  //   React.useEffect(() => {
-  //     loadApplications();
-  //   }, [board.id, filters, searchQuery]);
+  React.useEffect(() => {
+    loadApplications();
+  }, [board.id, filters]);
 
   // 处理申请
   const handleApplication = async (
@@ -71,7 +76,8 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
     status: "approve" | "reject"
   ) => {
     try {
-      await api.boards.create({
+      await api.boards.approve({
+        application_id: applicationId,
         status,
       });
 
@@ -225,48 +231,55 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
       </div>
 
       {/* 申请列表 */}
-      {applications.length === 0 ? (
+      {applications?.items.length === 0 ? (
         <div className="text-center py-8 text-gray-500">暂无待审核的申请</div>
       ) : (
         <div className="space-y-4">
-          {applications.map((application) => (
+          {applications?.items.map((application) => (
             <Card key={application.id} className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <Avatar className="h-10 w-10">
                     <AvatarImage
-                      src={application.user.avatar}
-                      alt={application.user.name}
+                      src={application.user?.avatar_url}
+                      alt={application.user?.nickname}
                     />
-                    <AvatarFallback>{application.user.name[0]}</AvatarFallback>
+                    <AvatarFallback>
+                      {application.user?.nickname[0]}
+                    </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-medium flex items-center gap-2">
-                      {application.user.name}
-                      <span className="text-sm text-gray-500">
-                        @{application.user.username}
+                    <div className="font-medium">
+                      {application.user?.nickname}
+                      <span className="ml-2 text-sm text-muted-foreground">
+                        @{application.user?.username}
                       </span>
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-sm text-muted-foreground">
                       注册时间：
-                      {new Date(
-                        application.user.created_at
-                      ).toLocaleDateString()}
+                      {application.user?.created_at
+                        ? formatDate(application.user.created_at)
+                        : "-"}
                       <span className="mx-2">·</span>
                       申请时间：
-                      {new Date(application.created_at).toLocaleDateString()}
+                      {application.created_at
+                        ? formatDate(application.created_at)
+                        : "-"}
                     </div>
-                    {application.answer && (
-                      <div className="mt-2 text-sm">
-                        <span className="text-gray-500">申请答案：</span>
-                        {application.answer}
+                    <div className="mt-2">
+                      <div className="text-sm">
+                        看板问题：{board.question}？
                       </div>
-                    )}
+                      <div className="text-sm">
+                        看板答案：{application.user_answer}
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
                     size="sm"
+                    variant="default"
                     onClick={() => handleApplication(application.id, "approve")}
                   >
                     通过

@@ -78,4 +78,18 @@ export interface BoardBlacklist {
   user?: User;
 }
 
+export interface BoardHistory {
+  id: number;
+  board_id: number;
+  user_id: number;
+  user_hashid: string;
+  status: number;
+  question: string;
+  answer: string;
+  user_answer: string;
+  created_at: string;
+  updated_at: string;
+  user?: User;
+}
+
 export type BoardChildrenResponse = Response<Pagination<BoardChild>>;

@@ -14,7 +14,6 @@ async function getDiscussions(): Promise<Pagination<Discussion>> {
     });
     return response;
   } catch (error) {
-    console.error("Failed to fetch discussions:", error);
     return {
       code: -1,
       items: [],

@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import {
@@ -11,10 +11,7 @@ import {
   Bookmark,
   Heart,
   Users,
-  Languages,
   Globe,
-  Plus,
-  PenSquare,
   RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,6 +25,9 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useMutation } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
+import { JoinBoardDialog } from "@/components/board/join-board-dialog";
+import { BoardApprovalMode } from "@/constants/board-approval-mode";
+import { Board } from "@/types/board";
 
 interface NavItem {
   title: string;
@@ -64,6 +64,8 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   const pathname = usePathname();
   const { t, i18n } = useTranslation();
   const [createBoardOpen, setCreateBoardOpen] = useState(false);
+  const [joinBoardOpen, setJoinBoardOpen] = useState(false);
+  const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
   const { setIsVisible } = usePostEditorStore();
   const queryClient = useQueryClient();
 
@@ -105,6 +107,15 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
       i18n.changeLanguage("en");
     } else {
       i18n.changeLanguage("zh-Hans-CN");
+    }
+  };
+
+  const handleJoinBoard = (board: Board) => {
+    if (board.approval_mode === BoardApprovalMode.APPROVAL) {
+      setSelectedBoard(board);
+      setJoinBoardOpen(true);
+    } else {
+      joinBoard(board.id);
     }
   };
 
@@ -198,7 +209,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                   className="rounded-full h-6"
                   onClick={(e) => {
                     e.preventDefault();
-                    joinBoard(board.id);
+                    handleJoinBoard(board);
                   }}
                 >
                   加入
@@ -207,6 +218,19 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
             ))}
           </div>
         </div>
+
+        {/* 加入看板对话框 */}
+        {selectedBoard && (
+          <JoinBoardDialog
+            open={joinBoardOpen}
+            onOpenChange={setJoinBoardOpen}
+            boardId={selectedBoard.id}
+            question={selectedBoard.question}
+            onSuccess={() => {
+              queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
+            }}
+          />
+        )}
 
         {/* 页脚链接 */}
         <div className="mt-auto space-y-4">
