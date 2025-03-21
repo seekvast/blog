@@ -219,7 +219,7 @@ export function MembersSettings({ board }: SettingsProps) {
           onOpenChange={setIsChangeRoleOpen}
           boardId={board.id}
           userId={selectedMember.hashid}
-          currentRole={selectedMember.user_role}
+          currentRole={selectedMember.user_role || 0}
           onSuccess={fetchMembers}
         />
       )}

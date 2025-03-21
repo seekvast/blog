@@ -31,6 +31,7 @@ export interface User {
   token?: string;
   posts_count?: number;
   replies_count?: number;
+  user_role?: number;
   blocked?: {
     id: number;
     user_hashid: string;

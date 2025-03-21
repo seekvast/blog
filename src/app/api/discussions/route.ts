@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth'
 import { api } from '@/lib/api'
 import { validate } from '@/middleware/validate'
 import { withErrorHandler, ApiError } from '@/middleware/error'
-import { discussionQuerySchema, createDiscussionSchema } from '@/validations/discussion'
+import { discussionQuerySchema } from '@/validations/discussion'
 // import { API_ROUTES } from '@/constants/api'
 
 export const dynamic = 'force-dynamic'

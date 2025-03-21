@@ -6,6 +6,8 @@ import { AlertCircle } from "lucide-react";
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
+  fallback?: React.ReactNode;
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
 
 interface ErrorBoundaryState {
@@ -28,10 +30,17 @@ export class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("Error caught by boundary:", error, errorInfo);
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
   }
 
   render() {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
+
       return (
         <div className="flex flex-col items-center justify-center min-h-[400px] p-4">
           <AlertCircle className="h-12 w-12 text-destructive mb-4" />
