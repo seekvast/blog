@@ -317,7 +317,9 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             </div>
 
             <div className="mt-2 flex items-start space-x-3">
-              <Link href={`/u/${currentDiscussion.user.username}`}>
+              <Link
+                href={`/u/${currentDiscussion.user.username}?hash=${currentDiscussion.user.hashid}`}
+              >
                 <Avatar className="h-12 w-12 md:h-14 md:w-14 flex-shrink-0">
                   <AvatarImage
                     src={currentDiscussion.user.avatar_url}
@@ -331,7 +333,9 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
 
               <div className="flex-1 min-w-0 overflow-hidden">
                 <div className="flex items-center space-x-2">
-                  <Link href={`/u/${currentDiscussion.user.username}`}>
+                  <Link
+                    href={`/u/${currentDiscussion.user.username}?hash=${currentDiscussion.user.hashid}`}
+                  >
                     <span className="text-base md:text-lg font-medium truncate">
                       {currentDiscussion.user.username}
                     </span>

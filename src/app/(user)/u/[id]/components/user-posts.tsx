@@ -1,19 +1,17 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { DiscussionItem } from "@/components/home/discussion-item";
 import { InfiniteScroll } from "@/components/common/infinite-scroll";
-import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import type { Discussion } from "@/types/discussion";
 import type { Pagination } from "@/types/common";
 import { LayoutGrid, List } from "lucide-react";
-interface UserPostsProps {}
 
 export function UserPosts() {
-  const params = useParams();
-  const userId = params?.id as string;
+  const searchParams = useSearchParams();
+  const hash = searchParams?.get("hash");
   const [discussions, setDiscussions] = useState<Pagination<Discussion>>({
     code: 0,
     items: [],
@@ -35,7 +33,7 @@ export function UserPosts() {
       const response = await api.discussions.list({
         page: 1,
         per_page: 10,
-        user_hashid: userId,
+        user_hashid: hash || undefined,
       });
 
       setDiscussions(response);
@@ -46,7 +44,7 @@ export function UserPosts() {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [hash]);
 
   useEffect(() => {
     fetchDiscussions();
@@ -61,7 +59,7 @@ export function UserPosts() {
       const response = await api.discussions.list({
         page,
         per_page: 10,
-        user_hashid: userId,
+        user_hashid: hash || undefined,
       });
 
       if (response.items.length === 0 || page >= response.last_page) {
@@ -80,7 +78,7 @@ export function UserPosts() {
     } finally {
       setLoading(false);
     }
-  }, [loading, hasMore, page, userId]);
+  }, [loading, hasMore, page, hash]);
 
   // 清理 observer
   useEffect(() => {

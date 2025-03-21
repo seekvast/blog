@@ -113,7 +113,9 @@ export function MembersSettings({ board }: SettingsProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem className="cursor-pointer">
-                    <Link href={`/u/${member.hashid}`}>查看个人主页</Link>
+                    <Link href={`/u/${member.username}?hash=${member.hashid}`}>
+                      查看个人主页
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem className="cursor-pointer">
                     变更身份组

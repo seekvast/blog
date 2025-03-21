@@ -55,6 +55,7 @@ export interface QueryParams extends PaginationParams {
   board_child_id?: number;
   board_id?: number;
   user_hashid?: string;
+  username?: string;
   q?: string;
   from?: string;
 }

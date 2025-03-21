@@ -46,7 +46,9 @@ export const CommentList = React.memo(
           {comments.map((comment) => (
             <div key={comment.id} className="pt-2 pb-4 border-b">
               <div className="flex items-start space-x-3 px-2 md:px-4 min-w-0">
-                <Link href={`/u/${comment.user.username}`}>
+                <Link
+                  href={`/u/${comment.user.username}?hash=${comment.user.hashid}`}
+                >
                   <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
                     <AvatarImage src={comment.user.avatar_url} />
                     <AvatarFallback>{comment.user.nickname[0]}</AvatarFallback>
@@ -55,7 +57,9 @@ export const CommentList = React.memo(
                 <div className="flex-1 min-w-0 overflow-hidden">
                   <div className="flex justify-between w-full items-center">
                     <div className="flex items-center gap-2">
-                      <Link href={`/u/${comment.user.username}`}>
+                      <Link
+                        href={`/u/${comment.user.username}?hash=${comment.user.hashid}`}
+                      >
                         <span className="font-medium text-base truncate">
                           {comment.user.nickname || comment.user.username}
                         </span>
