@@ -5,6 +5,7 @@ interface PostEditorStore {
   hasUnsavedContent: boolean;
   isVisible: boolean;
   uploadingFiles: File[];
+  openFrom: string;
   setHasUnsavedContent: (hasUnsavedContent: boolean) => void;
   setIsVisible: (isVisible: boolean) => void;
   onClose: ((confirmed?: boolean) => void) | null;
@@ -12,6 +13,7 @@ interface PostEditorStore {
   addUploadingFile: (file: File) => void;
   removeUploadingFile: (file: File) => void;
   insertText: (text: string) => void;
+  setOpenFrom: (from: string) => void;
 }
 
 export const usePostEditorStore = create<PostEditorStore>((set) => {
@@ -25,15 +27,19 @@ export const usePostEditorStore = create<PostEditorStore>((set) => {
     isVisible: false,
     onClose: null,
     uploadingFiles: [],
+    openFrom: "",
     setHasUnsavedContent: (hasUnsavedContent) => set({ hasUnsavedContent }),
     setIsVisible: (isVisible) => set({ isVisible }),
     setOnClose: (onClose) => set({ onClose }),
-    addUploadingFile: (file) => set((state) => ({ 
-      uploadingFiles: [...state.uploadingFiles, file] 
-    })),
-    removeUploadingFile: (file) => set((state) => ({ 
-      uploadingFiles: state.uploadingFiles.filter(f => f !== file) 
-    })),
+    addUploadingFile: (file) =>
+      set((state) => ({
+        uploadingFiles: [...state.uploadingFiles, file],
+      })),
+    removeUploadingFile: (file) =>
+      set((state) => ({
+        uploadingFiles: state.uploadingFiles.filter((f) => f !== file),
+      })),
     insertText,
+    setOpenFrom: (from) => set({ openFrom: from }),
   };
 });

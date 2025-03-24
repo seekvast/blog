@@ -16,6 +16,7 @@ import { usePostEditorStore } from "@/store/post-editor";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
+import { useDraftStore } from "@/store/draft";
 
 import { PollEditor } from "./poll-editor";
 import { PollPreview } from "./poll-preview";
@@ -95,7 +96,8 @@ export default function CreatePostModal() {
     setIsOpen,
     setOnClose,
   } = useMarkdownEditor();
-  const { isVisible, setIsVisible } = usePostEditorStore();
+  const { isVisible, setIsVisible, openFrom } = usePostEditorStore();
+  const { draft, hasDraft, setDraft } = useDraftStore();
   const editorRef = React.useRef<{ reset: () => void; isFullscreen: boolean }>(
     null
   );
@@ -104,6 +106,22 @@ export default function CreatePostModal() {
 
   const { boardChildren, setBoardChildren: setBoardChildren } =
     useBoardChildrenStore();
+
+  // 从草稿加载内容
+  React.useEffect(() => {
+    if (isVisible && openFrom === "draft" && hasDraft && draft) {
+      setDiscussionForm((prev) => ({
+        ...prev,
+        title: draft.title || "",
+        board_id: draft.board_id || 0,
+        board_child_id: draft.board_child_id,
+      }));
+      setContent(draft.content || "");
+      if (draft.poll) {
+        dispatchPoll({ type: "SET_DATA", payload: draft.poll });
+      }
+    }
+  }, [isVisible, hasDraft, draft]);
 
   // 监听编辑器全屏状态变化
   const handleFullscreenChange = React.useCallback((fullscreen: boolean) => {
@@ -407,15 +425,18 @@ export default function CreatePostModal() {
         content: content,
         board_id: discussionForm.board_id,
         board_child_id: discussionForm.board_child_id,
+        poll: pollState.data,
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "成功",
         description: "草稿保存成功",
       });
-      // 更新未保存内容状态
       setHasUnsavedContent(false);
+      setDraft({
+        ...data,
+      });
     },
     onError: (error) => {
       toast({

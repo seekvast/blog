@@ -5,19 +5,36 @@ import { useEffect } from "react";
 import { SessionProvider, useSession } from "next-auth/react";
 import type { Session } from "next-auth";
 import { User } from "@/types/user";
+import { useDraftStore } from "@/store/draft";
+import { api } from "@/lib/api";
 
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
 }
 
-const AuthContext = React.createContext<AuthContextValue | undefined>(undefined);
+const AuthContext = React.createContext<AuthContextValue | undefined>(
+  undefined
+);
 
 function AuthContextProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const loading = status === "loading";
   const [user, setUser] = React.useState<User | null>(null);
-  
+  const { setDraft } = useDraftStore();
+
+  // 获取草稿数据
+  const fetchDraft = React.useCallback(async () => {
+    try {
+      const draft = await api.discussions.draft();
+      if (draft) {
+        setDraft(draft);
+      }
+    } catch (error) {
+      console.error("获取草稿失败:", error);
+    }
+  }, [setDraft]);
+
   useEffect(() => {
     if (status === "loading") {
       return;
@@ -39,21 +56,24 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
         last_seen_at: session.user.last_seen_at || "",
         token: session.user.token || "",
       });
+      // 用户登录时获取草稿
+      fetchDraft();
     } else {
       setUser(null);
+      // 用户登出时清除草稿状态
+      setDraft(null);
     }
-  }, [session, status]);
+  }, [session, status, setDraft, fetchDraft]);
 
-  const value = React.useMemo(() => ({
-    user,
-    loading,
-  }), [user, loading]);
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+  const value = React.useMemo(
+    () => ({
+      user,
+      loading,
+    }),
+    [user, loading]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function AuthProvider({

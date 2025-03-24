@@ -82,8 +82,19 @@ export const Editor = React.forwardRef<
     },
     get isFullscreen() {
       return isFullscreen;
-    }
+    },
   }));
+
+  // 监听 initialContent 的变化
+  React.useEffect(() => {
+    if (initialContent !== content) {
+      setContent(initialContent);
+      setHistory((prev) => ({
+        ...prev,
+        current: initialContent,
+      }));
+    }
+  }, [initialContent]);
 
   const handleSelect = React.useCallback(() => {
     if (!textareaRef.current) return;
@@ -274,17 +285,17 @@ export const Editor = React.forwardRef<
     (content: string, user: { username: string }, cursorPosition: number) => {
       const before = content.slice(0, cursorPosition);
       const after = content.slice(cursorPosition);
-      
+
       // Find the last @ symbol before cursor
       const lastAtPos = before.lastIndexOf("@");
       if (lastAtPos === -1) return content;
-      
+
       // Replace the @username with the markdown mention format
-      const newContent = 
+      const newContent =
         before.slice(0, lastAtPos) +
         `[@${user.username}](@${user.username})` +
         after;
-      
+
       return newContent;
     },
     []
@@ -326,7 +337,8 @@ export const Editor = React.forwardRef<
     <div
       className={cn(
         "relative flex w-full h-full min-h-0 flex-col overflow-hidden border rounded-md bg-background",
-        isFullscreen && "fixed inset-0 z-50 m-0 h-[calc(100vh-56px)] w-screen rounded-none",
+        isFullscreen &&
+          "fixed inset-0 z-50 m-0 h-[calc(100vh-56px)] w-screen rounded-none",
         !isFullscreen && "kater-focus-primary",
         className
       )}
@@ -380,7 +392,11 @@ export const Editor = React.forwardRef<
                 cursorPosition={textareaRef.current?.selectionStart ?? 0}
                 onClose={() => setShowMentionPicker(false)}
                 onSelect={(user) => {
-                  const newContent = insertMention(content, user, textareaRef.current?.selectionStart ?? 0);
+                  const newContent = insertMention(
+                    content,
+                    user,
+                    textareaRef.current?.selectionStart ?? 0
+                  );
                   handleContentChange(newContent);
                   setShowMentionPicker(false);
                 }}

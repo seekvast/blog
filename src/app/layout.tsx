@@ -39,23 +39,23 @@ export default async function RootLayout({
           fontSans.variable
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <AuthProvider session={session}>
-            <LoginModalProvider>
-              <QueryProvider>
+        <QueryProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <AuthProvider session={session}>
+              <LoginModalProvider>
                 <I18nProvider>
                   {children}
                   <Toaster />
                 </I18nProvider>
-              </QueryProvider>
-            </LoginModalProvider>
-          </AuthProvider>
-        </ThemeProvider>
+              </LoginModalProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );

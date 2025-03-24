@@ -30,6 +30,8 @@ import {
 import { api } from "@/lib/api";
 import { usePostEditorStore } from "@/store/post-editor";
 import { cn } from "@/lib/utils";
+import { useDraftStore } from "@/store/draft";
+import { Badge } from "@/components/ui/badge";
 
 interface HeaderProps {
   className?: string;
@@ -40,8 +42,9 @@ export function Header({ className }: HeaderProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const { openLogin, openRegister } = useAuthModal();
-  const { hasUnsavedContent, isVisible, onClose, setIsVisible } =
+  const { hasUnsavedContent, isVisible, onClose, setIsVisible, setOpenFrom } =
     usePostEditorStore();
+  const { hasDraft } = useDraftStore();
 
   const handleLogoClick = React.useCallback(
     (e: React.MouseEvent) => {
@@ -67,6 +70,11 @@ export function Header({ className }: HeaderProps) {
       window.location.href = "/";
     }
   };
+
+  const handleCreatePost = React.useCallback(() => {
+    setIsVisible(true);
+    setOpenFrom("draft");
+  }, [setIsVisible, setOpenFrom]);
 
   return (
     <header
@@ -104,20 +112,24 @@ export function Header({ className }: HeaderProps) {
           <div className="ml-auto flex items-center gap-4">
             {user ? (
               <>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="hover:bg-muted hidden lg:flex"
-                >
-                  <PenSquare className="h-5 w-5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="hover:bg-muted hidden lg:flex"
-                >
+                <div className="relative">
+                  <button
+                    type="button"
+                    className="hover:bg-muted hidden lg:flex"
+                    onClick={handleCreatePost}
+                  >
+                    <PenSquare className="h-5 w-5" />
+                  </button>
+                  {hasDraft && (
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-1 -right-1 h-2 w-2 rounded-full p-0"
+                    />
+                  )}
+                </div>
+                <button type="button" className="hover:bg-muted hidden lg:flex">
                   <Bell className="h-5 w-5" />
-                </Button>
+                </button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Avatar className="h-8 w-8 cursor-pointer ring-offset-background transition-opacity hover:opacity-80">

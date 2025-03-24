@@ -66,7 +66,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   const [createBoardOpen, setCreateBoardOpen] = useState(false);
   const [joinBoardOpen, setJoinBoardOpen] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
-  const { setIsVisible } = usePostEditorStore();
+  const { setIsVisible, setOpenFrom } = usePostEditorStore();
   const queryClient = useQueryClient();
 
   const { data: boards } = useQuery({
@@ -96,6 +96,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
     // 在其他页面，显示发布文章的模态框
     else {
       setIsVisible(true);
+      setOpenFrom("sidebar");
     }
   };
 

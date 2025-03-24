@@ -16,6 +16,8 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuthModal } from "./auth-modal-store";
+import { useDraftStore } from "@/store/draft";
+import { api } from "@/lib/api";
 
 interface LoginModalProps {
   open?: boolean;
@@ -26,6 +28,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
   const router = useRouter();
   const { toast } = useToast();
   const { isLoginOpen, closeLogin, openRegister } = useAuthModal();
+  const { setDraft } = useDraftStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -70,6 +73,16 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
           description: result?.error || "邮箱或密码错误",
         });
         return;
+      }
+
+      // 登录成功后获取草稿
+      try {
+        const draft = await api.discussions.draft();
+        if (draft) {
+          setDraft(draft);
+        }
+      } catch (error) {
+        console.error("获取草稿失败:", error);
       }
 
       // 登录成功
@@ -117,14 +130,18 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
             <DialogTitle className="text-2xl font-medium">登入</DialogTitle>
             <div className="text-sm text-muted-foreground">
               還沒有賬號？
-              <Button variant="link" className="px-1 h-auto" onClick={() => {
-                if (onOpenChange) {
-                  onOpenChange(false);
-                } else {
-                  closeLogin();
-                }
-                openRegister();
-              }}>
+              <Button
+                variant="link"
+                className="px-1 h-auto"
+                onClick={() => {
+                  if (onOpenChange) {
+                    onOpenChange(false);
+                  } else {
+                    closeLogin();
+                  }
+                  openRegister();
+                }}
+              >
                 去註冊
               </Button>
             </div>
