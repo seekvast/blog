@@ -18,8 +18,8 @@ import type {
   Report,
   PollVoter,
   BoardHistory,
-  Draft,
 } from "@/types";
+import { Draft } from "@/types/draft";
 
 export interface ApiOptions {
   prefix?: string;

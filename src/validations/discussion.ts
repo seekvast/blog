@@ -83,7 +83,10 @@ export const discussionSchema = z.object({
     .min(1, "标题不能为空")
     .min(3, "标题至少需要3个字符")
     .max(100, "标题不能超过100个字符"),
-  content: z.string().min(10, "内容不能为空"),
+  content: z
+    .string()
+    .min(10, "内容不能少于10个字符")
+    .max(10000, "内容不能超过10000个字符"),
   board_id: z.number(),
   board_child_id: z.number().optional(),
   type: z.string().optional(),
