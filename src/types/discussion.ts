@@ -127,4 +127,17 @@ export interface Post {
   user_voted: PostVote | null;
 }
 
+export interface Draft {
+  id: number;
+  board_id: number;
+  board_child_id: number;
+  user_hashid: string;
+  title: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
 export type DiscussionResponse = Response<Pagination<Discussion>>;
+export type DraftResponse = Response<Draft>;

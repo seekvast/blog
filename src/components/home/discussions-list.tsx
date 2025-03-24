@@ -207,7 +207,7 @@ export function DiscussionsList({
                 discussion={discussion}
                 displayMode={displayMode}
                 isLastItem={isLastItem}
-                onDelete={handleDeleteDiscussion}
+                onChange={handleDeleteDiscussion}
               />
             );
           })}

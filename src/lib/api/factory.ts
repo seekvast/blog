@@ -18,6 +18,7 @@ import type {
   Report,
   PollVoter,
   BoardHistory,
+  Draft,
 } from "@/types";
 
 export interface ApiOptions {
@@ -119,9 +120,15 @@ export function createApi(options: ApiOptions = {}) {
         http.post<Post>(`${prefix}/discussion/post`, data),
       update: (slug: string, data: any) =>
         http.patch<Discussion>(`${prefix}/discussions/${slug}`, data),
-
+      changeBoard: (data: any) =>
+        http.put<Discussion>(`${prefix}/discussion/board`, data),
+      changePostType: (data: any) =>
+        http.put<Discussion>(`${prefix}/discussion/post-type`, data),
+      setting: (data: any) =>
+        http.put<Discussion>(`${prefix}/discussion/setting`, data),
       delete: (data: any) => http.delete(`${prefix}/discussion`, data),
-
+      draft: () => http.get<Draft>(`${prefix}/discussion/draft`, undefined, { next }),
+      saveDraft: (data: any) => http.post<Draft>(`${prefix}/discussion/draft`, data),
       posts: (params?: QueryParams) =>
         http.get<Pagination<Post>>(`${prefix}/discussion/posts`, params, {
           next,

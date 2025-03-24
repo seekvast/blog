@@ -33,13 +33,13 @@ interface DiscussionItemProps {
   discussion: Discussion;
   displayMode: "grid" | "list";
   isLastItem?: boolean;
-  onDelete?: (deletedSlug: string) => void;
+  onChange?: (deletedSlug: string) => void;
 }
 
 export const DiscussionItem = React.forwardRef<
   HTMLElement,
   DiscussionItemProps
->(({ discussion, displayMode, isLastItem, onDelete }, ref) => {
+>(({ discussion, displayMode, isLastItem, onChange }, ref) => {
   const { requireAuth } = useRequireAuth();
   const [isVoted, setIsVoted] = useState(discussion.user_voted?.vote === "up");
   const [isVoting, setIsVoting] = useState(false);
@@ -124,16 +124,11 @@ export const DiscussionItem = React.forwardRef<
               {discussion.is_private === 1 && (
                 <Badge variant="secondary">私密</Badge>
               )}
-              {discussion.is_sticky === 1 && (
-                <Badge variant="secondary" className="bg-blue-50 text-blue-600">
-                  置顶
-                </Badge>
-              )}
             </div>
 
             <DiscussionActions
               discussion={discussion}
-              onDelete={() => onDelete?.(discussion.slug)}
+              onChange={() => onChange?.(discussion.slug)}
             />
           </div>
 

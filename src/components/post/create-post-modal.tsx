@@ -14,14 +14,8 @@ import { AlertTriangle } from "lucide-react";
 import { AttachmentType } from "@/constants/attachment-type";
 import { usePostEditorStore } from "@/store/post-editor";
 import { z } from "zod";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { useMutation } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/use-toast";
 
 import { PollEditor } from "./poll-editor";
 import { PollPreview } from "./poll-preview";
@@ -72,6 +66,7 @@ interface PollState {
 
 export default function CreatePostModal() {
   const router = useRouter();
+  const { toast } = useToast();
   const [pendingAction, setPendingAction] = React.useState<(() => void) | null>(
     null
   );
@@ -396,6 +391,41 @@ export default function CreatePostModal() {
     };
   }, [isVisible, hasUnsavedContent, setIsVisible, setIsOpen, setOnClose]);
 
+  // useMutation 实现保存草稿
+  const handleSaveDraft = useMutation({
+    mutationFn: () => {
+      // 验证必填字段
+      if (!discussionForm.board_id) {
+        throw new Error("请选择版块");
+      }
+      if (!discussionForm.title.trim()) {
+        throw new Error("请输入标题");
+      }
+
+      return api.discussions.saveDraft({
+        title: discussionForm.title,
+        content: content,
+        board_id: discussionForm.board_id,
+        board_child_id: discussionForm.board_child_id,
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "成功",
+        description: "草稿保存成功",
+      });
+      // 更新未保存内容状态
+      setHasUnsavedContent(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "保存失败",
+        description: error.message || "保存草稿失败，请重试",
+        variant: "destructive",
+      });
+    },
+  });
+
   return (
     <Portal>
       <div
@@ -450,9 +480,10 @@ export default function CreatePostModal() {
                   variant="outline"
                   size="sm"
                   className="rounded-full w-full sm:w-auto"
-                  onClick={() => {}}
+                  onClick={() => handleSaveDraft.mutate()}
+                  disabled={handleSaveDraft.isPending}
                 >
-                  保存草稿箱
+                  {handleSaveDraft.isPending ? "保存中..." : "保存草稿箱"}
                 </Button>
                 <Button
                   size="sm"

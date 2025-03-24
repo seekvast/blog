@@ -4,13 +4,15 @@ import * as React from "react";
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
 
 const TOAST_LIMIT = 1;
-const TOAST_REMOVE_DELAY = 300;
+const TOAST_REMOVE_DELAY = 100;
+const DEFAULT_TOAST_DURATION = 1500;
 
 type ToasterToast = ToastProps & {
   id: string;
   title?: React.ReactNode;
   description?: React.ReactNode;
   action?: ToastActionElement;
+  duration?: number;
 };
 
 const actionTypes = {
@@ -153,6 +155,7 @@ function toast({ ...props }: Toast) {
       ...props,
       id,
       open: true,
+      duration: props.duration ?? DEFAULT_TOAST_DURATION,
       onOpenChange: (open) => {
         if (!open) dismiss();
       },

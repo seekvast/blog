@@ -74,6 +74,13 @@ function BoardContent() {
     }
   }, [discussionsLoading, hasMore]);
 
+  const handleChangeDiscussion = (slug: string) => {
+    setDiscussions((prev) =>
+      prev.filter((discussion) => discussion.slug !== slug)
+    );
+    fetchDiscussions();
+  };
+
   const fetchBoardDetail = async () => {
     try {
       setLoading(true);
@@ -110,6 +117,7 @@ function BoardContent() {
         board_child_id: selectedChildId || undefined,
         page: currentPage,
         per_page: 10,
+        from: "board",
         sort: sortBy,
       });
 
@@ -395,6 +403,7 @@ function BoardContent() {
                   key={discussion.first_post_id}
                   discussion={discussion}
                   displayMode={displayMode}
+                  onChange={handleChangeDiscussion}
                 />
               ))}
             </InfiniteScroll>
