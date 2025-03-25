@@ -51,7 +51,6 @@ const initPollForm: PollForm = {
   end_time: "",
 };
 
-// 1. 状态管理优化：将相关状态组合在一起
 interface ModalState {
   isSubmitting: boolean;
   isEditorFullscreen: boolean;
@@ -167,7 +166,6 @@ export default function CreatePostModal() {
     setIsEditorFullscreen(fullscreen);
   }, []);
 
-  // 2. 重置逻辑优化：分离不同类型的状态重置
   const resetPollState = React.useCallback(() => {
     dispatchPoll({ type: "RESET" });
   }, []);
@@ -190,7 +188,6 @@ export default function CreatePostModal() {
     setHasUnsavedContent(false);
   }, [resetPollState, resetDiscussionState, resetModalState]);
 
-  // 3. 事件处理优化：使用 useCallback 包装所有事件处理函数
   const handlePollConfirm = React.useCallback(() => {
     try {
       const validatedData = pollSchema.parse(pollState.form);
@@ -278,7 +275,6 @@ export default function CreatePostModal() {
     setIsVisible,
   ]);
 
-  // Reducer 函数
   function modalReducer(
     state: ModalState,
     action: { type: string; payload?: any }
@@ -450,10 +446,8 @@ export default function CreatePostModal() {
     };
   }, [isVisible, hasUnsavedContent, setIsVisible, setIsOpen, setOnClose]);
 
-  // useMutation 实现保存草稿
   const handleSaveDraft = useMutation({
     mutationFn: () => {
-      // 验证必填字段
       if (!discussionForm.board_id) {
         throw new Error("请选择版块");
       }

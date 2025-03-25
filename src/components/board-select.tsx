@@ -42,8 +42,8 @@ export const BoardSelect = React.forwardRef<
       try {
         setLoading(true);
         const queryParams = {
-            page: pageNum,
-            visibility: BoardVisibility.PUBLIC,
+          page: pageNum,
+          visibility: BoardVisibility.PUBLIC,
           name: "",
         };
         if (searchName) queryParams.name = searchName;
@@ -100,7 +100,7 @@ export const BoardSelect = React.forwardRef<
       setSearchQuery("");
       setPage(1);
       setHasMore(true);
-    }
+    },
   }));
 
   return (
@@ -113,7 +113,9 @@ export const BoardSelect = React.forwardRef<
         <SelectValue placeholder="请选择看板">
           {(value !== undefined && selectedBoard) || value === undefined ? (
             <div className="flex items-center justify-start gap-2 w-full">
-              <span className="truncate">{selectedBoard?.name || "请选择看板"}</span>
+              <span className="truncate">
+                {selectedBoard?.name || "请选择看板"}
+              </span>
             </div>
           ) : null}
         </SelectValue>

@@ -19,7 +19,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuthModal } from "@/components/auth/auth-modal-store";
 import { useRouter } from "next/navigation";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,6 +31,7 @@ import { usePostEditorStore } from "@/store/post-editor";
 import { cn } from "@/lib/utils";
 import { useDraftStore } from "@/store/draft";
 import { Badge } from "@/components/ui/badge";
+import { SearchDropdown } from "@/components/search/search-dropdown";
 
 interface HeaderProps {
   className?: string;
@@ -98,14 +98,7 @@ export function Header({ className }: HeaderProps) {
 
           {/* Search */}
           <div className="relative flex-1 sm:max-w-[240px] mx-3">
-            <div className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-muted-foreground" />
-            </div>
-            <Input
-              type="search"
-              placeholder="搜尋關鍵字"
-              className="pl-8 bg-muted/50 rounded-full h-8 text-base"
-            />
+            <SearchDropdown triggerClassName="w-full" />
           </div>
 
           {/* Actions */}

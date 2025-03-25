@@ -96,7 +96,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
     // 在其他页面，显示发布文章的模态框
     else {
       setIsVisible(true);
-      setOpenFrom("sidebar");
+      setOpenFrom("create");
     }
   };
 
