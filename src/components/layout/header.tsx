@@ -32,6 +32,8 @@ import { cn } from "@/lib/utils";
 import { useDraftStore } from "@/store/draft";
 import { Badge } from "@/components/ui/badge";
 import { SearchDropdown } from "@/components/search/search-dropdown";
+import { SearchMobile } from "@/components/search/search-mobile";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface HeaderProps {
   className?: string;
@@ -45,6 +47,7 @@ export function Header({ className }: HeaderProps) {
   const { hasUnsavedContent, isVisible, onClose, setIsVisible, setOpenFrom } =
     usePostEditorStore();
   const { hasDraft } = useDraftStore();
+  const isMobile = useMediaQuery("(max-width: 640px)");
 
   const handleLogoClick = React.useCallback(
     (e: React.MouseEvent) => {
@@ -98,7 +101,8 @@ export function Header({ className }: HeaderProps) {
 
           {/* Search */}
           <div className="relative flex-1 sm:max-w-[240px] mx-3">
-            <SearchDropdown triggerClassName="w-full" />
+            <SearchDropdown triggerClassName="w-full hidden lg:flex" />
+            <SearchMobile triggerClassName="w-full lg:hidden" />
           </div>
 
           {/* Actions */}

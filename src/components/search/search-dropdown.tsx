@@ -89,7 +89,7 @@ export function SearchDropdown({ triggerClassName }: SearchDropdownProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="w-full lg:w-[600px] p-0"
+        className="w-full lg:w-[450px] p-0"
         sideOffset={5}
       >
         <form onSubmit={handleSearch} className="relative">
