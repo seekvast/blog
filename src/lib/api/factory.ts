@@ -55,8 +55,10 @@ export function createApi(options: ApiOptions = {}) {
       changePassword: (data: any) =>
         http.patch<void>(`${prefix}/user/password`, data),
       joinBoard: (data: any) => http.post<any>(`${prefix}/user/board`, data),
-      saveCategory: (data: any) => http.post<any>(`${prefix}/user/category`, data),
-      getCategory: (params?: QueryParams) => http.get<any>(`${prefix}/user/category`, params, { next }),
+      saveCategory: (data: any) =>
+        http.post<any>(`${prefix}/user/category`, data),
+      getCategory: (params?: QueryParams) =>
+        http.get<any>(`${prefix}/user/category`, params, { next }),
       block: (data: any) => http.post<any>(`${prefix}/user/block`, data),
     },
 
@@ -89,18 +91,19 @@ export function createApi(options: ApiOptions = {}) {
       getMembers: (data: any) =>
         http.get<Pagination<User>>(`${prefix}/board/users`, data),
       manageUser: (data: any) =>
-            http.post<BoardUser>(`${prefix}/board/manage-user`, data),
+        http.post<BoardUser>(`${prefix}/board/manage-user`, data),
       changeUserRole: (data: any) =>
         http.post<BoardUser>(`${prefix}/board/user-role`, data),
       getBlacklist: (data: any) =>
-            http.get<Pagination<BoardBlacklist>>(`${prefix}/board/blacklist`, data),
+        http.get<Pagination<BoardBlacklist>>(`${prefix}/board/blacklist`, data),
       getHistory: (data: any) =>
-            http.get<Pagination<BoardHistory>>(`${prefix}/board/history`, data),
+        http.get<Pagination<BoardHistory>>(`${prefix}/board/history`, data),
       getManagers: (data: any) =>
-            http.get<BoardUser[]>(`${prefix}/board/managers`, data),
+        http.get<BoardUser[]>(`${prefix}/board/managers`, data),
       approve: (data: any) => http.post<any>(`${prefix}/board/approve`, data),
       join: (data: any) => http.post<any>(`${prefix}/board/join`, data),
-      recommend: (params?: QueryParams) => http.get<Board[]>(`${prefix}/board/recommend`, params, { next }),
+      recommend: (params?: QueryParams) =>
+        http.get<Board[]>(`${prefix}/board/recommend`, params, { next }),
     },
 
     discussions: {
@@ -111,6 +114,10 @@ export function createApi(options: ApiOptions = {}) {
 
       get: (slug: string) =>
         http.get<Discussion>(`${prefix}/discussion?slug=${slug}`, undefined, {
+          next,
+        }),
+      getRaw: (slug: string) =>
+        http.get<Discussion>(`${prefix}/discussion/raw?slug=${slug}`, undefined, {
           next,
         }),
 
@@ -127,8 +134,10 @@ export function createApi(options: ApiOptions = {}) {
       setting: (data: any) =>
         http.put<Discussion>(`${prefix}/discussion/setting`, data),
       delete: (data: any) => http.delete(`${prefix}/discussion`, data),
-      draft: () => http.get<Draft>(`${prefix}/discussion/draft`, undefined, { next }),
-      saveDraft: (data: any) => http.post<Draft>(`${prefix}/discussion/draft`, data),
+      draft: () =>
+        http.get<Draft>(`${prefix}/discussion/draft`, undefined, { next }),
+      saveDraft: (data: any) =>
+        http.post<Draft>(`${prefix}/discussion/draft`, data),
       posts: (params?: QueryParams) =>
         http.get<Pagination<Post>>(`${prefix}/discussion/posts`, params, {
           next,
@@ -139,13 +148,24 @@ export function createApi(options: ApiOptions = {}) {
 
       unlike: (slug: string) =>
         http.delete(`${prefix}/discussions/${slug}/like`),
-      
+
       store: (data: any) => http.post<Discussion>(`${prefix}/discussion`, data),
-      saveBookmark: (data: any) => http.post<any>(`${prefix}/discussion/bookmark`, data),
-      saveFollow: (data: any) => http.post<any>(`${prefix}/discussion/follow`, data),
-      votePoll: (data: any) => http.post<any>(`${prefix}/discussion/vote-poll`, data),
-      getPollVotes: (params?: QueryParams) => http.get<Pagination<PollVoter>>(`${prefix}/discussion/poll-votes`, params, { next }),
-      getRandom: () => http.get<Discussion[]>(`${prefix}/discussion/random`, undefined, { next }),
+      saveBookmark: (data: any) =>
+        http.post<any>(`${prefix}/discussion/bookmark`, data),
+      saveFollow: (data: any) =>
+        http.post<any>(`${prefix}/discussion/follow`, data),
+      votePoll: (data: any) =>
+        http.post<any>(`${prefix}/discussion/vote-poll`, data),
+      getPollVotes: (params?: QueryParams) =>
+        http.get<Pagination<PollVoter>>(
+          `${prefix}/discussion/poll-votes`,
+          params,
+          { next }
+        ),
+      getRandom: () =>
+        http.get<Discussion[]>(`${prefix}/discussion/random`, undefined, {
+          next,
+        }),
     },
 
     posts: {
@@ -161,7 +181,7 @@ export function createApi(options: ApiOptions = {}) {
         http.patch<Post>(`${prefix}/posts/${slug}`, data),
 
       delete: (data: any) => http.delete(`${prefix}/post`, data),
-      
+
       updatePost: (data: any) => http.put<Post>(`${prefix}/post`, data),
       vote: (data: any) => http.post<any>(`${prefix}/post/vote`, data),
     },
@@ -170,11 +190,13 @@ export function createApi(options: ApiOptions = {}) {
       image: (data: any) =>
         http.post<Attachment>(`${prefix}/upload/image`, data),
     },
-    
+
     reports: {
       create: (data: any) => http.post<any>(`${prefix}/report`, data),
-      list: (params?: QueryParams) => http.get<Pagination<Report>>(`${prefix}/reports`, params, { next }),
-      get: (params: any) => http.get<Report>(`${prefix}/report`, params, { next }),
+      list: (params?: QueryParams) =>
+        http.get<Pagination<Report>>(`${prefix}/reports`, params, { next }),
+      get: (params: any) =>
+        http.get<Report>(`${prefix}/report`, params, { next }),
     },
   };
 }

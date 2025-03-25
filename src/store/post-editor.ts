@@ -1,11 +1,13 @@
 import { create } from "zustand";
 import { useMarkdownEditor } from "./md-editor";
+import type { Discussion } from "@/types/discussion";
 
 interface PostEditorStore {
   hasUnsavedContent: boolean;
   isVisible: boolean;
   uploadingFiles: File[];
-  openFrom: string;
+  openFrom: "create" | "edit" | "draft";
+  discussion?: Discussion;
   setHasUnsavedContent: (hasUnsavedContent: boolean) => void;
   setIsVisible: (isVisible: boolean) => void;
   onClose: ((confirmed?: boolean) => void) | null;
@@ -13,7 +15,8 @@ interface PostEditorStore {
   addUploadingFile: (file: File) => void;
   removeUploadingFile: (file: File) => void;
   insertText: (text: string) => void;
-  setOpenFrom: (from: string) => void;
+  setOpenFrom: (openFrom: "create" | "edit" | "draft") => void;
+  setDiscussion: (discussion?: Discussion) => void;
 }
 
 export const usePostEditorStore = create<PostEditorStore>((set) => {
@@ -27,7 +30,8 @@ export const usePostEditorStore = create<PostEditorStore>((set) => {
     isVisible: false,
     onClose: null,
     uploadingFiles: [],
-    openFrom: "",
+    openFrom: "create",
+    discussion: undefined,
     setHasUnsavedContent: (hasUnsavedContent) => set({ hasUnsavedContent }),
     setIsVisible: (isVisible) => set({ isVisible }),
     setOnClose: (onClose) => set({ onClose }),
@@ -40,6 +44,7 @@ export const usePostEditorStore = create<PostEditorStore>((set) => {
         uploadingFiles: state.uploadingFiles.filter((f) => f !== file),
       })),
     insertText,
-    setOpenFrom: (from) => set({ openFrom: from }),
+    setOpenFrom: (openFrom) => set({ openFrom }),
+    setDiscussion: (discussion) => set({ discussion }),
   };
 });

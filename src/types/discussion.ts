@@ -91,6 +91,7 @@ export interface Discussion {
   main_post: Post;
   board: Board;
   board_child: BoardChild;
+  raw_content: string;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;

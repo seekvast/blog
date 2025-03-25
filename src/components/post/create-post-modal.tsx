@@ -29,6 +29,7 @@ import {
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const initDiscussionForm: DiscussionForm = {
+  slug: "",
   title: "",
   content: "",
   board_id: 0,
@@ -96,7 +97,8 @@ export default function CreatePostModal() {
     setIsOpen,
     setOnClose,
   } = useMarkdownEditor();
-  const { isVisible, setIsVisible, openFrom } = usePostEditorStore();
+  const { isVisible, setIsVisible, openFrom, discussion } =
+    usePostEditorStore();
   const { draft, hasDraft, setDraft } = useDraftStore();
   const editorRef = React.useRef<{ reset: () => void; isFullscreen: boolean }>(
     null
@@ -122,6 +124,43 @@ export default function CreatePostModal() {
       }
     }
   }, [isVisible, hasDraft, draft]);
+
+  React.useEffect(() => {
+    if (isVisible && openFrom === "edit" && discussion) {
+      // 获取文章详情
+      const fetchDiscussion = async () => {
+        try {
+          const data = await api.discussions.getRaw(discussion.slug);
+          setDiscussionForm({
+            slug: data.slug,
+            title: data.title,
+            content: data.raw_content,
+            board_id: data.board_id,
+            board_child_id: data.board_child_id,
+          });
+          setContent(data.raw_content);
+          if (data.poll) {
+            dispatchPoll({
+              type: "SET_DATA",
+              payload: {
+                ...data.poll,
+                start_time: data.poll.start_time ?? "",
+                end_time: data.poll.end_time ?? "",
+                options: data.poll.options.map((option) => option.option),
+              },
+            });
+          }
+        } catch (error) {
+          toast({
+            title: "获取文章失败",
+            description: error.message || "获取文章详情失败，请重试",
+            variant: "destructive",
+          });
+        }
+      };
+      fetchDiscussion();
+    }
+  }, [isVisible, openFrom, discussion]);
 
   // 监听编辑器全屏状态变化
   const handleFullscreenChange = React.useCallback((fullscreen: boolean) => {
@@ -208,6 +247,7 @@ export default function CreatePostModal() {
       dispatch({ type: "SET_SUBMITTING", payload: true });
 
       const data = {
+        slug: validatedDiscussion.slug,
         title: validatedDiscussion.title,
         content: validatedDiscussion.content,
         board_id: validatedDiscussion.board_id,
@@ -387,6 +427,7 @@ export default function CreatePostModal() {
   React.useEffect(() => {
     if (!isVisible) {
       resetAllStates();
+      usePostEditorStore.setState({ discussion: undefined });
     }
   }, [isVisible, resetAllStates]);
 
@@ -460,7 +501,7 @@ export default function CreatePostModal() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 <h1 className="text-lg font-medium leading-none whitespace-nowrap">
-                  发布文章
+                  {openFrom === "edit" ? "编辑文章" : "发布文章"}
                 </h1>
                 <div className="w-full min-w-[260px] sm:w-auto">
                   <BoardSelect

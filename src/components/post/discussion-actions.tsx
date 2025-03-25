@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { usePostEditorStore } from "@/store/post-editor";
 interface DiscussionActionsProps {
   discussion: Discussion;
   onChange?: (deletedSlug: string) => void;
@@ -44,6 +45,8 @@ export function DiscussionActions({
   discussion,
   onChange,
 }: DiscussionActionsProps) {
+  const { isVisible, onClose, setIsVisible, setOpenFrom } =
+    usePostEditorStore();
   const [reportToAdminOpen, setReportToAdminOpen] = useState(false);
   const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -188,7 +191,16 @@ export function DiscussionActions({
         <DropdownMenuContent align="end" className="w-48">
           {isAuthor && (
             <>
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => {
+                  setOpenFrom("edit");
+                  setIsVisible(true);
+                  usePostEditorStore.setState({
+                    discussion: discussion,
+                  });
+                }}
+              >
                 <Edit className="mr-2 h-4 w-4" />
                 <span>編輯</span>
               </DropdownMenuItem>

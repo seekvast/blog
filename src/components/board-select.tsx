@@ -13,6 +13,7 @@ import { api } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import { QueryParams } from "@/types/common";
 import { Board } from "@/types/board";
+import { BoardVisibility } from "@/constants/board-visibility";
 
 interface BoardSelectProps {
   value?: number;
@@ -41,7 +42,8 @@ export const BoardSelect = React.forwardRef<
       try {
         setLoading(true);
         const queryParams = {
-          page: pageNum,
+            page: pageNum,
+            visibility: BoardVisibility.PUBLIC,
           name: "",
         };
         if (searchName) queryParams.name = searchName;

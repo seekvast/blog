@@ -78,6 +78,7 @@ export const pollSchema = z
   );
 
 export const discussionSchema = z.object({
+  slug: z.string().optional(),
   title: z
     .string()
     .min(1, "标题不能为空")

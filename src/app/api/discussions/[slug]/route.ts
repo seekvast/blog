@@ -9,7 +9,8 @@ export const GET = withErrorHandler(async (
   request: NextRequest,
   { params }: { params: { slug: string } }
 ) => {
-  try {
+    console.log(params.slug, 'params.slug............')
+    try {
     const data = await api.discussions.get(params.slug)
     return NextResponse.json(data)
   } catch (error) {
