@@ -55,7 +55,10 @@ export function SearchPopover({ triggerClassName }: SearchPopoverProps) {
   };
 
   const onSearchItemClick = (search: string) => {
-    setOpen(false);
+    if (handleSearchItemClick(search)) {
+      setKeyword("");
+      setOpen(false);
+    }
   };
 
   return (
@@ -134,7 +137,7 @@ export function SearchPopover({ triggerClassName }: SearchPopoverProps) {
                   <div
                     key={index}
                     className="rounded-lg p-3 cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => onSearchItemClick(board.name)}
+                    onClick={() => setOpen(false)}
                   >
                     <div className="flex flex-col items-center gap-2">
                       <Link

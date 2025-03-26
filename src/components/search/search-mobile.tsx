@@ -5,7 +5,7 @@ import { Search, X, ChevronLeft } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { useSearch } from "./use-search";
 import Link from "next/link";
 
@@ -43,8 +43,10 @@ export function SearchMobile({ triggerClassName }: SearchMobileProps) {
   };
 
   const onSearchItemClick = (search: string) => {
-    setKeyword("");
-    setOpen(false);
+    if (handleSearchItemClick(search)) {
+      setKeyword("");
+      setOpen(false);
+    }
   };
 
   return (
@@ -66,6 +68,7 @@ export function SearchMobile({ triggerClassName }: SearchMobileProps) {
         side="top"
         className="h-full w-full p-0 pt-0 block [&>button]:hidden"
       >
+        <SheetTitle className="sr-only">搜索</SheetTitle>
         <div className="flex items-center justify-between border-b p-3">
           <button onClick={() => setOpen(false)} className="mr-3">
             <ChevronLeft className="h-6 w-6" />
