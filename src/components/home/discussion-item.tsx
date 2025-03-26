@@ -95,7 +95,7 @@ export const DiscussionItem = React.forwardRef<
   };
 
   return (
-    <article ref={ref} className="py-4 w-full">
+    <article ref={ref} className={cn("py-4 w-full")}>
       <div className="flex space-x-3 w-full">
         {/* 作者头像 */}
         <Link

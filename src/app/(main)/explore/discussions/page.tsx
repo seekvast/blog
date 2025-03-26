@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { DiscussionItem } from "@/components/home/discussion-item";
 import { InfiniteScroll } from "@/components/common/infinite-scroll";
+import { ExploreTabs } from "@/components/search/explore-tabs";
 
 export default function DiscussionsPage() {
   const searchParams = useSearchParams();
@@ -55,10 +56,11 @@ export default function DiscussionsPage() {
       </div>
     );
   }
-  //   console.log("data:", data?.pages);
 
   return (
-    <div className="flex flex-col pb-8">
+    <div className="flex flex-col">
+      <ExploreTabs />
+
       <InfiniteScroll
         currentPage={data?.pages[0].current_page ?? 1}
         onLoadMore={() => fetchNextPage()}
@@ -66,9 +68,10 @@ export default function DiscussionsPage() {
         loading={isFetchingNextPage}
         disableInitialCheck={true}
       >
-        {data?.pages
-          .flatMap((page) => page.items)
-          .map((discussion, index) => {
+        <div className="divide-y">
+          {data?.pages
+            .flatMap((page) => page.items)
+            .map((discussion, index) => {
               return (
                 <DiscussionItem
                   key={discussion.slug + index}
@@ -77,6 +80,7 @@ export default function DiscussionsPage() {
                 />
               );
             })}
+        </div>
       </InfiniteScroll>
     </div>
   );

@@ -36,12 +36,14 @@ export function SearchMobile({ triggerClassName }: SearchMobileProps) {
 
   const onSearch = (e: React.FormEvent) => {
     if (handleSearch(e)) {
+      setKeyword("");
       setOpen(false);
     }
   };
 
   const onSearchItemClick = (search: string) => {
     if (handleSearchItemClick(search)) {
+      setKeyword("");
       setOpen(false);
     }
   };

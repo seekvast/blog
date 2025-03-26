@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Board } from "@/types";
+import { User } from "lucide-react";
 
 interface BoardItemProps {
   board: Board;
@@ -37,9 +38,19 @@ export function BoardItem({ board, onJoin, onLeave }: BoardItemProps) {
             )}
           </div>
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <span>{board.users_count} 位成员</span>
+            {board.visibility >= 1 && (
+              <>
+                <span>私密</span>
+                <span>•</span>
+              </>
+            )}
+
+            <div className="flex items-center">
+              <User className="h-4" />
+              <span>{board.users_count || 0}</span>
+            </div>
             <span>•</span>
-            <span>{board.board_user?.posts_count || 0} 篇讨论</span>
+            <span>{board.category.name}</span>
           </div>
           <div className="text-sm text-muted-foreground">{board.desc}</div>
         </div>

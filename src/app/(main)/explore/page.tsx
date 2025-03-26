@@ -8,23 +8,14 @@ import { useQuery } from "@tanstack/react-query";
 import { DiscussionItem } from "@/components/home/discussion-item";
 import { BoardItem } from "@/components/board/board-item";
 import { UserItem } from "@/components/user/user-item";
-import { cn } from "@/lib/utils";
-
-const tabs = [
-  { id: "all", name: "相关" },
-  { id: "discussion", name: "文章" },
-  { id: "board", name: "看板" },
-  { id: "user", name: "用户" },
-] as const;
+import { ExploreTabs } from "@/components/search/explore-tabs";
 
 export default function ExplorePage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const q = searchParams?.get("q") ?? "";
-  const [activeTab, setActiveTab] = React.useState<string>("all");
   const { data: explore } = useQuery({
     queryKey: ["explore", q],
-    queryFn: () => api.common.search({ q }),
+    queryFn: () => api.common.search({ keyword: q }),
     enabled: !!q,
   });
 
@@ -37,33 +28,12 @@ export default function ExplorePage() {
   }
 
   return (
-    <div className="flex flex-col space-y-8 pb-8">
+    <div className="flex flex-col space-y-4 ">
       {/* Tab 导航 */}
-      <div className="flex space-x-4 border-b">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => {
-              if (tab.id === "all") {
-                router.push(`/explore?q=${q}`);
-              } else {
-                router.push(`/explore/${tab.id}s?q=${q}`);
-              }
-            }}
-            className={cn(
-              "px-4 py-2 text-sm font-medium transition-colors",
-              activeTab === tab.id
-                ? "text-primary border-b-2 border-primary"
-                : "text-muted-foreground hover:text-primary"
-            )}
-          >
-            {tab.name}
-          </button>
-        ))}
-      </div>
+      <ExploreTabs />
 
       {/* 文章区块 */}
-      <section className="space-y-4">
+      <section className="">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium border-l-4 border-primary pl-2">
             文章
@@ -89,7 +59,7 @@ export default function ExplorePage() {
       </section>
 
       {/* 看板区块 */}
-      <section className="space-y-4">
+      <section className="">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium border-l-4 border-primary pl-2">
             看板
@@ -101,14 +71,16 @@ export default function ExplorePage() {
             全部结果
           </Link>
         </div>
-        {explore?.boards.items.map((board) => (
-          <BoardItem key={board.id} board={board} />
-        ))}
+        <div className="divide-y">
+          {explore?.boards.items.map((board) => (
+            <BoardItem key={board.id} board={board} />
+          ))}
+        </div>
       </section>
 
       {/* 用户区块 */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
+      <section className="">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-medium border-l-4 border-primary pl-2">
             用户
           </h2>
@@ -119,9 +91,16 @@ export default function ExplorePage() {
             全部结果
           </Link>
         </div>
-        {explore?.users.items.map((user, index) => (
-          <UserItem key={user.hashid + index} user={user} />
-        ))}
+        <div className="grid grid-cols-2 gap-2">
+          {explore?.users.items.map((user, index) => (
+            <div
+              key={user.hashid + index}
+              className="border rounded-lg hover:border-primary transition-colors"
+            >
+              <UserItem user={user} />
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );

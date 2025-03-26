@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { UserItem } from "@/components/user/user-item";
 import { InfiniteScroll } from "@/components/common/infinite-scroll";
+import { ExploreTabs } from "@/components/search/explore-tabs";
 
 export default function UsersPage() {
   const searchParams = useSearchParams();
@@ -33,16 +34,23 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="flex flex-col pb-8">
+    <div className="flex flex-col">
+      <ExploreTabs />
+
       <InfiniteScroll
         currentPage={data?.pages[0].current_page ?? 1}
         onLoadMore={() => fetchNextPage()}
         hasMore={!!hasNextPage}
         loading={isFetchingNextPage}
+        disableInitialCheck={true}
       >
-        {data?.pages.flatMap((page) => page.items).map((user) => (
-          <UserItem key={user.username} user={user} />
-        ))}
+        <div className="divide-y">
+          {data?.pages
+            .flatMap((page) => page.items)
+            .map((user) => (
+              <UserItem key={user.username} user={user} />
+            ))}
+        </div>
       </InfiniteScroll>
     </div>
   );
