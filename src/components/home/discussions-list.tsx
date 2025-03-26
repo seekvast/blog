@@ -3,12 +3,12 @@
 import * as React from "react";
 import { useRef, useCallback, useEffect } from "react";
 
-import { LayoutGrid, List, ChevronDown } from "lucide-react";
+import { LayoutGrid, List, ChevronDown, Loader2 } from "lucide-react";
 import type { Discussion } from "@/types/discussion";
 import type { Pagination } from "@/types/common";
 import { api } from "@/lib/api";
 import { DiscussionItem } from "@/components/home/discussion-item";
-import { InfiniteScroll } from "@/components/common/infinite-scroll";
+import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { useDevice } from "@/hooks/use-device";
 import { cn } from "@/lib/utils";
 import {
@@ -52,7 +52,7 @@ export function DiscussionsList({
 
   const handleDeleteDiscussion = useCallback(
     (deletedSlug: string) => {
-    //   // 如果删除的是下一页的第一条数据，pageNum=当前页-上一页
+      //   // 如果删除的是下一页的第一条数据，pageNum=当前页-上一页
       //   setDiscussions((prev) => ({
       //     ...prev,
       //     items: prev.items.filter((item) => item.slug !== deletedSlug),
@@ -77,19 +77,25 @@ export function DiscussionsList({
       });
 
       if (pageNum === 1) {
+        // 首次加载或刷新
         setDiscussions(response);
         setPage(2);
         setHasMore(response.last_page > 1);
       } else {
-        if (response.items.length === 0 || pageNum >= response.last_page) {
-          setHasMore(false);
-          setDiscussions((prev) => ({
-            ...prev,
-            items: [...prev.items, ...response.items],
-            current_page: pageNum,
-            last_page: response.last_page,
-          }));
-          setPage((prev) => prev + 1);
+        // 加载更多数据
+        setDiscussions((prev) => ({
+          ...prev,
+          items: [...prev.items, ...response.items],
+          current_page: pageNum,
+          last_page: response.last_page,
+        }));
+
+        // 检查是否还有更多页
+        setHasMore(pageNum < response.last_page);
+
+        // 只有在还有更多页的情况下才增加页码
+        if (pageNum < response.last_page) {
+          setPage(pageNum + 1);
         }
       }
     } catch (error) {
@@ -99,10 +105,19 @@ export function DiscussionsList({
     }
   };
 
-  const loadMore = useCallback(async () => {
+  const loadMore = useCallback(() => {
     if (loading || !hasMore) return;
-    await fetchDiscussions(activeTab, page);
-  }, [loading, hasMore, page, activeTab]);
+    fetchDiscussions(activeTab, page, sortBy);
+  }, [loading, hasMore, page, activeTab, sortBy]);
+
+  // 防止初始加载或标签切换时自动触发无限滚动
+  useEffect(() => {
+    // 重置滚动位置
+    window.scrollTo(0, 0);
+
+    // 当切换标签或排序方式时，重新获取第一页数据
+    fetchDiscussions(activeTab, 1, sortBy);
+  }, [activeTab, sortBy]);
 
   return (
     <div className="flex flex-col">
@@ -197,7 +212,7 @@ export function DiscussionsList({
           loading={loading}
           hasMore={hasMore}
           onLoadMore={loadMore}
-          currentPage={page}
+          className="divide-y"
         >
           {discussions.items.map((discussion, index) => {
             const isLastItem = index === discussions.items.length - 1;
@@ -212,11 +227,6 @@ export function DiscussionsList({
             );
           })}
         </InfiniteScroll>
-      </div>
-
-      {/* 加载状态指示器 */}
-      <div className="h-10 flex items-center justify-center text-muted-foreground">
-        {!hasMore && discussions.last_page > 1 && <div>No more items</div>}
       </div>
     </div>
   );

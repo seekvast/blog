@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { BoardItem } from "@/components/board/board-item";
-import { InfiniteScroll } from "@/components/common/infinite-scroll";
+import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { ExploreTabs } from "@/components/search/explore-tabs";
 
 export default function BoardsPage() {
@@ -38,11 +38,9 @@ export default function BoardsPage() {
       <ExploreTabs />
 
       <InfiniteScroll
-        currentPage={data?.pages[0].current_page ?? 1}
         onLoadMore={() => fetchNextPage()}
         hasMore={!!hasNextPage}
         loading={isFetchingNextPage}
-        disableInitialCheck={true}
       >
         <div className="divide-y">
           {data?.pages

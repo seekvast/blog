@@ -9,10 +9,8 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            // 在开发环境下禁用重试
             retry: process.env.NODE_ENV === "production",
-            // 缓存时间1分钟
-            staleTime: 1000 * 60 * 1,
+            staleTime: 1000 * 60 * 0,
           },
         },
       })

@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { DiscussionItem } from "@/components/home/discussion-item";
-import { InfiniteScroll } from "@/components/common/infinite-scroll";
+import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { api } from "@/lib/api";
 import type { Discussion } from "@/types/discussion";
 import type { Pagination } from "@/types/common";
@@ -113,7 +113,6 @@ export function UserPosts() {
           loading={loading}
           hasMore={hasMore}
           onLoadMore={loadMore}
-          currentPage={page}
         >
           {discussions.items.map((discussion, index) => {
             const isLastItem = index === discussions.items.length - 1;

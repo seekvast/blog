@@ -15,7 +15,7 @@ import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { Board, BoardChild, BoardRule } from "@/types/board";
 import { Discussion } from "@/types/discussion";
 import { DiscussionItem } from "@/components/home/discussion-item";
-import { InfiniteScroll } from "@/components/common/infinite-scroll";
+import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { BoardUserRole } from "@/constants/board-user-role";
 import {
   useQuery,
@@ -395,7 +395,6 @@ function BoardContent() {
               loading={discussionsLoading}
               hasMore={hasMore}
               onLoadMore={handleLoadMore}
-              currentPage={currentPage}
               className="space-y-4 py-4 divide-y"
             >
               {discussions.map((discussion) => (

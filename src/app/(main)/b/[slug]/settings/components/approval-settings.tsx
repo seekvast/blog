@@ -9,7 +9,7 @@ import { api } from "@/lib/api";
 import { Card } from "@/components/ui/card";
 import { BoardHistory } from "@/types/board";
 import { Pagination } from "@/types/common";
-import { InfiniteScroll } from "@/components/common/infinite-scroll";
+import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
@@ -242,8 +242,6 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
         loading={isLoading || isFetchingNextPage}
         hasMore={!!hasNextPage}
         onLoadMore={handleLoadMore}
-        currentPage={data?.pageParams?.length || 1}
-        disableInitialCheck={true}
       >
         {applications.length === 0 ? (
           <div className="text-center py-8 text-gray-500">暂无待审核的申请</div>
