@@ -83,10 +83,7 @@ export function InfiniteScroll({
 
   return (
     <div className={className}>
-      {/* 初始加载时显示加载指示器 */}
-      {loading && currentPage === 1 ? (
-        loadingIndicator
-      ) : childrenArray.length === 0 ? (
+      {childrenArray.length === 0 ? (
         <div className="flex justify-center py-8 text-muted-foreground">
           這裡空空如也
         </div>
@@ -94,7 +91,7 @@ export function InfiniteScroll({
         <>
           {enhancedChildren}
           {/* 加载更多时显示加载指示器 */}
-          {loading && currentPage > 1 && loadingIndicator}
+          {loading && loadingIndicator}
         </>
       )}
     </div>

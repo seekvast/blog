@@ -31,8 +31,8 @@ export interface ApiOptions {
 export function createApi(options: ApiOptions = {}) {
   const { prefix = "", next } = options;
   return {
-      common: {
-        search: (data: any) => http.get<any>(`${prefix}/search`, data, { next }),
+    common: {
+      search: (data: any) => http.get<any>(`${prefix}/search`, data, { next }),
       categories: () =>
         http.get<Category[]>(`${prefix}/categories`, undefined, { next }),
       parse: (data: any) => http.post<any>(`${prefix}/parse`, data),
@@ -108,19 +108,28 @@ export function createApi(options: ApiOptions = {}) {
     },
 
     discussions: {
-      list: (params?: QueryParams) =>
-        http.get<Pagination<Discussion>>(`${prefix}/discussions`, params, {
-          next,
-        }),
+      list: (params?: QueryParams) => {
+        return http.get<Pagination<Discussion>>(
+          `${prefix}/discussions`,
+          params,
+          {
+            next,
+          }
+        );
+      },
 
       get: (slug: string) =>
         http.get<Discussion>(`${prefix}/discussion?slug=${slug}`, undefined, {
           next,
         }),
       getRaw: (slug: string) =>
-        http.get<Discussion>(`${prefix}/discussion/raw?slug=${slug}`, undefined, {
-          next,
-        }),
+        http.get<Discussion>(
+          `${prefix}/discussion/raw?slug=${slug}`,
+          undefined,
+          {
+            next,
+          }
+        ),
 
       create: (data: any) =>
         http.post<Discussion>(`${prefix}/discussions`, data),

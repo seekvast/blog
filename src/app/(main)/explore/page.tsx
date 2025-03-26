@@ -1,155 +1,128 @@
 "use client";
 
 import * as React from "react";
-import { useRef, useCallback, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-
-import { LayoutGrid, List, ChevronDown } from "lucide-react";
-import type { Discussion } from "@/types/discussion";
-import type { Pagination } from "@/types/common";
-import type { Board } from "@/types/board";
-import type { User } from "@/types/user";
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { api } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
 import { DiscussionItem } from "@/components/home/discussion-item";
 import { BoardItem } from "@/components/board/board-item";
 import { UserItem } from "@/components/user/user-item";
-import { InfiniteScroll } from "@/components/common/infinite-scroll";
 import { cn } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useQuery } from "@tanstack/react-query";
 
-type DisplayMode = "list" | "grid";
-type SortBy = "hot" | "create" | "reply";
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+const tabs = [
+  { id: "all", name: "相关" },
+  { id: "discussion", name: "文章" },
+  { id: "board", name: "看板" },
+  { id: "user", name: "用户" },
+] as const;
 
 export default function ExplorePage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const searchQuery = searchParams?.get("q") ?? "";
-  const [activeTab, setActiveTab] = React.useState<"recommend" | "trace">(
-    "recommend"
-  );
-  const [displayMode, setDisplayMode] = React.useState<DisplayMode>("list");
-
-  const [discussions, setDiscussions] = React.useState<Pagination<Discussion>>({
-    items: [],
-    total: 0,
-    per_page: 1,
-    current_page: 1,
-    last_page: 1,
-    code: 0,
-    message: "",
-  });
-
-  const [boards, setBoards] = React.useState<Pagination<Board>>({
-    items: [],
-    total: 0,
-    per_page: 1,
-    current_page: 1,
-    last_page: 1,
-    code: 0,
-    message: "",
-  });
-
-  const [users, setUsers] = React.useState<Pagination<User>>({
-    items: [],
-    total: 0,
-    per_page: 1,
-    current_page: 1,
-    last_page: 1,
-    code: 0,
-    message: "",
-  });
-
+  const q = searchParams?.get("q") ?? "";
+  const [activeTab, setActiveTab] = React.useState<string>("all");
   const { data: explore } = useQuery({
-    queryKey: ["explore", searchQuery],
-    queryFn: () => api.common.search({ q: searchQuery || "" }),
-    enabled: !!searchQuery,
+    queryKey: ["explore", q],
+    queryFn: () => api.common.search({ q }),
+    enabled: !!q,
   });
 
-  React.useEffect(() => {
-    if (explore) {
-      setDiscussions(explore.discussions);
-      setBoards(explore.boards);
-      setUsers(explore.users);
-    }
-  }, [explore]);
+  if (!q) {
+    return (
+      <div className="flex items-center justify-center h-[200px] text-muted-foreground">
+        请输入搜索关键词
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col">
-      {/* 顶部导航 - 仅在非移动端显示 */}
-      <div className="bg-background">
-        <div className="mx-auto lg:border-b">
-          <div className="flex h-[40px] items-center justify-between ">
-            <div className="flex items-center space-x-8">
-              <button type="button">相关</button>
-              <button type="button">文章</button>
-              <button type="button">看板</button>
-              <button
-                type="button"
-                className={cn(
-                  "h-8 font-medium hover:text-primary/90",
-                  activeTab === "trace"
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                )}
-              >
-                用户
-              </button>
-            </div>
-          </div>
-        </div>
+    <div className="flex flex-col space-y-8 pb-8">
+      {/* Tab 导航 */}
+      <div className="flex space-x-4 border-b">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => {
+              if (tab.id === "all") {
+                router.push(`/explore?q=${q}`);
+              } else {
+                router.push(`/explore/${tab.id}s?q=${q}`);
+              }
+            }}
+            className={cn(
+              "px-4 py-2 text-sm font-medium transition-colors",
+              activeTab === tab.id
+                ? "text-primary border-b-2 border-primary"
+                : "text-muted-foreground hover:text-primary"
+            )}
+          >
+            {tab.name}
+          </button>
+        ))}
       </div>
 
-      <div className="divide-y">
-        <section>
-          <div className="flex items-center justify-between py-2">
-            <h2 className="text-lg font-medium border-l-4 border-primary pl-2">
-              文章
-            </h2>
-            <button className="text-sm text-primary">全部结果</button>
-          </div>
-
-          {discussions.items.map((discussion, index) => {
-            const isLastItem = index === discussions.items.length - 1;
+      {/* 文章区块 */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-medium border-l-4 border-primary pl-2">
+            文章
+          </h2>
+          <Link
+            href={{ pathname: "/explore/discussions", query: { q } }}
+            className="text-sm text-primary hover:text-primary/90"
+          >
+            全部结果
+          </Link>
+        </div>
+        <div className="divide-y">
+          {explore?.discussions.items.map((discussion, index) => {
             return (
               <DiscussionItem
-                key={discussion.slug + index}
+                key={discussion.slug}
                 discussion={discussion}
-                displayMode={displayMode}
-                isLastItem={isLastItem}
+                displayMode="list"
               />
             );
           })}
-        </section>
-        <section className="pt-4">
-          <div className="flex items-center justify-between py-2">
-            <h2 className="text-lg font-medium border-l-4 border-primary pl-2">
-              看板
-            </h2>
-            <button className="text-sm text-primary">全部结果</button>
-          </div>
-          {boards.items.map((board, index) => {
-            return <BoardItem key={board.id} board={board} />;
-          })}
-        </section>
-        <section className="pt-4">
-          <div className="flex items-center justify-between py-2">
-            <h2 className="text-lg font-medium border-l-4 border-primary pl-2">
-              用户
-            </h2>
-            <button className="text-sm text-primary">全部结果</button>
-          </div>
-          {users.items.map((user, index) => {
-            return <UserItem key={user.hashid + index} user={user} />;
-          })}
-        </section>
-      </div>
+        </div>
+      </section>
+
+      {/* 看板区块 */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-medium border-l-4 border-primary pl-2">
+            看板
+          </h2>
+          <Link
+            href={{ pathname: "/explore/boards", query: { q } }}
+            className="text-sm text-primary hover:text-primary/90"
+          >
+            全部结果
+          </Link>
+        </div>
+        {explore?.boards.items.map((board) => (
+          <BoardItem key={board.id} board={board} />
+        ))}
+      </section>
+
+      {/* 用户区块 */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-medium border-l-4 border-primary pl-2">
+            用户
+          </h2>
+          <Link
+            href={{ pathname: "/explore/users", query: { q } }}
+            className="text-sm text-primary hover:text-primary/90"
+          >
+            全部结果
+          </Link>
+        </div>
+        {explore?.users.items.map((user, index) => (
+          <UserItem key={user.hashid + index} user={user} />
+        ))}
+      </section>
     </div>
   );
 }
