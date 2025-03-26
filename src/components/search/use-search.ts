@@ -1,8 +1,11 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useSearchStore } from "@/store/search-store";
+import { api } from "@/lib/api";
+import type { Board } from "@/types";
+import { useQuery } from "@tanstack/react-query";
 
-interface Board {
+interface SearchBoard {
   name: string;
   members: number;
   category: string;
@@ -13,11 +16,14 @@ export function useSearch() {
   const router = useRouter();
   const [keyword, setKeyword] = React.useState("");
   const { histories, addHistory, clearHistories } = useSearchStore();
-  const [popularBoards] = React.useState<Board[]>([
-    { name: "色图交流", members: 99, category: "动漫", avatar: "" },
-    { name: "色图交流", members: 99, category: "动漫", avatar: "" },
-    { name: "色图交流", members: 99, category: "动漫", avatar: "" },
-  ]);
+
+  const { data: hotBoards } = useQuery<Board[]>({
+    queryKey: ["popularBoards"],
+    queryFn: async () => {
+      const boards = await api.boards.recommend({ q: "hot" });
+      return boards;
+    },
+  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +46,7 @@ export function useSearch() {
     keyword,
     setKeyword,
     histories,
-    popularBoards,
+    hotBoards,
     handleSearch,
     handleClearHistories: clearHistories,
     handleSearchItemClick,

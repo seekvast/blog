@@ -4,7 +4,7 @@ import * as React from "react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { LayoutGrid, List, ChevronDown, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,20 +14,21 @@ import { api } from "@/lib/api";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { Board, BoardChild, BoardRule } from "@/types/board";
 import { Discussion } from "@/types/discussion";
-import { DiscussionItem } from "@/components/home/discussion-item";
+import { DiscussionItem } from "@/components/discussion/discussion-item";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { BoardUserRole } from "@/constants/board-user-role";
-import {
-  useQuery,
-} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-type SortBy = "hot" | "create" | "reply";
+import { 
+  DiscussionControls, 
+  type DisplayMode, 
+  type SortBy 
+} from "@/components/discussion/discussion-controls";
 
 export default function BoardPage() {
   return (
@@ -58,15 +59,10 @@ function BoardContent() {
   const [error, setError] = useState<string | null>(null);
   const observerRef = useRef<IntersectionObserver>();
   const [hasMore, setHasMore] = useState(true);
-  const [displayMode, setDisplayMode] = useState<"grid" | "list">("grid");
+  const [displayMode, setDisplayMode] = useState<DisplayMode>("grid");
   const [activeTab, setActiveTab] = useState<"posts" | "rules" | "children">(
     "posts"
   );
-  const sortOptions = {
-    hot: "热门",
-    create: "最新发表",
-    reply: "最后回复",
-  };
   const [sortBy, setSortBy] = useState<SortBy>("hot");
   const handleLoadMore = useCallback(() => {
     if (!discussionsLoading && hasMore) {
@@ -84,9 +80,6 @@ function BoardContent() {
   const fetchBoardDetail = async () => {
     try {
       setLoading(true);
-      //   if (!params?.slug || Array.isArray(params.slug)) {
-      //     throw new Error('Invalid board slug');
-      //   }
       const data = await api.boards.get({ slug: params?.slug });
       setBoard(data);
     } catch (error) {
@@ -163,7 +156,6 @@ function BoardContent() {
     }
   }, [currentPage]);
 
-  // 使用 useQuery 获取规则列表
   const {
     data: rules = [],
     isLoading: rulesLoading,
@@ -305,48 +297,15 @@ function BoardContent() {
                   </button>
                 </div>
                 {activeTab === "posts" && (
-                  <div className="flex items-center space-x-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <div className="inline-flex items-center space-x-1 font-medium text-muted-foreground cursor-pointer">
-                          <span>{sortOptions[sortBy]}</span>
-                          <ChevronDown className="h-4 w-4" />
-                        </div>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {Object.entries(sortOptions).map(([key, label]) => (
-                          <DropdownMenuItem
-                            key={key}
-                            className={cn(
-                              sortBy === key && "bg-accent",
-                              "cursor-pointer"
-                            )}
-                            onClick={() => {
-                              setSortBy(key as SortBy);
-                              fetchDiscussions(key as SortBy);
-                            }}
-                          >
-                            {label}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <button
-                      type="button"
-                      className="h-8 text-muted-foreground hover:bg-transparent hover:text-foreground"
-                      onClick={() =>
-                        setDisplayMode((prev) =>
-                          prev === "grid" ? "list" : "grid"
-                        )
-                      }
-                    >
-                      {displayMode === "grid" ? (
-                        <LayoutGrid className="h-5 w-5" />
-                      ) : (
-                        <List className="h-5 w-5" />
-                      )}
-                    </button>
-                  </div>
+                  <DiscussionControls
+                    displayMode={displayMode}
+                    setDisplayMode={setDisplayMode}
+                    sortBy={sortBy}
+                    setSortBy={(sort) => {
+                      setSortBy(sort);
+                      fetchDiscussions(sort);
+                    }}
+                  />
                 )}
               </div>
             </div>

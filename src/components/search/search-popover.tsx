@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Search, X } from "lucide-react";
+import { Search, X, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -17,7 +17,7 @@ export function SearchPopover({ triggerClassName }: SearchPopoverProps) {
     keyword,
     setKeyword,
     histories,
-    popularBoards,
+    hotBoards,
     handleSearch,
     handleClearHistories,
     handleSearchItemClick,
@@ -131,7 +131,7 @@ export function SearchPopover({ triggerClassName }: SearchPopoverProps) {
             <div>
               <h3 className="text-sm font-medium mb-3">热门看板</h3>
               <div className="grid grid-cols-3 gap-3">
-                {popularBoards.map((board, index) => (
+                {hotBoards?.map((board, index) => (
                   <div
                     key={index}
                     className="rounded-lg p-3 cursor-pointer hover:bg-muted/50 transition-colors"
@@ -147,9 +147,12 @@ export function SearchPopover({ triggerClassName }: SearchPopoverProps) {
                           {board.name}
                         </h4>
                         <div className="flex items-center justify-center text-xs text-muted-foreground mt-1">
-                          <span>{board.members} 成员</span>
+                          <div className="flex items-center">
+                            <User className="h-4 w-4" />
+                            <span>{0}成员</span>
+                          </div>
                           <span className="mx-1">·</span>
-                          <span>{board.category}</span>
+                          <span>{board.category.name}</span>
                         </div>
                       </div>
                     </div>

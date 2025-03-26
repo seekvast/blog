@@ -1,4 +1,4 @@
-import { DiscussionsList } from "@/components/home/discussions-list";
+import { DiscussionsList } from "@/components/discussion/discussions-list";
 import { api } from "@/lib/api";
 
 async function getDiscussions() {

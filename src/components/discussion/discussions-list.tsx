@@ -3,28 +3,24 @@
 import * as React from "react";
 import { useRef, useCallback, useEffect } from "react";
 
-import { LayoutGrid, List, ChevronDown, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import type { Discussion } from "@/types/discussion";
 import type { Pagination } from "@/types/common";
 import { api } from "@/lib/api";
-import { DiscussionItem } from "@/components/home/discussion-item";
+import { DiscussionItem } from "@/components/discussion/discussion-item";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
-import { useDevice } from "@/hooks/use-device";
 import { cn } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { 
+  DiscussionControls, 
+  type DisplayMode, 
+  type SortBy 
+} from "@/components/discussion/discussion-controls";
 
 interface DiscussionsListProps {
   initialDiscussions: Pagination<Discussion>;
   from: string;
 }
 
-type DisplayMode = "list" | "grid";
-type SortBy = "hot" | "create" | "reply";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -32,7 +28,6 @@ export function DiscussionsList({
   initialDiscussions,
   from,
 }: DiscussionsListProps) {
-  const [displayMode, setDisplayMode] = React.useState<DisplayMode>("grid");
   const [discussions, setDiscussions] = React.useState(initialDiscussions);
   const [page, setPage] = React.useState(2);
   const [loading, setLoading] = React.useState(false);
@@ -42,13 +37,8 @@ export function DiscussionsList({
   const [activeTab, setActiveTab] = React.useState<"recommend" | "trace">(
     "recommend"
   );
+  const [displayMode, setDisplayMode] = React.useState<DisplayMode>("grid");
   const [sortBy, setSortBy] = React.useState<SortBy>("hot");
-
-  const sortOptions = {
-    hot: "热门",
-    create: "最新发表",
-    reply: "最后回复",
-  };
 
   const handleDeleteDiscussion = useCallback(
     (deletedSlug: string) => {
@@ -162,46 +152,15 @@ export function DiscussionsList({
               <div className="flex items-center space-x-4 lg:space-x-8"></div>
             )}
 
-            <div className="flex items-center space-x-3">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <div className="inline-flex items-center space-x-1 font-medium text-muted-foreground cursor-pointer">
-                    <span>{sortOptions[sortBy]}</span>
-                    <ChevronDown className="h-4 w-4" />
-                  </div>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {Object.entries(sortOptions).map(([key, label]) => (
-                    <DropdownMenuItem
-                      key={key}
-                      className={cn(
-                        sortBy === key && "bg-accent",
-                        "cursor-pointer"
-                      )}
-                      onClick={() => {
-                        setSortBy(key as SortBy);
-                        fetchDiscussions(activeTab, 1, key as SortBy);
-                      }}
-                    >
-                      {label}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <button
-                type="button"
-                className="inline-flex h-8 items-center justify-center font-medium text-muted-foreground"
-                onClick={() =>
-                  setDisplayMode((prev) => (prev === "grid" ? "list" : "grid"))
-                }
-              >
-                {displayMode === "grid" ? (
-                  <LayoutGrid className="h-5 w-5" />
-                ) : (
-                  <List className="h-5 w-5" />
-                )}
-              </button>
-            </div>
+            <DiscussionControls
+              displayMode={displayMode}
+              setDisplayMode={setDisplayMode}
+              sortBy={sortBy}
+              setSortBy={(sort) => {
+                setSortBy(sort);
+                fetchDiscussions(activeTab, 1, sort);
+              }}
+            />
           </div>
         </div>
       </div>

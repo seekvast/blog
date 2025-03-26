@@ -17,7 +17,7 @@ export function SearchMobile({ triggerClassName }: SearchMobileProps) {
     keyword,
     setKeyword,
     histories,
-    popularBoards,
+    hotBoards,
     handleSearch,
     handleClearHistories,
     handleSearchItemClick,
@@ -136,7 +136,7 @@ export function SearchMobile({ triggerClassName }: SearchMobileProps) {
           <div>
             <h3 className="text-base font-medium mb-3">热门看板</h3>
             <div className="grid grid-cols-3 gap-3">
-              {popularBoards.map((board, index) => (
+              {hotBoards?.map((board, index) => (
                 <div
                   key={index}
                   className="rounded-lg p-3 cursor-pointer hover:bg-muted/50 transition-colors"
@@ -150,9 +150,9 @@ export function SearchMobile({ triggerClassName }: SearchMobileProps) {
                     <div>
                       <h4 className="font-medium">{board.name}</h4>
                       <div className="flex items-center text-xs text-muted-foreground mt-1">
-                        <span>{board.members} 成员</span>
+                        <span>{0} 成员</span>
                         <span className="mx-1">·</span>
-                        <span>{board.category}</span>
+                        <span>{board.category.name}</span>
                       </div>
                     </div>
                   </div>

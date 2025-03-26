@@ -4,13 +4,20 @@ import * as React from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { DiscussionItem } from "@/components/home/discussion-item";
+import { DiscussionItem } from "@/components/discussion/discussion-item";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { ExploreTabs } from "@/components/search/explore-tabs";
+import type {
+  DisplayMode,
+  SortBy,
+} from "@/components/discussion/discussion-controls";
 
 export default function DiscussionsPage() {
   const searchParams = useSearchParams();
   const q = searchParams?.get("q") ?? "";
+  const [displayMode, setDisplayMode] = React.useState<DisplayMode>("list");
+  const [sortBy, setSortBy] = React.useState<SortBy>("hot");
+
   const {
     data,
     fetchNextPage,
@@ -18,14 +25,16 @@ export default function DiscussionsPage() {
     isFetchingNextPage,
     error,
     isLoading,
+    refetch,
   } = useInfiniteQuery({
-    queryKey: ["explore-discussions", q],
+    queryKey: ["explore-discussions", q, sortBy],
     queryFn: async ({ pageParam = 1 }) => {
       try {
         const response = await api.discussions.list({
           from: "search",
           keyword: q,
           page: pageParam,
+          sort: sortBy,
         });
         return response;
       } catch (error) {
@@ -40,6 +49,13 @@ export default function DiscussionsPage() {
     enabled: !!q,
     initialPageParam: 1,
   });
+
+  // 当排序方式改变时重新获取数据
+  React.useEffect(() => {
+    if (q) {
+      refetch();
+    }
+  }, [sortBy, q, refetch]);
 
   if (isLoading) {
     return (
@@ -59,7 +75,13 @@ export default function DiscussionsPage() {
 
   return (
     <div className="flex flex-col">
-      <ExploreTabs />
+      <ExploreTabs
+        displayMode={displayMode}
+        setDisplayMode={setDisplayMode}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        showControls={true}
+      />
 
       <InfiniteScroll
         onLoadMore={() => fetchNextPage()}
@@ -74,7 +96,7 @@ export default function DiscussionsPage() {
                 <DiscussionItem
                   key={discussion.slug + index}
                   discussion={discussion}
-                  displayMode={"list"}
+                  displayMode={displayMode}
                 />
               );
             })}

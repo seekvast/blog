@@ -140,7 +140,7 @@ export const DiscussionItem = React.forwardRef<
           </div>
 
           <div className="mt-3 flex items-center space-x-2 lg:space-x-4 text-sm text-center">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <div className="relative group">
                 <ThumbsUp
                   className={cn(
@@ -156,9 +156,11 @@ export const DiscussionItem = React.forwardRef<
                   {isVoted ? "取消点赞" : "点赞"}
                 </div>
               </div>
-              <span className="text-sm text-muted-foreground">
-                {discussion.votes_count}
-              </span>
+              {discussion.up_votes > 0 && (
+                <span className="text-sm text-muted-foreground">
+                  {discussion.up_votes}
+                </span>
+              )}
             </div>
             <Link
               href={`/d/${discussion.slug}#comment`}

@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
-import { DiscussionItem } from "@/components/home/discussion-item";
+import { DiscussionItem } from "@/components/discussion/discussion-item";
 import { BoardItem } from "@/components/board/board-item";
 import { UserItem } from "@/components/user/user-item";
 import { ExploreTabs } from "@/components/search/explore-tabs";
