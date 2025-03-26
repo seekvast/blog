@@ -24,10 +24,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { 
-  DiscussionControls, 
-  type DisplayMode, 
-  type SortBy 
+import {
+  DiscussionControls,
+  type DisplayMode,
+  type SortBy,
 } from "@/components/discussion/discussion-controls";
 
 export default function BoardPage() {
@@ -189,7 +189,7 @@ function BoardContent() {
   if (!board) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        板块不存在
+        看板不存在
       </div>
     );
   }

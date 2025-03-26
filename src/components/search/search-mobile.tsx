@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useSearch } from "./use-search";
+import Link from "next/link";
 
 interface SearchMobileProps {
   triggerClassName?: string;
@@ -42,10 +43,8 @@ export function SearchMobile({ triggerClassName }: SearchMobileProps) {
   };
 
   const onSearchItemClick = (search: string) => {
-    if (handleSearchItemClick(search)) {
-      setKeyword("");
-      setOpen(false);
-    }
+    setKeyword("");
+    setOpen(false);
   };
 
   return (
@@ -143,10 +142,12 @@ export function SearchMobile({ triggerClassName }: SearchMobileProps) {
                   onClick={() => onSearchItemClick(board.name)}
                 >
                   <div className="flex flex-col items-center gap-3">
-                    <Avatar className="h-16 w-16 flex-shrink-0">
-                      <AvatarImage src={board.avatar} alt={board.name} />
-                      <AvatarFallback>{board.name[0]}</AvatarFallback>
-                    </Avatar>
+                    <Link href={`/b/${board.slug}`}>
+                      <Avatar className="h-16 w-16 flex-shrink-0">
+                        <AvatarImage src={board.avatar} alt={board.name} />
+                        <AvatarFallback>{board.name[0]}</AvatarFallback>
+                      </Avatar>
+                    </Link>
                     <div>
                       <h4 className="font-medium">{board.name}</h4>
                       <div className="flex items-center text-xs text-muted-foreground mt-1">

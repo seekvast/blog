@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useSearch } from "./use-search";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface SearchPopoverProps {
   triggerClassName?: string;
@@ -54,9 +55,7 @@ export function SearchPopover({ triggerClassName }: SearchPopoverProps) {
   };
 
   const onSearchItemClick = (search: string) => {
-    if (handleSearchItemClick(search)) {
-      setOpen(false);
-    }
+    setOpen(false);
   };
 
   return (
@@ -138,10 +137,15 @@ export function SearchPopover({ triggerClassName }: SearchPopoverProps) {
                     onClick={() => onSearchItemClick(board.name)}
                   >
                     <div className="flex flex-col items-center gap-2">
-                      <Avatar className="h-16 w-16 flex-shrink-0">
-                        <AvatarImage src={board.avatar} alt={board.name} />
-                        <AvatarFallback>{board.name[0]}</AvatarFallback>
-                      </Avatar>
+                      <Link
+                        href={`/b/${board.slug}`}
+                        className="flex flex-col items-center gap-2"
+                      >
+                        <Avatar className="h-16 w-16 flex-shrink-0">
+                          <AvatarImage src={board.avatar} alt={board.name} />
+                          <AvatarFallback>{board.name[0]}</AvatarFallback>
+                        </Avatar>
+                      </Link>
                       <div className="text-center">
                         <h4 className="font-medium text-sm truncate">
                           {board.name}
