@@ -31,7 +31,7 @@ import { usePostEditorStore } from "@/store/post-editor";
 import { cn } from "@/lib/utils";
 import { useDraftStore } from "@/store/draft";
 import { Badge } from "@/components/ui/badge";
-import { SearchDropdown } from "@/components/search/search-dropdown";
+import { SearchPopover } from "@/components/search/search-popover";
 import { SearchMobile } from "@/components/search/search-mobile";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
@@ -86,7 +86,7 @@ export function Header({ className }: HeaderProps) {
         className
       )}
     >
-      <div className="mx-auto w-full max-w-7xl flex h-14 px-4">
+      <div className="mx-auto w-full max-w-7xl flex h-16 md:h-14 px-4">
         <div className="flex justify-between w-full items-center">
           {/* Logo */}
           <div className="flex justify-between gap-4">
@@ -101,7 +101,7 @@ export function Header({ className }: HeaderProps) {
 
           {/* Search */}
           <div className="relative flex-1 sm:max-w-[240px] mx-3">
-            <SearchDropdown triggerClassName="w-full hidden lg:flex" />
+            <SearchPopover triggerClassName="w-full hidden lg:flex" />
             <SearchMobile triggerClassName="w-full lg:hidden" />
           </div>
 
@@ -109,10 +109,10 @@ export function Header({ className }: HeaderProps) {
           <div className="ml-auto flex items-center gap-4">
             {user ? (
               <>
-                <div className="relative">
+                <div className="relative hidden md:flex">
                   <button
                     type="button"
-                    className="hover:bg-muted hidden lg:flex"
+                    className="hover:bg-muted hidden md:flex"
                     onClick={handleCreatePost}
                   >
                     <PenSquare className="h-5 w-5" />
@@ -124,7 +124,7 @@ export function Header({ className }: HeaderProps) {
                     />
                   )}
                 </div>
-                <button type="button" className="hover:bg-muted hidden lg:flex">
+                <button type="button" className="hover:bg-muted hidden md:flex">
                   <Bell className="h-5 w-5" />
                 </button>
                 <DropdownMenu>

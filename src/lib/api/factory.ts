@@ -31,7 +31,8 @@ export interface ApiOptions {
 export function createApi(options: ApiOptions = {}) {
   const { prefix = "", next } = options;
   return {
-    common: {
+      common: {
+        search: (data: any) => http.get<any>(`${prefix}/search`, data, { next }),
       categories: () =>
         http.get<Category[]>(`${prefix}/categories`, undefined, { next }),
       parse: (data: any) => http.post<any>(`${prefix}/parse`, data),

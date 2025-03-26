@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { JoinBoardDialog } from "@/components/board/join-board-dialog";
 import { BoardApprovalMode } from "@/constants/board-approval-mode";
+import { BoardItem } from "@/components/board/board-item";
 
 export default function BoardsPage() {
   const [boards, setBoards] = useState<Board[]>([]);
@@ -106,14 +107,22 @@ export default function BoardsPage() {
     }
   };
 
-  const handleJoinBoard = (board: Board) => {
-    if (board.approval_mode === BoardApprovalMode.APPROVAL) {
+  const handleJoinBoard = (boardId: number) => {
+    const board = boards.find((b) => b.id === boardId);
+    if (!board) return;
+    
+    if (board.approval_mode === BoardApprovalMode.NONE || board.approval_mode === BoardApprovalMode.AUTO) {
+      joinBoard(board.id);
+    } else {
       setSelectedBoard(board);
       setJoinBoardOpen(true);
-    } else {
-      joinBoard(board.id);
     }
   };
+
+  const handleLeaveBoard = (boardId: number) => {
+    // TODO: 实现退出看板逻辑
+  };
+
   return (
     <div className="flex flex-col">
       {/* 顶部导航 */}
@@ -213,58 +222,12 @@ export default function BoardsPage() {
             className="divide-y"
           >
             {boards.map((board) => (
-              <div
-                key={board.id}
-                className="flex items-center justify-between py-4"
-              >
-                <div className="flex items-center space-x-4">
-                  <Link href={`/b/${board.slug}`}>
-                    <Avatar className="h-14 w-14">
-                      <AvatarImage src={board.avatar} alt={board.name} />
-                      <AvatarFallback>{board.name[0]}</AvatarFallback>
-                    </Avatar>
-                  </Link>
-                  <div className="space-y-1">
-                    <div className="flex items-center space-x-2">
-                      <Link
-                        href={`/b/${board.slug}`}
-                        className="text-lg font-medium hover:text-primary"
-                      >
-                        {board.name}
-                      </Link>
-                      {board.is_nsfw === 1 && (
-                        <Badge variant="destructive" className="h-5">
-                          成人
-                        </Badge>
-                      )}
-                      {/* {board.visibility === 1 && (
-                        <Badge variant="secondary" className="h-5">
-                          私密
-                        </Badge>
-                      )} */}
-                    </div>
-                    <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                      {board.category && <span>{board.category.name}</span>}
-                    </div>
-                    <p className="text-sm text-muted-foreground line-clamp-1">
-                      {board.desc}
-                    </p>
-                  </div>
-                </div>
-                {board.is_joined ? (
-                  <Button variant="outline" size="sm">
-                    已加入
-                  </Button>
-                ) : (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => handleJoinBoard(board)}
-                  >
-                    加入
-                  </Button>
-                )}
-              </div>
+              <BoardItem 
+                key={board.id} 
+                board={board} 
+                onJoin={handleJoinBoard} 
+                onLeave={handleLeaveBoard} 
+              />
             ))}
           </InfiniteScroll>
         )}

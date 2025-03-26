@@ -101,7 +101,7 @@ export const DiscussionItem = React.forwardRef<
         <Link
           href={`/u/${discussion.user.username}?hash=${discussion.user.hashid}`}
         >
-          <Avatar className="h-10 w-10 lg:h-14 lg:w-14 flex-shrink-0">
+          <Avatar className="h-14 w-14 flex-shrink-0">
             <AvatarImage
               src={discussion.user.avatar_url}
               alt={discussion.user.username}
