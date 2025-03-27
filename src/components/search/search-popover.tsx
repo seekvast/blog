@@ -1,10 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Search, X, User } from "lucide-react";
+import { Search, X, UserRound } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { SearchSuggestions } from "@/components/search/search-suggestions";
 import { useSearch } from "./use-search";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -97,76 +99,15 @@ export function SearchPopover({ triggerClassName }: SearchPopoverProps) {
           )}
         >
           <div className="p-3 max-h-[60vh] overflow-y-auto">
-            {/* 最近搜索 */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium">最近搜索</h3>
-                {histories.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleClearHistories}
-                    className="text-xs text-muted-foreground hover:text-foreground"
-                  >
-                    清除
-                  </button>
-                )}
-              </div>
-              {histories.length > 0 ? (
-                <div className="flex flex-wrap gap-4">
-                  {histories.map((search, index) => (
-                    <Badge
-                      key={index}
-                      variant="secondary"
-                      className="cursor-pointer hover:bg-secondary/80 py-1.5"
-                      onClick={() => onSearchItemClick(search)}
-                    >
-                      {search}
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">暂无最近搜索</p>
-              )}
-            </div>
-
-            {/* 热门看板 */}
-            <div>
-              <h3 className="text-sm font-medium mb-3">热门看板</h3>
-              <div className="grid grid-cols-3 gap-3">
-                {hotBoards?.map((board, index) => (
-                  <div
-                    key={index}
-                    className="rounded-lg p-3 cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => setOpen(false)}
-                  >
-                    <div className="flex flex-col items-center gap-2">
-                      <Link
-                        href={`/b/${board.slug}`}
-                        className="flex flex-col items-center gap-2"
-                      >
-                        <Avatar className="h-16 w-16 flex-shrink-0">
-                          <AvatarImage src={board.avatar} alt={board.name} />
-                          <AvatarFallback>{board.name[0]}</AvatarFallback>
-                        </Avatar>
-                      </Link>
-                      <div className="text-center">
-                        <h4 className="font-medium text-sm truncate">
-                          {board.name}
-                        </h4>
-                        <div className="flex items-center justify-center text-xs text-muted-foreground mt-1">
-                          <div className="flex items-center">
-                            <User className="h-4 w-4" />
-                            <span>{0}成员</span>
-                          </div>
-                          <span className="mx-1">·</span>
-                          <span>{board.category.name}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* 最近搜索和热门看板 */}
+            <SearchSuggestions
+              histories={histories}
+              hotBoards={hotBoards}
+              onSearchItemClick={onSearchItemClick}
+              onClearHistories={handleClearHistories}
+              onBoardClick={(board) => setOpen(false)}
+              variant="popover"
+            />
           </div>
         </div>
       </div>

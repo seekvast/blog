@@ -1,11 +1,17 @@
 "use client";
 
 import * as React from "react";
-import { Search, X, ChevronLeft } from "lucide-react";
+import { Search, X, ChevronLeft, UserRound } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { SearchSuggestions } from "@/components/search/search-suggestions";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { useSearch } from "./use-search";
 import Link from "next/link";
 
@@ -103,67 +109,14 @@ export function SearchMobile({ triggerClassName }: SearchMobileProps) {
         </div>
 
         <div className="p-4 overflow-y-auto h-[calc(100%-56px)]">
-          {/* 最近搜索 */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-base font-medium">最近搜索</h3>
-              {histories.length > 0 && (
-                <button
-                  onClick={handleClearHistories}
-                  className="text-sm text-muted-foreground hover:text-foreground"
-                >
-                  清除
-                </button>
-              )}
-            </div>
-            {histories.length > 0 ? (
-              <div className="grid grid-cols-3 gap-3">
-                {histories.map((search, index) => (
-                  <Badge
-                    key={index}
-                    variant="secondary"
-                    className="cursor-pointer hover:bg-secondary/80 py-2 flex justify-center"
-                    onClick={() => onSearchItemClick(search)}
-                  >
-                    {search}
-                  </Badge>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">暂无最近搜索</p>
-            )}
-          </div>
-
-          {/* 热门看板 */}
-          <div>
-            <h3 className="text-base font-medium mb-3">热门看板</h3>
-            <div className="grid grid-cols-3 gap-3">
-              {hotBoards?.map((board, index) => (
-                <div
-                  key={index}
-                  className="rounded-lg p-3 cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => onSearchItemClick(board.name)}
-                >
-                  <div className="flex flex-col items-center gap-3">
-                    <Link href={`/b/${board.slug}`}>
-                      <Avatar className="h-16 w-16 flex-shrink-0">
-                        <AvatarImage src={board.avatar} alt={board.name} />
-                        <AvatarFallback>{board.name[0]}</AvatarFallback>
-                      </Avatar>
-                    </Link>
-                    <div>
-                      <h4 className="font-medium">{board.name}</h4>
-                      <div className="flex items-center text-xs text-muted-foreground mt-1">
-                        <span>{0} 成员</span>
-                        <span className="mx-1">·</span>
-                        <span>{board.category.name}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* 使用封装的搜索建议组件 */}
+          <SearchSuggestions
+            histories={histories}
+            hotBoards={hotBoards}
+            onSearchItemClick={onSearchItemClick}
+            onClearHistories={handleClearHistories}
+            variant="mobile"
+          />
         </div>
       </SheetContent>
     </Sheet>
