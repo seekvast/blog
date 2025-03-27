@@ -18,8 +18,9 @@ import type {
   Report,
   PollVoter,
   BoardHistory,
+  Notification,
+  Draft,
 } from "@/types";
-import { Draft } from "@/types/draft";
 
 export interface ApiOptions {
   prefix?: string;
@@ -207,6 +208,17 @@ export function createApi(options: ApiOptions = {}) {
         http.get<Pagination<Report>>(`${prefix}/reports`, params, { next }),
       get: (params: any) =>
         http.get<Report>(`${prefix}/report`, params, { next }),
+    },
+    notifications: {
+      getUnread: (data: any) =>
+        http.get<Pagination<Notification>>(
+          `${prefix}/notification/unread`,
+          data,
+          { next }
+        ),
+      read: (data: any) => http.get<any>(`${prefix}/notification/read`, data),
+      readAll: () => http.get<any>(`${prefix}/notification/read-all`),
+      clear: () => http.get<any>(`${prefix}/notification/clear`),
     },
   };
 }

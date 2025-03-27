@@ -34,6 +34,7 @@ import { Badge } from "@/components/ui/badge";
 import { SearchPopover } from "@/components/search/search-popover";
 import { SearchMobile } from "@/components/search/search-mobile";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { NotificationPopover } from "@/components/notification/notification-popover";
 
 interface HeaderProps {
   className?: string;
@@ -75,6 +76,7 @@ export function Header({ className }: HeaderProps) {
   };
 
   const handleCreatePost = React.useCallback(() => {
+    if (!hasDraft) return;
     setIsVisible(true);
     setOpenFrom("draft");
   }, [setIsVisible, setOpenFrom]);
@@ -124,9 +126,9 @@ export function Header({ className }: HeaderProps) {
                     />
                   )}
                 </div>
-                <button type="button" className="hover:bg-muted hidden md:flex">
-                  <Bell className="h-5 w-5" />
-                </button>
+                <div className="hidden lg:flex">
+                  <NotificationPopover autoLoad={true} />
+                </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Avatar className="h-8 w-8 cursor-pointer ring-offset-background transition-opacity hover:opacity-80">

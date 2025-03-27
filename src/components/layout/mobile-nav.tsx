@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Home, Heart, LayoutGrid, Bookmark, Bell } from "lucide-react";
+import { Home, Heart, LayoutGrid, Bookmark } from "lucide-react";
+import { NotificationIcon } from "@/components/notification/notification-icon";
 
 const navItems = [
   {
@@ -30,7 +31,7 @@ const navItems = [
   {
     label: "消息",
     href: "/notifications",
-    icon: Bell,
+    icon: NotificationIcon,
   },
 ];
 
@@ -64,7 +65,11 @@ export function MobileNav() {
               : "text-muted-foreground"
           )}
         >
-          <item.icon className="h-5 w-5 mb-0.5" />
+          {item.icon === NotificationIcon ? (
+            <item.icon className="h-5 w-5 mb-0.5" />
+          ) : (
+            <item.icon className="h-5 w-5 mb-0.5" />
+          )}
           <span>{item.label}</span>
         </Link>
       ))}

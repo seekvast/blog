@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Board } from "@/types";
-import { User } from "lucide-react";
+import { UserRound } from "lucide-react";
 
 interface BoardItemProps {
   board: Board;
@@ -46,7 +46,7 @@ export function BoardItem({ board, onJoin, onLeave }: BoardItemProps) {
             )}
 
             <div className="flex items-center">
-              <User className="h-4" />
+              <UserRound className="h-4" />
               <span>{board.users_count || 0}</span>
             </div>
             <span>•</span>

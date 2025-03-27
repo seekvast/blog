@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, ArrowLeft, X, RotateCw, Menu } from "lucide-react";
+import { Search, X, RotateCw, ChevronLeft } from "lucide-react";
 import { Sheet, SheetTrigger } from "@/components/ui/sheet";
 
 interface MobileHeaderProps {
@@ -106,7 +106,7 @@ export function MobileHeader({
             className="h-8 w-8"
             onClick={() => router.back()}
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4" />
           </Button>
           <Input
             type="search"
@@ -138,7 +138,7 @@ export function MobileHeader({
           className="h-8 w-8"
           onClick={() => router.back()}
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ChevronLeft className="h-4 w-4" />
         </Button>
         <span className="flex-1 text-center text-sm font-medium">{title}</span>
         {onRefresh && (
@@ -166,7 +166,7 @@ export function MobileHeader({
         className="h-8 w-8"
         onClick={() => router.back()}
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ChevronLeft className="h-4 w-4" />
       </Button>
       <span className="flex-1 text-center text-sm font-medium">{title}</span>
       {onClose && (

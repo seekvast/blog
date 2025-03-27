@@ -146,7 +146,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
         </nav>
 
         {/* 创建看板按钮 */}
-        <div className="px-3 py-2">
+        <div className="py-2">
           <Button className="w-full text-lg" onClick={handlePublishClick}>
             {pathname === "/b"
               ? t("common.createBoard", { defaultValue: "创建看板" })

@@ -3,6 +3,8 @@ export * from "./common";
 export * from "./board";
 export * from "./user";
 export * from "./report";
+export * from "./notification";
+export * from "./draft";
 
 export interface CreateDiscussionDto {
   title: string;
