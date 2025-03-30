@@ -215,6 +215,12 @@ export function createApi(options: ApiOptions = {}) {
           `${prefix}/notification/unread`,
           data,
           { next }
+            ),
+      list: (params?: QueryParams) =>
+        http.get<Pagination<Notification>>(
+          `${prefix}/notifications`,
+          params,
+          { next }
         ),
       read: (data: any) => http.get<any>(`${prefix}/notification/read`, data),
       readAll: () => http.get<any>(`${prefix}/notification/read-all`),

@@ -4,6 +4,8 @@ import * as React from "react";
 import { Bell, Trash2, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+
 import {
   Popover,
   PopoverContent,
@@ -40,18 +42,14 @@ export function NotificationPopover({
     total,
     loading,
     error,
-    hasMore,
+      hasMore,
+      unreadCount,
     fetchNotifications,
     loadMore,
     markAsRead,
     markAllNotificationsAsRead,
     clearAllNotifications,
   } = useNotifications(autoLoad);
-
-  const unreadCount = React.useMemo(
-    () => getUnreadCount(notifications),
-    [notifications]
-  );
 
   const handleNotificationClick = (notification: any) => {
     // 标记为已读
@@ -109,8 +107,8 @@ export function NotificationPopover({
         align="end"
       >
         <div className="flex flex-col">
-          <div className="flex items-center  justify-between p-2 border-b">
-            <div className="flex flex-grow">
+          <div className="flex items-center  justify-between py-2 px-4 border-b">
+            <div className="flex">
               <button
                 className={cn(
                   "flex-1 py-2 text-sm font-medium",
@@ -125,7 +123,7 @@ export function NotificationPopover({
 
               <button
                 className={cn(
-                  "flex-1 py-2 text-sm font-medium",
+                  "flex-1 py-2 pl-4 text-sm font-medium",
                   activeType === "mentions"
                     ? "text-primary"
                     : "text-muted-foreground"
@@ -139,7 +137,7 @@ export function NotificationPopover({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6"
+                className="h-6 w-6 text-muted-foreground"
                 title="清除所有通知"
                 onClick={handleClearAll}
               >
@@ -148,7 +146,7 @@ export function NotificationPopover({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6"
+                className="h-6 w-6 text-muted-foreground"
                 title="全部标为已读"
                 onClick={handleMarkAllAsRead}
               >
@@ -166,16 +164,6 @@ export function NotificationPopover({
           hasMore={hasMore}
           onLoadMore={loadMore}
         />
-
-        {/* <div className="p-3 border-t text-center">
-          <Link
-            href="/notifications"
-            className="text-xs text-muted-foreground hover:text-primary"
-            onClick={() => setOpen(false)}
-          >
-            查看全部
-          </Link>
-        </div> */}
       </PopoverContent>
     </Popover>
   );

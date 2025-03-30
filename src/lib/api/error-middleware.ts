@@ -127,6 +127,21 @@ export async function handleApiError(error: unknown): Promise<void> {
     // 处理业务错误码
     if (apiError.code) {
       switch (apiError.code) {
+        case 4000:
+          // 清理登录状态
+          await signOut({ redirect: false });
+          // 打开登录窗口
+          const { useAuthModal } = await import(
+            "@/components/auth/auth-modal-store"
+          );
+          const store = useAuthModal.getState();
+          store.openLogin();
+          toast({
+            title: "请登录",
+            description: "请登录后继续",
+            variant: "destructive",
+          });
+          break;
         case 1001:
           toast({
             title: "登录失败",

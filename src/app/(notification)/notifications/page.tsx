@@ -53,39 +53,35 @@ export default function NotificationsPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <MobileHeader variant="detail" title="通知" />
       <main className="flex-1">
-        <div className="flex border-b h-12">
-          <button
-            className={cn(
-              "flex-1 py-2 text-sm font-medium",
-              activeType === "all"
-                ? "text-primary border-b-2 border-b-primary"
-                : "text-muted-foreground"
-            )}
-            onClick={() => handleTypeChange("all")}
-          >
-            全部
-          </button>
-          <button
-            className={cn(
-              "flex-1 py-2 text-sm font-medium",
-              activeType === "mentions"
-                ? "text-primary border-b-2 border-b-primary"
-                : "text-muted-foreground"
-            )}
-            onClick={() => handleTypeChange("mentions")}
-          >
-            提及
-          </button>
-        </div>
-
-        {/* <div className="flex justify-end p-2 border-b">
+        <div className="flex justify-between items-center px-4 py-1 border-b">
+          <div className="flex">
+            <button
+              className={cn(
+                "flex-1 py-2 text-sm font-medium",
+                activeType === "all" ? "text-primary" : "text-muted-foreground"
+              )}
+              onClick={() => handleTypeChange("all")}
+            >
+              全部
+            </button>
+            <button
+              className={cn(
+                "flex-1 pl-4 py-2 text-sm font-medium",
+                activeType === "mentions"
+                  ? "text-primary"
+                  : "text-muted-foreground"
+              )}
+              onClick={() => handleTypeChange("mentions")}
+            >
+              提及
+            </button>
+          </div>
           <div className="flex gap-2">
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6"
+              className="h-6 w-6 text-muted-foreground"
               title="清除所有通知"
               onClick={handleClearAll}
             >
@@ -94,14 +90,14 @@ export default function NotificationsPage() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6"
+              className="h-6 w-6 text-muted-foreground"
               title="全部标为已读"
               onClick={handleMarkAllAsRead}
             >
               <CheckCheck className="h-4 w-4" />
             </Button>
           </div>
-        </div> */}
+        </div>
 
         <div className="px-2">
           <NotificationList

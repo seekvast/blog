@@ -60,6 +60,7 @@ export function markAllAsRead(notifications: Notification[]): Notification[] {
 // 获取通知列表的Hook
 export function useNotifications(autoLoad: boolean = true) {
   const [notifications, setNotifications] = React.useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [hasMore, setHasMore] = React.useState(true);
@@ -73,10 +74,9 @@ export function useNotifications(autoLoad: boolean = true) {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.notifications.getUnread({
+      const response = await api.notifications.list({
         page: pageNum,
         per_page: 20,
-        next: { revalidate: 60 },
       });
 
       if (pageNum === 1) {
@@ -88,6 +88,7 @@ export function useNotifications(autoLoad: boolean = true) {
       setHasMore(pageNum < response.last_page);
       setPage(pageNum);
       setTotal(response.total);
+      setUnreadCount(response.unread_count);
     } catch (err) {
       console.error("获取通知失败", err);
       setError("获取通知失败");
@@ -153,6 +154,7 @@ export function useNotifications(autoLoad: boolean = true) {
     error,
     hasMore,
     total,
+    unreadCount,
     fetchNotifications,
     loadMore,
     markAsRead,
@@ -170,6 +172,7 @@ interface NotificationListProps {
   hasMore?: boolean;
   onLoadMore?: () => void;
   total?: number;
+  unreadCount?: number;
 }
 
 export function NotificationList({
@@ -181,6 +184,7 @@ export function NotificationList({
   hasMore = false,
   onLoadMore = () => {},
   total = 0,
+  unreadCount = 0,
 }: NotificationListProps) {
   const handleItemClick = (notification: Notification) => {
     if (onItemClick) {
@@ -231,61 +235,80 @@ export function NotificationList({
         return "";
     }
   };
-  return (
-    <InfiniteScroll
-      loading={loading}
-      hasMore={hasMore}
-      onLoadMore={onLoadMore}
-      className={cn("flex flex-col divide-y", className)}
-    >
-      {filteredNotifications.map((notification) => {
-        const data = parseNotificationData(notification);
-        const title = notification.discussion
-          ? notification.discussion.title
-          : `通知 #${notification.id}`;
-        const message = buildMessage(notification);
 
-        return (
-          <div key={notification.id} className="relative">
+  return (
+    <div className="relative flex flex-col h-full">
+      <InfiniteScroll
+        loading={loading}
+        hasMore={hasMore}
+        onLoadMore={onLoadMore}
+        className={cn("flex flex-col divide-y divide-border", className)}
+      >
+        {filteredNotifications.map((notification) => {
+          const data = parseNotificationData(notification);
+          const title = notification.discussion
+            ? notification.discussion.title
+            : `通知 #${notification.id}`;
+          const message = buildMessage(notification);
+          const isUnread = !notification.read_at;
+
+          return (
             <Link
+              key={notification.id}
               href={`/d/${notification.subject_slug}`}
-              className="block"
+              className={cn(
+                "flex items-start gap-3 p-2 hover:bg-accent/50 transition-colors",
+                isUnread && "bg-accent/30"
+              )}
               onClick={() => handleItemClick(notification)}
             >
-              <div
-                className={cn(
-                  "flex items-start gap-3 p-4 hover:bg-muted/50 transition-colors",
-                  notification.read_at ? "opacity-70" : ""
-                )}
-              >
-                <Avatar className="h-14 w-14">
-                  <AvatarImage
-                    src={notification.from_user.avatar_url}
-                    alt={notification.from_user.username}
-                  />
-                  <AvatarFallback>
+              <Avatar className="h-10 w-10 shrink-0">
+                <AvatarImage
+                  src={notification.from_user.avatar_url}
+                  alt={notification.from_user.username}
+                />
+                <AvatarFallback>
+                  {notification.from_user.username.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-sm">
                     {notification.from_user.username}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 space-y-1 overflow-hidden">
-                  <div className="flex justify-between items-start">
-                    <h4 className="font-medium text-sm">{title}</h4>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-                      {formatDistanceToNow(new Date(notification.created_at), {
-                        addSuffix: true,
-                        locale: zhCN,
-                      })}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {message}
-                  </p>
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {formatDistanceToNow(new Date(notification.created_at), {
+                      addSuffix: true,
+                      locale: zhCN,
+                    })}
+                  </span>
                 </div>
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                  {message}
+                </p>
+                {notification.discussion && (
+                  <div className="mt-2 text-xs text-muted-foreground line-clamp-1">
+                    {title}
+                  </div>
+                )}
               </div>
+              {isUnread && (
+                <div className="h-2 w-2 rounded-full bg-primary shrink-0" />
+              )}
             </Link>
-          </div>
-        );
-      })}
-    </InfiniteScroll>
+          );
+        })}
+      </InfiniteScroll>
+      <div className="sticky bottom-0 left-0 right-0 bg-background">
+        <div className="p-3 text-center">
+          <Link
+            href="/notifications"
+            className="text-xs text-muted-foreground hover:text-primary"
+          >
+            查看全部
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 }
