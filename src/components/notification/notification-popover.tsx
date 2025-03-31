@@ -12,11 +12,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
-  NotificationList,
+  NotificationPreview,
   NotificationTabType,
   useNotifications,
-  getUnreadCount,
-} from "./notification-list";
+} from "./notification-preview";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useRouter } from "next/navigation";
@@ -42,8 +41,8 @@ export function NotificationPopover({
     total,
     loading,
     error,
-      hasMore,
-      unreadCount,
+    hasMore,
+    unreadCount,
     fetchNotifications,
     loadMore,
     markAsRead,
@@ -58,10 +57,10 @@ export function NotificationPopover({
   };
 
   const handleTriggerClick = (e: React.MouseEvent) => {
-    if (isMobile) {
-      e.preventDefault();
-      router.push("/notifications");
-    }
+    // if (isMobile) {
+    //   e.preventDefault();
+    //   router.push("/notifications");
+    // }
   };
 
   const handleMarkAllAsRead = () => {
@@ -103,7 +102,7 @@ export function NotificationPopover({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-80 p-0 max-h-[70vh] overflow-y-auto"
+        className="w-screen lg:w-80 p-0 max-h-[70vh] overflow-y-auto"
         align="end"
       >
         <div className="flex flex-col">
@@ -156,7 +155,7 @@ export function NotificationPopover({
           </div>
         </div>
 
-        <NotificationList
+        <NotificationPreview
           notifications={notifications}
           tabType={activeType}
           onItemClick={handleNotificationClick}

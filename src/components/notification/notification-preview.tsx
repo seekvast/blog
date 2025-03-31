@@ -44,11 +44,6 @@ export function filterNotifications(
   return notifications;
 }
 
-// 获取未读通知数量
-export function getUnreadCount(notifications: Notification[]): number {
-  return notifications.filter((notification) => !notification.read_at).length;
-}
-
 // 标记所有通知为已读
 export function markAllAsRead(notifications: Notification[]): Notification[] {
   return notifications.map((item) => ({
@@ -175,7 +170,7 @@ interface NotificationListProps {
   unreadCount?: number;
 }
 
-export function NotificationList({
+export function NotificationPreview({
   notifications,
   className,
   onItemClick,
@@ -206,6 +201,16 @@ export function NotificationList({
     return (
       <div className={cn("flex flex-col space-y-2 p-4", className)}>
         <div className="text-center py-8 text-muted-foreground">暂无通知</div>
+        <div className="sticky bottom-0 left-0 right-0 bg-background">
+          <div className="p-3 text-center">
+            <Link
+              href="/notifications"
+              className="text-xs text-muted-foreground hover:text-primary"
+            >
+              查看全部
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }

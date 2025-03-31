@@ -13,7 +13,7 @@ export default function UserLayout({
     <div className="min-h-screen bg-background">
       <RouteProgress />
       <Header />
-      {children}
+      <main className="mx-auto max-w-7xl overflow-hidden">{children}</main>
       <MobileNav />
     </div>
   );

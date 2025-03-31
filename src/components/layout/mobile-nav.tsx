@@ -5,9 +5,17 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Home, Heart, LayoutGrid, Bookmark } from "lucide-react";
-import { NotificationIcon } from "@/components/notification/notification-icon";
+import { NotificationPopover } from "@/components/notification/notification-popover";
+import { LucideIcon } from "lucide-react";
 
-const navItems = [
+type NavItem = {
+  label: string;
+  href?: string;
+  icon?: LucideIcon;
+  isPopover?: boolean;
+};
+
+const navItems: NavItem[] = [
   {
     label: "首页",
     href: "/",
@@ -30,8 +38,7 @@ const navItems = [
   },
   {
     label: "消息",
-    href: "/notifications",
-    icon: NotificationIcon,
+    isPopover: true,
   },
 ];
 
@@ -47,32 +54,40 @@ export function MobileNav() {
         "border-t safe-area-bottom"
       )}
     >
-      {navItems.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          className={cn(
-            "flex flex-col items-center justify-center",
-            "w-16 h-full py-1",
-            "text-xs font-medium transition-colors",
-            "hover:text-primary",
-            pathname === item.href
-              ? [
-                  "text-primary",
-                  "after:absolute after:bottom-[2px] after:w-1 after:h-1",
-                  "after:rounded-full after:bg-primary",
-                ]
-              : "text-muted-foreground"
-          )}
-        >
-          {item.icon === NotificationIcon ? (
-            <item.icon className="h-5 w-5 mb-0.5" />
-          ) : (
-            <item.icon className="h-5 w-5 mb-0.5" />
-          )}
-          <span>{item.label}</span>
-        </Link>
-      ))}
+      {navItems.map((item) =>
+        item.isPopover ? (
+          <div
+            key="notifications"
+            className="flex flex-col items-center justify-center w-16 h-full py-1"
+          >
+            <NotificationPopover />
+            <span className="text-xs font-medium text-muted-foreground">
+              消息
+            </span>
+          </div>
+        ) : (
+          <Link
+            key={item.href}
+            href={item.href || "/"}
+            className={cn(
+              "flex flex-col items-center justify-center",
+              "w-16 h-full py-1",
+              "text-xs font-medium transition-colors",
+              "hover:text-primary",
+              pathname === item.href
+                ? [
+                    "text-primary",
+                    "after:absolute after:bottom-[2px] after:w-1 after:h-1",
+                    "after:rounded-full after:bg-primary",
+                  ]
+                : "text-muted-foreground"
+            )}
+          >
+            {item.icon && <item.icon className="h-5 w-5 mb-0.5" />}
+            <span>{item.label}</span>
+          </Link>
+        )
+      )}
     </nav>
   );
 }

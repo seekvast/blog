@@ -1,15 +1,20 @@
 "use client";
 
 import * as React from "react";
-import { MobileHeader } from "@/components/layout/mobile-header";
 import {
-  NotificationList,
+  NotificationPreview,
   NotificationTabType,
   useNotifications,
-} from "@/components/notification/notification-list";
+} from "@/components/notification/notification-preview";
 import { Trash2, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { NotificationItem } from "@/components/notification/notification-item";
+import { Notification } from "@/types";
+import {
+  NotificationDesktopNav,
+  NotificationMobileNav,
+} from "@/components/notification/notification-nav";
 
 export default function NotificationsPage() {
   const [activeType, setActiveType] =
@@ -18,7 +23,6 @@ export default function NotificationsPage() {
   const {
     notifications,
     loading,
-    error,
     hasMore,
     fetchNotifications,
     loadMore,
@@ -27,7 +31,7 @@ export default function NotificationsPage() {
     clearAllNotifications,
   } = useNotifications();
 
-  const handleNotificationClick = (notification: any) => {
+  const handleNotificationClick = (notification: Notification) => {
     // 标记为已读
     markAsRead(notification.id);
   };
@@ -52,64 +56,43 @@ export default function NotificationsPage() {
   }, [fetchNotifications]);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <main className="flex-1">
-        <div className="flex justify-between items-center px-4 py-1 border-b">
-          <div className="flex">
-            <button
-              className={cn(
-                "flex-1 py-2 text-sm font-medium",
-                activeType === "all" ? "text-primary" : "text-muted-foreground"
-              )}
-              onClick={() => handleTypeChange("all")}
-            >
-              全部
-            </button>
-            <button
-              className={cn(
-                "flex-1 pl-4 py-2 text-sm font-medium",
-                activeType === "mentions"
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              )}
-              onClick={() => handleTypeChange("mentions")}
-            >
-              提及
-            </button>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 text-muted-foreground"
-              title="清除所有通知"
-              onClick={handleClearAll}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 text-muted-foreground"
-              title="全部标为已读"
-              onClick={handleMarkAllAsRead}
-            >
-              <CheckCheck className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+    <div className="lg:py-4">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
+        {/* PC端导航 */}
+        <NotificationDesktopNav
+          activeType={activeType}
+          onTypeChange={handleTypeChange}
+        />
+        {/* 移动端导航 */}
+        <NotificationMobileNav
+          activeType={activeType}
+          onTypeChange={handleTypeChange}
+        />
 
-        <div className="px-2">
-          <NotificationList
-            notifications={notifications}
-            tabType={activeType}
-            onItemClick={handleNotificationClick}
-            loading={loading}
-            hasMore={hasMore}
-            onLoadMore={loadMore}
-          />
+        {/* 右侧内容区 */}
+        <div className="flex-1 min-w-0 px-2 lg:px-4 overflow-hidden">
+          {/* 通知列表 */}
+          {loading && notifications.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center h-40">
+              <p className="text-muted-foreground">加载中...</p>
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center h-40">
+              <p className="text-muted-foreground">暂无通知</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-border">
+              {notifications.map((notification) => (
+                <NotificationItem
+                  key={notification.id}
+                  notification={notification}
+                  onClick={handleNotificationClick}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }

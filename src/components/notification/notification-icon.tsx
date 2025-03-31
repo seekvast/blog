@@ -4,7 +4,7 @@ import * as React from "react";
 import { Bell } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useNotifications } from "./notification-list";
+import { useNotifications } from "./notification-preview";
 
 interface NotificationIconProps {
   className?: string;
