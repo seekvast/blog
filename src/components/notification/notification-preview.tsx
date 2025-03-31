@@ -192,32 +192,6 @@ export function NotificationPreview({
 
   const filteredNotifications = filterNotifications(notifications, tabType);
 
-  // 解析通知数据
-  const parseNotificationData = (notification: Notification) => {
-    try {
-      return typeof notification.data === "string"
-        ? JSON.parse(notification.data)
-        : notification.data;
-    } catch (e) {
-      return { title: "通知", message: notification.data || "" };
-    }
-  };
-
-  const buildMessage = (notification: Notification) => {
-    switch (notification.type) {
-      case "upVoted":
-        return notification.from_user.username + " 對你的文章按了推";
-      case "downVoted":
-        return notification.from_user.username + " 對你的文章按了嘘";
-      case "newPost":
-        return notification.from_user.username + " 回覆了你發表的文章";
-      case "replied":
-        return notification.from_user.username + " 回覆了你的評論";
-      default:
-        return "";
-    }
-  };
-
   return (
     <div className="relative flex flex-col h-full">
       {/* 使用一个固定高度的容器，避免加载状态切换时的布局跳动 */}

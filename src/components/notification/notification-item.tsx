@@ -62,23 +62,34 @@ export function NotificationItem({
   };
 
   return (
-    <Link
-      href={`/d/${notification.subject_slug}`}
+    <div
       className={cn("flex items-start gap-2 py-4 px-2")}
       onClick={handleClick}
     >
-      <Avatar className="h-10 w-10 shrink-0">
-        <AvatarImage
-          src={notification.from_user.avatar_url}
-          alt={notification.from_user.username}
-        />
-        <AvatarFallback>
-          {notification.from_user.username.slice(0, 2).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
+      <Link
+        href={`/u/${notification.from_user.username}?hash=${notification.from_user.hashid}`}
+      >
+        <Avatar className="h-10 w-10 shrink-0">
+          <AvatarImage
+            src={notification.from_user.avatar_url}
+            alt={notification.from_user.username}
+          />
+          <AvatarFallback>
+            {notification.from_user.username.slice(0, 2).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+      </Link>
+
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="font-medium">{notification.from_user.username}</span>
+        <div className="flex justify-between items-center gap-2">
+          {notification.discussion && (
+            <Link
+              href={`/d/${notification.subject_slug}`}
+              className="font-medium"
+            >
+              {title}
+            </Link>
+          )}
           <span className="text-xs text-muted-foreground">
             {formatDistanceToNow(new Date(notification.created_at), {
               addSuffix: true,
@@ -86,16 +97,12 @@ export function NotificationItem({
             })}
           </span>
         </div>
-        <p className="text-sm text-foreground mt-1">{message}</p>
-        {notification.discussion && (
-          <div className="mt-2 text-xs text-muted-foreground line-clamp-1">
-            {title}
-          </div>
-        )}
+
+        <p className="text-sm text-muted-foreground mt-1">{message}</p>
       </div>
       {isUnread && (
         <div className="h-2 w-2 rounded-full bg-primary shrink-0 mt-2" />
       )}
-    </Link>
+    </div>
   );
 }
