@@ -45,7 +45,10 @@ export function buildMessage(notification: Notification) {
   }
 }
 
-export function NotificationItem({ notification, onClick }: NotificationItemProps) {
+export const NotificationItem = React.forwardRef<
+  HTMLAnchorElement,
+  NotificationItemProps
+>(({ notification, onClick }, ref) => {
   const isUnread = !notification.read_at;
   const message = buildMessage(notification);
   const title = notification.discussion
@@ -60,6 +63,7 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
 
   return (
     <Link
+      ref={ref}
       href={`/d/${notification.subject_slug}`}
       className={cn("flex items-start gap-4 p-4")}
       onClick={handleClick}
@@ -102,4 +106,4 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
       )}
     </Link>
   );
-}
+});

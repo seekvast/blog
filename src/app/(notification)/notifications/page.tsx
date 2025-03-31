@@ -15,6 +15,7 @@ import {
   NotificationDesktopNav,
   NotificationMobileNav,
 } from "@/components/notification/notification-nav";
+import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 
 export default function NotificationsPage() {
   const [activeType, setActiveType] =
@@ -81,7 +82,12 @@ export default function NotificationsPage() {
               <p className="text-muted-foreground">暂无通知</p>
             </div>
           ) : (
-            <div className="divide-y divide-border">
+            <InfiniteScroll
+              loading={loading}
+              hasMore={hasMore}
+              onLoadMore={loadMore}
+              className="divide-y divide-border"
+            >
               {notifications.map((notification) => (
                 <NotificationItem
                   key={notification.id}
@@ -89,7 +95,7 @@ export default function NotificationsPage() {
                   onClick={handleNotificationClick}
                 />
               ))}
-            </div>
+            </InfiniteScroll>
           )}
         </div>
       </div>

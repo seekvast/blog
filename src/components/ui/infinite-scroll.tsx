@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useEffect, useRef, useCallback } from "react"
-import { Loader2 } from "lucide-react"
+import * as React from "react";
+import { useEffect, useRef, useCallback } from "react";
+import { Loader2 } from "lucide-react";
 
 interface InfiniteScrollProps {
-  children: React.ReactNode
-  loading: boolean
-  hasMore: boolean
-  onLoadMore: () => void
-  className?: string
-  loadingComponent?: React.ReactNode
-  endMessage?: React.ReactNode
-  rootMargin?: string
+  children: React.ReactNode;
+  loading: boolean;
+  hasMore: boolean;
+  onLoadMore: () => void;
+  className?: string;
+  loadingComponent?: React.ReactNode;
+  endMessage?: React.ReactNode;
+  rootMargin?: string;
 }
 
 export function InfiniteScroll({
@@ -33,47 +33,44 @@ export function InfiniteScroll({
   ),
   rootMargin = "100px",
 }: InfiniteScrollProps) {
-  const loadingRef = useRef(false)
-  const observerRef = useRef<IntersectionObserver | null>(null)
+  const loadingRef = useRef(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
   const lastItemRef = useCallback(
     (node: HTMLDivElement) => {
-      if (loading) return
-      if (observerRef.current) observerRef.current.disconnect()
+      if (loading) return;
+      if (observerRef.current) observerRef.current.disconnect();
 
       observerRef.current = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting && hasMore && !loadingRef.current) {
-            loadingRef.current = true
-            onLoadMore()
+            loadingRef.current = true;
+            onLoadMore();
           }
         },
         {
           rootMargin,
         }
-      )
+      );
 
-      if (node) observerRef.current.observe(node)
+      if (node) observerRef.current.observe(node);
     },
     [loading, hasMore, onLoadMore, rootMargin]
-  )
+  );
 
   useEffect(() => {
-    loadingRef.current = loading
-  }, [loading])
+    loadingRef.current = loading;
+  }, [loading]);
 
   return (
     <div className={className}>
-      {React.Children.map(children, (child, index) => {
-        if (React.isValidElement(child) && index === React.Children.count(children) - 1) {
-          return React.cloneElement(child as React.ReactElement, {
-            ref: lastItemRef,
-          })
-        }
-        return child
-      })}
-      
+      {children}
+      {/* 添加一个专门的观察元素，而不是依赖于克隆最后一个子元素 */}
+      {hasMore && (
+        <div ref={lastItemRef} style={{ height: "1px", margin: 0 }} />
+      )}
+
       {loading && loadingComponent}
       {!loading && !hasMore && endMessage}
     </div>
-  )
+  );
 }

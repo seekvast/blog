@@ -80,7 +80,9 @@ export function useNotifications(autoLoad: boolean = true) {
         setNotifications((prev) => [...prev, ...(response.items ?? [])]);
       }
 
+      // 只根据后端返回的last_page判断是否有更多数据
       setHasMore(pageNum < response.last_page);
+      
       setPage(pageNum);
       setTotal(response.total);
       setUnreadCount(response.unread_count);
