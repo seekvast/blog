@@ -84,6 +84,9 @@
     --ring: 217 100% 50%;
 
     --radius: 0.5rem;
+    
+    /* 移动导航栏高度 */
+    --mobile-nav-height: 3.5rem;
   }
 
   a,
@@ -179,5 +182,12 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* 为移动导航栏提供底部空间 */
+@media (max-width: 1023px) {
+  main {
+    padding-bottom: var(--mobile-nav-height);
   }
 }

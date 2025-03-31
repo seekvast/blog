@@ -9,6 +9,7 @@ import { zhCN } from "date-fns/locale";
 import { api } from "@/lib/api";
 import { Notification } from "@/types";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
+import { NotificationItem } from "@/components/notification/notification-item";
 
 export type NotificationType =
   | "discussionRenamed"
@@ -191,32 +192,6 @@ export function NotificationPreview({
 
   const filteredNotifications = filterNotifications(notifications, tabType);
 
-  if (loading) {
-    return (
-      <div className={cn("flex flex-col space-y-2 p-4", className)}>
-        <div className="text-center py-8 text-muted-foreground">加载中...</div>
-      </div>
-    );
-  }
-
-  if (filteredNotifications.length === 0) {
-    return (
-      <div className={cn("flex flex-col space-y-2 p-4", className)}>
-        <div className="text-center py-8 text-muted-foreground">暂无通知</div>
-        <div className="sticky bottom-0 left-0 right-0 bg-background">
-          <div className="p-3 text-center">
-            <Link
-              href="/notifications"
-              className="text-xs text-muted-foreground hover:text-primary"
-            >
-              查看全部
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // 解析通知数据
   const parseNotificationData = (notification: Notification) => {
     try {
@@ -245,67 +220,34 @@ export function NotificationPreview({
 
   return (
     <div className="relative flex flex-col h-full">
-      <InfiniteScroll
-        loading={loading}
-        hasMore={hasMore}
-        onLoadMore={onLoadMore}
-        className={cn("flex flex-col divide-y divide-border", className)}
-      >
-        {filteredNotifications.map((notification) => {
-          const data = parseNotificationData(notification);
-          const title = notification.discussion
-            ? notification.discussion.title
-            : `通知 #${notification.id}`;
-          const message = buildMessage(notification);
-          const isUnread = !notification.read_at;
-
-          return (
-            <Link
-              key={notification.id}
-              href={`/d/${notification.subject_slug}`}
-              className={cn(
-                "flex items-start gap-3 p-2 hover:bg-accent/50 transition-colors",
-                isUnread && "bg-accent/30"
-              )}
-              onClick={() => handleItemClick(notification)}
-            >
-              <Avatar className="h-10 w-10 shrink-0">
-                <AvatarImage
-                  src={notification.from_user.avatar_url}
-                  alt={notification.from_user.username}
-                />
-                <AvatarFallback>
-                  {notification.from_user.username.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm">
-                    {notification.from_user.username}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(notification.created_at), {
-                      addSuffix: true,
-                      locale: zhCN,
-                    })}
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                  {message}
-                </p>
-                {notification.discussion && (
-                  <div className="mt-2 text-xs text-muted-foreground line-clamp-1">
-                    {title}
-                  </div>
-                )}
-              </div>
-              {isUnread && (
-                <div className="h-2 w-2 rounded-full bg-primary shrink-0" />
-              )}
-            </Link>
-          );
-        })}
-      </InfiniteScroll>
+      {/* 使用一个固定高度的容器，避免加载状态切换时的布局跳动 */}
+      <div className={cn("flex flex-col min-h-[200px]", className)}>
+        {loading && filteredNotifications.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center text-muted-foreground">加载中...</div>
+          </div>
+        ) : filteredNotifications.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center text-muted-foreground">暂无通知</div>
+          </div>
+        ) : (
+          <InfiniteScroll
+            loading={loading}
+            hasMore={hasMore}
+            onLoadMore={onLoadMore}
+            className={cn("flex flex-col divide-y divide-border")}
+          >
+            {filteredNotifications.map((notification) => (
+              <NotificationItem
+                key={notification.id}
+                notification={notification}
+                onClick={handleItemClick}
+              />
+            ))}
+          </InfiniteScroll>
+        )}
+      </div>
+      
       <div className="sticky bottom-0 left-0 right-0 bg-background">
         <div className="p-3 text-center">
           <Link

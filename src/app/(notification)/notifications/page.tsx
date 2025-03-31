@@ -57,8 +57,8 @@ export default function NotificationsPage() {
   }, [fetchNotifications]);
 
   return (
-    <div className="lg:py-4">
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
+    <div className="">
+      <div className="flex flex-col lg:flex-row">
         {/* PC端导航 */}
         <NotificationDesktopNav
           activeType={activeType}

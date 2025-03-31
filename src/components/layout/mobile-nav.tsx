@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Home, Heart, LayoutGrid, Bookmark } from "lucide-react";
 import { NotificationPopover } from "@/components/notification/notification-popover";
 import { LucideIcon } from "lucide-react";
+import { useEffect } from "react";
 
 type NavItem = {
   label: string;
@@ -49,7 +50,7 @@ export function MobileNav() {
     <nav
       className={cn(
         "lg:hidden fixed bottom-0 left-0 right-0 z-50",
-        "flex h-14 items-center justify-around",
+        "flex h-[var(--mobile-nav-height)] items-center justify-around",
         "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
         "border-t safe-area-bottom"
       )}

@@ -8,7 +8,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Notification } from "@/types";
 
-
 export type NotificationType =
   | "discussionRenamed"
   | "userSuspended"
@@ -26,6 +25,7 @@ export type NotificationType =
 interface NotificationItemProps {
   notification: Notification;
   onClick?: (notification: Notification) => void;
+  className?: string;
 }
 
 export function buildMessage(notification: Notification) {
@@ -45,10 +45,10 @@ export function buildMessage(notification: Notification) {
   }
 }
 
-export const NotificationItem = React.forwardRef<
-  HTMLAnchorElement,
-  NotificationItemProps
->(({ notification, onClick }, ref) => {
+export function NotificationItem({
+  notification,
+  onClick,
+}: NotificationItemProps) {
   const isUnread = !notification.read_at;
   const message = buildMessage(notification);
   const title = notification.discussion
@@ -63,9 +63,8 @@ export const NotificationItem = React.forwardRef<
 
   return (
     <Link
-      ref={ref}
       href={`/d/${notification.subject_slug}`}
-      className={cn("flex items-start gap-4 p-4")}
+      className={cn("flex items-start gap-2 py-4 px-2")}
       onClick={handleClick}
     >
       <Avatar className="h-10 w-10 shrink-0">
@@ -74,24 +73,17 @@ export const NotificationItem = React.forwardRef<
           alt={notification.from_user.username}
         />
         <AvatarFallback>
-          {notification.from_user.username
-            .slice(0, 2)
-            .toUpperCase()}
+          {notification.from_user.username.slice(0, 2).toUpperCase()}
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="font-medium">
-            {notification.from_user.username}
-          </span>
+          <span className="font-medium">{notification.from_user.username}</span>
           <span className="text-xs text-muted-foreground">
-            {formatDistanceToNow(
-              new Date(notification.created_at),
-              {
-                addSuffix: true,
-                locale: zhCN,
-              }
-            )}
+            {formatDistanceToNow(new Date(notification.created_at), {
+              addSuffix: true,
+              locale: zhCN,
+            })}
           </span>
         </div>
         <p className="text-sm text-foreground mt-1">{message}</p>
@@ -106,4 +98,4 @@ export const NotificationItem = React.forwardRef<
       )}
     </Link>
   );
-});
+}

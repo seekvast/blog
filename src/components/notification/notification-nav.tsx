@@ -29,7 +29,7 @@ export function NotificationDesktopNav({
   };
 
   return (
-    <div className="hidden lg:block w-60 flex-shrink-0">
+    <div className="hidden lg:block py-4 w-60 flex-shrink-0">
       <nav className="flex-col space-y-1 space-x-0 border-none rounded-lg px-2 overflow-visible whitespace-normal">
         {navItems.map((item) => (
           <button

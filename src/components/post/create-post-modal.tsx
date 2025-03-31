@@ -347,6 +347,7 @@ export default function CreatePostModal() {
         current_page: 1,
         last_page: 1,
         message: "",
+        unread_count: 0,
       });
     }
   }, [discussionForm.board_id, loadBoardChildren]);
@@ -486,7 +487,7 @@ export default function CreatePostModal() {
     <Portal>
       <div
         className={cn(
-          "fixed inset-0 top-14 z-40 transform bg-background transition-transform duration-500 ease-out overflow-y-auto",
+          "fixed inset-0 top-14 z-40 transform bg-background transition-transform duration-500 ease-out overflow-y-auto pb-14 lg:pb-0",
           isVisible ? "translate-y-0" : "translate-y-full"
         )}
       >
