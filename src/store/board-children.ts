@@ -18,11 +18,13 @@ export const useBoardChildrenStore = create<BoardChildrenState>((set) => ({
     per_page: 20,
     current_page: 1,
     last_page: 1,
-    message: ''
+    unread_count: 0,
+    message: "",
   },
   isLoading: false,
   isError: false,
-  setBoardChildren: (children: Pagination<BoardChild>) => set({ boardChildren: children }),
+  setBoardChildren: (children: Pagination<BoardChild>) =>
+    set({ boardChildren: children }),
   fetchBoardChildren: async (boardId: number) => {
     try {
       set({ isLoading: true, isError: false });

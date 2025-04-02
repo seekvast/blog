@@ -73,6 +73,7 @@ export default function SettingsPage() {
         preferences: {
           ...user.preferences,
           discloseOnline: value,
+          nsfwVisible: user.preferences?.nsfwVisible || "no",
           autoFollow: user.preferences?.autoFollow || "yes",
           notify_voted: user.preferences?.notify_voted || "yes",
           notify_reply: user.preferences?.notify_reply || "yes",

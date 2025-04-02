@@ -153,7 +153,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
     }
   };
 
-  const handleToggle = (key: keyof User["preferences"], checked: boolean) => {
+  const handleToggle = (key: string, checked: boolean) => {
     setNsfwVisible(checked ? "yes" : "no");
     api.users.savePreferences({
       preferences: {
@@ -394,7 +394,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
           <Switch
             checked={nsfwVisible === "yes"}
             onCheckedChange={(checked) => {
-              handleToggle("nsfwVisible", checked ? "yes" : "no");
+              handleToggle("nsfwVisible", checked);
             }}
           />
         </div>

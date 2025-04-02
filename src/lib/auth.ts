@@ -89,7 +89,17 @@ export const authOptions: NextAuthOptions = {
           is_email_confirmed: token.is_email_confirmed as number,
           joined_at: token.joined_at as string,
           last_seen_at: token.last_seen_at as string,
-          preferences: token.preferences,
+          preferences: token.preferences as {
+            nsfwVisible: string;
+            discloseOnline: string;
+            autoFollow: string;
+            notify_voted: string;
+            notify_reply: string;
+            notify_newPost: string;
+            notify_userMentioned: string;
+            notify_discussionLocked: string;
+            notify_report: string;
+          },
           token: token.token as string,
         };
       }

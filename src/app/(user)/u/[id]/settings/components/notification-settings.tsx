@@ -19,6 +19,7 @@ import { User } from "@/types/user";
 type NotifyPreferences = {
   discloseOnline: string;
   autoFollow: string;
+  nsfwVisible: string;
   notify_voted: string;
   notify_reply: string;
   notify_newPost: string;

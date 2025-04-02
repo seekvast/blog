@@ -127,6 +127,8 @@ export interface Post {
   parent_post: Post;
   user: User;
   user_voted: PostVote | null;
+  is_voted: boolean;
+  children: Post[];
 }
 
 export type DiscussionResponse = Response<Pagination<Discussion>>;
