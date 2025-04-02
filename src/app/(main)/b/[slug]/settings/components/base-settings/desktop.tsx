@@ -5,7 +5,6 @@ import { FormFields, SharedSettingsProps } from "./shared";
 import { AvatarUpload } from "@/components/common/avatar-upload";
 import { AttachmentType } from "@/constants/attachment-type";
 
-
 export function DesktopBaseSettings({
   form,
   isSubmitting,
@@ -21,7 +20,7 @@ export function DesktopBaseSettings({
           <div className="space-y-2">
             <div className="flex items-center gap-4">
               <AvatarUpload
-                url={boardAvatar}
+                url={form.getValues("avatar") ?? null}
                 name={form.getValues("name")}
                 size="sm"
                 attachmentType={AttachmentType.BOARD_AVATAR}

@@ -76,7 +76,7 @@ export default function UserSidebar({
                   isActive ? "lg:text-blue-600" : "lg:text-gray-500"
                 )}
               >
-                {item.count}
+                {/* {item.count} */}
               </span>
             )}
           </a>

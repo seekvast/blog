@@ -49,7 +49,7 @@ export function NotificationDesktopNav({
                 activeType === item.type ? "text-blue-600" : "text-gray-500"
               )}
             >
-              {0}
+              {/* {0} */}
             </span>
           </button>
         ))}

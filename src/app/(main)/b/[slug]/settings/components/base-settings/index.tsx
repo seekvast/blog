@@ -20,7 +20,7 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [boardAvatar, setBoardAvatar] = useState<string | null>(board.avatar);
   const [categories, setCategories] = useState<Category[]>([]);
-  
+
   const form = useForm<BoardSettingsFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -58,13 +58,12 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
   }, []);
 
   const onSubmit = async (values: BoardSettingsFormValues) => {
-    console.log('Form values on submit:', values);
+    console.log("Form values on submit:", values);
     setIsSubmitting(true);
     try {
       const updateData = {
         ...values,
         id: board.id,
-        avatar: boardAvatar,
       };
       await api.boards.update(updateData);
       toast({

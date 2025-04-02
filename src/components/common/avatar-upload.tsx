@@ -44,7 +44,7 @@ export function AvatarUpload({
   className,
 }: AvatarUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState(url);
+  const [avatarUrl, setAvatarUrl] = useState(url || null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
