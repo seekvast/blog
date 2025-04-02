@@ -57,6 +57,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
     password: "",
     password_confirm: "",
   });
+  const [nsfwVisible, setNsfwVisible] = useState(user.preferences?.nsfwVisible);
 
   const getGenderText = (value: string | undefined) => {
     switch (value) {
@@ -150,6 +151,15 @@ export default function SecuritySettings({ user }: { user: User | null }) {
         });
       }
     }
+  };
+
+  const handleToggle = (key: keyof User["preferences"], checked: boolean) => {
+    setNsfwVisible(checked ? "yes" : "no");
+    api.users.savePreferences({
+      preferences: {
+        nsfwVisible: checked ? "yes" : "no",
+      },
+    });
   };
 
   const today = new Date().toISOString().split("T")[0];
@@ -381,7 +391,12 @@ export default function SecuritySettings({ user }: { user: User | null }) {
           <p className="text-sm text-gray-500 mt-1">
             開啟後，可以自由選擇是否瀏覽成人文章與看板，並根據設定顯示相應的內容。
           </p>
-          <Switch />
+          <Switch
+            checked={nsfwVisible === "yes"}
+            onCheckedChange={(checked) => {
+              handleToggle("nsfwVisible", checked ? "yes" : "no");
+            }}
+          />
         </div>
       </div>
     </div>

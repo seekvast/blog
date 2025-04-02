@@ -15,11 +15,16 @@ import Link from "next/link";
 import { SearchInput } from "@/components/search/search-input";
 import { ChangeRoleDialog } from "@/components/board/change-role-dialog";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { BoardUserRole } from "@/constants/board-user-role";
+import { useAuth } from "@/components/providers/auth-provider";
+
 interface SettingsProps {
   board: Board;
 }
 
 export function MembersSettings({ board }: SettingsProps) {
+  const { user } = useAuth();
+
   const { toast } = useToast();
   const [members, setMembers] = React.useState<Pagination<User>>();
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -31,6 +36,10 @@ export function MembersSettings({ board }: SettingsProps) {
   const [isMuteOpen, setIsMuteOpen] = useState(false);
   const [isMangerOpen, setIsMangerOpen] = useState(false);
   const [action, setAction] = useState(0);
+  const isModerator =
+    board.board_user &&
+    (board.board_user.user_role === BoardUserRole.MODERATOR ||
+      board.board_user.user_role === BoardUserRole.CREATOR);
   // 展开搜索框
   const expandSearch = () => {
     setIsSearchExpanded(true);
@@ -194,18 +203,22 @@ export function MembersSettings({ board }: SettingsProps) {
                   >
                     变更身份组
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    onClick={() => handleManger(member, 2)}
-                  >
-                    禁言
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="cursor-pointer text-destructive"
-                    onClick={() => handleManger(member, 3)}
-                  >
-                    踢出并封禁
-                  </DropdownMenuItem>
+                  {user && member.hashid !== user.hashid && (
+                    <>
+                      <DropdownMenuItem
+                        className="cursor-pointer"
+                        onClick={() => handleManger(member, member.status === 5 ? 1 : 5)}
+                      >
+                        {member.status === 5 ? "解除禁言" : "禁言"}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer text-destructive"
+                        onClick={() => handleManger(member, 4)}
+                      >
+                        踢出并封禁
+                      </DropdownMenuItem>
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

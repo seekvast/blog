@@ -18,17 +18,15 @@ import { DiscussionItem } from "@/components/discussion/discussion-item";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { BoardUserRole } from "@/constants/board-user-role";
 import { useQuery } from "@tanstack/react-query";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { BoardApprovalMode } from "@/constants/board-approval-mode";
 import {
   DiscussionControls,
   type DisplayMode,
   type SortBy,
 } from "@/components/discussion/discussion-controls";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/components/ui/use-toast";
+import { JoinBoardDialog } from "@/components/board/join-board-dialog";
 
 export default function BoardPage() {
   return (
@@ -47,6 +45,7 @@ export default function BoardPage() {
 }
 
 function BoardContent() {
+  const queryClient = useQueryClient();
   const params = useParams();
   const [loading, setLoading] = useState(true);
   const [board, setBoard] = useState<Board | null>(null);
@@ -64,6 +63,8 @@ function BoardContent() {
     "posts"
   );
   const [sortBy, setSortBy] = useState<SortBy>("hot");
+  const [joinBoardOpen, setJoinBoardOpen] = useState(false);
+
   const handleLoadMore = useCallback(() => {
     if (!discussionsLoading && hasMore) {
       setCurrentPage((prev) => prev + 1);
@@ -170,6 +171,17 @@ function BoardContent() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { mutate: joinBoard } = useMutation({
+    mutationFn: (boardId: number) => api.boards.join({ board_id: boardId }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["board_detail"] });
+      fetchBoardDetail();
+      toast({
+        title: "加入看板成功",
+      });
+    },
+  });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -193,7 +205,13 @@ function BoardContent() {
       </div>
     );
   }
-
+  const handleJoinBoard = () => {
+    if (board.approval_mode === BoardApprovalMode.APPROVAL) {
+        setJoinBoardOpen(true);
+      } else {
+        joinBoard(board.id);
+      }
+  };
   return (
     <div className="flex flex-col mx-auto w-full">
       {/* 看板信息 */}
@@ -223,23 +241,35 @@ function BoardContent() {
                     (board.board_user?.user_role === BoardUserRole.CREATOR ||
                       board.board_user?.user_role ===
                         BoardUserRole.MODERATOR) && (
-                      <Link href={`/b/${board.slug}/settings`}>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="space-x-1 text-primary rounded-full"
-                        >
-                          设定
-                        </Button>
-                      </Link>
+                      <>
+                        <Link href={`/b/${board.slug}/settings`}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="space-x-1 text-primary rounded-full"
+                          >
+                            设定
+                          </Button>
+                        </Link>
+                      </>
                     )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="space-x-1 rounded-full"
-                  >
-                    已加入
-                  </Button>
+                  {board.board_user ? (
+                    <Button
+                      size="sm"
+                      className="space-x-1 rounded-full"
+                      variant="outline"
+                    >
+                      已加入
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      className="space-x-1 rounded-full"
+                      onClick={handleJoinBoard}
+                    >
+                      加入
+                    </Button>
+                  )}
                 </div>
               </div>
               <div className="mt-1 text-sm text-muted-foreground">
@@ -419,7 +449,19 @@ function BoardContent() {
             )}
           </div>
         )}
-      </div>
+          </div>
+    {/* 加入看板对话框 */}
+    {board && (
+          <JoinBoardDialog
+            open={joinBoardOpen}
+            onOpenChange={setJoinBoardOpen}
+            boardId={board.id}
+            question={board.question}
+            onSuccess={() => {
+              queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
+            }}
+          />
+        )}
     </div>
   );
 }

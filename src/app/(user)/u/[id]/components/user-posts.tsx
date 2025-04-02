@@ -20,6 +20,7 @@ export function UserPosts() {
     total: 0,
     per_page: 10,
     message: "",
+    unread_count: 0,
   });
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);

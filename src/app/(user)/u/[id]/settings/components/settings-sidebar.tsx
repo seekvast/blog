@@ -121,7 +121,7 @@ export const navGroups: NavGroup[] = [
     title: "违规",
     icon: Ban,
     href: "violation",
-    openTab: true,
+    openTab: false,
     items: [
       {
         label: "检举记录",

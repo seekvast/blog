@@ -78,14 +78,14 @@ export function NotificationPopover({
   // 当弹出框打开时刷新通知
   React.useEffect(() => {
     if (open) {
-      fetchNotifications(1);
+      fetchNotifications(1, { q: activeType });
     }
   }, [open, fetchNotifications]);
 
   // 当标签页改变时重新加载
   React.useEffect(() => {
     if (open) {
-      fetchNotifications(1);
+      fetchNotifications(1, { q: activeType });
     }
   }, [activeType, open, fetchNotifications]);
 
@@ -130,6 +130,17 @@ export function NotificationPopover({
                 onClick={() => handleTypeChange("mentions")}
               >
                 提及
+              </button>
+              <button
+                className={cn(
+                  "flex-1 py-2 pl-4 text-sm font-medium",
+                  activeType === "board"
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                )}
+                onClick={() => handleTypeChange("board")}
+              >
+                看板
               </button>
             </div>
             <div className="flex gap-2">

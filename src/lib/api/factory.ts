@@ -59,9 +59,13 @@ export function createApi(options: ApiOptions = {}) {
       joinBoard: (data: any) => http.post<any>(`${prefix}/user/board`, data),
       saveCategory: (data: any) =>
         http.post<any>(`${prefix}/user/category`, data),
+      savePreferences: (data: any) =>
+        http.patch<any>(`${prefix}/user/preferences`, data),
       getCategory: (params?: QueryParams) =>
         http.get<any>(`${prefix}/user/category`, params, { next }),
       block: (data: any) => http.post<any>(`${prefix}/user/block`, data),
+      getPosts: (params?: QueryParams) =>
+        http.get<Pagination<Post>>(`${prefix}/user/posts`, params, { next }),
     },
 
     boards: {
@@ -215,13 +219,11 @@ export function createApi(options: ApiOptions = {}) {
           `${prefix}/notification/unread`,
           data,
           { next }
-            ),
-      list: (params?: QueryParams) =>
-        http.get<Pagination<Notification>>(
-          `${prefix}/notifications`,
-          params,
-          { next }
         ),
+      list: (params?: QueryParams) =>
+        http.get<Pagination<Notification>>(`${prefix}/notifications`, params, {
+          next,
+        }),
       read: (data: any) => http.get<any>(`${prefix}/notification/read`, data),
       readAll: () => http.get<any>(`${prefix}/notification/read-all`),
       clear: () => http.get<any>(`${prefix}/notification/clear`),

@@ -31,7 +31,7 @@ export function BoardItem({ board, onJoin, onLeave }: BoardItemProps) {
             >
               {board.name}
             </Link>
-            {board.is_nsfw && (
+            {board.is_nsfw === 1 && (
               <Badge variant="destructive" className="h-5">
                 成人
               </Badge>

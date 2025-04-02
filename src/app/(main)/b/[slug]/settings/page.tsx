@@ -18,7 +18,6 @@ export default async function BoardSettingsPage({ params }: PageProps) {
     notFound();
   }
 
-  // 在服务端直接获取数据
   const board = await api.boards.get({ slug });
   if (!board) {
     notFound();

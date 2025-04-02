@@ -55,6 +55,7 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
         joined_at: session.user.joined_at || "",
         last_seen_at: session.user.last_seen_at || "",
         token: session.user.token || "",
+        preferences: session.user.preferences,
       });
       // 用户登录时获取草稿
       fetchDraft();

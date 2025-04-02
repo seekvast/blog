@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -7,18 +6,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { Board, Report } from "@/types";
-import { ChevronDown, Search } from "lucide-react";
-import Image from "next/image";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { BoardUser } from "@/types";
-import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { formatDate } from "@/lib/utils";
 import { Pagination } from "@/types/common";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  reportProcessSchema,
+  type ReportProcessSchema,
+} from "@/validations/report-process";
 
 interface ReportsSettingsProps {
   board: Board;
@@ -41,6 +53,19 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
   const pageSize = 10;
   const queryClient = useQueryClient();
   const { toast } = useToast();
+
+  const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
+  const [isProcessDialogOpen, setIsProcessDialogOpen] = useState(false);
+
+  const form = useForm<ReportProcessSchema>({
+    resolver: zodResolver(reportProcessSchema),
+    defaultValues: {
+      act_mode: "delete",
+      act_explain: "",
+      reason_desc: "",
+      delete_history: "none",
+    },
+  });
 
   const { data: managersData } = useQuery<BoardUser[]>({
     queryKey: ["board-managers", board.id],
@@ -106,9 +131,6 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
       reportId: number;
       action: string;
     }) => {
-      // 这里应该使用正确的 API 接口
-      // 由于目前没有看到确切的 API，我们可以假设使用 POST 请求
-      // 在实际开发中，需要替换为正确的 API 调用
       return await fetch(`/api/reports/${reportId}/${action}`, {
         method: "POST",
         headers: {
@@ -172,6 +194,19 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
       user: "用户",
     };
     return typeMap[targetType] || targetType;
+  };
+
+  const handleOpenProcessDialog = (reportId: number) => {
+    setSelectedReportId(reportId);
+    setIsProcessDialogOpen(true);
+    form.reset();
+  };
+
+  const handleProcess = (data: ReportProcessSchema) => {
+    if (!selectedReportId) return;
+    handleReportAction(selectedReportId, data.act_mode);
+    setIsProcessDialogOpen(false);
+    setSelectedReportId(null);
   };
 
   return (
@@ -244,7 +279,7 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
                   <h4 className="font-medium">{report.discussion.title}</h4>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                  {report.reason}
+                  {report.reason_text}
                 </p>
                 <div className="mt-2 text-sm text-muted-foreground">
                   <div>检举人：{report.reporter?.username || "未知用户"}</div>
@@ -266,12 +301,12 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
                   variant="secondary"
                   size="sm"
                   className="h-7"
-                  onClick={() => handleReportAction(report.id, "accept")}
+                  onClick={() => handleOpenProcessDialog(report.id)}
                   disabled={
                     report.status !== 0 || processReportMutation.isPending
                   }
                 >
-                  接受
+                  处置
                 </Button>
                 <Button
                   variant="secondary"
@@ -282,21 +317,128 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
                     report.status !== 0 || processReportMutation.isPending
                   }
                 >
-                  驳回
+                  撤销
                 </Button>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 text-xs text-muted-foreground hover:text-foreground"
-              >
-                查看详情
-                <ChevronDown className="ml-1 h-3 w-3" />
-              </Button>
             </div>
           </div>
         ))}
       </InfiniteScroll>
+      <Dialog open={isProcessDialogOpen} onOpenChange={setIsProcessDialogOpen}>
+        <DialogContent>
+          <form onSubmit={form.handleSubmit(handleProcess)}>
+            <DialogHeader>
+              <DialogTitle>处理方式</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <Label>处理方式</Label>
+                <RadioGroup
+                  value={form.watch("act_mode")}
+                  onValueChange={(value: ReportProcessSchema["act_mode"]) =>
+                    form.setValue("act_mode", value)
+                  }
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="delete" id="delete" />
+                    <Label htmlFor="delete">删除文章/回覆</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="hide" id="hide" />
+                    <Label htmlFor="hide">踢出看板(可重複加入)</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="lock" id="lock" />
+                    <Label htmlFor="lock">封鎖</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="reject" id="reject" />
+                    <Label htmlFor="reject">禁言</Label>
+                  </div>
+                </RadioGroup>
+                {form.formState.errors.act_mode && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.act_mode.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>删除讯息历史</Label>
+                <Select
+                  value={form.watch("delete_history")}
+                  onValueChange={(
+                    value: ReportProcessSchema["delete_history"]
+                  ) => form.setValue("delete_history", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="选择删除历史时间范围" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">什麼都別刪除</SelectItem>
+                    <SelectItem value="1h">刪除過去1小時</SelectItem>
+                    <SelectItem value="6h">刪除過去6小時</SelectItem>
+                    <SelectItem value="12h">刪除過去12小時</SelectItem>
+                    <SelectItem value="24h">刪除過去24小時</SelectItem>
+                    <SelectItem value="3d">刪除過去3天</SelectItem>
+                    <SelectItem value="7d">刪除過去7天</SelectItem>
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.delete_history && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.delete_history.message}
+                  </p>
+                )}
+                <div className="text-xs text-muted-foreground mt-1">
+                  将删除过去该时间段内，看板內所發表的所有文章與回覆
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>原因(用户可见)</Label>
+                <textarea
+                  className="w-full min-h-[100px] p-2 border rounded-md"
+                  placeholder="请输入原因"
+                  {...form.register("act_explain")}
+                />
+                {form.formState.errors.act_explain && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.act_explain.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>原因(仅看板管理员可见)</Label>
+                <textarea
+                  className="w-full min-h-[100px] p-2 border rounded-md"
+                  placeholder="请输入原因"
+                  {...form.register("reason_desc")}
+                />
+                {form.formState.errors.reason_desc && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.reason_desc.message}
+                  </p>
+                )}
+              </div>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setIsProcessDialogOpen(false)}
+              >
+                取消
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={processReportMutation.isPending}
+              >
+                处理
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

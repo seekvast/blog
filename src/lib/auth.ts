@@ -48,6 +48,7 @@ export const authOptions: NextAuthOptions = {
           joined_at: data.joined_at,
           last_seen_at: data.last_seen_at,
           token: data.token,
+          preferences: data.preferences,
         };
       },
     }),
@@ -67,6 +68,7 @@ export const authOptions: NextAuthOptions = {
         token.is_email_confirmed = user.is_email_confirmed;
         token.joined_at = user.joined_at;
         token.last_seen_at = user.last_seen_at;
+        token.preferences = user.preferences;
         token.token = user.token;
       }
       return token;
@@ -87,6 +89,7 @@ export const authOptions: NextAuthOptions = {
           is_email_confirmed: token.is_email_confirmed as number,
           joined_at: token.joined_at as string,
           last_seen_at: token.last_seen_at as string,
+          preferences: token.preferences,
           token: token.token as string,
         };
       }

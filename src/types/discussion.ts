@@ -123,6 +123,7 @@ export interface Post {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  discussion: Discussion;
   parent_post: Post;
   user: User;
   user_voted: PostVote | null;

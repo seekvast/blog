@@ -25,25 +25,8 @@ export type NotificationType =
   | "discussionLocked"
   | "postLiked";
 
-export type NotificationTabType = "all" | "mentions" | "replies";
+export type NotificationTabType = "all" | "mentions" | "board";
 
-// 根据选项卡类型过滤通知
-export function filterNotifications(
-  notifications: Notification[],
-  tabType: NotificationTabType
-): Notification[] {
-  if (tabType === "all") return notifications;
-  if (tabType === "mentions")
-    return notifications.filter(
-      (n) =>
-        n.type === "postMentioned" ||
-        n.type === "userMentioned" ||
-        n.type === "groupMentioned"
-    );
-  if (tabType === "replies")
-    return notifications.filter((n) => n.type === "replied");
-  return notifications;
-}
 
 // 标记所有通知为已读
 export function markAllAsRead(notifications: Notification[]): Notification[] {
@@ -64,37 +47,42 @@ export function useNotifications(autoLoad: boolean = true) {
   const [total, setTotal] = React.useState(0);
   const loadingRef = React.useRef(false);
 
-  const fetchNotifications = React.useCallback(async (pageNum: number) => {
-    if (loadingRef.current) return;
-    loadingRef.current = true;
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.notifications.list({
-        page: pageNum,
-        per_page: 20,
-      });
+  const fetchNotifications = React.useCallback(
+      async (pageNum: number, query?: any) => {
+          console.log("query..........", query);
+      if (loadingRef.current) return;
+      loadingRef.current = true;
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await api.notifications.list({
+          page: pageNum,
+          per_page: 20,
+          ...query,
+        });
 
-      if (pageNum === 1) {
-        setNotifications(response.items ?? []);
-      } else {
-        setNotifications((prev) => [...prev, ...(response.items ?? [])]);
+        if (pageNum === 1) {
+          setNotifications(response.items ?? []);
+        } else {
+          setNotifications((prev) => [...prev, ...(response.items ?? [])]);
+        }
+
+        // 只根据后端返回的last_page判断是否有更多数据
+        setHasMore(pageNum < response.last_page);
+
+        setPage(pageNum);
+        setTotal(response.total);
+        setUnreadCount(response.unread_count);
+      } catch (err) {
+        console.error("获取通知失败", err);
+        setError("获取通知失败");
+      } finally {
+        setLoading(false);
+        loadingRef.current = false;
       }
-
-      // 只根据后端返回的last_page判断是否有更多数据
-      setHasMore(pageNum < response.last_page);
-      
-      setPage(pageNum);
-      setTotal(response.total);
-      setUnreadCount(response.unread_count);
-    } catch (err) {
-      console.error("获取通知失败", err);
-      setError("获取通知失败");
-    } finally {
-      setLoading(false);
-      loadingRef.current = false;
-    }
-  }, []);
+    },
+    []
+  );
 
   const loadMore = React.useCallback(() => {
     if (!loadingRef.current && hasMore) {
@@ -177,7 +165,6 @@ export function NotificationPreview({
   notifications,
   className,
   onItemClick,
-  tabType = "all",
   loading = false,
   hasMore = false,
   onLoadMore = () => {},
@@ -190,17 +177,15 @@ export function NotificationPreview({
     }
   };
 
-  const filteredNotifications = filterNotifications(notifications, tabType);
-
   return (
     <div className="relative flex flex-col h-full">
       {/* 使用一个固定高度的容器，避免加载状态切换时的布局跳动 */}
       <div className={cn("flex flex-col min-h-[200px]", className)}>
-        {loading && filteredNotifications.length === 0 ? (
+        {loading && notifications.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center text-muted-foreground">加载中...</div>
           </div>
-        ) : filteredNotifications.length === 0 ? (
+        ) : notifications.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center text-muted-foreground">暂无通知</div>
           </div>
@@ -211,7 +196,7 @@ export function NotificationPreview({
             onLoadMore={onLoadMore}
             className={cn("flex flex-col divide-y divide-border")}
           >
-            {filteredNotifications.map((notification) => (
+            {notifications.map((notification) => (
               <NotificationItem
                 key={notification.id}
                 notification={notification}
@@ -221,7 +206,7 @@ export function NotificationPreview({
           </InfiniteScroll>
         )}
       </div>
-      
+
       <div className="sticky bottom-0 left-0 right-0 bg-background">
         <div className="p-3 text-center">
           <Link

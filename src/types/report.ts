@@ -1,5 +1,6 @@
 import { User } from "./user";
 import { Discussion, Post } from "./discussion";
+import { Board } from "./board";
 
 export interface Report {
   id: number;
@@ -7,6 +8,7 @@ export interface Report {
   target_id: number;
   target_type: string;
   reason: string;
+  reason_text: string;
   status: number;
   created_at: string;
   updated_at: string;
@@ -14,6 +16,7 @@ export interface Report {
   reporter: User;
   discussion: Discussion;
   post: Post;
+  board: Board;
 }
 
 export interface ReportForm {

@@ -32,6 +32,18 @@ export interface User {
   posts_count?: number;
   replies_count?: number;
   user_role?: number;
+  status?: number;
+  preferences?: {
+    nsfwVisible: string;
+    discloseOnline: string;
+    autoFollow: string;
+    notify_voted: string;
+    notify_reply: string;
+    notify_newPost: string;
+    notify_userMentioned: string;
+    notify_discussionLocked: string;
+    notify_report: string;
+  };
   blocked?: {
     id: number;
     user_hashid: string;

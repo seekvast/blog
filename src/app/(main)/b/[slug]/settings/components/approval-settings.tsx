@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { SearchInput } from "@/components/search/search-input";
 import { formatDate } from "@/lib/utils";
+import { BoardUserRole } from "@/constants/board-user-role";
 
 interface ApprovalSettingsProps {
   board: Board;
@@ -28,7 +29,9 @@ interface ApprovalSettingsProps {
 
 export function ApprovalSettings({ board }: ApprovalSettingsProps) {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
+    
+    const isModerator = board.board_user && (board.board_user.user_role === BoardUserRole.MODERATOR || board.board_user.user_role === BoardUserRole.CREATOR);
   // 筛选条件
   const [filters, setFilters] = React.useState({
     apply_time: "",
@@ -55,6 +58,7 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
         const response = await api.boards.getHistory({
           ...filters,
           status: 0,
+          board_id: board.id,
           keyword: searchQuery,
           page: pageParam,
           per_page: 10,
@@ -81,7 +85,6 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
 
   // 处理申请
   const handleApplication = async (applicationId: number, status: 1 | 2) => {
-    try {
       await api.boards.approve({
         history_id: applicationId,
         status,
@@ -97,14 +100,6 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
 
       // 重新加载列表
       refetch();
-    } catch (error) {
-      console.error("Error handling application:", error);
-      toast({
-        variant: "destructive",
-        title: "处理失败",
-        description: "无法处理申请，请重试",
-      });
-    }
   };
 
   // 清空筛选条件

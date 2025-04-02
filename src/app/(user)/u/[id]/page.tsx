@@ -23,11 +23,6 @@ const navItems = [
     href: "following" as UserTabType,
   },
   {
-    label: "违规记录",
-    count: 41,
-    href: "violation" as UserTabType,
-  },
-  {
     label: "使用者名称历史",
     count: 41,
     href: "history" as UserTabType,
@@ -37,46 +32,7 @@ const navItems = [
 export default function UserPage() {
   const params = useParams();
   const userId = params?.id as string;
-  console.log(userId, "usr........id");
-  const [activeTab, setActiveTab] = React.useState<UserTabType>("posts");
-
-  const mockPosts = [
-    {
-      id: "1",
-      title: "那些喜歡小女生的根本人渣===",
-      content:
-        "那些喜歡小女生的根本人渣===,rt那些喜歡小女生的根本人渣===,rt那些喜歡小女生的根本人渣===,rt",
-      date: "今天14:15",
-      commentCount: 123,
-      likeCount: 123,
-      author: {
-        name: "用户名",
-        avatar: "/avatar.jpg",
-      },
-      board: {
-        name: "看板名称",
-        icon: "/board-icon.jpg",
-      },
-      isNsfw: true,
-    },
-    {
-      id: "2",
-      title: "那些喜歡小女生的根本人渣===",
-      content:
-        "想弄個手照集中串 大家願意分享自己的手照嗎想弄個手照集中串 大家願意分享自己的手照嗎想弄個手照集中串 大家願意分享自己的手照嗎",
-      date: "今天14:15",
-      commentCount: 123,
-      likeCount: 123,
-      author: {
-        name: "用户名",
-        avatar: "/avatar.jpg",
-      },
-      board: {
-        name: "看板名称",
-        icon: "/board-icon.jpg",
-      },
-    },
-  ];
+  const [activeTab, setActiveTab] = React.useState<UserTabType>("replies");
 
   // 根据activeTab渲染对应的内容
   const renderContent = () => {
@@ -86,11 +42,9 @@ export default function UserPage() {
       case "replies":
         return <UserReplies />;
       case "following":
-        return <div></div>;
-      case "violation":
-        return <div></div>;
+        return <div className="min-h-screen"></div>;
       case "history":
-        return <div></div>;
+        return <div className="min-h-screen"></div>;
       default:
         return null;
     }
