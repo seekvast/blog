@@ -22,9 +22,14 @@ import { api } from "@/lib/api";
 interface LoginModalProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  isRedirect?: boolean;
 }
 
-export function LoginModal({ open, onOpenChange }: LoginModalProps) {
+export function LoginModal({
+  open,
+  onOpenChange,
+  isRedirect = false,
+}: LoginModalProps) {
   const router = useRouter();
   const { toast } = useToast();
   const { isLoginOpen, closeLogin, openRegister } = useAuthModal();
@@ -95,7 +100,11 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
       } else {
         closeLogin();
       }
-      router.refresh();
+      if (isRedirect) {
+        router.push("/");
+      } else {
+        router.refresh();
+      }
     } catch (error) {
       // 显示具体的错误信息
       toast({

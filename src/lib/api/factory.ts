@@ -51,7 +51,7 @@ export function createApi(options: ApiOptions = {}) {
 
       refreshToken: () => http.get<User>(`${prefix}/user/refresh-token`),
       confirmEmail: (data: any) =>
-        http.post<User>(`${prefix}/user/confirm-email`, data),
+        http.get<User>(`${prefix}/user/confirm-email`, data),
       update: (data: any) => http.patch<User>(`${prefix}/user`, data),
       updateBirthday: (data: { birthday: string }) =>
         http.patch<User>(`${prefix}/user/birthday`, data),

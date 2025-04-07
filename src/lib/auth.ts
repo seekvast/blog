@@ -86,6 +86,7 @@ export const authOptions: NextAuthOptions = {
         token.joined_at = refreshUser.joined_at;
         token.last_seen_at = refreshUser.last_seen_at;
         token.preferences = refreshUser.preferences;
+        token.token = refreshUser.token;
       }
       return token;
     },

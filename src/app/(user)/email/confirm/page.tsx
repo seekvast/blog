@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,25 +10,29 @@ import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useAuthModal } from "@/components/auth/auth-modal-store";
+import { LoginModal } from "@/components/auth/login-modal";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 export default function EmailConfirmPage() {
   const { data: session, update } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
+  const { openLogin } = useAuthModal();
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
   );
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isResending, setIsResending] = useState(false);
-  const [countdown, setCountdown] = useState(60);
+  const [countdown, setCountdown] = useState(0);
 
-  useEffect(() => {
-    console.log(session, " verifyEmail session..................");
+  const token = searchParams?.get("token");
 
-    const verifyEmail = async () => {
-      const token = searchParams?.get("token");
-
+  // 使用 useQuery 处理邮箱验证请求
+  const { isLoading } = useQuery({
+    queryKey: ['confirmEmail', token],
+    queryFn: async () => {
       if (!token) {
         setStatus("error");
         setErrorMessage("无效的验证链接");
@@ -37,11 +41,12 @@ export default function EmailConfirmPage() {
           title: "验证失败",
           description: "无效的验证链接",
         });
-        return;
+        throw new Error("无效的验证链接");
       }
 
       try {
-        await api.users.confirmEmail({ token });
+        const result = await api.users.confirmEmail({ token });
+
         if (session?.user) {
           await update({
             user: {
@@ -55,10 +60,15 @@ export default function EmailConfirmPage() {
           title: "验证成功",
           description: "您的邮箱已成功验证",
         });
+
         // 延迟跳转，让用户看到成功提示
-        setTimeout(() => {
-          router.push("/");
-        }, 3000);
+        if (session?.user) {
+          setTimeout(() => {
+            router.push("/");
+          }, 3000);
+        }
+
+        return result;
       } catch (error) {
         setStatus("error");
         setErrorMessage("此验证链接已失效，可能已被使用或超过 24 小时有效期。");
@@ -67,12 +77,42 @@ export default function EmailConfirmPage() {
           title: "验证失败",
           description: "验证链接已失效",
         });
+        throw error;
       }
-    };
+    },
+    enabled: !!token, // 只有当 token 存在时才执行查询
+    retry: false, // 不重试失败的请求
+    refetchOnWindowFocus: false, // 窗口聚焦时不重新获取
+    refetchOnMount: false, // 组件挂载时不重新获取
+    refetchOnReconnect: false, // 重新连接时不重新获取
+    staleTime: Infinity, // 数据永不过期
+  });
 
-    verifyEmail();
-  }, [searchParams, router, toast]);
+  const resendMutation = useMutation({
+    mutationFn: async () => {
+      return await api.users.resendEmail({ token });
+    },
+    onSuccess: () => {
+      toast({
+        title: "发送成功",
+        description: "新的验证邮件已发送到您的邮箱",
+      });
+      setCountdown(60);
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        title: "发送失败",
+        description:
+          error instanceof Error ? error.message : "发送验证邮件失败",
+      });
+    },
+    onSettled: () => {
+      setIsResending(false);
+    },
+  });
 
+  // 处理倒计时
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (status === "error" && countdown > 0) {
@@ -85,25 +125,8 @@ export default function EmailConfirmPage() {
 
   const handleResendEmail = async () => {
     if (countdown > 0 || isResending) return;
-
     setIsResending(true);
-    try {
-      await api.users.resendEmail({ token: searchParams?.get("token") });
-      toast({
-        title: "发送成功",
-        description: "新的验证邮件已发送到您的邮箱",
-      });
-      setCountdown(60);
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "发送失败",
-        description:
-          error instanceof Error ? error.message : "发送验证邮件失败",
-      });
-    } finally {
-      setIsResending(false);
-    }
+    resendMutation.mutate();
   };
 
   return (
@@ -113,7 +136,7 @@ export default function EmailConfirmPage() {
           <h1 className="text-2xl font-semibold">邮箱验证</h1>
         </CardHeader>
         <CardContent className="text-center space-y-4">
-          {status === "loading" && (
+          {(isLoading || status === "loading") && (
             <div className="flex flex-col items-center gap-4">
               <Loader2 className="h-8 w-8 animate-spin" />
               <p>正在验证您的邮箱...</p>
@@ -135,9 +158,15 @@ export default function EmailConfirmPage() {
                 />
               </svg>
               <p>邮箱验证成功！</p>
-              <p className="text-sm text-muted-foreground">
-                3秒后自动跳转到首页
-              </p>
+              {session?.user ? (
+                <p className="text-sm text-muted-foreground">
+                  3秒后自动跳转到首页
+                </p>
+              ) : (
+                <Button size="sm" onClick={openLogin}>
+                  点击登录
+                </Button>
+              )}
             </div>
           )}
           {status === "error" && (
@@ -150,6 +179,7 @@ export default function EmailConfirmPage() {
                   {errorMessage}
                 </p>
                 <Button
+                  size="sm"
                   className="mt-4 transition-transform hover:scale-105"
                   onClick={handleResendEmail}
                   disabled={countdown > 0 || isResending}
@@ -174,6 +204,7 @@ export default function EmailConfirmPage() {
           )}
         </CardContent>
       </Card>
+      <LoginModal isRedirect={true} />
     </div>
   );
 }
