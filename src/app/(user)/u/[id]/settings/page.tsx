@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import SettingsSidebar, {
   SettingsTabType,
   navGroups,
@@ -31,8 +31,8 @@ import { api } from "@/lib/api";
 
 export default function SettingsPage() {
   const queryClient = useQueryClient();
-  const params = useParams();
-  const userId = params?.id as string;
+  const params = useSearchParams();
+  const userId = params?.get("hashid");
   const [activeTab, setActiveTab] = React.useState<SettingsTabType>("profile");
   const [blacklistType, setBlacklistType] = React.useState<"board" | "user">(
     "board"

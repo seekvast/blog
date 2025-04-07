@@ -146,7 +146,7 @@ export function Header({ className }: HeaderProps) {
                       </DropdownMenuItem>
                     </Link>
 
-                    <Link href={`/u/${user.username}/settings`}>
+                    <Link href={`/u/${user.username}/settings?hashid=${user.hashid}`}>
                       <DropdownMenuItem className="cursor-pointer">
                         <Settings className="mr-2 h-4 w-4" />
                         <span>个人设定</span>

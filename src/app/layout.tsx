@@ -7,6 +7,7 @@ import { LoginModalProvider } from "@/components/providers/login-modal-provider"
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { I18nProvider } from "@/components/i18n-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { EmailVerificationProvider } from "@/components/providers/email-verification-provider";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { Toaster } from "@/components/ui/toaster";
@@ -49,7 +50,9 @@ export default async function RootLayout({
             <AuthProvider session={session}>
               <LoginModalProvider>
                 <I18nProvider>
-                  {children}
+                  <EmailVerificationProvider>
+                    {children}
+                  </EmailVerificationProvider>
                   <Toaster />
                 </I18nProvider>
               </LoginModalProvider>
