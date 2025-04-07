@@ -54,6 +54,7 @@ export function createServerError(
 
 export interface FetchOptions extends RequestInit {
   params?: Record<string, any>;
+  skipRequest?: boolean;
   retry?: number;
   timeout?: number;
 }

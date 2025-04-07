@@ -66,7 +66,6 @@ async function handleResponse<T>(response: Response): Promise<T> {
     error.code = interceptedData.code;
     error.data = interceptedData.data;
 
-    // 如果错误消息是对象，将其转换为字符串
     if (typeof interceptedData.message === "object") {
       error.message = Object.entries(interceptedData.message)
         .map(([key, value]) => `${key}: ${value}`)
@@ -100,18 +99,15 @@ export async function fetchApi<T>(
     ...restOptions
   } = options;
 
-  // 处理 URL
   const isServer = typeof window === "undefined";
   const baseUrl = getBaseUrl(isServer);
 
-  // 在服务端必须使用完整 URL，在客户端可以使用相对路径
   const url = isServer
     ? new URL(endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`)
     : new URL(
         endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`,
         window.location.origin
       );
-  // 添加查询参数
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
@@ -119,19 +115,25 @@ export async function fetchApi<T>(
       }
     });
   }
-  // 创建请求选项
   const headers = await createHeaders(restOptions);
-  const interceptedOptions = await runRequestInterceptors({
+  const interceptedOptions = await runRequestInterceptors(endpoint, {
     ...restOptions,
     headers,
   });
+  if (interceptedOptions.skipRequest) {
+    console.log(endpoint, "endpoint");
+    return {
+      code: 0,
+      data: null,
+      message: "请求已跳过（用户未登录）",
+    } as any;
+  }
 
   let lastError: Error | null = null;
   let attempts = 0;
 
   while (attempts < retry) {
     try {
-      // 发起请求
       const response = await Promise.race([
         fetch(url.toString(), interceptedOptions),
         timeoutPromise(timeout),

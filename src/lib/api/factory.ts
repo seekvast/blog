@@ -49,8 +49,9 @@ export function createApi(options: ApiOptions = {}) {
       get: (params: any) =>
         http.get<User>(`${prefix}/user/profile`, params, { next }),
 
-      me: () => http.get<User>(`${prefix}/user/me`, undefined, { next }),
-
+      refreshToken: () => http.get<User>(`${prefix}/user/refresh-token`),
+      confirmEmail: (data: any) =>
+        http.post<User>(`${prefix}/user/confirm-email`, data),
       update: (data: any) => http.patch<User>(`${prefix}/user`, data),
       updateBirthday: (data: { birthday: string }) =>
         http.patch<User>(`${prefix}/user/birthday`, data),
@@ -61,6 +62,8 @@ export function createApi(options: ApiOptions = {}) {
         http.post<any>(`${prefix}/user/category`, data),
       savePreferences: (data: any) =>
         http.patch<any>(`${prefix}/user/preferences`, data),
+      resendEmail: (data: any) =>
+        http.post<any>(`${prefix}/user/resend-email`, data),
       getCategory: (params?: QueryParams) =>
         http.get<any>(`${prefix}/user/category`, params, { next }),
       block: (data: any) => http.post<any>(`${prefix}/user/block`, data),

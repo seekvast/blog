@@ -5,22 +5,11 @@ import { zhCN } from "date-fns/locale";
 import {
   ThumbsUp,
   ThumbsDown,
-  MoreHorizontal,
-  Flag,
-  AlertTriangle,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { PostContent } from "@/components/post/post-content";
 import { cn } from "@/lib/utils";
 import type { Post } from "@/types/discussion";
-import { ReportDialog } from "@/components/report/report-dialog";
-import { useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { CommentActions } from "@/components/post/comment-actions";
 
 interface CommentListProps {

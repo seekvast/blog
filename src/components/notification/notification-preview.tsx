@@ -49,7 +49,6 @@ export function useNotifications(autoLoad: boolean = true) {
 
   const fetchNotifications = React.useCallback(
       async (pageNum: number, query?: any) => {
-          console.log("query..........", query);
       if (loadingRef.current) return;
       loadingRef.current = true;
       setLoading(true);

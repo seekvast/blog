@@ -54,7 +54,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, trigger, user, session }) {
       if (user) {
         token.hashid = user.hashid;
         token.username = user.username;
@@ -71,6 +71,22 @@ export const authOptions: NextAuthOptions = {
         token.preferences = user.preferences;
         token.token = user.token;
       }
+      if (trigger === "update" && session?.user) {
+        const refreshUser = await api.users.refreshToken();
+        token.hashid = refreshUser.hashid;
+        token.username = refreshUser.username;
+        token.email = refreshUser.email;
+        token.nickname = refreshUser.nickname;
+        token.avatar_url = refreshUser.avatar_url;
+        token.cover = refreshUser.cover;
+        token.bio = refreshUser.bio;
+        token.gender = refreshUser.gender;
+        token.birthday = refreshUser.birthday;
+        token.is_email_confirmed = refreshUser.is_email_confirmed;
+        token.joined_at = refreshUser.joined_at;
+        token.last_seen_at = refreshUser.last_seen_at;
+        token.preferences = refreshUser.preferences;
+      }
       return token;
     },
     async session({ session, token }) {
@@ -79,28 +95,8 @@ export const authOptions: NextAuthOptions = {
           id: token.hashid as string,
           hashid: token.hashid as string,
           username: token.username as string,
-          email: token.email as string,
           nickname: token.nickname as string,
-          avatar_url: token.avatar_url as string,
-          cover: token.cover as string,
-          bio: token.bio as string,
-          gender: token.gender as number,
-          birthday: token.birthday as string,
-          is_email_confirmed: token.is_email_confirmed as number,
-          joined_at: token.joined_at as string,
-          last_seen_at: token.last_seen_at as string,
-          preferences: token.preferences as {
-            nsfwVisible: string;
-            discloseOnline: string;
-            autoFollow: string;
-            notify_voted: string;
-            notify_reply: string;
-            notify_newPost: string;
-            notify_userMentioned: string;
-            notify_discussionLocked: string;
-            notify_report: string;
-          },
-          token: token.token as string,
+          ...token,
         };
       }
       return session;
@@ -108,11 +104,12 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
+  debug: true,
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-//适用API请求调用
 export async function getSession() {
   if (typeof window === "undefined") {
     return await getServerSession(authOptions);
@@ -164,5 +161,5 @@ export async function authMiddleware(request: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  return null; // 继续处理请求
+  return null;
 }
