@@ -25,6 +25,7 @@ import { CommentEditor } from "@/components/post/comment-editor";
 import { ErrorBoundary } from "@/components/error/error-boundary";
 import Link from "next/link";
 import { PollContent } from "@/components/post/poll-content";
+import { Attachment } from "@/types";
 
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
@@ -111,7 +112,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     },
   });
 
-  // 使用 useMutation 优化关注操作
   const followMutation = useMutation({
     mutationFn: () =>
       api.discussions.saveFollow({
@@ -147,61 +147,69 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         ["discussion-posts", slug, initialDiscussion.board_id],
         (oldData) => {
           if (!oldData) return oldData;
-          return {
-            ...oldData,
-            items: oldData.items.map((post) => {
+          
+          // 递归更新评论及其子评论的点赞状态
+          const updatePostVote = (posts: Post[]): Post[] => {
+            return posts.map(post => {
+              // 如果是目标评论，更新其点赞状态
               if (post.id === postId) {
+                // 如果已经投过相同的票，则取消投票
                 if (post.user_voted?.vote === vote) {
                   return {
                     ...post,
-                    up_votes_count:
-                      vote === "up"
-                        ? post.up_votes_count - 1
-                        : post.up_votes_count,
-                    down_votes_count:
-                      vote === "down"
-                        ? post.down_votes_count - 1
-                        : post.down_votes_count,
+                    up_votes_count: vote === "up" ? post.up_votes_count - 1 : post.up_votes_count,
+                    down_votes_count: vote === "down" ? post.down_votes_count - 1 : post.down_votes_count,
                     user_voted: null,
                   };
-                }
-                if (post.user_voted && post.user_voted?.vote !== vote) {
+                } 
+                // 如果已经投过不同的票，则切换投票
+                else if (post.user_voted) {
                   return {
                     ...post,
-                    up_votes_count:
-                      vote === "up"
-                        ? post.up_votes_count + 1
-                        : post.up_votes_count - 1,
-                    down_votes_count:
-                      vote === "down"
-                        ? post.down_votes_count + 1
-                        : post.down_votes_count - 1,
+                    up_votes_count: vote === "up" 
+                      ? post.up_votes_count + 1 
+                      : post.up_votes_count - (post.user_voted.vote === "up" ? 1 : 0),
+                    down_votes_count: vote === "down" 
+                      ? post.down_votes_count + 1 
+                      : post.down_votes_count - (post.user_voted.vote === "down" ? 1 : 0),
                     user_voted: {
                       id: postId,
                       post_id: postId,
-                      vote: vote,
+                      vote,
+                    },
+                  };
+                } 
+                // 如果还没投过票，则添加投票
+                else {
+                  return {
+                    ...post,
+                    up_votes_count: vote === "up" ? post.up_votes_count + 1 : post.up_votes_count,
+                    down_votes_count: vote === "down" ? post.down_votes_count + 1 : post.down_votes_count,
+                    user_voted: {
+                      id: postId,
+                      post_id: postId,
+                      vote,
                     },
                   };
                 }
+              }
+              
+              // 如果有子评论，递归更新子评论
+              if (post.children && post.children.length > 0) {
                 return {
                   ...post,
-                  up_votes_count:
-                    vote === "up"
-                      ? post.up_votes_count + 1
-                      : post.up_votes_count,
-                  down_votes_count:
-                    vote === "down"
-                      ? post.down_votes_count + 1
-                      : post.down_votes_count,
-                  user_voted: {
-                    id: postId,
-                    post_id: postId,
-                    vote: vote,
-                  },
+                  children: updatePostVote(post.children),
                 };
               }
+              
+              // 不需要更新的评论直接返回
               return post;
-            }),
+            });
+          };
+          
+          return {
+            ...oldData,
+            items: updatePostVote(oldData.items),
           };
         }
       );
@@ -216,11 +224,12 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   });
 
   const commentMutation = useMutation({
-    mutationFn: async (content: string) => {
+    mutationFn: async (content: string, attachment?: Attachment | null) => {
       return api.discussions.createPost({
         slug: currentDiscussion?.slug,
         content,
         parent_id: replyTo?.id,
+        attachment,
         quote: replyTo
           ? {
               username: replyTo.user.username,
@@ -257,9 +266,32 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     },
   });
 
-  React.useEffect(() => {
-    setDiscussion(initialDiscussion);
-  }, [initialDiscussion, setDiscussion]);
+  const handleSubmitComment = React.useCallback(
+    (content: string) => {
+      if (!content.trim() || isSubmitting) return;
+      commentMutation.mutate(content);
+    },
+    [isSubmitting, commentMutation]
+  );
+
+  const handleSubmitReply = React.useCallback(
+    (comment: Post, content: string, imageUrl?: string) => {
+      if (!content.trim() && !imageUrl) return;
+      
+      // 如果有图片，将图片URL添加到内容中
+      let finalContent = content;
+      if (imageUrl) {
+        finalContent = content ? `${content}\n\n![图片](${imageUrl})` : `![图片](${imageUrl})`;
+      }
+      
+      // 设置回复目标
+      setReplyTo(comment);
+      
+      // 提交回复
+      commentMutation.mutate(finalContent);
+    },
+    [commentMutation, setReplyTo]
+  );
 
   const handleReplyClick = React.useCallback(
     (comment: Post) => {
@@ -283,14 +315,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     [voteMutation, requireAuth]
   );
 
-  const handleSubmitComment = React.useCallback(
-    (content: string) => {
-      if (!content.trim() || isSubmitting) return;
-      commentMutation.mutate(content);
-    },
-    [isSubmitting, commentMutation]
-  );
-
   const handleBookmark = React.useCallback(() => {
     requireAuth(() => {
       bookmarkMutation.mutate();
@@ -302,6 +326,10 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       followMutation.mutate();
     });
   }, [requireAuth, followMutation]);
+
+  React.useEffect(() => {
+    setDiscussion(initialDiscussion);
+  }, [initialDiscussion, setDiscussion]);
 
   if (!currentDiscussion) {
     return null;
@@ -410,6 +438,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               isLoading={isLoading}
               onReply={handleReplyClick}
               onVote={handleVote}
+              onSubmitReply={handleSubmitReply}
             />
 
             {user && commentContent && (

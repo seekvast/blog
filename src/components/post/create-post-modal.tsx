@@ -635,6 +635,20 @@ export default function CreatePostModal() {
                 initialContent={content}
                 onChange={setContent}
                 onFullscreenChange={handleFullscreenChange}
+                onAttachmentUpload={(attachment) => {
+                  // 将 Attachment 类型转换为 discussionForm.attachments 所需的格式
+                  const formattedAttachment = {
+                    id: attachment.id,
+                    file_name: attachment.file_name,
+                    file_type: attachment.mime_type,
+                    file_path: attachment.file_path
+                  };
+                  
+                  setDiscussionForm((prev) => ({
+                    ...prev,
+                    attachments: [...(prev.attachments || []), formattedAttachment]
+                  }));
+                }}
               />
             </div>
           </div>

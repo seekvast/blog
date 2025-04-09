@@ -7,6 +7,7 @@ import { MentionPicker } from "./MentionPicker";
 import { cn } from "@/lib/utils";
 import { getCaretCoordinates } from "@/lib/utils/caret";
 import { uploadFile, AttachmentType } from "@/lib/utils/upload";
+import { Attachment } from "@/types";
 
 interface EditorProps {
   className?: string;
@@ -16,6 +17,7 @@ interface EditorProps {
   onChange?: (content: string) => void;
   onSave?: () => void;
   onFullscreenChange?: (isFullscreen: boolean) => void;
+  onAttachmentUpload?: (attachment: Attachment) => void;
 }
 
 export const Editor = React.forwardRef<
@@ -33,6 +35,7 @@ export const Editor = React.forwardRef<
     onChange,
     onSave,
     onFullscreenChange,
+    onAttachmentUpload,
   }: EditorProps,
   ref
 ) {
@@ -68,7 +71,6 @@ export const Editor = React.forwardRef<
 
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
 
-  // 暴露重置方法和全屏状态
   React.useImperativeHandle(ref, () => ({
     reset: () => {
       setContent("");
@@ -237,6 +239,8 @@ export const Editor = React.forwardRef<
       const image = await uploadFile(file, attachmentType);
       const imageMarkdown = `![${file.name}](${image.url})`;
       handleContentChange(content + imageMarkdown);
+      
+      onAttachmentUpload?.(image);
     } catch (error) {
       console.error("Failed to upload image:", error);
     } finally {
@@ -280,7 +284,6 @@ export const Editor = React.forwardRef<
     });
   }, [onChange]);
 
-  // Utility function to insert mention
   const insertMention = React.useCallback(
     (content: string, user: { username: string }, cursorPosition: number) => {
       const before = content.slice(0, cursorPosition);

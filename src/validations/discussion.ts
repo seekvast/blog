@@ -94,7 +94,8 @@ export const discussionSchema = z.object({
   is_private: z.boolean().optional(),
   attachments: z
     .array(
-      z.object({
+        z.object({
+        id: z.number(),
         file_name: z.string(),
         file_path: z.string(),
         file_type: z.string(),
