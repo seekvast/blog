@@ -12,12 +12,13 @@ import type { Post } from "@/types/discussion";
 import { CommentActions } from "@/components/post/comment-actions";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { ReplyEditor } from "@/components/post/reply-editor";
+import { PostForm } from "@/validations/post";
 
 interface CommentItemProps {
   comment: Post;
   onReply: (comment: Post) => void;
   onVote: (postId: number, vote: "up" | "down") => void;
-  onSubmitReply?: (comment: Post, content: string, imageUrl?: string) => void;
+  onSubmitReply?: (replyForm: PostForm) => void;
   level?: number;
 }
 
@@ -30,6 +31,11 @@ export const CommentItem = ({
   level = 0,
 }: CommentItemProps) => {
   const [replyEditorVisiable, setReplyEditorVisiable] = React.useState(false);
+  const [replyForm, setReplyForm] = React.useState<PostForm>({
+    slug: "",
+    content: "",
+    attachments: [],
+  });
 
   const handleReplyClick = () => {
     setReplyEditorVisiable(true);
@@ -37,13 +43,23 @@ export const CommentItem = ({
 
   const handleCancelReply = () => {
     setReplyEditorVisiable(false);
+    setReplyForm({
+      slug: "",
+      content: "",
+      attachments: [],
+    });
   };
 
-  const handleSubmitReply = (content: string, imageUrl?: string) => {
+  const handleSubmitReply = (replyForm: PostForm) => {
     if (onSubmitReply) {
-      onSubmitReply(comment, content, imageUrl);
+      onSubmitReply(replyForm);
     }
     setReplyEditorVisiable(false);
+    setReplyForm({
+      slug: "",
+      content: "",
+      attachments: [],
+    });
   };
 
   return (
@@ -108,9 +124,11 @@ export const CommentItem = ({
                       "text-primary fill-primary"
                   )}
                 />
-                <span className="text-xs md:text-sm">
-                  {comment.up_votes_count}
-                </span>
+                {comment.up_votes_count > 0 && (
+                  <span className="text-xs md:text-sm">
+                    {comment.up_votes_count}
+                  </span>
+                )}
               </div>
               <div
                 className="flex items-center space-x-1 cursor-pointer"
@@ -155,13 +173,15 @@ export const CommentItem = ({
 
           {/* 回复框 */}
           {replyEditorVisiable && (
-            <AuthGuard>
-              <ReplyEditor
-                comment={comment}
-                onCancel={handleCancelReply}
-                onSubmit={handleSubmitReply}
-              />
-            </AuthGuard>
+            <div className="mt-4">
+              <AuthGuard>
+                <ReplyEditor
+                  comment={comment}
+                  onCancel={handleCancelReply}
+                  onSubmit={handleSubmitReply}
+                />
+              </AuthGuard>
+            </div>
           )}
 
           {/* 渲染子评论 */}

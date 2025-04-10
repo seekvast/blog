@@ -25,11 +25,24 @@ import { CommentEditor } from "@/components/post/comment-editor";
 import { ErrorBoundary } from "@/components/error/error-boundary";
 import Link from "next/link";
 import { PollContent } from "@/components/post/poll-content";
+import { PostForm } from "@/validations/post";
 import { Attachment } from "@/types";
 
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
 }
+
+// 表单初始值
+const initPostForm: PostForm = {
+  slug: "",
+  content: "",
+  attachments: [] as {
+    id: number;
+    file_name: string;
+    file_type: string;
+    file_path: string;
+  }[],
+};
 
 export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   const params = useParams();
@@ -37,6 +50,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   if (!slug) {
     return <div>Invalid discussion URL</div>;
   }
+  const [postForm, setPostForm] = React.useState(initPostForm);
 
   const { user } = useAuth();
   const { requireAuth } = useRequireAuth();
@@ -147,44 +161,60 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         ["discussion-posts", slug, initialDiscussion.board_id],
         (oldData) => {
           if (!oldData) return oldData;
-          
+
           // 递归更新评论及其子评论的点赞状态
           const updatePostVote = (posts: Post[]): Post[] => {
-            return posts.map(post => {
+            return posts.map((post) => {
               // 如果是目标评论，更新其点赞状态
               if (post.id === postId) {
                 // 如果已经投过相同的票，则取消投票
                 if (post.user_voted?.vote === vote) {
                   return {
                     ...post,
-                    up_votes_count: vote === "up" ? post.up_votes_count - 1 : post.up_votes_count,
-                    down_votes_count: vote === "down" ? post.down_votes_count - 1 : post.down_votes_count,
+                    up_votes_count:
+                      vote === "up"
+                        ? post.up_votes_count - 1
+                        : post.up_votes_count,
+                    down_votes_count:
+                      vote === "down"
+                        ? post.down_votes_count - 1
+                        : post.down_votes_count,
                     user_voted: null,
                   };
-                } 
+                }
                 // 如果已经投过不同的票，则切换投票
                 else if (post.user_voted) {
                   return {
                     ...post,
-                    up_votes_count: vote === "up" 
-                      ? post.up_votes_count + 1 
-                      : post.up_votes_count - (post.user_voted.vote === "up" ? 1 : 0),
-                    down_votes_count: vote === "down" 
-                      ? post.down_votes_count + 1 
-                      : post.down_votes_count - (post.user_voted.vote === "down" ? 1 : 0),
+                    up_votes_count:
+                      vote === "up"
+                        ? post.up_votes_count + 1
+                        : post.up_votes_count -
+                          (post.user_voted.vote === "up" ? 1 : 0),
+                    down_votes_count:
+                      vote === "down"
+                        ? post.down_votes_count + 1
+                        : post.down_votes_count -
+                          (post.user_voted.vote === "down" ? 1 : 0),
                     user_voted: {
                       id: postId,
                       post_id: postId,
                       vote,
                     },
                   };
-                } 
+                }
                 // 如果还没投过票，则添加投票
                 else {
                   return {
                     ...post,
-                    up_votes_count: vote === "up" ? post.up_votes_count + 1 : post.up_votes_count,
-                    down_votes_count: vote === "down" ? post.down_votes_count + 1 : post.down_votes_count,
+                    up_votes_count:
+                      vote === "up"
+                        ? post.up_votes_count + 1
+                        : post.up_votes_count,
+                    down_votes_count:
+                      vote === "down"
+                        ? post.down_votes_count + 1
+                        : post.down_votes_count,
                     user_voted: {
                       id: postId,
                       post_id: postId,
@@ -193,7 +223,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   };
                 }
               }
-              
+
               // 如果有子评论，递归更新子评论
               if (post.children && post.children.length > 0) {
                 return {
@@ -201,12 +231,12 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   children: updatePostVote(post.children),
                 };
               }
-              
+
               // 不需要更新的评论直接返回
               return post;
             });
           };
-          
+
           return {
             ...oldData,
             items: updatePostVote(oldData.items),
@@ -224,25 +254,19 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   });
 
   const commentMutation = useMutation({
-    mutationFn: async (content: string, attachment?: Attachment | null) => {
+    mutationFn: async (postForm: PostForm) => {
       return api.discussions.createPost({
         slug: currentDiscussion?.slug,
-        content,
-        parent_id: replyTo?.id,
-        attachment,
-        quote: replyTo
-          ? {
-              username: replyTo.user.username,
-              content: replyTo.content,
-            }
-          : undefined,
+        content: postForm.content,
+        parent_id: postForm.parent_id,
+        attachments: postForm.attachments,
       });
     },
     onMutate: () => {
       setIsSubmitting(true);
     },
     onSuccess: () => {
-      setCommentContent("");
+      setPostForm(initPostForm);
       setReplyTo(null);
       editorRef.current?.reset?.();
       queryClient.invalidateQueries({
@@ -266,31 +290,19 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     },
   });
 
-  const handleSubmitComment = React.useCallback(
-    (content: string) => {
-      if (!content.trim() || isSubmitting) return;
-      commentMutation.mutate(content);
-    },
-    [isSubmitting, commentMutation]
-  );
+  const handleSubmitComment = React.useCallback((postForm: PostForm) => {
+      if (!postForm.content.trim() || isSubmitting) return;
+      
+    commentMutation.mutate(postForm);
+  }, [isSubmitting, commentMutation, postForm.content]);
 
   const handleSubmitReply = React.useCallback(
-    (comment: Post, content: string, imageUrl?: string) => {
-      if (!content.trim() && !imageUrl) return;
-      
-      // 如果有图片，将图片URL添加到内容中
-      let finalContent = content;
-      if (imageUrl) {
-        finalContent = content ? `${content}\n\n![图片](${imageUrl})` : `![图片](${imageUrl})`;
-      }
-      
-      // 设置回复目标
-      setReplyTo(comment);
-      
-      // 提交回复
-      commentMutation.mutate(finalContent);
+    (replyForm: PostForm) => {
+      if (!replyForm.content.trim()) return;
+
+      commentMutation.mutate(replyForm);
     },
-    [commentMutation, setReplyTo]
+    [commentMutation]
   );
 
   const handleReplyClick = React.useCallback(
@@ -330,6 +342,19 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   React.useEffect(() => {
     setDiscussion(initialDiscussion);
   }, [initialDiscussion, setDiscussion]);
+
+  const handleAttachmentUpload = (attachment: Attachment) => {
+    const formattedAttachment = {
+      id: attachment.id,
+      file_name: attachment.file_name,
+      file_type: attachment.mime_type,
+      file_path: attachment.file_path,
+    };
+    setPostForm((prev) => ({
+      ...prev,
+      attachments: [...(prev.attachments || []), formattedAttachment],
+    }));
+  };
 
   if (!currentDiscussion) {
     return null;
@@ -441,7 +466,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               onSubmitReply={handleSubmitReply}
             />
 
-            {user && commentContent && (
+            {user && postForm.content && (
               <div className="mt-6 pt-2 pb-4 border-b">
                 <div className="flex items-start space-x-3 px-2 md:px-4 min-w-0">
                   <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
@@ -457,7 +482,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                       </span>
                     </div>
                     <div className="mt-1 text-gray-900 text-base break-words">
-                      <Preview content={commentContent} />
+                      <Preview content={postForm.content} />
                     </div>
                   </div>
                 </div>
@@ -466,8 +491,8 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
 
             <CommentEditor
               user={user || null}
-              content={commentContent}
-              onChange={setCommentContent}
+              postForm={postForm}
+              onChange={(newPostForm) => setPostForm(newPostForm)}
               onSubmit={handleSubmitComment}
               isSubmitting={isSubmitting}
               replyTo={replyTo}

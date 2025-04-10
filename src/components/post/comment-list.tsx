@@ -1,13 +1,14 @@
 import * as React from "react";
 import type { Post } from "@/types/discussion";
 import { CommentItem } from "@/components/post/comment-item";
+import { PostForm } from "@/validations/post";
 
 interface CommentListProps {
   comments: Post[];
   isLoading: boolean;
   onReply: (comment: Post) => void;
   onVote: (postId: number, vote: "up" | "down") => void;
-  onSubmitReply?: (comment: Post, content: string, imageUrl?: string) => void;
+  onSubmitReply?: (replyForm: PostForm) => void;
 }
 
 export const CommentList = React.memo(

@@ -237,10 +237,9 @@ export const Editor = React.forwardRef<
     try {
       setUploadingFiles((prev) => [...prev, file]);
       const image = await uploadFile(file, attachmentType);
+      onAttachmentUpload?.(image);
       const imageMarkdown = `![${file.name}](${image.url})`;
       handleContentChange(content + imageMarkdown);
-      
-      onAttachmentUpload?.(image);
     } catch (error) {
       console.error("Failed to upload image:", error);
     } finally {

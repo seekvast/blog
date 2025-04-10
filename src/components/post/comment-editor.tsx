@@ -4,12 +4,14 @@ import { Editor } from "@/components/editor/Editor";
 import { AttachmentType } from "@/constants/attachment-type";
 import type { Post } from "@/types/discussion";
 import type { User } from "@/types/user";
+import type { Attachment } from "@/types";
+import { PostForm } from "@/validations/post";
 
 interface CommentEditorProps {
   user: User | null;
-  content: string;
-  onChange: (content: string) => void;
-  onSubmit: (content: string) => void;
+  postForm: PostForm;
+  onChange: (postForm: PostForm) => void;
+  onSubmit: (postForm: PostForm) => void;
   isSubmitting: boolean;
   replyTo: Post | null;
   onCancelReply: () => void;
@@ -20,7 +22,7 @@ interface CommentEditorProps {
 export const CommentEditor = React.memo(
   ({
     user,
-    content,
+    postForm,
     onChange,
     onSubmit,
     isSubmitting,
@@ -30,9 +32,35 @@ export const CommentEditor = React.memo(
     openLoginModal,
   }: CommentEditorProps) => {
     const handleSubmit = React.useCallback(() => {
-      if (!content.trim() || isSubmitting) return;
-      onSubmit(content);
-    }, [content, isSubmitting, onSubmit]);
+      if (!postForm.content.trim() || isSubmitting) return;
+      onSubmit(postForm);
+    }, [isSubmitting, onSubmit, postForm]);
+
+    const handleContentChange = React.useCallback(
+        (content: string) => {
+        onChange({
+          ...postForm,
+          content,
+        });
+      },
+      [postForm, onChange]
+    );
+
+    const handleAttachmentUpload = React.useCallback(
+      (attachment: Attachment) => {
+        const formattedAttachment = {
+          id: attachment.id,
+          file_name: attachment.file_name,
+          file_type: attachment.mime_type,
+          file_path: attachment.file_path,
+        };
+        onChange({
+          ...postForm,
+          attachments: [...(postForm.attachments || []), formattedAttachment],
+        });
+      },
+      [postForm, onChange]
+    );
 
     if (!user) {
       return (
@@ -73,15 +101,16 @@ export const CommentEditor = React.memo(
           placeholder={
             replyTo ? `回复 @${replyTo.user.username}...` : "写下你的评论..."
           }
-          initialContent={content}
-          onChange={onChange}
+          initialContent={postForm.content}
+          onChange={handleContentChange}
+          onAttachmentUpload={handleAttachmentUpload}
         />
         <div className="mt-2 flex items-center justify-between">
           <div></div>
           <Button
             size="sm"
             onClick={handleSubmit}
-            disabled={isSubmitting || !content.trim()}
+            disabled={isSubmitting || !postForm.content.trim()}
           >
             {isSubmitting ? "发送中..." : "发送"}
           </Button>

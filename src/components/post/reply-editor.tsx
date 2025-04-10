@@ -8,11 +8,12 @@ import { toast } from "@/components/ui/use-toast";
 import { ImageUpload } from "@/components/ui/image-upload";
 import type { Post } from "@/types/discussion";
 import type { Attachment } from "@/types";
+import { PostForm } from "@/validations/post";
 
 interface ReplyEditorProps {
   comment: Post;
   onCancel: () => void;
-  onSubmit: (content: string, imageUrl?: string) => void;
+  onSubmit: (replyForm: PostForm) => void;
   placeholder?: string;
 }
 
@@ -22,12 +23,17 @@ export const ReplyEditor = ({
   onSubmit,
   placeholder,
 }: ReplyEditorProps) => {
-  const [content, setContent] = React.useState("");
-  const [imageUrl, setImageUrl] = React.useState<string | null>(null);
+  const [replyForm, setReplyForm] = React.useState<PostForm>({
+    slug: comment.discussion_slug,
+    content: "",
+    attachments: [],
+  });
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
+  const [imageUrl, setImageUrl] = React.useState<string | undefined>(undefined);
+
   const handleSubmit = async () => {
-    if (!content.trim() && !imageUrl) {
+    if (!replyForm.content.trim() && !imageUrl) {
       toast({
         title: "内容不能为空",
         description: "请输入回复内容或上传图片",
@@ -38,20 +44,59 @@ export const ReplyEditor = ({
 
     setIsSubmitting(true);
     try {
-      onSubmit(content, imageUrl || undefined);
-      setContent("");
-      setImageUrl(null);
+      let finalContent = replyForm.content;
+      if (imageUrl) {
+        finalContent = replyForm.content
+          ? `${replyForm.content}\n\n![图片](${imageUrl})`
+          : `![图片](${imageUrl})`;
+      }
+      onSubmit({
+        ...replyForm,
+        content: finalContent,
+      });
+      setReplyForm({
+        slug: comment.discussion_slug,
+        content: "",
+        attachments: [],
+      });
+    } catch (error) {
+      toast({
+        title: "回复失败",
+        description: "请稍后重试",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setReplyForm({
+      ...replyForm,
+      content: e.target.value,
+    });
+  };
+
   const handleUploadSuccess = (attachment: Attachment) => {
-    setImageUrl(attachment.url);
+    setImageUrl(`${attachment.url}`);
+    const formattedAttachment = {
+      id: attachment.id,
+      file_name: attachment.file_name,
+      file_type: attachment.mime_type,
+      file_path: attachment.file_path,
+    };
+
+    setReplyForm({
+      ...replyForm,
+      attachments: [...(replyForm.attachments || []), formattedAttachment],
+    });
   };
 
   const handleRemoveImage = () => {
-    setImageUrl(null);
+    setReplyForm({
+      ...replyForm,
+      attachments: [],
+    });
   };
 
   return (
@@ -59,8 +104,8 @@ export const ReplyEditor = ({
       <div className="flex items-start space-x-2">
         <Textarea
           placeholder={placeholder || `回复 @${comment.user.username}`}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
+          value={replyForm.content}
+          onChange={handleContentChange}
           className="flex-1"
         />
       </div>
@@ -94,15 +139,15 @@ export const ReplyEditor = ({
             type="button"
             onClick={handleSubmit}
             size="sm"
-            disabled={isSubmitting || (!content.trim() && !imageUrl)}
+            disabled={isSubmitting || (!replyForm.content.trim() && !imageUrl)}
           >
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                提交中
+                发送中...
               </>
             ) : (
-              "回复"
+              "发送"
             )}
           </Button>
         </div>
