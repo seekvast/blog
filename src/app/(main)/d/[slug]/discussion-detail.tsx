@@ -8,13 +8,16 @@ import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import type { Discussion, Pagination } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Star, Bookmark } from "lucide-react";
+import { ChevronUp, X, ChevronDown, Star, Bookmark } from "lucide-react";
+import { AuthGuard } from "@/components/auth/auth-guard";
+import { PostNavigator } from "@/components/post/post-navigator";
 import { useLoginModal } from "@/components/providers/login-modal-provider";
 import { PostContent } from "@/components/post/post-content";
 import { api } from "@/lib/api";
 import { Preview } from "@/components/editor/Preview";
 import { toast } from "@/components/ui/use-toast";
 import { useState } from "react";
+import { format } from "date-fns";
 import {
   useMutation,
   useQueryClient,
@@ -33,7 +36,6 @@ import { PollContent } from "@/components/post/poll-content";
 import { PostForm } from "@/validations/post";
 import { Attachment } from "@/types";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
-import { MessageSquare, X, ChevronDown } from "lucide-react";
 
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
@@ -170,84 +172,101 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         vote,
       }),
     onSuccess: (_, { postId, vote }) => {
-      queryClient.setQueryData<Pagination<Post>>(
+      queryClient.setQueryData(
         ["discussion-posts", slug, initialDiscussion.board_id],
-        (oldData) => {
+        (oldData: any) => {
           if (!oldData) return oldData;
-          const updatePostVote = (posts: Post[]): Post[] => {
-            return posts.map((post) => {
-              if (post.id === postId) {
-                if (post.user_voted?.vote === vote) {
+
+          // 创建更新后的pages数组
+          const newPages = oldData.pages.map((page) => {
+            // 定义一个递归函数来更新帖子及其子帖子
+            const updatePostVote = (posts: Post[]): Post[] => {
+              return posts.map((post) => {
+                if (post.id === postId) {
+                  if (post.user_voted?.vote === vote) {
+                    return {
+                      ...post,
+                      up_votes_count:
+                        vote === "up"
+                          ? post.up_votes_count - 1
+                          : post.up_votes_count,
+                      down_votes_count:
+                        vote === "down"
+                          ? post.down_votes_count - 1
+                          : post.down_votes_count,
+                      user_voted: null,
+                    };
+                  } else if (post.user_voted) {
+                    console.log("post........   ", post);
+                    return {
+                      ...post,
+                      up_votes_count:
+                        vote === "up"
+                          ? post.up_votes_count + 1
+                          : post.up_votes_count -
+                            (post.user_voted.vote === "up" ? 1 : 0),
+                      down_votes_count:
+                        vote === "down"
+                          ? post.down_votes_count + 1
+                          : post.down_votes_count -
+                            (post.user_voted.vote === "down" ? 1 : 0),
+                      user_voted: {
+                        id: postId,
+                        post_id: postId,
+                        vote,
+                      },
+                    };
+                  } else {
+                    return {
+                      ...post,
+                      up_votes_count:
+                        vote === "up"
+                          ? post.up_votes_count + 1
+                          : post.up_votes_count,
+                      down_votes_count:
+                        vote === "down"
+                          ? post.down_votes_count + 1
+                          : post.down_votes_count,
+                      user_voted: {
+                        id: postId,
+                        post_id: postId,
+                        vote,
+                      },
+                    };
+                  }
+                }
+
+                // 处理子评论
+                if (post.children && post.children.length > 0) {
                   return {
                     ...post,
-                    up_votes_count:
-                      vote === "up"
-                        ? post.up_votes_count - 1
-                        : post.up_votes_count,
-                    down_votes_count:
-                      vote === "down"
-                        ? post.down_votes_count - 1
-                        : post.down_votes_count,
-                    user_voted: null,
-                  };
-                } else if (post.user_voted) {
-                  return {
-                    ...post,
-                    up_votes_count:
-                      vote === "up"
-                        ? post.up_votes_count + 1
-                        : post.up_votes_count -
-                          (post.user_voted.vote === "up" ? 1 : 0),
-                    down_votes_count:
-                      vote === "down"
-                        ? post.down_votes_count + 1
-                        : post.down_votes_count -
-                          (post.user_voted.vote === "down" ? 1 : 0),
-                    user_voted: {
-                      id: postId,
-                      post_id: postId,
-                      vote,
-                    },
-                  };
-                } else {
-                  return {
-                    ...post,
-                    up_votes_count:
-                      vote === "up"
-                        ? post.up_votes_count + 1
-                        : post.up_votes_count,
-                    down_votes_count:
-                      vote === "down"
-                        ? post.down_votes_count + 1
-                        : post.down_votes_count,
-                    user_voted: {
-                      id: postId,
-                      post_id: postId,
-                      vote,
-                    },
+                    children: updatePostVote(post.children),
                   };
                 }
-              }
-              if (post.children && post.children.length > 0) {
-                return {
-                  ...post,
-                  children: updatePostVote(post.children),
-                };
-              }
-              return post;
-            });
-          };
 
+                return post;
+              });
+            };
+
+            // 返回更新后的页面
+            return {
+              ...page,
+              items: updatePostVote(page.items),
+            };
+          });
+
+          // 返回更新后的数据
           return {
             ...oldData,
-            items: updatePostVote(oldData.items),
+            pages: newPages,
           };
         }
       );
     },
     onError: (error) => {
+      console.error("Failed to post comment:", error);
       toast({
-        title: "投票失败",
+        title: "失败",
         description: "请稍后重试",
         variant: "destructive",
       });
@@ -361,14 +380,16 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     }));
   };
 
+  // 计算总帖子数量（主贴 + 评论）
+  const totalPosts = allComments.length + 1; // +1 是因为要算上主贴
   if (!currentDiscussion) {
     return null;
   }
 
   return (
     <ErrorBoundary>
-      <div className="flex flex-col lg:flex-row gap-4 md:gap-6 mb-4 md:mb-8">
-        <div className="flex-1 min-w-0">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto] gap-4 md:gap-6 mb-4 md:mb-8">
+        <div className="min-w-0">
           <div className="border-b pb-4 flex-1 max-w-4xl">
             <div className="w-full">
               <h2 className="text-xl md:text-2xl font-medium overflow-hidden text-ellipsis whitespace-nowrap">
@@ -494,7 +515,15 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => setShowCommentEditor(false)}
+                        onClick={() => {
+                          setShowCommentEditor(false);
+                          setPostForm({
+                            slug: "",
+                            parent_id: 0,
+                            content: "",
+                            attachments: [],
+                          });
+                        }}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -548,7 +577,8 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           </div>
         </div>
 
-        <aside className="hidden lg:block sticky top-4 w-full lg:w-40 xl:w-60 flex-shrink-0 pl-2">
+        {/* 侧边栏 - 使用sticky定位 */}
+        <aside className="hidden lg:block sticky top-16 w-full lg:w-40 xl:w-60 self-start pl-2">
           <div className="flex w-full flex-col space-y-3">
             <Button
               variant={isFollowed ? "default" : "secondary"}
@@ -582,20 +612,30 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 {isBookmarked ? "已添加书签" : "书签"}
               </div>
             </Button>
-            <Button
-              className="w-full justify-between bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => {
-                if (!user) {
-                  openLoginModal();
-                  return;
-                }
-                setShowCommentEditor(true);
-              }}
-            >
-              评论
-              <ChevronDown className="h-4 w-4" />
-            </Button>
+            <AuthGuard>
+              <Button
+                className="w-full justify-between bg-primary text-primary-foreground hover:bg-primary/90"
+                onClick={() => {
+                  if (!user) {
+                    openLoginModal();
+                    return;
+                  }
+                  setShowCommentEditor(true);
+                }}
+              >
+                评论
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </AuthGuard>
           </div>
+
+          {/* 帖子导航组件 */}
+          <PostNavigator
+            totalPosts={comments.pages?.[0]?.total || 0}
+            discussionDate={initialDiscussion.created_at}
+            hasUnreadPosts={false}
+            className="mt-4"
+          />
         </aside>
       </div>
     </ErrorBoundary>

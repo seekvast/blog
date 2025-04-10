@@ -145,10 +145,10 @@ export const ReplyEditor = ({
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                发送中...
+                保存中...
               </>
             ) : (
-              "发送"
+              "确定"
             )}
           </Button>
         </div>

@@ -97,7 +97,7 @@ export const CommentEditor = React.memo(
             onClick={handleSubmit}
             disabled={isSubmitting || !postForm.content.trim()}
           >
-            {isSubmitting ? "发送中..." : "发送"}
+            {isSubmitting ? "保存中..." : "确定"}
           </Button>
         </div>
       </div>
