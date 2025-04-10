@@ -37,7 +37,7 @@ export const CommentEditor = React.memo(
     }, [isSubmitting, onSubmit, postForm]);
 
     const handleContentChange = React.useCallback(
-        (content: string) => {
+      (content: string) => {
         onChange({
           ...postForm,
           content,
@@ -78,22 +78,7 @@ export const CommentEditor = React.memo(
     }
 
     return (
-      <div id="comment" className="flex flex-col mt-6 min-h-[260px]">
-        {replyTo && (
-          <div className="mb-2 px-4 py-2 bg-muted/50 rounded-md flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">
-              回复 @{replyTo.user.username}
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 px-2"
-              onClick={onCancelReply}
-            >
-              取消回复
-            </Button>
-          </div>
-        )}
+      <div id="comment" className="flex flex-col min-h-[260px]">
         <Editor
           ref={editorRef}
           className="flex-grow"

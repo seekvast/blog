@@ -25,6 +25,7 @@ export const ReplyEditor = ({
 }: ReplyEditorProps) => {
   const [replyForm, setReplyForm] = React.useState<PostForm>({
     slug: comment.discussion_slug,
+    parent_id: comment.id,
     content: "",
     attachments: [],
   });

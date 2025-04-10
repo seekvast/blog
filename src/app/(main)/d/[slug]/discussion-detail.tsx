@@ -15,7 +15,12 @@ import { api } from "@/lib/api";
 import { Preview } from "@/components/editor/Preview";
 import { toast } from "@/components/ui/use-toast";
 import { useState } from "react";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useQuery,
+  useInfiniteQuery,
+} from "@tanstack/react-query";
 import { cn, debounce } from "@/lib/utils";
 import type { Post } from "@/types/discussion";
 import { useRequireAuth } from "@/hooks/use-require-auth";
@@ -27,6 +32,8 @@ import Link from "next/link";
 import { PollContent } from "@/components/post/poll-content";
 import { PostForm } from "@/validations/post";
 import { Attachment } from "@/types";
+import { InfiniteScroll } from "@/components/ui/infinite-scroll";
+import { MessageSquare, X, ChevronDown } from "lucide-react";
 
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
@@ -57,7 +64,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   const { openLoginModal } = useLoginModal();
   const { currentDiscussion, setDiscussion } = useDiscussionStore();
 
-  const [commentContent, setCommentContent] = React.useState("");
   const [replyTo, setReplyTo] = React.useState<Post | null>(null);
   const editorRef = React.useRef<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,40 +73,47 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   const [isFollowed, setIsFollowed] = useState(
     initialDiscussion?.discussion_user?.subscription === "follow"
   );
-
+  const [showCommentEditor, setShowCommentEditor] = useState(false);
   const queryClient = useQueryClient();
-
-  // 使用 React Query 获取评论列表
   const {
     data: comments = {
-      items: [],
-      code: 0,
-      total: 0,
-      per_page: 0,
-      current_page: 0,
-      last_page: 0,
-      message: "",
+      pages: [],
+      pageParams: [],
     },
     isLoading,
     error: commentsError,
-  } = useQuery<Pagination<Post>>({
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["discussion-posts", slug, initialDiscussion?.board_id],
-    queryFn: async () => {
+    queryFn: async ({ pageParam = 1 }) => {
       try {
         return await api.discussions.posts({
           slug,
           board_id: initialDiscussion.board_id,
+          page: pageParam,
         });
       } catch (error) {
         console.error("Failed to fetch comments:", error);
         throw error;
       }
     },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.current_page < lastPage.last_page) {
+        return lastPage.current_page + 1;
+      }
+      return undefined;
+    },
     enabled: !!currentDiscussion,
     staleTime: 10 * 1000,
   });
 
-  // 使用 useMutation 优化书签操作
+  const allComments = React.useMemo(() => {
+    return comments.pages?.flatMap((page) => page.items) || [];
+  }, [comments.pages]);
+
   const bookmarkMutation = useMutation({
     mutationFn: () =>
       api.discussions.saveBookmark({
@@ -161,13 +174,9 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         ["discussion-posts", slug, initialDiscussion.board_id],
         (oldData) => {
           if (!oldData) return oldData;
-
-          // 递归更新评论及其子评论的点赞状态
           const updatePostVote = (posts: Post[]): Post[] => {
             return posts.map((post) => {
-              // 如果是目标评论，更新其点赞状态
               if (post.id === postId) {
-                // 如果已经投过相同的票，则取消投票
                 if (post.user_voted?.vote === vote) {
                   return {
                     ...post,
@@ -181,9 +190,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                         : post.down_votes_count,
                     user_voted: null,
                   };
-                }
-                // 如果已经投过不同的票，则切换投票
-                else if (post.user_voted) {
+                } else if (post.user_voted) {
                   return {
                     ...post,
                     up_votes_count:
@@ -202,9 +209,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                       vote,
                     },
                   };
-                }
-                // 如果还没投过票，则添加投票
-                else {
+                } else {
                   return {
                     ...post,
                     up_votes_count:
@@ -223,16 +228,12 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   };
                 }
               }
-
-              // 如果有子评论，递归更新子评论
               if (post.children && post.children.length > 0) {
                 return {
                   ...post,
                   children: updatePostVote(post.children),
                 };
               }
-
-              // 不需要更新的评论直接返回
               return post;
             });
           };
@@ -269,6 +270,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       setPostForm(initPostForm);
       setReplyTo(null);
       editorRef.current?.reset?.();
+      // 使用invalidateQueries刷新无限滚动查询
       queryClient.invalidateQueries({
         queryKey: ["discussion-posts", slug, initialDiscussion.board_id],
       });
@@ -290,11 +292,14 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     },
   });
 
-  const handleSubmitComment = React.useCallback((postForm: PostForm) => {
+  const handleSubmitComment = React.useCallback(
+    (postForm: PostForm) => {
       if (!postForm.content.trim() || isSubmitting) return;
-      
-    commentMutation.mutate(postForm);
-  }, [isSubmitting, commentMutation, postForm.content]);
+
+      commentMutation.mutate(postForm);
+    },
+    [isSubmitting, commentMutation, postForm.content]
+  );
 
   const handleSubmitReply = React.useCallback(
     (replyForm: PostForm) => {
@@ -458,48 +463,88 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           </div>
 
           <div className="mt-4">
-            <CommentList
-              comments={comments.items}
-              isLoading={isLoading}
-              onReply={handleReplyClick}
-              onVote={handleVote}
-              onSubmitReply={handleSubmitReply}
-            />
+            {/* 评论列表 */}
+            <div className={cn(showCommentEditor && "mb-[200px]")}>
+              <InfiniteScroll
+                hasMore={hasNextPage}
+                loading={isFetchingNextPage}
+                onLoadMore={fetchNextPage}
+              >
+                <CommentList
+                  comments={allComments}
+                  isLoading={isLoading}
+                  onReply={handleReplyClick}
+                  onVote={handleVote}
+                  onSubmitReply={handleSubmitReply}
+                />
+              </InfiniteScroll>
+            </div>
 
-            {user && postForm.content && (
-              <div className="mt-6 pt-2 pb-4 border-b">
-                <div className="flex items-start space-x-3 px-2 md:px-4 min-w-0">
-                  <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
-                    <AvatarImage src={user.avatar_url} />
-                    <AvatarFallback>
-                      {user.nickname?.[0] || user.username?.[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0 overflow-hidden">
-                    <div className="flex items-center">
-                      <span className="font-medium text-sm md:text-base truncate">
-                        {user.nickname || user.username}
-                      </span>
+            {/* 评论编辑器 */}
+            {showCommentEditor && (
+              <div className="fixed inset-0 flex flex-col justify-end animate-in fade-in duration-300 w-full z-50">
+                <div
+                  className="bg-background animate-in shadow-[0_-4px_15px_rgba(0,0,0,0.12)] slide-in-from-bottom duration-300"
+                  style={{ position: "relative", zIndex: 50 }}
+                >
+                  <div className="p-4 max-w-4xl mx-auto">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-medium">发表评论</h3>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => setShowCommentEditor(false)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
                     </div>
-                    <div className="mt-1 text-gray-900 text-base break-words">
-                      <Preview content={postForm.content} />
-                    </div>
+
+                    {/* 评论预览 */}
+                    {user &&
+                      postForm.content &&
+                      postForm.content.trim().length > 0 && (
+                        <div className="mb-6 pt-2 pb-4 border-b">
+                          <div className="flex items-start space-x-3 px-2 md:px-4 min-w-0">
+                            <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
+                              <AvatarImage src={user.avatar_url} />
+                              <AvatarFallback>
+                                {user.nickname?.[0] || user.username?.[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0 overflow-hidden">
+                              <div className="flex items-center">
+                                <span className="font-medium text-sm md:text-base truncate">
+                                  {user.nickname || user.username}
+                                </span>
+                              </div>
+                              <div className="mt-1 text-gray-900 text-base break-words">
+                                <Preview content={postForm.content} />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    <CommentEditor
+                      user={user || null}
+                      postForm={postForm}
+                      onChange={(newPostForm) => {
+                        setPostForm({ ...newPostForm });
+                      }}
+                      onSubmit={(form) => {
+                        handleSubmitComment(form);
+                        setShowCommentEditor(false);
+                      }}
+                      isSubmitting={isSubmitting}
+                      replyTo={replyTo}
+                      onCancelReply={() => setReplyTo(null)}
+                      editorRef={editorRef}
+                      openLoginModal={openLoginModal}
+                    />
                   </div>
                 </div>
               </div>
             )}
-
-            <CommentEditor
-              user={user || null}
-              postForm={postForm}
-              onChange={(newPostForm) => setPostForm(newPostForm)}
-              onSubmit={handleSubmitComment}
-              isSubmitting={isSubmitting}
-              replyTo={replyTo}
-              onCancelReply={() => setReplyTo(null)}
-              editorRef={editorRef}
-              openLoginModal={openLoginModal}
-            />
           </div>
         </div>
 
@@ -522,7 +567,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   : "关注"}
               </div>
             </Button>
-
             <Button
               variant={isBookmarked ? "default" : "secondary"}
               className="w-full justify-between"
@@ -537,6 +581,19 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 />
                 {isBookmarked ? "已添加书签" : "书签"}
               </div>
+            </Button>
+            <Button
+              className="w-full justify-between bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={() => {
+                if (!user) {
+                  openLoginModal();
+                  return;
+                }
+                setShowCommentEditor(true);
+              }}
+            >
+              评论
+              <ChevronDown className="h-4 w-4" />
             </Button>
           </div>
         </aside>
