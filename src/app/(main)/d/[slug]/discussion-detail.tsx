@@ -473,14 +473,20 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             )}
           </div>
 
-          <div className="flex items-center justify-between border-b">
+          <div className="flex items-center justify-between border-b text-sm  text-gray-500">
             <div className="flex items-center pb-2">
               <span>评论</span>
-              <span className="w-2"></span>
-              <span className="text-blue-600">
+              <span className="pl-2 text-blue-600">
                 {currentDiscussion.comment_count - 1}
               </span>
             </div>
+
+            <button
+              className="cursor-pointer hover:text-primary"
+              onClick={() => setShowCommentEditor(true)}
+            >
+              回复
+            </button>
           </div>
 
           <div className="mt-4">
@@ -578,7 +584,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         </div>
 
         {/* 侧边栏 - 使用sticky定位 */}
-        <aside className="hidden lg:block sticky top-16 w-full lg:w-40 xl:w-60 self-start pl-2">
+        <aside className="hidden lg:block sticky top-20 w-full lg:w-40 xl:w-60 self-start pl-2">
           <div className="flex w-full flex-col space-y-3">
             <Button
               variant={isFollowed ? "default" : "secondary"}

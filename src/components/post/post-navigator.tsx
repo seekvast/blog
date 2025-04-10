@@ -21,42 +21,27 @@ export function PostNavigator({
 }: PostNavigatorProps) {
   const [currentPostIndex, setCurrentPostIndex] = React.useState(1);
   const [isDragging, setIsDragging] = React.useState(false);
+  const [thumbPositionPercentage, setThumbPositionPercentage] =
+    React.useState(0);
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const sliderRef = React.useRef<HTMLDivElement>(null);
   const sliderThumbRef = React.useRef<HTMLDivElement>(null);
-  const containerRef = React.useRef<HTMLDivElement>(null);
 
-  // 格式化讨论日期
-  const formattedDate = React.useMemo(() => {
-    return format(new Date(discussionDate), "MMMM yyyy", { locale: zhCN });
-  }, [discussionDate]);
+  // 格式化日期
+  const formattedDate = format(new Date(discussionDate || ""), "MMMM yyyy", {
+    locale: zhCN,
+  });
 
   // 计算滑块高度百分比
   const thumbHeightPercentage = React.useMemo(() => {
-    // 滑块最小占比20%，最大占比80%
     const minPercentage = 20;
     const maxPercentage = 80;
-
-    // 楼层数越少，滑块越大
-    // 当楼层数为1时，滑块占比为maxPercentage
-    // 当楼层数为50或更多时，滑块占比为minPercentage
     const percentage = Math.max(
       minPercentage,
       maxPercentage - ((totalPosts - 1) / 49) * (maxPercentage - minPercentage)
     );
-
     return Math.min(percentage, maxPercentage);
   }, [totalPosts]);
-
-  // 计算滑块位置百分比（基于当前楼层）
-  const thumbPositionPercentage = React.useMemo(() => {
-    if (totalPosts <= 1) return 0;
-
-    // 计算可滚动范围（考虑滑块自身高度）
-    const scrollableRange = 100 - thumbHeightPercentage;
-
-    // 计算当前位置百分比
-    return ((currentPostIndex - 1) / (totalPosts - 1)) * scrollableRange;
-  }, [currentPostIndex, totalPosts, thumbHeightPercentage]);
 
   // 滚动到顶部（主贴）
   const scrollToTop = () => {
@@ -71,105 +56,119 @@ export function PostNavigator({
     });
   };
 
-  // 根据点击位置滚动到指定楼层
-  const handleSliderClick = (e: React.MouseEvent) => {
-    if (!sliderRef.current || isDragging) return;
+  // 处理滑块点击
+  const handleSliderClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!sliderRef.current) return;
 
-    const sliderRect = sliderRef.current.getBoundingClientRect();
-    const thumbHeight = (thumbHeightPercentage / 100) * sliderRect.height;
-    const clickY = e.clientY - sliderRect.top;
+    const rect = sliderRef.current.getBoundingClientRect();
+    const offsetY = e.clientY - rect.top;
+    const percentage = (offsetY / rect.height) * 100;
 
-    // 计算可滚动范围
-    const scrollableHeight = sliderRect.height - thumbHeight;
-
-    // 如果点击位置在滑块范围内，不做处理
-    const thumbTop = (thumbPositionPercentage / 100) * sliderRect.height;
-    if (clickY >= thumbTop && clickY <= thumbTop + thumbHeight) {
-      return;
-    }
-
-    // 计算目标位置百分比
-    let targetPercentage;
-    if (clickY < thumbTop) {
-      // 点击位置在滑块上方
-      targetPercentage = Math.max(0, clickY / scrollableHeight);
-    } else {
-      // 点击位置在滑块下方
-      targetPercentage = Math.min(1, clickY / scrollableHeight);
-    }
-
-    // 计算目标楼层
-    const targetIndex = Math.max(
-      1,
-      Math.min(Math.round(targetPercentage * (totalPosts - 1) + 1), totalPosts)
+    // 限制百分比在有效范围内
+    const limitedPercentage = Math.max(
+      0,
+      Math.min(100 - thumbHeightPercentage, percentage)
     );
+    setThumbPositionPercentage(limitedPercentage);
 
-    // 更新当前楼层
-    setCurrentPostIndex(targetIndex);
+    // 计算对应的帖子索引
+    const postIndex = Math.max(
+      1,
+      Math.min(
+        totalPosts,
+        Math.round(
+          (limitedPercentage / (100 - thumbHeightPercentage)) *
+            (totalPosts - 1) +
+            1
+        )
+      )
+    );
+    setCurrentPostIndex(postIndex);
 
-    // 滚动到对应位置
+    // 计算滚动位置
     const scrollHeight =
       document.documentElement.scrollHeight - window.innerHeight;
-    const targetPosition =
-      ((targetIndex - 1) / (totalPosts - 1)) * scrollHeight;
+    const scrollPosition =
+      (limitedPercentage / (100 - thumbHeightPercentage)) * scrollHeight;
 
+    // 使用平滑滚动
     window.scrollTo({
-      top: targetPosition,
+      top: scrollPosition,
       behavior: "smooth",
     });
   };
 
-  // 处理滑块拖动开始
+  // 处理拖动开始
   const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
-    e.preventDefault();
     setIsDragging(true);
+
+    // 阻止默认事件，防止文本选择
+    e.preventDefault();
+
+    // 添加拖动时的过渡效果和鼠标样式
+    if (sliderThumbRef.current) {
+      sliderThumbRef.current.style.transition = "none";
+    }
+
+    // 设置全局鼠标样式
+    document.body.style.cursor = "ns-resize";
   };
 
-  // 处理滑块拖动
-  const handleDrag = React.useCallback(
-    (clientY: number) => {
-      if (!isDragging || !sliderRef.current) return;
+  // 处理拖动
+  const handleDrag = (clientY: number) => {
+    if (!isDragging || !sliderRef.current) return;
 
-      const sliderRect = sliderRef.current.getBoundingClientRect();
-      const thumbHeight = (thumbHeightPercentage / 100) * sliderRect.height;
+    const rect = sliderRef.current.getBoundingClientRect();
+    const offsetY = clientY - rect.top;
+    const percentage = (offsetY / rect.height) * 100;
 
-      // 计算可滚动范围
-      const scrollableHeight = sliderRect.height - thumbHeight;
+    // 限制百分比在有效范围内
+    const limitedPercentage = Math.max(
+      0,
+      Math.min(100 - thumbHeightPercentage, percentage)
+    );
+    setThumbPositionPercentage(limitedPercentage);
 
-      // 计算拖动位置百分比（限制在0-1之间）
-      const dragPercentage = Math.max(
-        0,
-        Math.min((clientY - sliderRect.top) / scrollableHeight, 1)
-      );
+    // 计算对应的帖子索引
+    const postIndex = Math.max(
+      1,
+      Math.min(
+        totalPosts,
+        Math.round(
+          (limitedPercentage / (100 - thumbHeightPercentage)) *
+            (totalPosts - 1) +
+            1
+        )
+      )
+    );
+    setCurrentPostIndex(postIndex);
 
-      // 计算目标楼层
-      const targetIndex = Math.max(
-        1,
-        Math.min(Math.round(dragPercentage * (totalPosts - 1) + 1), totalPosts)
-      );
+    // 计算滚动位置
+    const scrollHeight =
+      document.documentElement.scrollHeight - window.innerHeight;
+    const scrollPosition =
+      (limitedPercentage / (100 - thumbHeightPercentage)) * scrollHeight;
 
-      // 更新当前楼层
-      setCurrentPostIndex(targetIndex);
+    // 直接滚动，拖动时不使用平滑效果
+    window.scrollTo({
+      top: scrollPosition,
+    });
+  };
 
-      // 滚动到对应位置
-      const scrollHeight =
-        document.documentElement.scrollHeight - window.innerHeight;
-      const targetPosition =
-        ((targetIndex - 1) / (totalPosts - 1)) * scrollHeight;
-
-      window.scrollTo({
-        top: targetPosition,
-      });
-    },
-    [isDragging, totalPosts, thumbHeightPercentage]
-  );
-
-  // 处理滑块拖动结束
-  const handleDragEnd = React.useCallback(() => {
+  // 处理拖动结束
+  const handleDragEnd = () => {
     setIsDragging(false);
-  }, []);
 
-  // 监听滚动事件，更新当前帖子索引
+    // 恢复过渡效果和鼠标样式
+    if (sliderThumbRef.current) {
+      sliderThumbRef.current.style.transition = "top 0.2s ease-out";
+    }
+
+    // 恢复全局鼠标样式
+    document.body.style.cursor = "";
+  };
+
+  // 监听滚动事件
   React.useEffect(() => {
     const handleScroll = () => {
       if (isDragging) return;
@@ -177,45 +176,68 @@ export function PostNavigator({
       const scrollTop = window.scrollY;
       const scrollHeight =
         document.documentElement.scrollHeight - window.innerHeight;
-      const scrollPercentage = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
+      const scrollPercentage = (scrollTop / scrollHeight) * 100;
 
-      // 更新当前帖子索引
-      const newIndex = Math.max(
-        1,
-        Math.min(
-          Math.round(scrollPercentage * (totalPosts - 1) + 1),
-          totalPosts
-        )
+      // 计算滑块位置
+      const thumbPosition = Math.min(
+        100 - thumbHeightPercentage,
+        (scrollPercentage * (100 - thumbHeightPercentage)) / 100
       );
 
-      setCurrentPostIndex(newIndex);
+      // 使用平滑过渡
+      if (sliderThumbRef.current) {
+        sliderThumbRef.current.style.transition = "top 0.2s ease-out";
+      }
+
+      setThumbPositionPercentage(thumbPosition);
+
+      // 计算当前帖子索引
+      const currentIndex = Math.max(
+        1,
+        Math.min(
+          totalPosts,
+          Math.round((scrollPercentage / 100) * (totalPosts - 1) + 1)
+        )
+      );
+      setCurrentPostIndex(currentIndex);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isDragging, totalPosts]);
+  }, [isDragging, thumbHeightPercentage, totalPosts]);
 
-  // 监听鼠标移动和触摸移动事件
+  // 监听鼠标和触摸事件
   React.useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => handleDrag(e.clientY);
+    const handleMouseMove = (e: MouseEvent) => {
+      handleDrag(e.clientY);
+    };
+
     const handleTouchMove = (e: TouchEvent) => {
       if (e.touches.length > 0) {
         handleDrag(e.touches[0].clientY);
       }
     };
 
+    const handleMouseUp = () => {
+      handleDragEnd();
+    };
+
+    const handleTouchEnd = () => {
+      handleDragEnd();
+    };
+
     if (isDragging) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("touchmove", handleTouchMove);
-      document.addEventListener("mouseup", handleDragEnd);
-      document.addEventListener("touchend", handleDragEnd);
+      document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener("touchend", handleTouchEnd);
     }
 
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("touchmove", handleTouchMove);
-      document.removeEventListener("mouseup", handleDragEnd);
-      document.removeEventListener("touchend", handleDragEnd);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("touchend", handleTouchEnd);
     };
   }, [isDragging, handleDrag, handleDragEnd]);
 
@@ -232,13 +254,11 @@ export function PostNavigator({
           <span>最早内容</span>
         </button>
 
-        {/* 垂直线和滑块 - 靠左对齐，与ChevronUp图标对齐 */}
         <div className="relative ml-2" style={{ height: "200px" }}>
-          {/* 垂直线（轨道） */}
           <div
             ref={sliderRef}
             onClick={handleSliderClick}
-            className="absolute inset-0 bg-gray-200 cursor-pointer rounded-sm"
+            className="absolute inset-0 bg-gray-200 cursor-pointer rounded-sm hover:bg-gray-300 transition-colors"
             style={{ width: "4px" }}
           />
 
@@ -248,21 +268,36 @@ export function PostNavigator({
             onMouseDown={handleDragStart}
             onTouchStart={handleDragStart}
             className={cn(
-              "absolute left-0 right-0 bg-blue-700 rounded-sm cursor-grab",
-              isDragging ? "cursor-grabbing" : ""
+              "absolute left-0 bg-primary rounded-sm transition-shadow",
+              isDragging
+                ? "cursor-grabbing shadow-md"
+                : "cursor-ns-resize hover:bg-blue-600"
             )}
             style={{
               width: "5px",
               height: `${thumbHeightPercentage}%`,
               top: `${thumbPositionPercentage}%`,
+              transition: "top 0.2s ease-out, background-color 0.2s",
             }}
           />
-          {/* 右侧帖子信息 */}
-          <div className="flex flex-col justify-center ml-4">
-            <div className="text-base font-medium text-gray-800">
+
+          {/* 右侧帖子信息 - 跟随滑块一起滑动 */}
+          <div
+            className="absolute flex flex-col justify-center ml-4"
+            style={{
+              top: `calc(${thumbPositionPercentage}% + ${
+                thumbHeightPercentage / 2
+              }% - 1.5rem)`,
+              left: "5px",
+              transition: "top 0.2s ease-out",
+            }}
+          >
+            <div className="text-base font-medium text-gray-800 whitespace-nowrap">
               {currentPostIndex} / {totalPosts} 楼
             </div>
-            <div className="text-sm text-gray-500 mt-1">{formattedDate}</div>
+            <div className="text-sm text-gray-500 mt-1 whitespace-nowrap">
+              {formattedDate}
+            </div>
           </div>
         </div>
 
