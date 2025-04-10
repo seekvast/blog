@@ -11,6 +11,7 @@ interface PostNavigatorProps {
   discussionDate: string;
   hasUnreadPosts?: boolean;
   className?: string;
+  onScrollToBottom?: () => void;
 }
 
 export function PostNavigator({
@@ -18,6 +19,7 @@ export function PostNavigator({
   discussionDate,
   hasUnreadPosts = false,
   className,
+  onScrollToBottom,
 }: PostNavigatorProps) {
   const [currentPostIndex, setCurrentPostIndex] = React.useState(1);
   const [isDragging, setIsDragging] = React.useState(false);
@@ -50,10 +52,14 @@ export function PostNavigator({
 
   // 滚动到底部（最新评论）
   const scrollToBottom = () => {
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: "smooth",
-    });
+    if (onScrollToBottom) {
+      onScrollToBottom();
+    } else {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   };
 
   // 处理滑块点击

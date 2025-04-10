@@ -77,6 +77,12 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   );
   const [showCommentEditor, setShowCommentEditor] = useState(false);
   const queryClient = useQueryClient();
+  const [hasLoadedAllComments, setHasLoadedAllComments] = useState(false);
+  const loadedCommentsCountRef = React.useRef(0);
+  const [queryParams, setQueryParams] = useState({
+    page: 1,
+    per_page: 10,
+  });
   const {
     data: comments = {
       pages: [],
@@ -87,21 +93,28 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch,
   } = useInfiniteQuery({
-    queryKey: ["discussion-posts", slug, initialDiscussion?.board_id],
+    queryKey: [
+      "discussion-posts",
+      slug,
+      initialDiscussion?.board_id,
+      queryParams,
+    ],
     queryFn: async ({ pageParam = 1 }) => {
       try {
         return await api.discussions.posts({
           slug,
           board_id: initialDiscussion.board_id,
           page: pageParam,
+          per_page: queryParams.per_page,
         });
       } catch (error) {
         console.error("Failed to fetch comments:", error);
         throw error;
       }
     },
-    initialPageParam: 1,
+    initialPageParam: queryParams.page,
     getNextPageParam: (lastPage) => {
       if (lastPage.current_page < lastPage.last_page) {
         return lastPage.current_page + 1;
@@ -111,6 +124,42 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     enabled: !!currentDiscussion,
     staleTime: 10 * 1000,
   });
+
+  const loadLastPage = React.useCallback(async () => {
+    if (comments.pages && comments.pages.length > 0) {
+      const total = comments.pages[0].total || 0;
+      const loadedItems = comments.pages.flatMap((page) => page.items).length;
+
+      if (loadedItems >= total) {
+        window.scrollTo({
+          top: document.documentElement.scrollHeight,
+          behavior: "smooth",
+        });
+        return;
+      }
+
+      try {
+        setQueryParams({
+          page: 1,
+          per_page: total,
+        });
+
+        setTimeout(() => {
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: "smooth",
+          });
+        }, 1000);
+        return;
+      } catch (error) {
+        console.error("加载所有评论失败:", error);
+      }
+    }
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [comments.pages]);
 
   const allComments = React.useMemo(() => {
     return comments.pages?.flatMap((page) => page.items) || [];
@@ -173,13 +222,11 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       }),
     onSuccess: (_, { postId, vote }) => {
       queryClient.setQueryData(
-        ["discussion-posts", slug, initialDiscussion.board_id],
+        ["discussion-posts", slug, initialDiscussion.board_id, queryParams],
         (oldData: any) => {
           if (!oldData) return oldData;
 
-          // 创建更新后的pages数组
           const newPages = oldData.pages.map((page) => {
-            // 定义一个递归函数来更新帖子及其子帖子
             const updatePostVote = (posts: Post[]): Post[] => {
               return posts.map((post) => {
                 if (post.id === postId) {
@@ -197,7 +244,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                       user_voted: null,
                     };
                   } else if (post.user_voted) {
-                    console.log("post........   ", post);
                     return {
                       ...post,
                       up_votes_count:
@@ -236,7 +282,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   }
                 }
 
-                // 处理子评论
                 if (post.children && post.children.length > 0) {
                   return {
                     ...post,
@@ -248,14 +293,12 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               });
             };
 
-            // 返回更新后的页面
             return {
               ...page,
               items: updatePostVote(page.items),
             };
           });
 
-          // 返回更新后的数据
           return {
             ...oldData,
             pages: newPages,
@@ -289,9 +332,13 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       setPostForm(initPostForm);
       setReplyTo(null);
       editorRef.current?.reset?.();
-      // 使用invalidateQueries刷新无限滚动查询
       queryClient.invalidateQueries({
-        queryKey: ["discussion-posts", slug, initialDiscussion.board_id],
+        queryKey: [
+          "discussion-posts",
+          slug,
+          initialDiscussion.board_id,
+          queryParams,
+        ],
       });
       toast({
         title: "评论已发布",
@@ -380,8 +427,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     }));
   };
 
-  // 计算总帖子数量（主贴 + 评论）
-  const totalPosts = allComments.length + 1; // +1 是因为要算上主贴
+  const totalPosts = allComments.length + 1;
   if (!currentDiscussion) {
     return null;
   }
@@ -490,7 +536,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           </div>
 
           <div className="mt-4">
-            {/* 评论列表 */}
             <div className={cn(showCommentEditor && "mb-[200px]")}>
               <InfiniteScroll
                 hasMore={hasNextPage}
@@ -507,7 +552,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               </InfiniteScroll>
             </div>
 
-            {/* 评论编辑器 */}
             {showCommentEditor && (
               <div className="fixed inset-0 flex flex-col justify-end animate-in fade-in duration-300 w-full z-50">
                 <div
@@ -535,7 +579,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                       </Button>
                     </div>
 
-                    {/* 评论预览 */}
                     {user &&
                       postForm.content &&
                       postForm.content.trim().length > 0 && (
@@ -583,7 +626,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           </div>
         </div>
 
-        {/* 侧边栏 - 使用sticky定位 */}
         <aside className="hidden lg:block sticky top-20 w-full lg:w-40 xl:w-60 self-start pl-2">
           <div className="flex w-full flex-col space-y-3">
             <Button
@@ -635,12 +677,12 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             </AuthGuard>
           </div>
 
-          {/* 帖子导航组件 */}
           <PostNavigator
             totalPosts={comments.pages?.[0]?.total || 0}
             discussionDate={initialDiscussion.created_at}
             hasUnreadPosts={false}
             className="mt-4"
+            onScrollToBottom={loadLastPage}
           />
         </aside>
       </div>
