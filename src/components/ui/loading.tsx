@@ -16,7 +16,7 @@ const sizeMap = {
 export function Loading({
   size = 'md',
   fullscreen = false,
-  text,
+  text = '加载中...',
   className,
   ...props
 }: LoadingProps) {

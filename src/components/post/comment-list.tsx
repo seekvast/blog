@@ -2,6 +2,7 @@ import * as React from "react";
 import type { Post } from "@/types/discussion";
 import { CommentItem } from "@/components/post/comment-item";
 import { PostForm } from "@/validations/post";
+import { Loading } from "@/components/ui/loading";
 
 interface CommentListProps {
   comments: Post[];
@@ -19,6 +20,14 @@ export const CommentList = React.memo(
     onVote,
     onSubmitReply,
   }: CommentListProps) => {
+    if (!comments.length && isLoading) {
+      return (
+        <div className="flex flex-col items-center justify-center py-8">
+          <Loading size="md" />
+        </div>
+      );
+    }
+
     if (!comments || comments.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-8 text-sm md:text-base text-muted-foreground">

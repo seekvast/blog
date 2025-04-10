@@ -77,12 +77,16 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   );
   const [showCommentEditor, setShowCommentEditor] = useState(false);
   const queryClient = useQueryClient();
-  const [hasLoadedAllComments, setHasLoadedAllComments] = useState(false);
-  const loadedCommentsCountRef = React.useRef(0);
-  const [queryParams, setQueryParams] = useState({
+  const [queryParams, setQueryParams] = React.useState<{
+    page: number;
+    per_page: number;
+  }>({
     page: 1,
     per_page: 10,
   });
+  const [totalPosts, setTotalPosts] = React.useState(
+    initialDiscussion?.comment_count > 0 ? initialDiscussion.comment_count : 1
+  );
   const {
     data: comments = {
       pages: [],
@@ -124,6 +128,12 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     enabled: !!currentDiscussion,
     staleTime: 10 * 1000,
   });
+
+  React.useEffect(() => {
+    if (comments.pages && comments.pages.length > 0) {
+      setTotalPosts(comments.pages[0].total);
+    }
+  }, [comments.pages]);
 
   const loadLastPage = React.useCallback(async () => {
     if (comments.pages && comments.pages.length > 0) {
@@ -427,7 +437,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     }));
   };
 
-  const totalPosts = allComments.length + 1;
   if (!currentDiscussion) {
     return null;
   }
@@ -522,9 +531,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           <div className="flex items-center justify-between border-b text-sm  text-gray-500">
             <div className="flex items-center pb-2">
               <span>评论</span>
-              <span className="pl-2 text-blue-600">
-                {currentDiscussion.comment_count - 1}
-              </span>
+              <span className="pl-2 text-blue-600">{totalPosts}</span>
             </div>
 
             <button
@@ -678,7 +685,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           </div>
 
           <PostNavigator
-            totalPosts={comments.pages?.[0]?.total || 0}
+            totalPosts={totalPosts}
             discussionDate={initialDiscussion.created_at}
             hasUnreadPosts={false}
             className="mt-4"
