@@ -20,15 +20,15 @@
   .safe-area-top {
     padding-top: env(safe-area-inset-top);
   }
-  
+
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
-  
+
   .safe-area-left {
     padding-left: env(safe-area-inset-left);
   }
-  
+
   .safe-area-right {
     padding-right: env(safe-area-inset-right);
   }
@@ -38,9 +38,19 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /* 灰色背景在深色模式下的样式 */
+  .bg-subtle {
+    @apply bg-gray-50 dark:bg-gray-800;
+  }
+
+  /* 蓝色背景在深色模式下的样式 */
+  .bg-blue-subtle {
+    @apply bg-blue-50 dark:bg-gray-800;
   }
 }
 
@@ -49,7 +59,7 @@
     @apply sticky top-0 flex items-baseline justify-between py-4 glass-effect;
   }
   .kater-focus-primary {
-    @apply focus-within:border-2 focus-within:border-primary focus-within:ring-1
+    @apply focus-within:border-2 focus-within:border-primary focus-within:ring-1;
   }
 }
 
@@ -84,7 +94,7 @@
     --ring: 217 100% 50%;
 
     --radius: 0.5rem;
-    
+
     /* 移动导航栏高度 */
     --mobile-nav-height: 3.5rem;
   }

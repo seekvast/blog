@@ -179,7 +179,7 @@ export default function SettingsSidebar({ activeTab, onTabChange }: SettingsSide
                   <a
                     className={cn(
                       "flex items-center px-4 py-2 rounded-lg transition-colors",
-                      isActive ? "bg-blue-50 text-blue-600" : "hover:bg-gray-50"
+                      isActive ? "bg-blue-subtle text-primary" : "hover:bg-subtle"
                     )}
                     key={group.href}
                     href="#"

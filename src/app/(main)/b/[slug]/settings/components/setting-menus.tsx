@@ -146,8 +146,8 @@ export function SettingMenus({
                 className={cn(
                   "flex items-center p-2 text-sm rounded-lg transition-colors",
                   activeTab === item.id
-                    ? "bg-blue-50 text-blue-600 font-medium"
-                    : "text-gray-600 hover:bg-gray-50"
+                    ? "bg-blue-subtle text-primary font-medium"
+                    : "text-muted-foreground hover:bg-blue-subtle"
                 )}
               >
                 {item.label}
@@ -173,8 +173,8 @@ export function SettingMenus({
                 className={cn(
                   "flex items-center p-2 text-sm rounded-lg transition-colors",
                   activeTab === item.id
-                    ? "bg-blue-50 text-blue-600 font-medium"
-                    : "text-gray-600 hover:bg-gray-50"
+                    ? "bg-blue-subtle text-primary font-medium"
+                    : "text-muted-foreground hover:bg-blue-subtle"
                 )}
               >
                 {item.label}

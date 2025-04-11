@@ -192,15 +192,12 @@ export function createApi(options: ApiOptions = {}) {
 
       get: (slug: string) =>
         http.get<Post>(`${prefix}/posts/${slug}`, undefined, { next }),
+      getRaw: (id: number) =>
+        http.get<Post>(`${prefix}/posts/raw`, { id }, { next }),
 
       create: (data: any) => http.post<Post>(`${prefix}/posts`, data),
-
-      update: (slug: string, data: any) =>
-        http.patch<Post>(`${prefix}/posts/${slug}`, data),
-
+      update: (data: any) => http.patch<Post>(`${prefix}/post`, data),
       delete: (data: any) => http.delete(`${prefix}/post`, data),
-
-      updatePost: (data: any) => http.put<Post>(`${prefix}/post`, data),
       vote: (data: any) => http.post<any>(`${prefix}/post/vote`, data),
     },
 

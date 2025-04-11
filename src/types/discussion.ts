@@ -117,6 +117,7 @@ export interface Post {
   board_creator_hashid: string;
   type: string;
   content: string;
+  raw_content: string;
   discussion_slug: string;
   edited_at: string | null;
   hidden_at: string | null;

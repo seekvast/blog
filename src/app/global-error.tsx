@@ -11,7 +11,6 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // 记录错误到控制台或监控系统
     console.error("全局错误:", error);
   }, [error]);
 

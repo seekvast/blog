@@ -27,9 +27,10 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface CommentActionsProps {
   comment: Post;
+  onEdit?: (comment: Post) => void;
 }
 
-export function CommentActions({ comment }: CommentActionsProps) {
+export function CommentActions({ comment, onEdit }: CommentActionsProps) {
   const [reportToAdminOpen, setReportToAdminOpen] = useState(false);
   const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -63,6 +64,13 @@ export function CommentActions({ comment }: CommentActionsProps) {
   const handleDelete = () => {
     setShowDeleteConfirm(true);
   };
+  
+  const handleEdit = () => {
+    if (onEdit) {
+      onEdit(comment);
+    }
+  };
+  
   return (
     <>
       <DropdownMenu>
@@ -72,7 +80,10 @@ export function CommentActions({ comment }: CommentActionsProps) {
         <DropdownMenuContent align="end" className="w-48">
           {isAuthor ? (
             <>
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem 
+                className="cursor-pointer"
+                onClick={handleEdit}
+              >
                 <Edit className="mr-2 h-4 w-4" />
                 <span>編輯</span>
               </DropdownMenuItem>

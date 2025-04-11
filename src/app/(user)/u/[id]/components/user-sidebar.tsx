@@ -61,8 +61,8 @@ export default function UserSidebar({
               // 桌面端样式（大屏幕）
               "lg:w-auto lg:flex-auto lg:flex lg:items-center lg:justify-between lg:text-left lg:py-2 lg:px-4 lg:rounded-lg lg:border-b-0 lg:min-w-0",
               isActive
-                ? "lg:bg-blue-50 lg:text-blue-600 lg:font-medium lg:border-none"
-                : "lg:hover:bg-gray-50"
+                ? "lg:bg-blue-subtle lg:text-blue-600 lg:font-medium lg:border-none"
+                : "lg:hover:bg-subtle lg:text-gray-500"
             )}
           >
             <span className="px-4 lg:px-0">{item.label}</span>

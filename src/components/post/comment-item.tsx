@@ -13,6 +13,11 @@ import { CommentActions } from "@/components/post/comment-actions";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { ReplyEditor } from "@/components/post/reply-editor";
 import { PostForm } from "@/validations/post";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import { useToast } from "@/components/ui/use-toast";
 
 interface CommentItemProps {
   comment: Post;
@@ -22,7 +27,6 @@ interface CommentItemProps {
   level?: number;
 }
 
-// 单个评论组件，支持递归渲染子评论
 export const CommentItem = ({
   comment,
   onReply,
@@ -31,10 +35,40 @@ export const CommentItem = ({
   level = 0,
 }: CommentItemProps) => {
   const [replyEditorVisiable, setReplyEditorVisiable] = React.useState(false);
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [editContent, setEditContent] = React.useState(comment.content);
   const [replyForm, setReplyForm] = React.useState<PostForm>({
     slug: "",
     content: "",
     attachments: [],
+  });
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const editMutation = useMutation({
+    mutationFn: (data: { id: number; content: string }) =>
+      api.posts.update({ id: data.id, content: data.content }),
+    onSuccess: () => {
+      toast({
+        title: "编辑成功",
+        description: "评论已更新",
+      });
+      queryClient.invalidateQueries({
+        queryKey: [
+          "discussion-posts",
+          comment.discussion_slug,
+          comment.board_id,
+        ],
+      });
+      setIsEditing(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "编辑失败",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
   const handleReplyClick = () => {
@@ -59,6 +93,32 @@ export const CommentItem = ({
       slug: "",
       content: "",
       attachments: [],
+    });
+  };
+
+  const handleEdit = (comment: Post) => {
+    setIsEditing(true);
+    setEditContent(comment.raw_content);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditContent(comment.raw_content);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editContent.trim()) {
+      toast({
+        title: "内容不能为空",
+        description: "请输入评论内容",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    editMutation.mutate({
+      id: comment.id,
+      content: editContent,
     });
   };
 
@@ -108,71 +168,100 @@ export const CommentItem = ({
           </div>
 
           <div className="mt-2 text-sm md:text-base">
-            <PostContent post={comment} />
+            {isEditing ? (
+              <div className="space-y-2">
+                <Textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  className="min-h-[100px] w-full"
+                  placeholder="编辑你的评论..."
+                />
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancelEdit}
+                  >
+                    取消
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSaveEdit}
+                    disabled={editMutation.isPending}
+                  >
+                    {editMutation.isPending ? "保存中..." : "保存"}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <PostContent post={comment} />
+            )}
           </div>
 
-          <div className="mt-3 flex justify-between items-center space-x-4 text-sm md:text-base text-gray-500">
-            <div className="flex items-center gap-2 space-x-3 md:space-x-6">
-              <div
-                className="flex items-center space-x-1 cursor-pointer"
-                onClick={() => onVote(comment.id, "up")}
-              >
-                <ThumbsUp
-                  className={cn(
-                    "h-4 w-4",
-                    comment.user_voted?.vote === "up" &&
-                      "text-primary fill-primary"
+          {!isEditing && (
+            <div className="mt-3 flex justify-between items-center space-x-4 text-sm md:text-base text-gray-500">
+              <div className="flex items-center gap-2 space-x-3 md:space-x-6">
+                <div
+                  className="flex items-center space-x-1 cursor-pointer"
+                  onClick={() => onVote(comment.id, "up")}
+                >
+                  <ThumbsUp
+                    className={cn(
+                      "h-4 w-4",
+                      comment.user_voted?.vote === "up" &&
+                        "text-primary fill-primary"
+                    )}
+                  />
+                  {comment.up_votes_count > 0 && (
+                    <span className="text-xs md:text-sm">
+                      {comment.up_votes_count}
+                    </span>
                   )}
-                />
-                {comment.up_votes_count > 0 && (
-                  <span className="text-xs md:text-sm">
-                    {comment.up_votes_count}
-                  </span>
-                )}
-              </div>
-              <div
-                className="flex items-center space-x-1 cursor-pointer"
-                onClick={() => onVote(comment.id, "down")}
-              >
-                <ThumbsDown
-                  className={cn(
-                    "h-4 w-4",
-                    comment.user_voted?.vote === "down" &&
-                      "text-destructive fill-destructive"
+                </div>
+                <div
+                  className="flex items-center space-x-1 cursor-pointer"
+                  onClick={() => onVote(comment.id, "down")}
+                >
+                  <ThumbsDown
+                    className={cn(
+                      "h-4 w-4",
+                      comment.user_voted?.vote === "down" &&
+                        "text-destructive fill-destructive"
+                    )}
+                  />
+                  {comment.down_votes_count > 5 && (
+                    <span className="text-xs md:text-sm">
+                      {comment.down_votes_count}
+                    </span>
                   )}
-                />
-                {comment.down_votes_count > 5 && (
-                  <span className="text-xs md:text-sm">
-                    {comment.down_votes_count}
-                  </span>
-                )}
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center space-x-3">
-              <AuthGuard
-                fallback={
+              <div className="flex items-center space-x-3">
+                <AuthGuard
+                  fallback={
+                    <button
+                      className="text-sm cursor-pointer hover:text-primary"
+                      onClick={() => onReply(comment)}
+                    >
+                      回复
+                    </button>
+                  }
+                >
                   <button
                     className="text-sm cursor-pointer hover:text-primary"
-                    onClick={() => onReply(comment)}
+                    onClick={handleReplyClick}
                   >
                     回复
                   </button>
-                }
-              >
-                <button
-                  className="text-sm cursor-pointer hover:text-primary"
-                  onClick={handleReplyClick}
-                >
-                  回复
-                </button>
-              </AuthGuard>
-              <CommentActions comment={comment} />
+                </AuthGuard>
+                <CommentActions comment={comment} onEdit={handleEdit} />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* 回复框 */}
-          {replyEditorVisiable && (
+          {replyEditorVisiable && !isEditing && (
             <div className="mt-4">
               <AuthGuard>
                 <ReplyEditor
@@ -186,7 +275,7 @@ export const CommentItem = ({
 
           {/* 渲染子评论 */}
           {comment.children && comment.children.length > 0 && (
-            <div className="mt-2 space-y-4 bg-gray-50 py-4 divide-y">
+            <div className="mt-2 space-y-4 bg-subtle py-4 divide-y">
               {comment.children.map((childComment) => (
                 <CommentItem
                   key={childComment.id}

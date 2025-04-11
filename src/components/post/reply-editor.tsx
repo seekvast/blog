@@ -101,7 +101,7 @@ export const ReplyEditor = ({
   };
 
   return (
-    <div className="mt-3 bg-gray-50 p-3 rounded-md">
+    <div className="mt-3 bg-subtle p-3 rounded-md">
       <div className="flex items-start space-x-2">
         <Textarea
           placeholder={placeholder || `回复 @${comment.user.username}`}
