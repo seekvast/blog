@@ -8,7 +8,7 @@ import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import type { Discussion, Pagination } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ChevronUp, X, ChevronDown, Star, Bookmark } from "lucide-react";
+import { ChevronUp, X, ChevronDown, Star, Bookmark, Check, EyeOff } from "lucide-react";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { PostNavigator } from "@/components/post/post-navigator";
 import { useLoginModal } from "@/components/providers/login-modal-provider";
@@ -36,6 +36,7 @@ import { PollContent } from "@/components/post/poll-content";
 import { PostForm } from "@/validations/post";
 import { Attachment } from "@/types";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
@@ -635,23 +636,73 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
 
         <aside className="hidden lg:block sticky top-20 w-full lg:w-40 xl:w-60 self-start pl-2">
           <div className="flex w-full flex-col space-y-3">
-            <Button
-              variant={isFollowed ? "default" : "secondary"}
-              className="w-full justify-between"
-              onClick={handleFollow}
-              disabled={followMutation.isPending}
-            >
-              <div className="flex items-center">
-                <Star
-                  className={`mr-2 h-4 w-4 ${isFollowed ? "fill-current" : ""}`}
-                />
-                {followMutation.isPending
-                  ? "处理中..."
-                  : isFollowed
-                  ? "已关注"
-                  : "关注"}
-              </div>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant={isFollowed ? "default" : "secondary"}
+                  className="w-full justify-between"
+                  disabled={followMutation.isPending}
+                >
+                  <div className="flex items-center">
+                    <Star
+                      className={`mr-2 h-4 w-4 ${isFollowed ? "fill-current" : ""}`}
+                    />
+                    {followMutation.isPending
+                      ? "处理中..."
+                      : isFollowed
+                      ? "已关注"
+                      : "关注"}
+                  </div>
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem 
+                  className="flex flex-col items-start cursor-pointer py-2"
+                  onClick={() => {
+                    if (isFollowed) handleFollow();
+                  }}
+                >
+                  <div className="flex w-full items-center">
+                    <Star className="mr-2 h-4 w-4" />
+                    不关注
+                    {!isFollowed && <Check className="ml-auto h-4 w-4" />}
+                  </div>
+                  <span className="text-xs text-muted-foreground mt-1 pl-6">
+                    停当有人標註我時通知我。
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex flex-col items-start cursor-pointer py-2"
+                  onClick={() => {
+                    if (!isFollowed) handleFollow();
+                  }}
+                >
+                  <div className="flex w-full items-center">
+                    <Star className="mr-2 h-4 w-4 fill-current" />
+                    关注中
+                    {isFollowed && <Check className="ml-auto h-4 w-4" />}
+                  </div>
+                  <span className="text-xs text-muted-foreground mt-1 pl-6">
+                    當有人回覆此文章時通知我。
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex flex-col items-start cursor-pointer py-2"
+                  onClick={() => {
+                    // 实现忽视功能
+                  }}
+                >
+                  <div className="flex w-full items-center">
+                    <EyeOff className="mr-2 h-4 w-4" />
+                    忽视中
+                  </div>
+                  <span className="text-xs text-muted-foreground mt-1 pl-6">
+                    不接收任何通知並從文章列表中隱藏此文章。
+                  </span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               variant={isBookmarked ? "default" : "secondary"}
               className="w-full justify-between"

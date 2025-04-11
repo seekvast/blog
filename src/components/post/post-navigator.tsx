@@ -23,27 +23,28 @@ export function PostNavigator({
 }: PostNavigatorProps) {
   const [currentPostIndex, setCurrentPostIndex] = React.useState(1);
   const [isDragging, setIsDragging] = React.useState(false);
-  const [thumbPositionPercentage, setThumbPositionPercentage] =
-    React.useState(0);
+  const [scrollPosition, setScrollPosition] = React.useState(0);
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const sliderRef = React.useRef<HTMLDivElement>(null);
-  const sliderThumbRef = React.useRef<HTMLDivElement>(null);
+  const scrollAreaRef = React.useRef<HTMLDivElement>(null);
+  const scrollerRef = React.useRef<HTMLDivElement>(null);
 
-  // 格式化日期
   const formattedDate = format(new Date(discussionDate || ""), "MMMM yyyy", {
     locale: zhCN,
   });
 
-  // 计算滑块高度百分比
-  const thumbHeightPercentage = React.useMemo(() => {
-    const minPercentage = 20;
-    const maxPercentage = 80;
-    const percentage = Math.max(
-      minPercentage,
-      maxPercentage - ((totalPosts - 1) / 49) * (maxPercentage - minPercentage)
-    );
-    return Math.min(percentage, maxPercentage);
-  }, [totalPosts]);
+  const scrollerHeight = 50; // 固定滑块高度
+
+  const getTopPaddingHeight = () => {
+    if (!scrollAreaRef.current) return 0;
+    const scrollAreaHeight = scrollAreaRef.current.clientHeight;
+    return scrollPosition * (scrollAreaHeight - scrollerHeight);
+  };
+
+  const getBottomPaddingHeight = () => {
+    if (!scrollAreaRef.current) return 0;
+    const scrollAreaHeight = scrollAreaRef.current.clientHeight;
+    return (1 - scrollPosition) * (scrollAreaHeight - scrollerHeight);
+  };
 
   // 滚动到顶部（主贴）
   const scrollToTop = () => {
@@ -62,44 +63,32 @@ export function PostNavigator({
     }
   };
 
-  // 处理滑块点击
-  const handleSliderClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!sliderRef.current) return;
+  // 处理滑块区域点击
+  const handleScrollAreaClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!scrollAreaRef.current) return;
 
-    const rect = sliderRef.current.getBoundingClientRect();
+    const rect = scrollAreaRef.current.getBoundingClientRect();
     const offsetY = e.clientY - rect.top;
-    const percentage = (offsetY / rect.height) * 100;
+    const scrollAreaHeight = rect.height;
 
-    // 限制百分比在有效范围内
-    const limitedPercentage = Math.max(
-      0,
-      Math.min(100 - thumbHeightPercentage, percentage)
-    );
-    setThumbPositionPercentage(limitedPercentage);
+    let newScrollPosition = offsetY / scrollAreaHeight;
 
-    // 计算对应的帖子索引
+    newScrollPosition = Math.max(0, Math.min(1, newScrollPosition));
+
+    setScrollPosition(newScrollPosition);
+
     const postIndex = Math.max(
       1,
-      Math.min(
-        totalPosts,
-        Math.round(
-          (limitedPercentage / (100 - thumbHeightPercentage)) *
-            (totalPosts - 1) +
-            1
-        )
-      )
+      Math.min(totalPosts, Math.round(newScrollPosition * (totalPosts - 1) + 1))
     );
     setCurrentPostIndex(postIndex);
 
-    // 计算滚动位置
     const scrollHeight =
       document.documentElement.scrollHeight - window.innerHeight;
-    const scrollPosition =
-      (limitedPercentage / (100 - thumbHeightPercentage)) * scrollHeight;
+    const pageScrollPosition = newScrollPosition * scrollHeight;
 
-    // 使用平滑滚动
     window.scrollTo({
-      top: scrollPosition,
+      top: pageScrollPosition,
       behavior: "smooth",
     });
   };
@@ -107,71 +96,40 @@ export function PostNavigator({
   // 处理拖动开始
   const handleDragStart = (e: React.MouseEvent | React.TouchEvent) => {
     setIsDragging(true);
-
-    // 阻止默认事件，防止文本选择
     e.preventDefault();
-
-    // 添加拖动时的过渡效果和鼠标样式
-    if (sliderThumbRef.current) {
-      sliderThumbRef.current.style.transition = "none";
-    }
-
-    // 设置全局鼠标样式
-    document.body.style.cursor = "ns-resize";
   };
 
   // 处理拖动
   const handleDrag = (clientY: number) => {
-    if (!isDragging || !sliderRef.current) return;
+    if (!isDragging || !scrollAreaRef.current) return;
 
-    const rect = sliderRef.current.getBoundingClientRect();
+    const rect = scrollAreaRef.current.getBoundingClientRect();
     const offsetY = clientY - rect.top;
-    const percentage = (offsetY / rect.height) * 100;
+    const scrollAreaHeight = rect.height;
 
-    // 限制百分比在有效范围内
-    const limitedPercentage = Math.max(
-      0,
-      Math.min(100 - thumbHeightPercentage, percentage)
-    );
-    setThumbPositionPercentage(limitedPercentage);
+    let newScrollPosition = offsetY / scrollAreaHeight;
 
-    // 计算对应的帖子索引
+    newScrollPosition = Math.max(0, Math.min(1, newScrollPosition));
+
+    setScrollPosition(newScrollPosition);
+
     const postIndex = Math.max(
       1,
-      Math.min(
-        totalPosts,
-        Math.round(
-          (limitedPercentage / (100 - thumbHeightPercentage)) *
-            (totalPosts - 1) +
-            1
-        )
-      )
+      Math.min(totalPosts, Math.round(newScrollPosition * (totalPosts - 1) + 1))
     );
     setCurrentPostIndex(postIndex);
 
-    // 计算滚动位置
     const scrollHeight =
       document.documentElement.scrollHeight - window.innerHeight;
-    const scrollPosition =
-      (limitedPercentage / (100 - thumbHeightPercentage)) * scrollHeight;
+    const pageScrollPosition = newScrollPosition * scrollHeight;
 
-    // 直接滚动，拖动时不使用平滑效果
     window.scrollTo({
-      top: scrollPosition,
+      top: pageScrollPosition,
     });
   };
 
-  // 处理拖动结束
   const handleDragEnd = () => {
     setIsDragging(false);
-
-    // 恢复过渡效果和鼠标样式
-    if (sliderThumbRef.current) {
-      sliderThumbRef.current.style.transition = "top 0.2s ease-out";
-    }
-
-    // 恢复全局鼠标样式
-    document.body.style.cursor = "";
   };
 
   // 监听滚动事件
@@ -182,27 +140,19 @@ export function PostNavigator({
       const scrollTop = window.scrollY;
       const scrollHeight =
         document.documentElement.scrollHeight - window.innerHeight;
-      const scrollPercentage = (scrollTop / scrollHeight) * 100;
-
-      // 计算滑块位置
-      const thumbPosition = Math.min(
-        100 - thumbHeightPercentage,
-        (scrollPercentage * (100 - thumbHeightPercentage)) / 100
+      const newScrollPosition = Math.max(
+        0,
+        Math.min(1, scrollTop / scrollHeight)
       );
 
-      // 使用平滑过渡
-      if (sliderThumbRef.current) {
-        sliderThumbRef.current.style.transition = "top 0.2s ease-out";
-      }
-
-      setThumbPositionPercentage(thumbPosition);
+      setScrollPosition(newScrollPosition);
 
       // 计算当前帖子索引
       const currentIndex = Math.max(
         1,
         Math.min(
           totalPosts,
-          Math.round((scrollPercentage / 100) * (totalPosts - 1) + 1)
+          Math.round(newScrollPosition * (totalPosts - 1) + 1)
         )
       );
       setCurrentPostIndex(currentIndex);
@@ -210,7 +160,7 @@ export function PostNavigator({
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isDragging, thumbHeightPercentage, totalPosts]);
+  }, [isDragging, totalPosts]);
 
   // 监听鼠标和触摸事件
   React.useEffect(() => {
@@ -245,13 +195,11 @@ export function PostNavigator({
       document.removeEventListener("mouseup", handleMouseUp);
       document.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [isDragging, handleDrag, handleDragEnd]);
+  }, [isDragging]);
 
   return (
     <div ref={containerRef} className={cn("flex items-center", className)}>
-      {/* 左侧：最早内容按钮、垂直线、滑块和最新回复按钮 */}
       <div className="flex flex-col items-start mr-4">
-        {/* 最早内容按钮 */}
         <button
           onClick={scrollToTop}
           className="flex items-center text-sm text-gray-500 hover:text-gray-700"
@@ -260,54 +208,51 @@ export function PostNavigator({
           <span>最早内容</span>
         </button>
 
-        <div className="relative ml-2" style={{ height: "200px" }}>
-          <div
-            ref={sliderRef}
-            onClick={handleSliderClick}
-            className="absolute inset-0 bg-gray-200 cursor-pointer rounded-sm hover:bg-gray-300 transition-colors"
-            style={{ width: "4px" }}
-          />
+        {/* 滑块区域 */}
+        <div
+          ref={scrollAreaRef}
+          onClick={handleScrollAreaClick}
+          className="relative ml-2 cursor-ns-resize select-none touch-none"
+          style={{ height: "220px", width: "4px" }}
+        >
+          <div className="absolute inset-0 bg-gray-200 rounded-sm hover:bg-gray-300 transition-colors" />
 
-          {/* 滑块 */}
-          <div
-            ref={sliderThumbRef}
-            onMouseDown={handleDragStart}
-            onTouchStart={handleDragStart}
-            className={cn(
-              "absolute left-0 bg-primary rounded-sm transition-shadow",
-              isDragging
-                ? "cursor-grabbing shadow-md"
-                : "cursor-ns-resize hover:bg-blue-600"
-            )}
-            style={{
-              width: "5px",
-              height: `${thumbHeightPercentage}%`,
-              top: `${thumbPositionPercentage}%`,
-              transition: "top 0.2s ease-out, background-color 0.2s",
-            }}
-          />
+          <div className="relative h-full w-full">
+            <div
+              style={{ height: `${getTopPaddingHeight()}px` }}
+              className="timeline-padding"
+            />
 
-          {/* 右侧帖子信息 - 跟随滑块一起滑动 */}
-          <div
-            className="absolute flex flex-col justify-center ml-4"
-            style={{
-              top: `calc(${thumbPositionPercentage}% + ${
-                thumbHeightPercentage / 2
-              }% - 1.5rem)`,
-              left: "5px",
-              transition: "top 0.2s ease-out",
-            }}
-          >
-            <div className="text-base font-medium text-gray-800 whitespace-nowrap">
-              {currentPostIndex} / {totalPosts} 楼
+            <div
+              ref={scrollerRef}
+              onMouseDown={handleDragStart}
+              onTouchStart={handleDragStart}
+              style={{
+                width: "8px",
+                height: `${scrollerHeight}px`,
+                left: "-2px",
+              }}
+              className="flex items-center z-10 bg-primary rounded-sm hover:bg-blue-600 transition-colors absolute"
+            >
+              <div style={{ height: "100%" }} />
+
+              <div className="flex flex-col justify-center ml-4">
+                <div className="text-base font-medium text-gray-800 whitespace-nowrap">
+                  {currentPostIndex} / {totalPosts} 楼
+                </div>
+                <div className="text-sm text-gray-500 mt-1 whitespace-nowrap">
+                  {formattedDate}
+                </div>
+              </div>
             </div>
-            <div className="text-sm text-gray-500 mt-1 whitespace-nowrap">
-              {formattedDate}
-            </div>
+
+            <div
+              style={{ height: `${getBottomPaddingHeight()}px` }}
+              className="timeline-padding"
+            />
           </div>
         </div>
 
-        {/* 最新回复按钮 */}
         <button
           onClick={scrollToBottom}
           className="flex items-center text-sm text-gray-500 hover:text-gray-700"
