@@ -12,6 +12,7 @@ import type { Post } from "@/types/discussion";
 import { CommentActions } from "@/components/post/comment-actions";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { ReplyEditor } from "@/components/post/reply-editor";
+import { EditReply } from "@/components/post/edit-reply";
 import { PostForm } from "@/validations/post";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -169,32 +170,28 @@ export const CommentItem = ({
 
           <div className="mt-2 text-sm md:text-base">
             {isEditing ? (
-              <div className="space-y-2">
-                <Textarea
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
-                  className="min-h-[100px] w-full"
-                  placeholder="编辑你的评论..."
-                />
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCancelEdit}
-                  >
-                    取消
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleSaveEdit}
-                    disabled={editMutation.isPending}
-                  >
-                    {editMutation.isPending ? "保存中..." : "保存"}
-                  </Button>
-                </div>
-              </div>
+              <EditReply
+                comment={comment}
+                onCancel={handleCancelEdit}
+                onSuccess={() => setIsEditing(false)}
+              />
             ) : (
-              <PostContent post={comment} />
+              <>
+                <PostContent post={comment} />
+                
+                {/* 回复框 */}
+                {replyEditorVisiable && (
+                  <div className="mt-4">
+                    <AuthGuard>
+                      <ReplyEditor
+                        comment={comment}
+                        onCancel={handleCancelReply}
+                        onSubmit={handleSubmitReply}
+                      />
+                    </AuthGuard>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
@@ -257,19 +254,6 @@ export const CommentItem = ({
                 </AuthGuard>
                 <CommentActions comment={comment} onEdit={handleEdit} />
               </div>
-            </div>
-          )}
-
-          {/* 回复框 */}
-          {replyEditorVisiable && !isEditing && (
-            <div className="mt-4">
-              <AuthGuard>
-                <ReplyEditor
-                  comment={comment}
-                  onCancel={handleCancelReply}
-                  onSubmit={handleSubmitReply}
-                />
-              </AuthGuard>
             </div>
           )}
 
