@@ -37,7 +37,7 @@ export const CommentItem = ({
 }: CommentItemProps) => {
   const [replyEditorVisiable, setReplyEditorVisiable] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
-  const [editContent, setEditContent] = React.useState(comment.content);
+  const [editContent, setEditContent] = React.useState(comment.raw_content);
   const [replyForm, setReplyForm] = React.useState<PostForm>({
     slug: "",
     content: "",
@@ -45,6 +45,7 @@ export const CommentItem = ({
   });
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const editRef = React.useRef<HTMLDivElement>(null);
 
   const editMutation = useMutation({
     mutationFn: (data: { id: number; content: string }) =>
@@ -100,6 +101,13 @@ export const CommentItem = ({
   const handleEdit = (comment: Post) => {
     setIsEditing(true);
     setEditContent(comment.raw_content);
+    
+    // 使用setTimeout确保DOM已更新后再滚动
+    setTimeout(() => {
+      if (editRef.current) {
+        editRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 100);
   };
 
   const handleCancelEdit = () => {
@@ -168,7 +176,7 @@ export const CommentItem = ({
             )}
           </div>
 
-          <div className="mt-2 text-sm md:text-base">
+          <div className="mt-2 text-sm md:text-base" ref={editRef}>
             {isEditing ? (
               <EditReply
                 comment={comment}
