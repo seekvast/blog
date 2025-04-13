@@ -228,9 +228,9 @@ export function PostNavigator({
               onMouseDown={handleDragStart}
               onTouchStart={handleDragStart}
               style={{
-                width: "8px",
+                width: "6px",
                 height: `${scrollerHeight}px`,
-                left: "-2px",
+                left: "-1px",
               }}
               className="flex items-center z-10 bg-primary rounded-sm hover:bg-blue-600 transition-colors absolute"
             >
