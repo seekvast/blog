@@ -1,6 +1,13 @@
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 
+// 为 Google Analytics 的 gtag 函数声明类型
+declare global {
+  interface Window {
+    gtag?: (command: string, target: string, config: { page_path: string }) => void
+  }
+}
+
 // 滚动到顶部的选项
 const scrollOptions: ScrollToOptions = {
   top: 0,
