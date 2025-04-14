@@ -73,8 +73,8 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   const [isBookmarked, setIsBookmarked] = useState(
     initialDiscussion?.discussion_user?.is_bookmarked === "yes"
   );
-  const [isFollowed, setIsFollowed] = useState(
-    initialDiscussion?.discussion_user?.subscription === "follow"
+  const [followStatus, setFollowStatus] = useState<string|null>(
+    initialDiscussion?.discussion_user?.subscription || null
   );
   const [showCommentEditor, setShowCommentEditor] = useState(false);
   const queryClient = useQueryClient();
@@ -202,15 +202,17 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   });
 
   const followMutation = useMutation({
-    mutationFn: () =>
+    mutationFn: (action: string|null) =>
       api.discussions.saveFollow({
         slug: currentDiscussion?.slug,
+        action,
       }),
-    onMutate: () => {
-      setIsFollowed((prev) => !prev);
+    onMutate: (action) => {
+      setFollowStatus(action);
     },
-    onError: (error) => {
-      setIsFollowed((prev) => !prev);
+    onError: (error, action, context) => {
+      // 恢复之前的状态
+      setFollowStatus(initialDiscussion?.discussion_user?.subscription || null);
       toast({
         title: "操作失败",
         description: "关注操作失败，请稍后重试",
@@ -219,8 +221,8 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     },
     onSuccess: () => {
       toast({
-        title: isFollowed ? "已取消关注" : "已关注",
-        variant: "default",
+        title: followStatus === "follow" ? "已关注" : followStatus === "ignore" ? "已忽视" : "已取消关注",
+        description: followStatus === "follow" ? "将接收此讨论的更新" : followStatus === "ignore" ? "将不再接收此讨论的更新" : "已取消关注此讨论",
       });
     },
   });
@@ -415,9 +417,9 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     });
   }, [requireAuth, bookmarkMutation]);
 
-  const handleFollow = React.useCallback(() => {
+  const handleFollow = React.useCallback((action: string|null = null) => {
     requireAuth(() => {
-      followMutation.mutate();
+      followMutation.mutate(action);
     });
   }, [requireAuth, followMutation]);
 
@@ -639,18 +641,21 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  variant={isFollowed ? "default" : "secondary"}
+                  variant={followStatus ? "default" : "secondary"}
                   className="w-full justify-between"
+                  onClick={() => handleFollow(followStatus === "follow" ? null : "follow")}
                   disabled={followMutation.isPending}
                 >
                   <div className="flex items-center">
                     <Star
-                      className={`mr-2 h-4 w-4 ${isFollowed ? "fill-current" : ""}`}
+                      className={`mr-2 h-4 w-4 ${followStatus === "follow" ? "fill-current" : ""}`}
                     />
                     {followMutation.isPending
                       ? "处理中..."
-                      : isFollowed
+                      : followStatus === "follow"
                       ? "已关注"
+                      : followStatus === "ignore"
+                      ? "已忽视"
                       : "关注"}
                   </div>
                   <ChevronDown className="h-4 w-4" />
@@ -660,13 +665,13 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 <DropdownMenuItem 
                   className="flex flex-col items-start cursor-pointer py-2"
                   onClick={() => {
-                    if (isFollowed) handleFollow();
+                    if (followStatus) handleFollow(null);
                   }}
                 >
                   <div className="flex w-full items-center">
                     <Star className="mr-2 h-4 w-4" />
                     不关注
-                    {!isFollowed && <Check className="ml-auto h-4 w-4" />}
+                    {!followStatus && <Check className="ml-auto h-4 w-4" />}
                   </div>
                   <span className="text-xs text-muted-foreground mt-1 pl-6">
                     停当有人標註我時通知我。
@@ -675,13 +680,13 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 <DropdownMenuItem 
                   className="flex flex-col items-start cursor-pointer py-2"
                   onClick={() => {
-                    if (!isFollowed) handleFollow();
+                    if (followStatus !== "follow") handleFollow("follow");
                   }}
                 >
                   <div className="flex w-full items-center">
                     <Star className="mr-2 h-4 w-4 fill-current" />
                     关注中
-                    {isFollowed && <Check className="ml-auto h-4 w-4" />}
+                    {followStatus === "follow" && <Check className="ml-auto h-4 w-4" />}
                   </div>
                   <span className="text-xs text-muted-foreground mt-1 pl-6">
                     當有人回覆此文章時通知我。
@@ -690,12 +695,13 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 <DropdownMenuItem 
                   className="flex flex-col items-start cursor-pointer py-2"
                   onClick={() => {
-                    // 实现忽视功能
+                    if (followStatus !== "ignore") handleFollow("ignore");
                   }}
                 >
                   <div className="flex w-full items-center">
                     <EyeOff className="mr-2 h-4 w-4" />
                     忽视中
+                    {followStatus === "ignore" && <Check className="ml-auto h-4 w-4" />}
                   </div>
                   <span className="text-xs text-muted-foreground mt-1 pl-6">
                     不接收任何通知並從文章列表中隱藏此文章。
