@@ -212,6 +212,8 @@ export function createApi(options: ApiOptions = {}) {
         http.get<Pagination<Report>>(`${prefix}/reports`, params, { next }),
       get: (params: any) =>
         http.get<Report>(`${prefix}/report`, params, { next }),
+      process: (data: any) =>
+        http.post<any>(`${prefix}/report/process`, data),
     },
     notifications: {
       getUnread: (data: any) =>

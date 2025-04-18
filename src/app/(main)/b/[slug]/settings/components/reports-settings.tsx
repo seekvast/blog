@@ -30,6 +30,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   reportProcessSchema,
   type ReportProcessSchema,
+  ActionMode
 } from "@/validations/report-process";
 
 interface ReportsSettingsProps {
@@ -60,10 +61,10 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
   const form = useForm<ReportProcessSchema>({
     resolver: zodResolver(reportProcessSchema),
     defaultValues: {
-      act_mode: "delete",
+      act_mode: ActionMode.DELETE,
       act_explain: "",
       reason_desc: "",
-      delete_history: "none",
+      delete_range: "none",
     },
   });
 
@@ -131,14 +132,13 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
       reportId: number;
       action: string;
     }) => {
-      return await fetch(`/api/reports/${reportId}/${action}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          board_id: board.id,
-        }),
+      return await api.reports.process({
+        board_id: board.id,
+        id: reportId,
+        act_mode: action,
+        reason_desc: form.getValues("reason_desc"),
+        act_explain: form.getValues("act_explain"),
+        delete_range: form.getValues("delete_range"),
       });
     },
     onSuccess: () => {
@@ -162,7 +162,7 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
   });
 
   // 处理检举操作
-  const handleReportAction = (reportId: number, action: string) => {
+  const handleReportAction = (reportId: number, action: ActionMode) => {
     processReportMutation.mutate({ reportId, action });
   };
 
@@ -312,7 +312,7 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
                   variant="secondary"
                   size="sm"
                   className="h-7"
-                  onClick={() => handleReportAction(report.id, "reject")}
+                  onClick={() => handleReportAction(report.id, ActionMode.REVOKE)}
                   disabled={
                     report.status !== 0 || processReportMutation.isPending
                   }
@@ -334,26 +334,26 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
               <div className="space-y-4">
                 <Label>处理方式</Label>
                 <RadioGroup
-                  value={form.watch("act_mode")}
-                  onValueChange={(value: ReportProcessSchema["act_mode"]) =>
-                    form.setValue("act_mode", value)
+                  value={String(form.watch("act_mode"))}
+                  onValueChange={(value) =>
+                    form.setValue("act_mode", Number(value) as ActionMode)
                   }
                 >
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="delete" id="delete" />
+                    <RadioGroupItem value={String(ActionMode.DELETE)} id="delete" />
                     <Label htmlFor="delete">删除文章/回覆</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="hide" id="hide" />
-                    <Label htmlFor="hide">踢出看板(可重複加入)</Label>
+                    <RadioGroupItem value={String(ActionMode.KICK_OUT)} id="kickout" />
+                    <Label htmlFor="kickout">踢出看板(可重複加入)</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="lock" id="lock" />
-                    <Label htmlFor="lock">封鎖</Label>
+                    <RadioGroupItem value={String(ActionMode.BAN)} id="ban" />
+                    <Label htmlFor="ban">封鎖</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="reject" id="reject" />
-                    <Label htmlFor="reject">禁言</Label>
+                    <RadioGroupItem value={String(ActionMode.MUTE)} id="mute" />
+                    <Label htmlFor="mute">禁言</Label>
                   </div>
                 </RadioGroup>
                 {form.formState.errors.act_mode && (
@@ -365,10 +365,10 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
               <div className="space-y-2">
                 <Label>删除讯息历史</Label>
                 <Select
-                  value={form.watch("delete_history")}
-                  onValueChange={(
-                    value: ReportProcessSchema["delete_history"]
-                  ) => form.setValue("delete_history", value)}
+                  value={form.watch("delete_range")}
+                  onValueChange={(value: ReportProcessSchema["delete_range"]) =>
+                    form.setValue("delete_range", value)
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="选择删除历史时间范围" />
@@ -383,9 +383,9 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
                     <SelectItem value="7d">刪除過去7天</SelectItem>
                   </SelectContent>
                 </Select>
-                {form.formState.errors.delete_history && (
+                {form.formState.errors.delete_range && (
                   <p className="text-sm text-destructive">
-                    {form.formState.errors.delete_history.message}
+                    {form.formState.errors.delete_range.message}
                   </p>
                 )}
                 <div className="text-xs text-muted-foreground mt-1">
@@ -397,11 +397,11 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
                 <textarea
                   className="w-full min-h-[100px] p-2 border rounded-md"
                   placeholder="请输入原因"
-                  {...form.register("act_explain")}
+                  {...form.register("reason_desc")}
                 />
-                {form.formState.errors.act_explain && (
+                {form.formState.errors.reason_desc && (
                   <p className="text-sm text-destructive">
-                    {form.formState.errors.act_explain.message}
+                    {form.formState.errors.reason_desc.message}
                   </p>
                 )}
               </div>
@@ -410,11 +410,11 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
                 <textarea
                   className="w-full min-h-[100px] p-2 border rounded-md"
                   placeholder="请输入原因"
-                  {...form.register("reason_desc")}
+                  {...form.register("act_explain")}
                 />
-                {form.formState.errors.reason_desc && (
+                {form.formState.errors.act_explain && (
                   <p className="text-sm text-destructive">
-                    {form.formState.errors.reason_desc.message}
+                    {form.formState.errors.act_explain.message}
                   </p>
                 )}
               </div>
