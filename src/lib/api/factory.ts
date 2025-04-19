@@ -113,6 +113,8 @@ export function createApi(options: ApiOptions = {}) {
       join: (data: any) => http.post<any>(`${prefix}/board/join`, data),
       recommend: (params?: QueryParams) =>
         http.get<Board[]>(`${prefix}/board/recommend`, params, { next }),
+      hiddenChild: (data: any) =>
+        http.post<any>(`${prefix}/board/hidden-child`, data),
     },
 
     discussions: {

@@ -49,6 +49,8 @@ export interface BoardChild {
   is_default: number;
   sort: number;
   id: number;
+  is_hidden: number;
+  user_hidden: number;
 }
 
 export interface BoardRule {

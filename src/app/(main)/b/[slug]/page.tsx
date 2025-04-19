@@ -182,6 +182,29 @@ function BoardContent() {
     },
   });
 
+  const { mutate: hideChild } = useMutation({
+    mutationFn: ( child_id: number ) => 
+      api.boards.hiddenChild({ child_id, operator: "user" }),
+    onSuccess: () => {
+      fetchBoardChildren();
+      toast({
+        title: "操作成功",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "操作失败",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleHide = (child: BoardChild) => {
+    if (!board?.id) return;
+    
+    hideChild(child.id);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -207,10 +230,10 @@ function BoardContent() {
   }
   const handleJoinBoard = () => {
     if (board.approval_mode === BoardApprovalMode.APPROVAL) {
-        setJoinBoardOpen(true);
-      } else {
-        joinBoard(board.id);
-      }
+      setJoinBoardOpen(true);
+    } else {
+      joinBoard(board.id);
+    }
   };
   return (
     <div className="flex flex-col mx-auto w-full">
@@ -439,9 +462,17 @@ function BoardContent() {
               <div className="space-y-6">
                 {boardChildren.map((child) => (
                   <div key={child.id} className="border-b pb-4">
-                    <h3 className="text-lg font-medium mb-2">{child.name}</h3>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-medium mb-2">{child.name}</h3>
+                      <button
+                        className="text-xs px-2 py-1 rounded-full bg-gray-100"
+                        onClick={() => handleHide(child)}
+                      >
+                        {child.user_hidden === 1 ? "取消隐藏" : "隐藏"}
+                      </button>
+                    </div>
                     <span className="text-sm text-muted-foreground">
-                      100 篇文章
+                      {child.id} 篇文章
                     </span>
                   </div>
                 ))}
@@ -449,19 +480,19 @@ function BoardContent() {
             )}
           </div>
         )}
-          </div>
-    {/* 加入看板对话框 */}
-    {board && (
-          <JoinBoardDialog
-            open={joinBoardOpen}
-            onOpenChange={setJoinBoardOpen}
-            boardId={board.id}
-            question={board.question}
-            onSuccess={() => {
-              queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
-            }}
-          />
-        )}
+      </div>
+      {/* 加入看板对话框 */}
+      {board && (
+        <JoinBoardDialog
+          open={joinBoardOpen}
+          onOpenChange={setJoinBoardOpen}
+          boardId={board.id}
+          question={board.question}
+          onSuccess={() => {
+            queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
+          }}
+        />
+      )}
     </div>
   );
 }

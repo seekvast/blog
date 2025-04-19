@@ -6,13 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Board, BoardChild } from "@/types";
 import { Button } from "@/components/ui/button";
-import {
-  Plus,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-  GripVertical,
-} from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, Eye, EyeOff } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -30,7 +24,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import {
@@ -63,6 +56,7 @@ interface SortableBoardChildItemProps {
   onEdit: (child: BoardChild) => void;
   onDelete: (child: BoardChild) => void;
   isActive: boolean;
+  onRefresh: () => void;
 }
 
 function SortableBoardChildItem({
@@ -70,43 +64,46 @@ function SortableBoardChildItem({
   onEdit,
   onDelete,
   isActive,
+  onRefresh,
 }: SortableBoardChildItemProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: child.id });
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id: child.id });
+
+  const handleEdit = () => {
+    onEdit(child);
+  };
+
+  const handleDelete = () => {
+    onDelete(child);
+  };
+
+  const handleHide = async () => {
+    try {
+      await api.boards.hiddenChild({
+        child_id: child.id,
+        operator: "board",
+      });
+      console.log("子版块隐藏请求已发送");
+      onRefresh();
+    } catch (error) {
+      console.error("隐藏子版块失败:", error);
+    }
+  };
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
 
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onEdit(child);
-  };
-
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete(child);
-  };
-
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={cn(
-        "flex items-center gap-3 p-4 group transition-colors",
-        isDragging || isActive
-          ? "opacity-50 bg-muted/70 ring-2 ring-primary"
-          : "hover:bg-muted/70",
-        "touch-none"
-      )}
       {...attributes}
+      className={cn(
+        "flex items-center gap-2 py-4 px-2 rounded-md border",
+        isActive ? "border-primary" : "border-border"
+      )}
     >
       <div
         className="flex items-center cursor-move text-muted-foreground"
@@ -116,14 +113,17 @@ function SortableBoardChildItem({
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center">
-          <span className="text-sm text-gray-600 truncate">{child.name}</span>
+          <span className="text-base text-gray-600 truncate">{child.name}</span>
         </div>
       </div>
 
       <div className="flex gap-4 items-center text-gray-600">
-        <Button variant="secondary" size="sm" className="rounded-full">
-          隐藏
-        </Button>
+        <button
+          className="text-xs px-2 py-1 rounded-full bg-gray-100"
+          onClick={handleHide}
+        >
+          {child.is_hidden ? "取消隐藏" : "隐藏"}
+        </button>
         <button className="text-primary" onClick={handleEdit}>
           <Pencil className="h-4 w-4" />
         </button>
@@ -149,7 +149,6 @@ function ChildModal({
   editingChild?: BoardChild;
 }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { toast } = useToast();
 
   const formSchema = z.object({
     name: z.string().min(1, "看板名称不能为空"),
@@ -180,10 +179,6 @@ function ChildModal({
         id: editingChild?.id || 0,
       };
       await api.boards.saveChild(saveData);
-      toast({
-        title: "成功",
-        description: "保存成功",
-      });
       onOpenChange(false);
       form.reset();
       onSuccess?.();
@@ -246,7 +241,6 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
   >();
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [activeId, setActiveId] = React.useState<number | null>(null);
-  const { toast } = useToast();
 
   const BASE_SORT_GAP = 100; // 基础间隔值
   const MIN_GAP = 10; // 最小间隔，低于此值时触发重排序
@@ -302,11 +296,7 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
             })
           )
         ).catch(() => {
-          toast({
-            variant: "destructive",
-            title: "更新失败",
-            description: "重新排序失败，请刷新页面重试",
-          });
+          console.error("更新子版排序失败");
         });
       }
     }
@@ -371,18 +361,8 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
         id: active.id as number,
         sort: newSort,
       });
-
-      toast({
-        title: "成功",
-        description: "子版排序已更新",
-      });
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "更新失败",
-        description:
-          error instanceof Error ? error.message : "服务器错误，请稍后重试",
-      });
+      console.error("更新子版排序失败:", error);
       setBoardChildren(boardChildren);
     }
   };
@@ -423,10 +403,6 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
     setIsDeleting(true);
     try {
       await api.boards.deleteChild({ id: deletingChild.id, boardId: board.id });
-      toast({
-        title: "成功",
-        description: "子版删除成功",
-      });
       setDeleteModalOpen(false);
       fetchBoardChildren();
     } catch (error) {
@@ -506,6 +482,7 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 isActive={child.id === activeId}
+                onRefresh={fetchBoardChildren}
               />
             ))}
           </SortableContext>
