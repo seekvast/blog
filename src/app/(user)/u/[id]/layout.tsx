@@ -145,7 +145,7 @@ export default function UserLayout({
                 </div>
                 {isCurrentUser ? (
                   <Button size="sm" className="rounded-full primary" asChild>
-                    <Link href={`/u/${username}/settings`}>修改个人信息</Link>
+                    <Link href={`/u/${username}/settings?hashid=${userData.hashid}`}>修改个人信息</Link>
                   </Button>
                 ) : (
                   <DropdownMenu>

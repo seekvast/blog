@@ -77,7 +77,7 @@ export function ChangeRoleDialog({
             className="space-y-4"
           >
             <div className="flex items-center space-x-3">
-              <RadioGroupItem value="0" id="role-0" />
+              <RadioGroupItem value="3" id="role-0" />
               <div className="space-y-1">
                 <Label htmlFor="role-0" className="font-medium">
                   成员
