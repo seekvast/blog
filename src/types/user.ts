@@ -33,6 +33,7 @@ export interface User {
   replies_count?: number;
   user_role?: number;
   status?: number;
+  username_history?: string[]; 
   preferences?: {
     nsfwVisible: string;
     discloseOnline: string;
@@ -48,6 +49,12 @@ export interface User {
     id: number;
     user_hashid: string;
     blocked_hashid: string;
+  };
+  age_verification?: {
+    id: number;
+    user_id: number;
+    user_hashid: string;
+    status: number;
   };
   created_at?: string;
   updated_at?: string;

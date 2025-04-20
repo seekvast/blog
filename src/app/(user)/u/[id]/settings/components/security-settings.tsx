@@ -1,14 +1,15 @@
 "use client";
 
+import { useState, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { ChevronRight } from "lucide-react";
-import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,11 @@ import { User } from "@/types/user";
 import { api } from "@/lib/api";
 import { z } from "zod";
 import { signOut } from "next-auth/react";
+import { ImageUpload } from "@/components/ui/image-upload";
+import { Attachment } from "@/types";
+import { PlusIcon } from "lucide-react";
+import { X } from "lucide-react";
+import Image from "next/image";
 
 const passwordSchema = z
   .object({
@@ -50,6 +56,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [genderModalOpen, setGenderModalOpen] = useState(false);
   const [birthdayModalOpen, setBirthdayModalOpen] = useState(false);
+  const [ageVerificationOpen, setAgeVerificationOpen] = useState(false);
   const [gender, setGender] = useState(user.gender?.toString()); // Convert number to string
   const [birthday, setBirthday] = useState(user.birthday);
   const [passwordForm, setPasswordForm] = useState<PasswordSchema>({
@@ -58,6 +65,12 @@ export default function SecuritySettings({ user }: { user: User | null }) {
     password_confirm: "",
   });
   const [nsfwVisible, setNsfwVisible] = useState(user.preferences?.nsfwVisible);
+  const [verificationImageUrl, setVerificationImageUrl] = useState<
+    string | null
+  >(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getGenderText = (value: string | undefined) => {
     switch (value) {
@@ -160,6 +173,108 @@ export default function SecuritySettings({ user }: { user: User | null }) {
         nsfwVisible: checked ? "yes" : "no",
       },
     });
+  };
+
+  const handleAgeVerificationImageUpload = (attachment: Attachment) => {
+    setVerificationImageUrl(attachment.url);
+  };
+
+  const handleFileSelect = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAgeVerificationOpen = () => {
+    if (
+      user?.age_verification === null ||
+      user?.age_verification?.status === -1
+    ) {
+      setAgeVerificationOpen(true);
+    } else {
+      toast({
+        variant: "destructive",
+        title: "错误",
+        description: "您提交过年龄验证",
+      });
+    }
+  };
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 检查文件大小
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        variant: "destructive",
+        title: "文件过大",
+        description: "文件大小不能超过2MB",
+      });
+      return;
+    }
+
+    // 检查文件类型
+    if (!file.type.startsWith("image/")) {
+      toast({
+        variant: "destructive",
+        title: "格式不支持",
+        description: "只支持图片格式",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("attachment_type", "profile_avatars");
+
+      const data = await api.upload.image(formData);
+      handleAgeVerificationImageUpload(data);
+
+      toast({
+        description: "圖片上傳成功",
+      });
+    } catch (error) {
+      console.error("圖片上傳失敗:", error);
+      toast({
+        variant: "destructive",
+        title: "上傳失敗",
+        description: "圖片上傳失敗，請重試",
+      });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleAgeVerificationSubmit = async () => {
+    if (!verificationImageUrl) {
+      toast({
+        variant: "destructive",
+        title: "错误",
+        description: "请上传身份证明文件",
+      });
+      return;
+    }
+
+    try {
+      setIsVerifying(true);
+      await api.users.verifyAge({ image: verificationImageUrl });
+      toast({
+        title: "提交成功",
+        description: "年龄验证已提交，请等待审核",
+      });
+      setAgeVerificationOpen(false);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "提交失败",
+        description: error?.message || "请稍后重试",
+      });
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   const today = new Date().toISOString().split("T")[0];
@@ -377,12 +492,98 @@ export default function SecuritySettings({ user }: { user: User | null }) {
           <p className="text-sm text-gray-500 mt-1">
             驗證你的年齡以存取特定內容
           </p>
-          <div className="flex items-center gap-2 cursor-pointer">
+          <div
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => handleAgeVerificationOpen()}
+          >
             <span className="text-sm text-blue-600 ">去验证</span>
             <ChevronRight className="h-4 w-4 text-gray-400" />
           </div>
         </div>
       </div>
+
+      {/* 年龄验证对话框 */}
+      <Dialog open={ageVerificationOpen} onOpenChange={setAgeVerificationOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>年齡認證</DialogTitle>
+            <DialogDescription>
+              因應當地政府法規，需要您上傳具有年齡資訊身分證明文件以進行進階年齡認證。
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            <div className="bg-slate-50 rounded-md flex flex-col items-center justify-center">
+              {!verificationImageUrl ? (
+                <>
+                  <div className="mb-2 p-6">
+                    <div
+                      className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center text-white cursor-pointer"
+                      onClick={handleFileSelect}
+                    >
+                      {isUploading ? (
+                        <div className="animate-spin rounded-full h-8 w-8 border-4 border-white border-t-transparent"></div>
+                      ) : (
+                        <PlusIcon className="h-8 w-8" />
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-2">上傳證件照片</p>
+                </>
+              ) : (
+                <div className="relative w-full">
+                  <div className="w-full h-40 relative rounded-md overflow-hidden">
+                    <Image
+                      src={verificationImageUrl}
+                      alt="身份证明"
+                      width={400}
+                      height={400}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="absolute top-2 right-2 rounded-full p-2 h-8 w-8"
+                    onClick={() => setVerificationImageUrl(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium mb-2">要求:</h4>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li>請上傳真實有效、清晰的證件</li>
+                  <li>支持JPG、JPEG、PNG格式，大小不超過2M</li>
+                  <li>
+                    「年齡驗證所提供的個人證件僅用於確認是否為成年，驗證完畢後將於60天內銷毀證件照片。」
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <Button
+              className="w-full bg-blue-500 hover:bg-blue-600"
+              onClick={handleAgeVerificationSubmit}
+              disabled={!verificationImageUrl || isVerifying}
+            >
+              {isVerifying ? "驗證中..." : "提交"}
+            </Button>
+          </div>
+
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept="image/*"
+            onChange={handleFileUpload}
+          />
+        </DialogContent>
+      </Dialog>
 
       {/* 成人内容 */}
       <div className="py-3 border-b">

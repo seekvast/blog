@@ -39,7 +39,7 @@ export default function SettingsPage() {
   );
   const [showViolation, setShowViolation] = React.useState<boolean>(false);
   const [violationType, setViolationType] = React.useState<string>("account");
-  // 创建 refs 对象来存储各个 section 的引用
+
   const sectionRefs = {
     profile: useRef<HTMLElement>(null),
     security: useRef<HTMLElement>(null),
@@ -141,7 +141,6 @@ export default function SettingsPage() {
     }
   };
 
-  // 渲染使用 Tab 切换的内容
   const renderTabContent = () => {
     switch (activeTab) {
       case "blacklist":
@@ -194,9 +193,7 @@ export default function SettingsPage() {
     }
   };
 
-  // 获取菜单项的 openTab 属性
   const getMenuOpenTabStatus = (tab: SettingsTabType): boolean => {
-    // 从 settings-sidebar.tsx 中的 navGroups 数组获取菜单项的 openTab 属性
     const navGroup = navGroups.find((group) => group.href === tab);
     return !!navGroup?.openTab;
   };
@@ -268,7 +265,7 @@ export default function SettingsPage() {
                   <section
                     ref={sectionRefs.profile}
                     id="profile"
-                    className="py-3" // 为第一个 section 添加足够的顶部内边距
+                    className="py-3"
                   >
                     <h2 className="text-xl font-semibold">个人资讯</h2>
                     <ProfileSettings user={user} />
