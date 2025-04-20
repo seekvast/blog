@@ -91,7 +91,6 @@ export default function ProfileSettings({ user }: { user: User | null }) {
 
   const handleBgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    console.log(file);
     if (!file) return;
     setIsBgUploading(true);
 
@@ -205,11 +204,13 @@ export default function ProfileSettings({ user }: { user: User | null }) {
                   </h2>
                   <div className="text-xs sm:text-sm opacity-80">
                     {user.nickname && <span>@{user.nickname}</span>} 加入于{" "}
-                    {user.created_at ? new Date(user.created_at).toLocaleDateString("zh-CN", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    }) : "未知"}
+                    {user.created_at
+                      ? new Date(user.created_at).toLocaleDateString("zh-CN", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : "未知"}
                   </div>
                   <p className="text-xs sm:text-sm opacity-90 max-w-[250px] sm:max-w-[400px]">
                     {user.bio || "这个人很懒，什么都没写~"}
@@ -240,11 +241,8 @@ export default function ProfileSettings({ user }: { user: User | null }) {
           </div>
 
           {/* 表单内容区域 */}
-          <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="p-4 sm:p-8 space-y-6"
-            >
+          <div className="p-4 sm:p-8 space-y-6">
+            <Form {...form}>
               {/* 用户名 */}
               <FormField
                 control={form.control}
@@ -311,12 +309,19 @@ export default function ProfileSettings({ user }: { user: User | null }) {
                 >
                   取消
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
+                <Button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={() => {
+                    const values = form.getValues();
+                    onSubmit(values);
+                  }}
+                >
                   {isSubmitting ? "保存中..." : "保存"}
                 </Button>
               </div>
-            </form>
-          </Form>
+            </Form>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

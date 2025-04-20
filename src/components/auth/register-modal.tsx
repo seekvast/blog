@@ -279,7 +279,6 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
         gender: step2Data.gender ? parseInt(step2Data.gender) : undefined,
         birthday 
       });
-      console.log(data, '..................data');
       toast({
         title: "註冊成功",
         description: "請前往登錄",

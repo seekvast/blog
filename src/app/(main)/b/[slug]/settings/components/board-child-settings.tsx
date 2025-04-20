@@ -83,7 +83,6 @@ function SortableBoardChildItem({
         child_id: child.id,
         operator: "board",
       });
-      console.log("子版块隐藏请求已发送");
       onRefresh();
     } catch (error) {
       console.error("隐藏子版块失败:", error);

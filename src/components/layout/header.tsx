@@ -139,7 +139,7 @@ export function Header({ className }: HeaderProps) {
                     </Avatar>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
-                    <Link href={`/u/${user.username}?hash=${user.hashid}`}>
+                    <Link href={`/u/${user.username}?hashid=${user.hashid}`}>
                       <DropdownMenuItem className="cursor-pointer">
                         <User2 className="mr-2 h-4 w-4" />
                         <span>基本资料</span>

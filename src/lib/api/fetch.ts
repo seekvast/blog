@@ -121,7 +121,6 @@ export async function fetchApi<T>(
     headers,
   });
   if (interceptedOptions.skipRequest) {
-    console.log(endpoint, "endpoint");
     return {
       code: 0,
       data: null,

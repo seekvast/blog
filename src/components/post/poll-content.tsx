@@ -55,7 +55,6 @@ export function PollContent({ poll: initialPoll, onVote }: PollContentProps) {
   const [showVoters, setShowVoters] = React.useState(false);
 
     useEffect(() => {
-      console.log(isEnded, isStarted, "isEnded, isStarted");
     if (poll.user_voted) {
       setSelectedOptions(poll.user_voted.options);
       setIsVoted(true);

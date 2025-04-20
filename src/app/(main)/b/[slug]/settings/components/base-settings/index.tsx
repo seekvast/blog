@@ -58,7 +58,6 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
   }, []);
 
   const onSubmit = async (values: BoardSettingsFormValues) => {
-    console.log("Form values on submit:", values);
     setIsSubmitting(true);
     try {
       const updateData = {

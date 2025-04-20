@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Settings, Flag, AlertTriangle, Ban, Unlock } from "lucide-react";
@@ -27,8 +27,10 @@ export default function UserLayout({
   children: React.ReactNode;
 }) {
   const params = useParams();
+  const searchParams = useSearchParams();
   const pathname = usePathname();
   const username = params?.id as string;
+  const hashid = searchParams?.get("hashid");
   const isSettingsPage = pathname?.includes(`/u/${username}/settings`) ?? false;
   const { data: session } = useSession();
   const { toast } = useToast();
@@ -39,12 +41,11 @@ export default function UserLayout({
 
   // 获取用户详细信息
   const { data: userData } = useQuery({
-    queryKey: ["user", username],
-    queryFn: () => api.users.get({ username: username }),
-    enabled: !!username,
+    queryKey: ["user", hashid],
+    queryFn: () => api.users.get({ hashid: hashid }),
+    enabled: !!hashid,
   });
   const isCurrentUser = session?.user?.hashid === userData?.hashid;
-
   // 使用 useEffect 处理 blocked 状态
   useEffect(() => {
     if (userData?.blocked) {
