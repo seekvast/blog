@@ -70,6 +70,8 @@ export function createApi(options: ApiOptions = {}) {
       getPosts: (params?: QueryParams) =>
             http.get<Pagination<Post>>(`${prefix}/user/posts`, params, { next }),
       verifyAge: (data: any) => http.post<any>(`${prefix}/user/age-verify`, data),
+        sendEmail: (data: any) => http.get<any>(`${prefix}/user/send-email`, data),
+      updateEmail: (data: any) => http.patch<any>(`${prefix}/user/email`, data),
     },
 
     boards: {

@@ -42,7 +42,13 @@ const passwordSchema = z
     path: ["password_confirm"],
   });
 
+const emailSchema = z.object({
+  email: z.string().email("请输入有效的邮箱地址"),
+  captcha: z.string().min(1, "请输入验证码"),
+});
+
 type PasswordSchema = z.infer<typeof passwordSchema>;
+type EmailSchema = z.infer<typeof emailSchema>;
 
 export default function SecuritySettings({ user }: { user: User | null }) {
   if (!user) {
@@ -54,6 +60,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
   }
   const { toast } = useToast();
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [genderModalOpen, setGenderModalOpen] = useState(false);
   const [birthdayModalOpen, setBirthdayModalOpen] = useState(false);
   const [ageVerificationOpen, setAgeVerificationOpen] = useState(false);
@@ -64,6 +71,12 @@ export default function SecuritySettings({ user }: { user: User | null }) {
     password: "",
     password_confirm: "",
   });
+  const [emailForm, setEmailForm] = useState<EmailSchema>({
+    email: "",
+    captcha: "",
+  });
+  const [isSendingCode, setIsSendingCode] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   const [nsfwVisible, setNsfwVisible] = useState(user.preferences?.nsfwVisible);
   const [verificationImageUrl, setVerificationImageUrl] = useState<
     string | null
@@ -144,6 +157,110 @@ export default function SecuritySettings({ user }: { user: User | null }) {
         password: "",
         password_confirm: "",
       });
+      await signOut({
+        redirect: true,
+        callbackUrl: "/",
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // 显示第一个验证错误
+        toast({
+          variant: "destructive",
+          title: "验证错误",
+          description: error.errors[0].message,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "修改失败",
+          description: error?.message || "请稍后重试",
+        });
+      }
+    }
+  };
+
+  const handleEmailChange =
+    (field: keyof EmailSchema) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setEmailForm((prev) => ({
+        ...prev,
+        [field]: e.target.value,
+      }));
+    };
+
+  const handleSendVerificationCode = async () => {
+    if (!emailForm.email) {
+      toast({
+        variant: "destructive",
+        title: "错误",
+        description: "请输入新邮箱",
+      });
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailForm.email)) {
+      toast({
+        variant: "destructive",
+        title: "错误",
+        description: "请输入有效的邮箱地址",
+      });
+      return;
+    }
+
+    try {
+      setIsSendingCode(true);
+      // 调用发送验证码API
+      await api.users.sendEmail({ email: emailForm.email });
+      toast({
+        title: "发送成功",
+        description: "验证码已发送到您的新邮箱",
+      });
+      
+      // 设置倒计时
+      setCountdown(60);
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "发送失败",
+        description: error?.message || "请稍后重试",
+      });
+    } finally {
+      setIsSendingCode(false);
+    }
+  };
+
+  const handleEmailSubmit = async () => {
+    try {
+      // 使用 zod 验证表单
+      const validatedData = emailSchema.parse(emailForm);
+
+      // 提交到后端
+      await api.users.updateEmail({
+        email: validatedData.email,
+        captcha: validatedData.captcha
+      });
+      
+      toast({
+        title: "修改成功",
+        description: "邮箱已更新，请重新登录",
+      });
+      
+      setEmailModalOpen(false);
+      // 重置表单
+      setEmailForm({
+        email: "",
+        captcha: "",
+      });
+      
       await signOut({
         redirect: true,
         callbackUrl: "/",
@@ -288,7 +405,10 @@ export default function SecuritySettings({ user }: { user: User | null }) {
           <p className="text-sm text-gray-500 mt-1">
             更改你的电子邮件地址，以确保帐户安全并接收最新通知。
           </p>
-          <div className="flex items-center gap-2 cursor-pointer">
+          <div 
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => setEmailModalOpen(true)}
+          >
             <span className="text-sm text-gray-500">{user?.email}</span>
             <ChevronRight className="h-4 w-4 text-gray-400" />
           </div>
@@ -371,6 +491,66 @@ export default function SecuritySettings({ user }: { user: User | null }) {
               </Button>
               <Button onClick={handlePasswordSubmit}>确认修改</Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 邮箱修改Modal */}
+      <Dialog open={emailModalOpen} onOpenChange={setEmailModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>更改邮箱</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            {/* 新邮箱 */}
+            <div className="flex flex-col gap-2">
+              <Label>新邮箱</Label>
+              <Input
+                type="email"
+                placeholder="请输入新邮箱"
+                value={emailForm.email}
+                onChange={handleEmailChange("email")}
+              />
+            </div>
+
+            {/* 验证码 */}
+            <div className="flex flex-col gap-2">
+              <Label>验证码</Label>
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  placeholder="请输入验证码"
+                  value={emailForm.captcha}
+                  onChange={handleEmailChange("captcha")}
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleSendVerificationCode}
+                  disabled={countdown > 0 || isSendingCode}
+                  className="whitespace-nowrap"
+                >
+                  {isSendingCode
+                    ? "发送中..."
+                    : countdown > 0
+                    ? `发送验证码(${countdown}s)`
+                    : "发送验证码"}
+                </Button>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setEmailModalOpen(false)}
+            >
+              取消
+            </Button>
+            <Button type="button" onClick={handleEmailSubmit}>
+              确定
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -558,7 +738,9 @@ export default function SecuritySettings({ user }: { user: User | null }) {
                 <h4 className="font-medium mb-2">要求:</h4>
                 <ul className="text-sm text-gray-600 space-y-1">
                   <li>請上傳真實有效、清晰的證件</li>
-                  <li>支持JPG、JPEG、PNG格式，大小不超過2M</li>
+                  <li>
+                    支持JPG、JPEG、PNG格式，大小不超過2M
+                  </li>
                   <li>
                     「年齡驗證所提供的個人證件僅用於確認是否為成年，驗證完畢後將於60天內銷毀證件照片。」
                   </li>
