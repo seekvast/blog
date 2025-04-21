@@ -3,6 +3,11 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import { UserBlacklist as UserBlacklistType } from "@/types/user";
+import { Pagination } from "@/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // 看板黑名单数据接口
 interface BlacklistBoard {
@@ -62,11 +67,39 @@ function Boards({
 // 用户黑名单列表组件
 function Users({
   users,
+  isLoading,
   onUnblock,
 }: {
   users: BlacklistUser[];
+  isLoading: boolean;
   onUnblock: (id: string) => void;
 }) {
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="flex items-center justify-between py-3 border-b"
+          >
+            <div className="flex items-center gap-3">
+              <Skeleton className="w-12 h-12 rounded-full" />
+              <div>
+                <Skeleton className="h-5 w-32 mb-1" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            </div>
+            <Skeleton className="h-8 w-20" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (users.length === 0) {
+    return <div className="py-4 text-center text-gray-500">暂无数据</div>;
+  }
+
   return (
     <div className="space-y-4">
       {users.map((user) => (
@@ -114,27 +147,6 @@ const mockBoards: BlacklistBoard[] = [
   },
 ];
 
-const mockUsers: BlacklistUser[] = [
-  {
-    id: "3",
-    name: "用户名称用户名称用户名称",
-    avatar: "/avatar.jpg",
-    description: "@21821812u121",
-  },
-  {
-    id: "4",
-    name: "用户名称用户名称用户名称",
-    avatar: "/avatar.jpg",
-    description: "@21821812u121",
-  },
-  {
-    id: "5",
-    name: "用户名称用户名称用户名称",
-    avatar: "/avatar.jpg",
-    description: "@21821812u121",
-  },
-];
-
 interface UserBlacklistProps {
   type: "board" | "user";
   onTypeChange: (type: "board" | "user") => void;
@@ -146,22 +158,58 @@ export default function UserBlacklist({
   onTypeChange,
 }: UserBlacklistProps) {
   const [boards, setBoards] = React.useState<BlacklistBoard[]>(mockBoards);
-  const [users, setUsers] = React.useState<BlacklistUser[]>(mockUsers);
+
+  // 使用 React Query 获取用户黑名单数据
+  const { data, isLoading, isError, refetch } = useQuery<
+    Pagination<UserBlacklistType>
+  >({
+    queryKey: ["userBlacklist"],
+    queryFn: () => api.users.getBlacklist(),
+  });
+
+  // 将 API 返回的数据转换为组件所需的格式
+  const users = React.useMemo(() => {
+    if (!data?.items) return [];
+
+    return data.items.map((item) => ({
+      id: item.blocked_hashid,
+      name: item.blocked.nickname || item.blocked.username,
+      avatar: item.blocked.avatar_url || "/avatar.jpg",
+      description: `@${item.blocked.username}`,
+    }));
+  }, [data]);
 
   const handleUnblockBoard = (boardId: string) => {
     setBoards((prev) => prev.filter((board) => board.id !== boardId));
   };
 
-  const handleUnblockUser = (userId: string) => {
-    setUsers((prev) => prev.filter((user) => user.id !== userId));
+  const handleUnblockUser = async (userId: string) => {
+    try {
+      await api.users.block({ block_user_hashid: userId, action: "unblock" });
+      refetch();
+    } catch (error) {
+      console.error("解除黑名单失败", error);
+    }
   };
+
+  if (isError) {
+    return (
+      <div className="py-4 text-center text-red-500">
+        获取数据失败，请稍后重试
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
       {type === "board" ? (
         <Boards boards={boards} onUnblock={handleUnblockBoard} />
       ) : (
-        <Users users={users} onUnblock={handleUnblockUser} />
+        <Users
+          users={users}
+          isLoading={isLoading}
+          onUnblock={handleUnblockUser}
+        />
       )}
     </div>
   );

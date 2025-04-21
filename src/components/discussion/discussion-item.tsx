@@ -99,7 +99,7 @@ export const DiscussionItem = React.forwardRef<
       <div className="flex space-x-3 w-full">
         {/* 作者头像 */}
         <Link
-          href={`/u/${discussion.user.username}?hash=${discussion.user.hashid}`}
+          href={`/u/${discussion.user.username}?hashid=${discussion.user.hashid}`}
         >
           <Avatar className="h-14 w-14 flex-shrink-0">
             <AvatarImage

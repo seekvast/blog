@@ -12,6 +12,7 @@ import type {
   BoardChild,
   LoginResponse,
   User,
+  UserBlacklist,
   BoardRule,
   BoardUser,
   BoardBlacklist,
@@ -72,6 +73,7 @@ export function createApi(options: ApiOptions = {}) {
       verifyAge: (data: any) => http.post<any>(`${prefix}/user/age-verify`, data),
         sendEmail: (data: any) => http.get<any>(`${prefix}/user/send-email`, data),
       updateEmail: (data: any) => http.patch<any>(`${prefix}/user/email`, data),
+      getBlacklist: (params?: QueryParams) => http.get<Pagination<UserBlacklist>>(`${prefix}/user/blacklist`, params, { next }),
     },
 
     boards: {

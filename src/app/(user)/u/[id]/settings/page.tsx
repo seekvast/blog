@@ -35,7 +35,7 @@ export default function SettingsPage() {
   const userId = params?.get("hashid");
   const [activeTab, setActiveTab] = React.useState<SettingsTabType>("profile");
   const [blacklistType, setBlacklistType] = React.useState<"board" | "user">(
-    "board"
+    "user"
   );
   const [showViolation, setShowViolation] = React.useState<boolean>(false);
   const [violationType, setViolationType] = React.useState<string>("account");
@@ -154,7 +154,7 @@ export default function SettingsPage() {
                 />
                 <h2 className="text-xl font-semibold">封锁列表</h2>
               </div>
-              <Select
+              {/* <Select
                 value={blacklistType}
                 onValueChange={(value: "board" | "user") =>
                   setBlacklistType(value)
@@ -167,7 +167,7 @@ export default function SettingsPage() {
                   <SelectItem value="board">看板</SelectItem>
                   <SelectItem value="user">用户</SelectItem>
                 </SelectContent>
-              </Select>
+              </Select> */}
             </div>
             <UserBlacklist
               type={blacklistType}

@@ -33,7 +33,7 @@ export interface User {
   replies_count?: number;
   user_role?: number;
   status?: number;
-  username_history?: string[]; 
+  username_history?: string[];
   preferences?: {
     nsfwVisible: string;
     discloseOnline: string;
@@ -58,6 +58,13 @@ export interface User {
   };
   created_at?: string;
   updated_at?: string;
+}
+
+export interface UserBlacklist {
+  id: number;
+  user_hashid: string;
+  blocked_hashid: string;
+  blocked: User;
 }
 
 export type LoginResponse = Response<User>;

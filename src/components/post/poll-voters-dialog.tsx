@@ -83,7 +83,7 @@ export function PollVotersDialog({
                 {allVoters.map((voter) => (
                   <div key={voter.id} className="flex items-center space-x-4">
                     <Link
-                      href={`/u/${voter.user.username}?hash=${voter.user.hashid}`}
+                      href={`/u/${voter.user.username}?hashid=${voter.user.hashid}`}
                       className="flex items-center space-x-4"
                     >
                       <Avatar>

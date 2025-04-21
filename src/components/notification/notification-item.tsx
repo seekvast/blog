@@ -67,7 +67,7 @@ export function NotificationItem({
       onClick={handleClick}
     >
       <Link
-        href={`/u/${notification.from_user.username}?hash=${notification.from_user.hashid}`}
+        href={`/u/${notification.from_user.username}?hashid=${notification.from_user.hashid}`}
       >
         <Avatar className="h-10 w-10 shrink-0">
           <AvatarImage

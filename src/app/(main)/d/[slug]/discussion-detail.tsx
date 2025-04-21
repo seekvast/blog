@@ -8,7 +8,15 @@ import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import type { Discussion, Pagination } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ChevronUp, X, ChevronDown, Star, Bookmark, Check, EyeOff } from "lucide-react";
+import {
+  ChevronUp,
+  X,
+  ChevronDown,
+  Star,
+  Bookmark,
+  Check,
+  EyeOff,
+} from "lucide-react";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { PostNavigator } from "@/components/post/post-navigator";
 import { useLoginModal } from "@/components/providers/login-modal-provider";
@@ -36,7 +44,12 @@ import { PollContent } from "@/components/post/poll-content";
 import { PostForm } from "@/validations/post";
 import { Attachment } from "@/types";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
@@ -73,7 +86,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   const [isBookmarked, setIsBookmarked] = useState(
     initialDiscussion?.discussion_user?.is_bookmarked === "yes"
   );
-  const [followStatus, setFollowStatus] = useState<string|null>(
+  const [followStatus, setFollowStatus] = useState<string | null>(
     initialDiscussion?.discussion_user?.subscription || null
   );
   const [showCommentEditor, setShowCommentEditor] = useState(false);
@@ -202,7 +215,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   });
 
   const followMutation = useMutation({
-    mutationFn: (action: string|null) =>
+    mutationFn: (action: string | null) =>
       api.discussions.saveFollow({
         slug: currentDiscussion?.slug,
         action,
@@ -221,8 +234,18 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     },
     onSuccess: () => {
       toast({
-        title: followStatus === "follow" ? "已关注" : followStatus === "ignore" ? "已忽视" : "已取消关注",
-        description: followStatus === "follow" ? "将接收此讨论的更新" : followStatus === "ignore" ? "将不再接收此讨论的更新" : "已取消关注此讨论",
+        title:
+          followStatus === "follow"
+            ? "已关注"
+            : followStatus === "ignore"
+            ? "已忽视"
+            : "已取消关注",
+        description:
+          followStatus === "follow"
+            ? "将接收此讨论的更新"
+            : followStatus === "ignore"
+            ? "将不再接收此讨论的更新"
+            : "已取消关注此讨论",
       });
     },
   });
@@ -417,11 +440,14 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     });
   }, [requireAuth, bookmarkMutation]);
 
-  const handleFollow = React.useCallback((action: string|null = null) => {
-    requireAuth(() => {
-      followMutation.mutate(action);
-    });
-  }, [requireAuth, followMutation]);
+  const handleFollow = React.useCallback(
+    (action: string | null = null) => {
+      requireAuth(() => {
+        followMutation.mutate(action);
+      });
+    },
+    [requireAuth, followMutation]
+  );
 
   React.useEffect(() => {
     setDiscussion(initialDiscussion);
@@ -457,7 +483,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
 
             <div className="mt-2 flex items-start space-x-3">
               <Link
-                href={`/u/${currentDiscussion.user.username}?hash=${currentDiscussion.user.hashid}`}
+                href={`/u/${currentDiscussion.user.username}?hashid=${currentDiscussion.user.hashid}`}
               >
                 <Avatar className="h-12 w-12 md:h-14 md:w-14 flex-shrink-0">
                   <AvatarImage
@@ -473,7 +499,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               <div className="flex-1 min-w-0 overflow-hidden">
                 <div className="flex items-center space-x-2">
                   <Link
-                    href={`/u/${currentDiscussion.user.username}?hash=${currentDiscussion.user.hashid}`}
+                    href={`/u/${currentDiscussion.user.username}?hashid=${currentDiscussion.user.hashid}`}
                   >
                     <span className="text-base md:text-lg font-medium truncate">
                       {currentDiscussion.user.username}
@@ -643,12 +669,16 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 <Button
                   variant={followStatus ? "default" : "secondary"}
                   className="w-full justify-between"
-                  onClick={() => handleFollow(followStatus === "follow" ? null : "follow")}
+                  onClick={() =>
+                    handleFollow(followStatus === "follow" ? null : "follow")
+                  }
                   disabled={followMutation.isPending}
                 >
                   <div className="flex items-center">
                     <Star
-                      className={`mr-2 h-4 w-4 ${followStatus === "follow" ? "fill-current" : ""}`}
+                      className={`mr-2 h-4 w-4 ${
+                        followStatus === "follow" ? "fill-current" : ""
+                      }`}
                     />
                     {followMutation.isPending
                       ? "处理中..."
@@ -662,7 +692,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   className="flex flex-col items-start cursor-pointer py-2"
                   onClick={() => {
                     if (followStatus) handleFollow(null);
@@ -677,7 +707,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                     停当有人標註我時通知我。
                   </span>
                 </DropdownMenuItem>
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   className="flex flex-col items-start cursor-pointer py-2"
                   onClick={() => {
                     if (followStatus !== "follow") handleFollow("follow");
@@ -686,13 +716,15 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   <div className="flex w-full items-center">
                     <Star className="mr-2 h-4 w-4 fill-current" />
                     关注中
-                    {followStatus === "follow" && <Check className="ml-auto h-4 w-4" />}
+                    {followStatus === "follow" && (
+                      <Check className="ml-auto h-4 w-4" />
+                    )}
                   </div>
                   <span className="text-xs text-muted-foreground mt-1 pl-6">
                     當有人回覆此文章時通知我。
                   </span>
                 </DropdownMenuItem>
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   className="flex flex-col items-start cursor-pointer py-2"
                   onClick={() => {
                     if (followStatus !== "ignore") handleFollow("ignore");
@@ -701,7 +733,9 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   <div className="flex w-full items-center">
                     <EyeOff className="mr-2 h-4 w-4" />
                     忽视中
-                    {followStatus === "ignore" && <Check className="ml-auto h-4 w-4" />}
+                    {followStatus === "ignore" && (
+                      <Check className="ml-auto h-4 w-4" />
+                    )}
                   </div>
                   <span className="text-xs text-muted-foreground mt-1 pl-6">
                     不接收任何通知並從文章列表中隱藏此文章。

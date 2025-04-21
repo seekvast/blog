@@ -193,7 +193,9 @@ export function MembersSettings({ board }: SettingsProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem className="cursor-pointer">
-                    <Link href={`/u/${member.username}?hash=${member.hashid}`}>
+                    <Link
+                      href={`/u/${member.username}?hashid=${member.hashid}`}
+                    >
                       查看个人主页
                     </Link>
                   </DropdownMenuItem>
@@ -207,7 +209,9 @@ export function MembersSettings({ board }: SettingsProps) {
                     <>
                       <DropdownMenuItem
                         className="cursor-pointer"
-                        onClick={() => handleManger(member, member.status === 5 ? 1 : 5)}
+                        onClick={() =>
+                          handleManger(member, member.status === 5 ? 1 : 5)
+                        }
                       >
                         {member.status === 5 ? "解除禁言" : "禁言"}
                       </DropdownMenuItem>

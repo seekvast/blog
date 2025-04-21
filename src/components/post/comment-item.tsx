@@ -101,7 +101,7 @@ export const CommentItem = ({
   const handleEdit = (comment: Post) => {
     setIsEditing(true);
     setEditContent(comment.raw_content);
-    
+
     // 使用setTimeout确保DOM已更新后再滚动
     setTimeout(() => {
       if (editRef.current) {
@@ -137,7 +137,9 @@ export const CommentItem = ({
       className={cn("pt-2 pb-4 border-b", level > 0 && "border-b-0 pb-0")}
     >
       <div className="flex items-start space-x-3 px-2 md:px-4 min-w-0">
-        <Link href={`/u/${comment.user.username}?hash=${comment.user.hashid}`}>
+        <Link
+          href={`/u/${comment.user.username}?hashid=${comment.user.hashid}`}
+        >
           <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
             <AvatarImage src={comment.user.avatar_url} />
             <AvatarFallback>{comment.user.nickname[0]}</AvatarFallback>
@@ -147,7 +149,7 @@ export const CommentItem = ({
           <div className="flex justify-between w-full items-center">
             <div className="flex items-center gap-2">
               <Link
-                href={`/u/${comment.user.username}?hash=${comment.user.hashid}`}
+                href={`/u/${comment.user.username}?hashid=${comment.user.hashid}`}
               >
                 <span className="font-medium text-base truncate">
                   {comment.user.nickname || comment.user.username}
@@ -186,7 +188,7 @@ export const CommentItem = ({
             ) : (
               <>
                 <PostContent post={comment} />
-                
+
                 {/* 回复框 */}
                 {replyEditorVisiable && (
                   <div className="mt-4">
