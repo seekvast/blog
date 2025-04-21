@@ -19,11 +19,8 @@ import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { BoardUserRole } from "@/constants/board-user-role";
 import { useQuery } from "@tanstack/react-query";
 import { BoardApprovalMode } from "@/constants/board-approval-mode";
-import {
-  DiscussionControls,
-  type DisplayMode,
-  type SortBy,
-} from "@/components/discussion/discussion-controls";
+import { DiscussionControls } from "@/components/discussion/discussion-controls";
+import { DisplayMode, SortBy } from "@/types/display-preferences";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
 import { JoinBoardDialog } from "@/components/board/join-board-dialog";
@@ -351,8 +348,6 @@ function BoardContent() {
                 </div>
                 {activeTab === "posts" && (
                   <DiscussionControls
-                    displayMode={displayMode}
-                    setDisplayMode={setDisplayMode}
                     sortBy={sortBy}
                     setSortBy={(sort) => {
                       setSortBy(sort);

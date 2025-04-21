@@ -22,11 +22,6 @@ const navItems = [
     href: "posts" as UserTabType,
   },
   {
-    label: "标注",
-    count: 46,
-    href: "following" as UserTabType,
-  },
-  {
     label: "使用者名称历史",
     count: 41,
     href: "history" as UserTabType,
@@ -103,8 +98,6 @@ export default function UserPage() {
         return <UserPosts />;
       case "replies":
         return <UserReplies />;
-      case "following":
-        return <div className="min-h-screen"></div>;
       case "history":
         return (
           <div className="min-h-screen">
@@ -122,7 +115,7 @@ export default function UserPage() {
 
   return (
     <div className="lg:py-4">
-      <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
+      <div className="flex flex-col lg:flex-row min-h-screen gap-4 lg:gap-8">
         {/* 左侧导航 */}
         <div className="lg:w-60 flex-shrink-0">
           <UserSidebar

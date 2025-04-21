@@ -6,8 +6,6 @@ import React from "react";
 export type UserTabType =
   | "replies"
   | "posts"
-  | "following"
-  | "violation"
   | "history";
 
 interface UserSidebarProps {

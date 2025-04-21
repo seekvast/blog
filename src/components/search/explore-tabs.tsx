@@ -3,11 +3,8 @@
 import * as React from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import {
-  type DisplayMode,
-  type SortBy,
-  DiscussionControls,
-} from "@/components/discussion/discussion-controls";
+import { DiscussionControls } from "@/components/discussion/discussion-controls";
+import { DisplayMode, SortBy } from "@/types/display-preferences";
 
 const tabs = [
   { id: "all", name: "相关", path: "/explore" },
@@ -70,8 +67,6 @@ export function ExploreTabs({
 
       {showControls && (
         <DiscussionControls
-          displayMode={displayMode}
-          setDisplayMode={setDisplayMode}
           sortBy={sortBy}
           setSortBy={setSortBy}
         />

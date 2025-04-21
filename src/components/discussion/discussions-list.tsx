@@ -10,11 +10,8 @@ import { api } from "@/lib/api";
 import { DiscussionItem } from "@/components/discussion/discussion-item";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { cn } from "@/lib/utils";
-import { 
-  DiscussionControls, 
-  type DisplayMode, 
-  type SortBy 
-} from "@/components/discussion/discussion-controls";
+import { DiscussionControls } from "@/components/discussion/discussion-controls";
+import { DisplayMode, SortBy } from "@/types/display-preferences";
 
 interface DiscussionsListProps {
   initialDiscussions: Pagination<Discussion>;
@@ -153,8 +150,6 @@ export function DiscussionsList({
             )}
 
             <DiscussionControls
-              displayMode={displayMode}
-              setDisplayMode={setDisplayMode}
               sortBy={sortBy}
               setSortBy={(sort) => {
                 setSortBy(sort);
