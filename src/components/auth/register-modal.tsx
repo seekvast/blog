@@ -20,6 +20,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import Link from "next/link";
 import { useAuthModal } from "./auth-modal-store";
+import { useRegistrationStore } from "@/store/registration-store";
+import { signIn } from "next-auth/react";
 
 const stepOneSchema = z.object({
   email: z.string().email("請輸入有效的郵箱地址"),
@@ -28,8 +30,8 @@ const stepOneSchema = z.object({
     .min(8, "密碼至少需要8個字符")
     .max(100, "密碼最多100個字符")
     .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
-      "密碼必須包含大小寫字母和數字"
+      /^[0-9a-zA-Z!@#$%^&*\-_]{8,100}$/,
+      "密碼只能包含大小寫字母、數字和特殊字符（!@#$%^&*-_）"
     ),
 });
 
@@ -72,6 +74,7 @@ interface RegisterModalProps {
 
 export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
   const { isRegisterOpen, closeRegister, openLogin } = useAuthModal();
+  const { setNewlyRegistered } = useRegistrationStore();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -279,9 +282,20 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
         gender: step2Data.gender ? parseInt(step2Data.gender) : undefined,
         birthday 
       });
+      
+      if(data.token) {
+        await signIn("credentials", {
+          email: data.email,
+          password: step1Data.password,
+          redirect: false,
+        });
+      }
+      // 设置新注册用户状态，触发兴趣选择
+      setNewlyRegistered(true);
+      
       toast({
         title: "註冊成功",
-        description: "請前往登錄",
+        description: "已自動登錄",
       });
       if (onOpenChange) {
         onOpenChange(false);
