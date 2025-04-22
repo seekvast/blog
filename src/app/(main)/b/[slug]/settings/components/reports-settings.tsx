@@ -130,7 +130,7 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
       action,
     }: {
       reportId: number;
-      action: string;
+      action: ActionMode;
     }) => {
       return await api.reports.process({
         board_id: board.id,

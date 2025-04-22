@@ -214,26 +214,29 @@ export function DiscussionActions({
                 <Trash2 className="mr-2 h-4 w-4" />
                 <span>刪除</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
             </>
           )}
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() => setReportToAdminOpen(true)}
-          >
-            <Flag className="mr-2 h-4 w-4" />
-            <span>向管理員檢舉</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() => setReportToKaterOpen(true)}
-          >
-            <AlertTriangle className="mr-2 h-4 w-4" />
-            <span>向Kater檢舉</span>
-          </DropdownMenuItem>
+          {!isAuthor && (
+            <>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => setReportToAdminOpen(true)}
+              >
+                <Flag className="mr-2 h-4 w-4" />
+                <span>向管理員檢舉</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onClick={() => setReportToKaterOpen(true)}
+              >
+                <AlertTriangle className="mr-2 h-4 w-4" />
+                <span>向Kater檢舉</span>
+              </DropdownMenuItem>
+            </>
+          )}
+
           {discussion.board?.manager && (
             <>
-              <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() => {

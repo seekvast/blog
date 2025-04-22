@@ -7,15 +7,12 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { DiscussionItem } from "@/components/discussion/discussion-item";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { ExploreTabs } from "@/components/search/explore-tabs";
-import type {
-  DisplayMode,
-  SortBy,
-} from "@/components/discussion/discussion-controls";
+import { DiscussionControls } from "@/components/discussion/discussion-controls";
+import { DisplayMode, SortBy } from "@/types/display-preferences";
 
 export default function DiscussionsPage() {
   const searchParams = useSearchParams();
   const q = searchParams?.get("q") ?? "";
-  const [displayMode, setDisplayMode] = React.useState<DisplayMode>("list");
   const [sortBy, setSortBy] = React.useState<SortBy>("hot");
 
   const {
@@ -76,8 +73,6 @@ export default function DiscussionsPage() {
   return (
     <div className="flex flex-col">
       <ExploreTabs
-        displayMode={displayMode}
-        setDisplayMode={setDisplayMode}
         sortBy={sortBy}
         setSortBy={setSortBy}
         showControls={true}
@@ -96,7 +91,7 @@ export default function DiscussionsPage() {
                 <DiscussionItem
                   key={discussion.slug + index}
                   discussion={discussion}
-                  displayMode={displayMode}
+                  displayMode={"list"}
                 />
               );
             })}
