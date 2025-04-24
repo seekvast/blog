@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
+import { User } from "lucide-react";
 
 interface CommentItemProps {
   comment: Post;
@@ -39,6 +40,8 @@ export const CommentItem = ({
   level = 0,
 }: CommentItemProps) => {
   const [isEditing, setIsEditing] = React.useState(false);
+  const [isReplying, setIsReplying] = React.useState(false);
+  const [showChildren, setShowChildren] = React.useState(false);
   const [editContent, setEditContent] = React.useState(comment.raw_content);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -94,7 +97,10 @@ export const CommentItem = ({
       // 使用setTimeout确保DOM已更新后再滚动
       setTimeout(() => {
         if (editRef.current) {
-          editRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+          editRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
         }
       }, 100);
     }
@@ -253,19 +259,48 @@ export const CommentItem = ({
 
           {/* 渲染子评论 */}
           {comment.children && comment.children.length > 0 && (
-            <div className="mt-2 space-y-4 bg-subtle py-4 divide-y">
-              {comment.children.map((childComment) => (
-                <CommentItem
-                  key={childComment.id}
-                  comment={childComment}
-                  onReply={onReply}
-                  onVote={onVote}
-                  onSubmitReply={onSubmitReply}
-                  onEditComment={onEditComment}
-                  onEdit={onEdit}
-                  level={level + 1}
-                />
-              ))}
+            <div className="mt-2 space-y-4 py-4">
+              {!showChildren ? (
+                <div className="text-center">
+                  <button
+                    onClick={() => setShowChildren(true)}
+                    className="text-sm text-primary hover:text-primary/80 font-medium"
+                  >
+                    查看 {comment.children.length} 条回复
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {comment.children.map((childComment) => (
+                    <CommentItem
+                      key={childComment.id}
+                      comment={childComment}
+                      onReply={onReply}
+                      onVote={onVote}
+                      onSubmitReply={onSubmitReply}
+                      onEditComment={onEditComment}
+                      onEdit={onEdit}
+                      level={level + 1}
+                    />
+                  ))}
+                  <div
+                    className="flex items-center gap-2 p-3 border border-border rounded-md bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors mt-4"
+                    onClick={() => onReply(comment)}
+                  >
+                    <div className="text-sm text-muted-foreground flex-1">
+                      点击回复...
+                    </div>
+                  </div>
+                  <div className="text-center mt-4">
+                    <button
+                      onClick={() => setShowChildren(false)}
+                      className="text-sm text-primary hover:text-primary/80 font-medium"
+                    >
+                      收起回复
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>

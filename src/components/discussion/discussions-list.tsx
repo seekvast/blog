@@ -97,12 +97,10 @@ export function DiscussionsList({
     fetchDiscussions(activeTab, page, sortBy);
   }, [loading, hasMore, page, activeTab, sortBy]);
 
-  // 防止初始加载或标签切换时自动触发无限滚动
   useEffect(() => {
     // 重置滚动位置
     window.scrollTo(0, 0);
 
-    // 当切换标签或排序方式时，重新获取第一页数据
     fetchDiscussions(activeTab, 1, sortBy);
   }, [activeTab, sortBy]);
 
