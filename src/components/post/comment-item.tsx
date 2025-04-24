@@ -11,7 +11,6 @@ import { cn } from "@/lib/utils";
 import type { Post } from "@/types/discussion";
 import { CommentActions } from "@/components/post/comment-actions";
 import { AuthGuard } from "@/components/auth/auth-guard";
-import { ReplyEditor } from "@/components/post/reply-editor";
 import { EditReply } from "@/components/post/edit-reply";
 import { PostForm } from "@/validations/post";
 import { Button } from "@/components/ui/button";
@@ -25,6 +24,8 @@ interface CommentItemProps {
   onReply: (comment: Post) => void;
   onVote: (postId: number, vote: "up" | "down") => void;
   onSubmitReply?: (replyForm: PostForm) => void;
+  onEditComment?: (data: { id: number; content: string }) => void;
+  onEdit?: (comment: Post) => void;
   level?: number;
 }
 
@@ -33,16 +34,12 @@ export const CommentItem = ({
   onReply,
   onVote,
   onSubmitReply,
+  onEditComment,
+  onEdit,
   level = 0,
 }: CommentItemProps) => {
-  const [replyEditorVisiable, setReplyEditorVisiable] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
   const [editContent, setEditContent] = React.useState(comment.raw_content);
-  const [replyForm, setReplyForm] = React.useState<PostForm>({
-    slug: "",
-    content: "",
-    attachments: [],
-  });
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const editRef = React.useRef<HTMLDivElement>(null);
@@ -74,40 +71,33 @@ export const CommentItem = ({
   });
 
   const handleReplyClick = () => {
-    setReplyEditorVisiable(true);
+    onReply(comment);
   };
 
   const handleCancelReply = () => {
-    setReplyEditorVisiable(false);
-    setReplyForm({
-      slug: "",
-      content: "",
-      attachments: [],
-    });
+    // 不再需要本地的回复编辑器状态
   };
 
   const handleSubmitReply = (replyForm: PostForm) => {
     if (onSubmitReply) {
       onSubmitReply(replyForm);
     }
-    setReplyEditorVisiable(false);
-    setReplyForm({
-      slug: "",
-      content: "",
-      attachments: [],
-    });
   };
 
   const handleEdit = (comment: Post) => {
-    setIsEditing(true);
-    setEditContent(comment.raw_content);
+    if (onEdit) {
+      onEdit(comment);
+    } else {
+      setIsEditing(true);
+      setEditContent(comment.raw_content);
 
-    // 使用setTimeout确保DOM已更新后再滚动
-    setTimeout(() => {
-      if (editRef.current) {
-        editRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }, 100);
+      // 使用setTimeout确保DOM已更新后再滚动
+      setTimeout(() => {
+        if (editRef.current) {
+          editRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
+    }
   };
 
   const handleCancelEdit = () => {
@@ -125,10 +115,17 @@ export const CommentItem = ({
       return;
     }
 
-    editMutation.mutate({
-      id: comment.id,
-      content: editContent,
-    });
+    if (onEditComment) {
+      onEditComment({
+        id: comment.id,
+        content: editContent,
+      });
+    } else {
+      editMutation.mutate({
+        id: comment.id,
+        content: editContent,
+      });
+    }
   };
 
   return (
@@ -188,19 +185,6 @@ export const CommentItem = ({
             ) : (
               <>
                 <PostContent post={comment} />
-
-                {/* 回复框 */}
-                {replyEditorVisiable && (
-                  <div className="mt-4">
-                    <AuthGuard>
-                      <ReplyEditor
-                        comment={comment}
-                        onCancel={handleCancelReply}
-                        onSubmit={handleSubmitReply}
-                      />
-                    </AuthGuard>
-                  </div>
-                )}
               </>
             )}
           </div>
@@ -277,6 +261,8 @@ export const CommentItem = ({
                   onReply={onReply}
                   onVote={onVote}
                   onSubmitReply={onSubmitReply}
+                  onEditComment={onEditComment}
+                  onEdit={onEdit}
                   level={level + 1}
                 />
               ))}

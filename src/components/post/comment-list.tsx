@@ -10,6 +10,8 @@ interface CommentListProps {
   onReply: (comment: Post) => void;
   onVote: (postId: number, vote: "up" | "down") => void;
   onSubmitReply?: (replyForm: PostForm) => void;
+  onEditComment?: (data: { id: number; content: string }) => void;
+  onEdit?: (comment: Post) => void;
 }
 
 export const CommentList = React.memo(
@@ -19,6 +21,8 @@ export const CommentList = React.memo(
     onReply,
     onVote,
     onSubmitReply,
+    onEditComment,
+    onEdit,
   }: CommentListProps) => {
     if (!comments.length && isLoading) {
       return (
@@ -46,6 +50,8 @@ export const CommentList = React.memo(
               onReply={onReply}
               onVote={onVote}
               onSubmitReply={onSubmitReply}
+              onEditComment={onEditComment}
+              onEdit={onEdit}
             />
           ))}
         </div>

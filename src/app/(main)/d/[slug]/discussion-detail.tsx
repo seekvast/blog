@@ -81,6 +81,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   const { currentDiscussion, setDiscussion } = useDiscussionStore();
 
   const [replyTo, setReplyTo] = React.useState<Post | null>(null);
+  const [editingPost, setEditingPost] = React.useState<Post | null>(null);
   const editorRef = React.useRef<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(
@@ -394,34 +395,92 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     },
   });
 
+  const editCommentMutation = useMutation({
+    mutationFn: async (data: { id: number; content: string }) => {
+      return api.posts.update({
+        id: data.id,
+        content: data.content,
+      });
+    },
+    onMutate: () => {
+      setIsSubmitting(true);
+    },
+    onSuccess: () => {
+      setPostForm(initPostForm);
+      setEditingPost(null);
+      editorRef.current?.reset?.();
+      queryClient.invalidateQueries({
+        queryKey: [
+          "discussion-posts",
+          slug,
+          initialDiscussion.board_id,
+          queryParams,
+        ],
+      });
+      toast({
+        title: "评论已更新",
+        variant: "default",
+      });
+    },
+    onError: (error) => {
+      console.error("Failed to edit comment:", error);
+      toast({
+        title: "评论更新失败",
+        description: "请稍后重试",
+        variant: "destructive",
+      });
+    },
+    onSettled: () => {
+      setIsSubmitting(false);
+    },
+  });
+
   const handleSubmitComment = React.useCallback(
     (postForm: PostForm) => {
       if (!postForm.content.trim() || isSubmitting) return;
 
       commentMutation.mutate(postForm);
+      setReplyTo(null);
     },
     [isSubmitting, commentMutation, postForm.content]
   );
 
-  const handleSubmitReply = React.useCallback(
-    (replyForm: PostForm) => {
-      if (!replyForm.content.trim()) return;
+  const handleEditComment = React.useCallback(
+    (data: { id: number; content: string }) => {
+      if (!data.content.trim() || isSubmitting) return;
 
-      commentMutation.mutate(replyForm);
+      editCommentMutation.mutate(data);
     },
-    [commentMutation]
+    [isSubmitting, editCommentMutation]
   );
 
   const handleReplyClick = React.useCallback(
     (comment: Post) => {
       requireAuth(() => {
         setReplyTo(comment);
-        document.getElementById("comment")?.scrollIntoView({
-          behavior: "smooth",
-        });
+        setPostForm((prev) => ({
+          ...prev,
+          parent_id: comment.id,
+        }));
+        setShowCommentEditor(true);
       });
     },
-    [requireAuth]
+    [requireAuth, setShowCommentEditor]
+  );
+
+  const handleEditClick = React.useCallback(
+    (comment: Post) => {
+      requireAuth(() => {
+        setEditingPost(comment);
+        setPostForm((prev) => ({
+          ...prev,
+          content: comment.raw_content,
+          parent_id: comment.parent_id,
+        }));
+        setShowCommentEditor(true);
+      });
+    },
+    [requireAuth, setShowCommentEditor]
   );
 
   const handleVote = React.useCallback(
@@ -582,8 +641,10 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   comments={allComments}
                   isLoading={isLoading}
                   onReply={handleReplyClick}
+                  onEdit={handleEditClick}
                   onVote={handleVote}
-                  onSubmitReply={handleSubmitReply}
+                  onSubmitReply={handleSubmitComment}
+                  onEditComment={handleEditComment}
                 />
               </InfiniteScroll>
             </div>
@@ -594,15 +655,19 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   className="bg-background animate-in shadow-[0_-4px_15px_rgba(0,0,0,0.12)] slide-in-from-bottom duration-300"
                   style={{ position: "relative", zIndex: 50 }}
                 >
-                  <div className="p-4 max-w-4xl mx-auto">
+                  <div className="p-4 pb-[calc(1rem+var(--mobile-nav-height))] lg:pb-4 max-w-4xl mx-auto">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-medium">发表评论</h3>
+                      <h3 className="text-lg font-medium">
+                        {editingPost ? "编辑评论" : "发表评论"}
+                      </h3>
                       <Button
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8"
                         onClick={() => {
                           setShowCommentEditor(false);
+                          setReplyTo(null);
+                          setEditingPost(null);
                           setPostForm({
                             slug: "",
                             parent_id: 0,
@@ -646,7 +711,14 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                         setPostForm({ ...newPostForm });
                       }}
                       onSubmit={(form) => {
-                        handleSubmitComment(form);
+                        if (editingPost) {
+                          handleEditComment({
+                            id: editingPost.id,
+                            content: form.content,
+                          });
+                        } else {
+                          handleSubmitComment(form);
+                        }
                         setShowCommentEditor(false);
                       }}
                       isSubmitting={isSubmitting}
