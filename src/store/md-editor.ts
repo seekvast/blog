@@ -1,5 +1,4 @@
 import { create } from "zustand";
-// import { formatterApi } from "@/services/formatter";
 
 interface Selection {
   start: number;
@@ -28,19 +27,15 @@ interface EditorActions {
 }
 
 interface MarkdownEditorStore {
-  // 基础状态
   hasUnsavedContent: boolean;
   isOpen: boolean;
 
-  // 编辑器状态
   uploadingFiles: File[];
   mentions: string[];
 
-  // 基础方法
   setHasUnsavedContent: (hasUnsavedContent: boolean) => void;
   setIsOpen: (isOpen: boolean) => void;
 
-  // Markdown 编辑方法
   insertText: (
     text: string,
     position?: number,
@@ -49,16 +44,13 @@ interface MarkdownEditorStore {
   ) => void;
   wrapSelection: (before: string, after: string) => void;
 
-  // 文件和扩展功能
   addUploadingFile: (file: File) => void;
   removeUploadingFile: (file: File) => void;
   addMention: (username: string) => void;
 
-  // 服务器解析方法
   parseContent: () => Promise<string>;
   setParsedContent: (html: string | null) => void;
 
-  // 关闭回调
   onClose: ((confirmed?: boolean) => void) | null;
   setOnClose: (onClose: ((confirmed?: boolean) => void) | null) => void;
 }
@@ -68,7 +60,6 @@ const MAX_HISTORY = 50;
 export const useMarkdownEditor = create<
   EditorState & EditorActions & MarkdownEditorStore
 >((set, get) => ({
-  // 初始状态
   content: "",
   hasUnsavedContent: false,
   isOpen: false,
@@ -97,7 +88,6 @@ export const useMarkdownEditor = create<
   setPreviewMode: (mode) => set({ previewMode: mode }),
   setOnClose: (onClose) => set({ onClose }),
 
-  // Markdown 编辑方法
   insertText: (
     text: string,
     position?: number,
@@ -114,14 +104,12 @@ export const useMarkdownEditor = create<
 
     state.setContent(newContent);
 
-    // 设置新的光标位置到插入文本的末尾
     const finalPos = Math.min(newContent.length, newPos + text.length);
     state.setSelection({
       start: finalPos,
       end: finalPos,
     });
 
-    // 确保文本区域获得焦点并更新光标位置
     requestAnimationFrame(() => {
       const textarea = document.querySelector("textarea");
       if (textarea) {
@@ -135,14 +123,12 @@ export const useMarkdownEditor = create<
     const state = get();
     const { start, end } = state.selection;
 
-    // 如果没有选择文本，在光标处插入
     if (start === end) {
       const newText = before + after;
       const newContent =
         state.content.slice(0, start) + newText + state.content.slice(end);
 
       state.setContent(newContent);
-      // 将光标放在中间
       state.setSelection({
         start: start + before.length,
         end: start + before.length,
@@ -150,7 +136,6 @@ export const useMarkdownEditor = create<
       return;
     }
 
-    // 处理选中文本的情况
     const selectedText = state.content.slice(start, end);
     const newText = before + selectedText + after;
     const newContent =
@@ -163,7 +148,6 @@ export const useMarkdownEditor = create<
     });
   },
 
-  // 历史记录方法
   undo: () =>
     set((state) => {
       const previous = state.history.past[state.history.past.length - 1];
