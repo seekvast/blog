@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import {
@@ -28,11 +28,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { JoinBoardDialog } from "@/components/board/join-board-dialog";
 import { BoardApprovalMode } from "@/constants/board-approval-mode";
 import { Board } from "@/types/board";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 
 interface NavItem {
   title: string;
   href: string;
   icon: React.ComponentType<any>;
+  auth?: boolean;
 }
 
 const mainNavItems: NavItem[] = [
@@ -40,21 +42,25 @@ const mainNavItems: NavItem[] = [
     title: "首页",
     href: "/",
     icon: Home,
+    auth: false,
   },
   {
     title: "关注",
     href: "/following",
     icon: Heart,
+    auth: true,
   },
   {
     title: "看板",
     href: "/b",
     icon: LayoutGrid,
+    auth: false,
   },
   {
     title: "书签",
     href: "/bookmarked",
     icon: Bookmark,
+    auth: true,
   },
 ];
 
@@ -62,7 +68,9 @@ interface LeftSidebarProps extends React.HTMLAttributes<HTMLElement> {}
 
 export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { t, i18n } = useTranslation();
+  const { requireAuth } = useRequireAuth();
   const [createBoardOpen, setCreateBoardOpen] = useState(false);
   const [joinBoardOpen, setJoinBoardOpen] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
@@ -129,19 +137,35 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
         {/* 主导航 */}
         <nav className="flex flex-col gap-1">
           {mainNavItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
-                pathname === item.href
-                  ? "bg-accent text-accent-foreground"
-                  : "hover:bg-accent hover:text-accent-foreground"
-              )}
-            >
-              <item.icon className="mr-2 text-[20px] leading-none" />
-              <span>{item.title}</span>
-            </Link>
+            item.auth ? (
+              <div
+                key={item.href}
+                className={cn(
+                  "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors cursor-pointer",
+                  pathname === item.href
+                    ? "bg-accent text-accent-foreground"
+                    : "hover:bg-accent hover:text-accent-foreground"
+                )}
+                onClick={() => requireAuth(() => router.push(item.href))}
+              >
+                <item.icon className="mr-2 h-5 w-5" />
+                {item.title}
+              </div>
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
+                  pathname === item.href
+                    ? "bg-accent text-accent-foreground"
+                    : "hover:bg-accent hover:text-accent-foreground"
+                )}
+              >
+                <item.icon className="mr-2 h-5 w-5" />
+                {item.title}
+              </Link>
+            )
           ))}
         </nav>
 

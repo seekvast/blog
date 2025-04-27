@@ -1,5 +1,8 @@
 import { DiscussionsList } from "@/components/discussion/discussions-list";
 import { api } from "@/lib/api";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { LoginPrompt } from "@/components/auth/login-prompt";
 
 async function getDiscussions() {
   try {
@@ -26,6 +29,12 @@ async function getDiscussions() {
 }
 
 export default async function HomePage() {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    return <LoginPrompt message="查看关注内容需要登录" />;
+  }
+
   const initialDiscussions = await getDiscussions();
   return (
     <DiscussionsList initialDiscussions={initialDiscussions} from="following" />
