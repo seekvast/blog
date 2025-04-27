@@ -94,11 +94,11 @@ export default function NotificationSettings({ user }: { user: User | null }) {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
+      <div className="">
         <h3 className="text-lg font-medium">通知设置</h3>
 
         {/* 自动关注我回复的文章 */}
-        <div className="flex items-center justify-between py-3 border-b">
+        <div className="flex items-center justify-between py-4 border-b">
           <div className="flex items-center gap-2">
             <BookmarkPlus className="w-4 h-4 text-gray-500" />
             <Label className="text-sm text-gray-500">
@@ -112,7 +112,7 @@ export default function NotificationSettings({ user }: { user: User | null }) {
         </div>
 
         {/* 当我的文章被下方推时 */}
-        <div className="flex items-center justify-between py-3 border-b">
+        <div className="flex items-center justify-between py-4 border-b">
           <div className="flex items-center gap-2">
             <ThumbsUp className="w-4 h-4 text-gray-500" />
             <Label className="text-sm text-gray-500">
@@ -126,7 +126,7 @@ export default function NotificationSettings({ user }: { user: User | null }) {
         </div>
 
         {/* 有人回覆我 */}
-        <div className="flex items-center justify-between py-3 border-b">
+        <div className="flex items-center justify-between py-4 border-b">
           <div className="flex items-center gap-2">
             <MessageCircle className="w-4 h-4 text-gray-500" />
             <Label className="text-sm text-gray-500">有人回覆我</Label>
@@ -138,10 +138,11 @@ export default function NotificationSettings({ user }: { user: User | null }) {
         </div>
 
         {/* 关注的文章有新回覆 */}
-        <div className="flex items-center justify-between py-3 border-b">
+        <div className="flex items-center justify-between py-4 border-b">
           <div className="flex items-center gap-2">
             <Heart className="w-4 h-4 text-gray-500" />
             <Label className="text-sm text-gray-500">關注的文章有新回覆</Label>
+            <span>0xD83D 0xDE0A</span>
           </div>
           <Switch
             checked={settings?.notify_newPost === "yes"}
@@ -150,7 +151,7 @@ export default function NotificationSettings({ user }: { user: User | null }) {
         </div>
 
         {/* 有人标注我 */}
-        <div className="flex items-center justify-between py-3 border-b">
+        <div className="flex items-center justify-between py-4 border-b">
           <div className="flex items-center gap-2">
             <AtSign className="w-4 h-4 text-gray-500" />
             <Label className="text-sm text-gray-500">有人標注我</Label>
@@ -162,7 +163,7 @@ export default function NotificationSettings({ user }: { user: User | null }) {
         </div>
 
         {/* 文章被锁定 */}
-        <div className="flex items-center justify-between py-3 border-b">
+        <div className="flex items-center justify-between py-4 border-b">
           <div className="flex items-center gap-2">
             <Lock className="w-4 h-4 text-gray-500" />
             <Label className="text-sm text-gray-500">文章被鎖定</Label>
@@ -174,7 +175,7 @@ export default function NotificationSettings({ user }: { user: User | null }) {
         </div>
 
         {/* 这反内容政策 */}
-        <div className="flex items-center justify-between py-3 border-b">
+        <div className="flex items-center justify-between py-4 border-b">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-gray-500" />
             <Label className="text-sm text-gray-500">违反內容政策</Label>

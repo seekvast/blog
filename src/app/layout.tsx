@@ -15,8 +15,8 @@ import { Toaster } from "@/components/ui/toaster";
 
 export const metadata = {
   cache: "no-cache", //TODO: 测试环境禁用缓存
-  title: "Forum System",
-  description: "A modern forum system built with Next.js",
+  title: "Kater",
+  description: "Kater",
 };
 
 export default async function RootLayout({

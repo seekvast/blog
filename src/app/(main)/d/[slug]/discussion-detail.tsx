@@ -177,7 +177,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         }, 1000);
         return;
       } catch (error) {
-        console.error("加载所有评论失败:", error);
+        console.error("加载所有回复失败:", error);
       }
     }
     window.scrollTo({
@@ -378,14 +378,14 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         ],
       });
       toast({
-        title: "评论已发布",
+        title: "发布成功",
         variant: "default",
       });
     },
     onError: (error) => {
       console.error("Failed to post comment:", error);
       toast({
-        title: "评论发布失败",
+        title: "发布失败",
         description: "请稍后重试",
         variant: "destructive",
       });
@@ -618,7 +618,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
 
           <div className="flex items-center justify-between border-b text-sm  text-gray-500">
             <div className="flex items-center pb-2">
-              <span>评论</span>
+              <span>回复</span>
               <span className="pl-2 text-blue-600">{totalPosts}</span>
             </div>
 
@@ -658,7 +658,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   <div className="p-4 pb-[calc(1rem+var(--mobile-nav-height))] lg:pb-4 max-w-4xl mx-auto">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="text-lg font-medium">
-                        {editingPost ? "编辑评论" : "发表评论"}
+                        {editingPost ? "编辑回复" : "发表回复"}
                       </h3>
                       <Button
                         variant="ghost"

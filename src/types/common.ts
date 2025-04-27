@@ -36,6 +36,7 @@ export interface Tag extends BaseModel {
 export interface Category extends BaseModel {
   name: string;
   slug: string;
+  icon?: string;
   description?: string;
   parentId?: number;
 }

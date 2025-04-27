@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckIcon } from "lucide-react";
+import Twemoji from "react-twemoji";
 
 interface InterestSelectionProps {
   onComplete?: () => void;
@@ -85,11 +86,13 @@ export function InterestSelection({
     if (onComplete) onComplete();
   };
 
+  const selectedCount = categories.filter((cat) => cat.selected).length;
+
   if (isLoading) {
     return (
       <div className={`space-y-4 ${className}`}>
-        <h2 className="text-xl font-semibold">选择您感兴趣的话题</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <p className="text-sm text-neutral-500">根据你的选择推荐相应的内容</p>
+        <div className="grid grid-cols-3 gap-3">
           {Array.from({ length: 9 }).map((_, index) => (
             <Skeleton key={index} className="h-12 w-full rounded-lg" />
           ))}
@@ -100,37 +103,56 @@ export function InterestSelection({
 
   return (
     <div className={`space-y-4 ${className}`}>
-      <h2 className="text-xl font-semibold">选择您感兴趣的话题</h2>
-      <p className="text-sm text-neutral-500">
-        选择您感兴趣的话题，我们将为您推荐相关内容
-      </p>
+      <p className="text-sm text-neutral-500">根据你的选择推荐相应的内容</p>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 my-4">
+      <div className="grid grid-cols-3 gap-3 my-4">
         {categories.map((category) => (
-          <div
-            key={category.id}
-            onClick={() => toggleCategory(category.id)}
-            className={`
-              p-3 rounded-lg border cursor-pointer transition-all flex justify-between items-center
-              ${
-                category.selected
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-neutral-200 hover:border-neutral-300"
-              }
-            `}
-          >
-            <p className="text-sm font-medium truncate">{category.name}</p>
-            {category.selected && (
-              <CheckIcon className="h-4 w-4 text-primary flex-shrink-0 ml-2" />
-            )}
+          <div key={category.id} className="flex justify-center">
+            <div
+              onClick={() => toggleCategory(category.id)}
+              className={`
+                relative py-2 px-3 rounded-full cursor-pointer transition-all flex items-center
+                ${
+                  category.selected ? "bg-primary text-white" : "bg-neutral-100"
+                }
+              `}
+            >
+              <span className="text-base mr-1.5">
+                <Twemoji options={{ className: "w-6 h-6" }}>
+                  {category.icon}
+                </Twemoji>
+              </span>
+              <p className="text-sm font-medium">{category.name}</p>
+              {category.selected && (
+                <div className="ml-auto">
+                  <CheckIcon className="h-4 w-4 text-white" />
+                </div>
+              )}
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="flex justify-end mt-6">
-        <Button onClick={handleSave} disabled={isSaving} className="w-[120px]">
-          {isSaving ? "保存中..." : "保存"}
-        </Button>
+      <div className="mt-6 w-full">
+        {selectedCount > 0 ? (
+          <Button
+            size="sm"
+            onClick={handleSave}
+            disabled={isSaving}
+            className="w-full h-12 text-base font-medium rounded-lg bg-primary hover:bg-primary/90"
+          >
+            {isSaving ? "保存中..." : `已选 ${selectedCount} 个，选好了`}
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleSkip}
+            className="w-full h-12 text-base font-medium rounded-lg text-neutral-400 border-neutral-200"
+          >
+            选好了
+          </Button>
+        )}
       </div>
     </div>
   );
