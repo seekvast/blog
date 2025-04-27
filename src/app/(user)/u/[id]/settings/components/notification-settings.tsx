@@ -142,7 +142,6 @@ export default function NotificationSettings({ user }: { user: User | null }) {
           <div className="flex items-center gap-2">
             <Heart className="w-4 h-4 text-gray-500" />
             <Label className="text-sm text-gray-500">關注的文章有新回覆</Label>
-            <span>0xD83D 0xDE0A</span>
           </div>
           <Switch
             checked={settings?.notify_newPost === "yes"}

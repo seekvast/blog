@@ -13,6 +13,7 @@ import {
   Users,
   Globe,
   RotateCcw,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -29,6 +30,13 @@ import { JoinBoardDialog } from "@/components/board/join-board-dialog";
 import { BoardApprovalMode } from "@/constants/board-approval-mode";
 import { Board } from "@/types/board";
 import { useRequireAuth } from "@/hooks/use-require-auth";
+import { useLanguageName } from "@/hooks/use-language-name";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface NavItem {
   title: string;
@@ -71,6 +79,12 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const { requireAuth } = useRequireAuth();
+  const {
+    getCurrentLanguageName,
+    getCurrentLanguageCode,
+    changeLanguage,
+    languages,
+  } = useLanguageName();
   const [createBoardOpen, setCreateBoardOpen] = useState(false);
   const [joinBoardOpen, setJoinBoardOpen] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
@@ -108,17 +122,6 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
     }
   };
 
-  const handleLanguageChange = () => {
-    const currentLang = i18n.language;
-    if (currentLang === "zh-Hans-CN") {
-      i18n.changeLanguage("zh-Hant-TW");
-    } else if (currentLang === "zh-Hant-TW") {
-      i18n.changeLanguage("en");
-    } else {
-      i18n.changeLanguage("zh-Hans-CN");
-    }
-  };
-
   const handleJoinBoard = (board: Board) => {
     if (board.approval_mode === BoardApprovalMode.APPROVAL) {
       setSelectedBoard(board);
@@ -136,7 +139,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
       <div className="flex flex-col gap-4">
         {/* 主导航 */}
         <nav className="flex flex-col gap-1">
-          {mainNavItems.map((item) => (
+          {mainNavItems.map((item) =>
             item.auth ? (
               <div
                 key={item.href}
@@ -166,7 +169,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                 {item.title}
               </Link>
             )
-          ))}
+          )}
         </nav>
 
         {/* 创建看板按钮 */}
@@ -260,31 +263,54 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
         {/* 页脚链接 */}
         <div className="mt-auto space-y-4">
           <div className="flex w-full text-sm text-muted-foreground">
-            <Link href="#" className="flex-1 text-center hover:text-foreground">
+            <Link
+              href="https://support.kater.me/docs/policy/terms-of-service"
+              className="flex-1 text-center hover:text-foreground"
+            >
               {t("common.termsOfService", { defaultValue: "服务条款" })}
             </Link>
-            <Link href="#" className="flex-1 text-center hover:text-foreground">
+            <Link
+              href="https://support.kater.me/docs/policy/privacy-policy"
+              className="flex-1 text-center hover:text-foreground"
+            >
               {t("common.privacyPolicy", { defaultValue: "隐私政策" })}
             </Link>
-            <Link href="#" className="flex-1 text-center hover:text-foreground">
+            <Link
+              href="https://support.kater.me/docs/help"
+              className="flex-1 text-center hover:text-foreground"
+            >
               {t("common.contactUs", { defaultValue: "联系我们" })}
             </Link>
-            <Link href="#" className="flex-1 text-center hover:text-foreground">
-              {t("common.helpCenter", { defaultValue: "帮助中心" })}
+            <Link
+              href="https://support.kater.me/"
+              className="flex-1 text-center hover:text-foreground"
+            >
+              {t("common.helpCenter", { defaultValue: "说明中心" })}
             </Link>
           </div>
           <div className="flex justify-between">
-            <div
-              className="flex cursor-pointer items-center py-2 text-sm text-muted-foreground hover:text-foreground"
-              onClick={handleLanguageChange}
-            >
-              <Globe className="mr-2 leading-none" />
-              <span className="truncate">
-                {t("common.autoDetectLanguage", {
-                  defaultValue: "自动检测语言",
-                })}
-              </span>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex cursor-pointer items-center py-2 text-sm text-muted-foreground hover:text-foreground">
+                  <Globe className="mr-2 leading-none " />
+                  <span className="truncate">{getCurrentLanguageName()}</span>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                {languages.map((lang) => (
+                  <DropdownMenuItem
+                    key={lang.code}
+                    onClick={() => changeLanguage(lang.code)}
+                    className="flex justify-between"
+                  >
+                    {lang.name}
+                    {getCurrentLanguageCode() === lang.code && (
+                      <Check className="h-4 w-4" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <div>
               <ModeToggle />
             </div>

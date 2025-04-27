@@ -28,7 +28,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, GripVertical } from "lucide-react";
-import { dataTagErrorSymbol } from "@tanstack/react-query";
 import {
   DndContext,
   closestCenter,
@@ -176,7 +175,7 @@ export function RulesSettings({ board }: RulesSettingsProps) {
       } catch (error) {
         toast({
           variant: "destructive",
-          title: "获取规则失败",
+          title: "获取数据失败",
           description:
             error instanceof Error ? error.message : "服务器错误，请稍后重试",
         });
@@ -305,6 +304,13 @@ export function RulesSettings({ board }: RulesSettingsProps) {
   };
 
   const handleAddRule = () => {
+    if (rules.length >= 25) {
+      toast({
+        variant: "destructive",
+        description: "最多只能设置25条规则",
+      });
+      return;
+    }
     const maxSort =
       rules.length > 0 ? Math.max(...rules.map((rule) => rule.sort)) : 0;
     ruleForm.reset({
@@ -351,7 +357,7 @@ export function RulesSettings({ board }: RulesSettingsProps) {
 
       toast({
         title: "成功",
-        description: "规则已删除",
+        description: "删除成功",
       });
     } catch (error) {
       toast({
