@@ -16,7 +16,7 @@ export const useSearchStore = create<SearchState>()(
           const newHistories = [
             keyword,
             ...state.histories.filter((item) => item !== keyword),
-          ].slice(0, 10); // 最多保存10条记录
+          ].slice(0, 5); // 最多保存5条记录
           return { histories: newHistories };
         }),
       clearHistories: () => set({ histories: [] }),

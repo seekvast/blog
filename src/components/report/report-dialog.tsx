@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -18,14 +19,9 @@ import { useTranslation } from "react-i18next";
 import { api } from "@/lib/api";
 import { useMutation } from "@tanstack/react-query";
 import { ReportForm } from "@/types/report";
-interface ReportDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  title: string;
-  form: ReportForm;
-}
+import Image from "next/image";
+import Link from "next/link";
 
-// 向管理员举报的选项
 const adminReportOptions = [
   {
     id: 8,
@@ -113,6 +109,13 @@ const katerReportOptions = [
   },
 ];
 
+interface ReportDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  form: ReportForm;
+}
+
 export function ReportDialog({
   open,
   onOpenChange,
@@ -121,6 +124,7 @@ export function ReportDialog({
 }: ReportDialogProps) {
   const { toast } = useToast();
   const { t } = useTranslation();
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   // 根据举报类型选择选项列表
   const reportOptions =
@@ -145,10 +149,9 @@ export function ReportDialog({
       });
     },
     onSuccess: () => {
-      toast({
-        title: t("report.success"),
-        description: t("report.successMessage"),
-      });
+      // 显示成功对话框
+      setShowSuccessDialog(true);
+      // 关闭举报对话框
       onOpenChange(false);
     },
     onError: (error) => {
@@ -165,51 +168,90 @@ export function ReportDialog({
     reportMutation.mutate();
   };
 
+  const handleCloseSuccessDialog = () => {
+    setShowSuccessDialog(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[60vh] lg:max-h-[80vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="text-xl">{title}</DialogTitle>
-        </DialogHeader>
-        <div className="py-4 overflow-y-auto flex-1">
-          <RadioGroup
-            value={selectedReason.toString()}
-            onValueChange={(value) => setSelectedReason(Number(value))}
-            className="space-y-4"
-          >
-            {reportOptions.map((option) => (
-              <div key={option.id} className="flex items-start space-x-2">
-                <RadioGroupItem
-                  value={option.id.toString()}
-                  id={option.id.toString()}
-                />
-                <div className="grid gap-1.5">
-                  <Label htmlFor={option.id.toString()} className="font-medium">
-                    {option.label}
-                  </Label>
-                  {option.description && (
-                    <p className="text-sm text-muted-foreground">
-                      {option.description}
-                    </p>
-                  )}
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-h-[60vh] lg:max-h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="text-xl">{title}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 overflow-y-auto flex-1">
+            <RadioGroup
+              value={selectedReason.toString()}
+              onValueChange={(value) => setSelectedReason(Number(value))}
+              className="space-y-4"
+            >
+              {reportOptions.map((option) => (
+                <div key={option.id} className="flex items-start space-x-2">
+                  <RadioGroupItem
+                    value={option.id.toString()}
+                    id={option.id.toString()}
+                  />
+                  <div className="grid gap-1.5">
+                    <Label
+                      htmlFor={option.id.toString()}
+                      className="font-medium"
+                    >
+                      {option.label}
+                    </Label>
+                    {option.description && (
+                      <p className="text-sm text-muted-foreground">
+                        {option.description}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </RadioGroup>
-        </div>
-        <DialogFooter>
-          <Button
-            type="submit"
-            onClick={handleSubmit}
-            className="w-full"
-            disabled={reportMutation.isPending}
-          >
-            {reportMutation.isPending
-              ? t("common.submitting")
-              : t("report.submit")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+              ))}
+            </RadioGroup>
+          </div>
+          <DialogFooter>
+            <Button
+              type="submit"
+              onClick={handleSubmit}
+              className="w-full"
+              disabled={reportMutation.isPending}
+            >
+              {reportMutation.isPending
+                ? t("common.submitting")
+                : t("report.submit")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 举报成功对话框 */}
+      <Dialog open={showSuccessDialog} onOpenChange={handleCloseSuccessDialog}>
+        <DialogContent className="max-w-md flex flex-col items-center text-center">
+          <div className="flex justify-center w-full py-6">
+            <Image
+              src="/report.png"
+              alt="Report Success"
+              width={240}
+              height={240}
+              priority
+            />
+          </div>
+          <DialogHeader>
+            <DialogTitle className="text-xl">感谢您的检举</DialogTitle>
+            <DialogDescription className="mt-2">
+              如果我们确认该内容确实违反
+              <Link href="/" className="text-primary">
+                《内容守则》
+              </Link>
+              ,就会将其移除.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="w-full mt-6">
+            <Button className="w-full" onClick={handleCloseSuccessDialog}>
+              我知道了
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

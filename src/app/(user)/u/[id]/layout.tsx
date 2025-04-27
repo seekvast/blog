@@ -117,17 +117,17 @@ export default function UserLayout({
                   <Avatar className="h-16 w-16 lg:h-24 lg:w-24 border-4 border-background">
                     <AvatarImage src={userData.avatar_url || ""} />
                     <AvatarFallback>
-                      {userData.username?.slice(0, 2).toUpperCase()}
+                      {userData.nickname?.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="text-white">
                     <div className="flex items-center space-x-2">
                       <h1 className="text-2xl font-semibold text-white">
-                        {userData.username}
+                        {userData.nickname}
                       </h1>
                     </div>
                     <div className="text-white">
-                      <span className="font-medium">@{userData.nickname} </span>
+                      <span className="font-medium">@{userData.username} </span>
                       <span>加入于</span>
                       <span>
                         {userData.created_at
