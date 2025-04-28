@@ -27,7 +27,6 @@ export type NotificationType =
 
 export type NotificationTabType = "all" | "mentions" | "board";
 
-
 // 标记所有通知为已读
 export function markAllAsRead(notifications: Notification[]): Notification[] {
   return notifications.map((item) => ({
@@ -48,7 +47,7 @@ export function useNotifications(autoLoad: boolean = true) {
   const loadingRef = React.useRef(false);
 
   const fetchNotifications = React.useCallback(
-      async (pageNum: number, query?: any) => {
+    async (pageNum: number, query?: any) => {
       if (loadingRef.current) return;
       loadingRef.current = true;
       setLoading(true);
@@ -209,7 +208,7 @@ export function NotificationPreview({
       <div className="sticky bottom-0 left-0 right-0 bg-background">
         <div className="p-3 text-center">
           <Link
-            href="/notifications"
+            href="/notifications/all"
             className="text-xs text-muted-foreground hover:text-primary"
           >
             查看全部

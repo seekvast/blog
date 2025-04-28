@@ -1,40 +1,67 @@
 "use client";
 
 import * as React from "react";
+import { Bell, Trash2, CheckCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   NotificationPreview,
   NotificationTabType,
   useNotifications,
 } from "@/components/notification/notification-preview";
-import { Trash2, CheckCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { NotificationItem } from "@/components/notification/notification-item";
-import { Notification } from "@/types";
-import {
-  NotificationDesktopNav,
-  NotificationMobileNav,
-} from "@/components/notification/notification-nav";
-import { InfiniteScroll } from "@/components/ui/infinite-scroll";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { useRouter } from "next/navigation";
+import { NotificationIcon } from "@/components/notification/notification-icon";
+import { NotificationNav } from "@/components/notification/notification-nav";
 
-export default function NotificationsPage() {
+interface NotificationPopoverProps {
+  triggerClassName?: string;
+  autoLoad?: boolean;
+}
+
+export default function NotificationsPage({
+  triggerClassName,
+  autoLoad = true,
+}: NotificationPopoverProps) {
+  const router = useRouter();
+  const isMobile = useMediaQuery("(max-width: 640px)");
+  const [open, setOpen] = React.useState(false);
   const [activeType, setActiveType] =
     React.useState<NotificationTabType>("all");
 
   const {
     notifications,
+    total,
     loading,
+    error,
     hasMore,
+    unreadCount,
     fetchNotifications,
     loadMore,
     markAsRead,
     markAllNotificationsAsRead,
     clearAllNotifications,
-  } = useNotifications();
+  } = useNotifications(autoLoad);
 
-  const handleNotificationClick = (notification: Notification) => {
+  const handleNotificationClick = (notification: any) => {
     // 标记为已读
     markAsRead(notification.id);
+    setOpen(false);
+  };
+
+  const handleTriggerClick = (e: React.MouseEvent) => {
+    // if (isMobile) {
+    //   e.preventDefault();
+    //   router.push("/notifications");
+    // }
   };
 
   const handleMarkAllAsRead = () => {
@@ -47,58 +74,41 @@ export default function NotificationsPage() {
 
   const handleTypeChange = (type: NotificationTabType) => {
     setActiveType(type);
-    // 切换标签时重置并重新加载
-    fetchNotifications(1);
   };
 
-  // 页面加载时获取通知
+  // 当弹出框打开时刷新通知
   React.useEffect(() => {
-    fetchNotifications(1);
-  }, [fetchNotifications]);
+    if (open) {
+      fetchNotifications(1, { q: activeType });
+    }
+  }, [open, fetchNotifications]);
+
+  // 当标签页改变时重新加载
+  React.useEffect(() => {
+    if (open) {
+      fetchNotifications(1, { q: activeType });
+    }
+  }, [activeType, open, fetchNotifications]);
 
   return (
-    <div className="">
-      <div className="flex flex-col lg:flex-row">
-        {/* PC端导航 */}
-        <NotificationDesktopNav
+    <div className="w-screen h-[calc(100vh-4rem)] lg:w-80 lg:h-auto lg:max-h-[70vh] p-0 overflow-y-auto">
+      <div className="flex flex-col">
+        <NotificationNav
           activeType={activeType}
           onTypeChange={handleTypeChange}
+          onClearAll={handleClearAll}
+          onMarkAllAsRead={handleMarkAllAsRead}
         />
-        {/* 移动端导航 */}
-        <NotificationMobileNav
-          activeType={activeType}
-          onTypeChange={handleTypeChange}
-        />
-
-        {/* 右侧内容区 */}
-        <div className="flex-1 min-w-0 px-2 lg:px-4 overflow-hidden">
-          {/* 通知列表 */}
-          {loading && notifications.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center h-40">
-              <p className="text-muted-foreground">加载中...</p>
-            </div>
-          ) : notifications.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center h-40">
-              <p className="text-muted-foreground">暂无通知</p>
-            </div>
-          ) : (
-            <InfiniteScroll
-              loading={loading}
-              hasMore={hasMore}
-              onLoadMore={loadMore}
-              className="divide-y divide-border"
-            >
-              {notifications.map((notification) => (
-                <NotificationItem
-                  key={notification.id}
-                  notification={notification}
-                  onClick={handleNotificationClick}
-                />
-              ))}
-            </InfiniteScroll>
-          )}
-        </div>
       </div>
+
+      <NotificationPreview
+        notifications={notifications}
+        tabType={activeType}
+        onItemClick={handleNotificationClick}
+        loading={loading}
+        hasMore={hasMore}
+        onLoadMore={loadMore}
+      />
     </div>
   );
 }

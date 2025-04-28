@@ -1,90 +1,83 @@
 "use client";
 
 import * as React from "react";
+import { Trash2, CheckCheck } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { NotificationTabType } from "./notification-preview";
 
-const navItems = [
-  { label: "全部通知", type: "all" },
-  { label: "回复我的", type: "replies" },
-  { label: "@我的", type: "mentions" },
-  { label: "收到的赞", type: "likes" },
-  { label: "系统消息", type: "system" },
-];
-
-interface NotificationDesktopNavProps {
+interface NotificationNavProps {
   activeType: NotificationTabType;
   onTypeChange: (type: NotificationTabType) => void;
+  onClearAll: () => void;
+  onMarkAllAsRead: () => void;
+  className?: string;
 }
 
-export function NotificationDesktopNav({
+export function NotificationNav({
   activeType,
   onTypeChange,
-}: NotificationDesktopNavProps) {
-  const handleClick = (e: React.MouseEvent, type: string) => {
-    e.preventDefault();
-    if (onTypeChange && type) {
-      onTypeChange(type as NotificationTabType);
-    }
-  };
-
+  onClearAll,
+  onMarkAllAsRead,
+  className,
+}: NotificationNavProps) {
   return (
-    <div className="hidden lg:block py-4 w-60 flex-shrink-0">
-      <nav className="flex-col space-y-1 space-x-0 border-none rounded-lg px-2 overflow-visible whitespace-normal">
-        {navItems.map((item) => (
-          <button
-            key={item.type}
-            onClick={(e) => handleClick(e, item.type)}
-            className={cn(
-              "w-full flex-auto flex items-center justify-between text-left py-1 px-4 rounded-lg border-b-0 min-w-0",
-              activeType === item.type
-                ? "bg-blue-50 text-blue-600 font-medium border-none"
-                : "text-gray-500"
-            )}
-          >
-            <span className="px-0">{item.label}</span>
-            <span
-              className={cn(
-                "inline-block text-xs px-2 rounded",
-                activeType === item.type ? "text-blue-600" : "text-gray-500"
-              )}
-            >
-              {/* {0} */}
-            </span>
-          </button>
-        ))}
-      </nav>
-    </div>
-  );
-}
+    <div
+      className={cn(
+        "flex items-center justify-between py-2 px-4 border-b",
+        className
+      )}
+    >
+      <div className="flex">
+        <button
+          className={cn(
+            "flex-1 py-2 text-sm font-medium",
+            activeType === "all" ? "text-primary" : "text-muted-foreground"
+          )}
+          onClick={() => onTypeChange("all")}
+        >
+          全部
+        </button>
 
-interface NotificationMobileNavProps {
-  activeType: NotificationTabType;
-  onTypeChange: (type: NotificationTabType) => void;
-}
-
-export function NotificationMobileNav({
-  activeType,
-  onTypeChange,
-}: NotificationMobileNavProps) {
-  return (
-    <div className="lg:hidden">
-      <nav className="flex overflow-x-auto border-b whitespace-nowrap scrollbar-none h-10">
-        {navItems.map((item) => (
-          <button
-            key={item.type}
-            className={cn(
-              "py-1 px-4 text-center text-sm font-medium transition-colors",
-              activeType === item.type
-                ? "text-blue-600 border-b-2 border-blue-600"
-                : "text-gray-500 hover:text-gray-700"
-            )}
-            onClick={() => onTypeChange(item.type as NotificationTabType)}
-          >
-            {item.label}
-          </button>
-        ))}
-      </nav>
+        <button
+          className={cn(
+            "flex-1 py-2 pl-4 text-sm font-medium",
+            activeType === "mentions" ? "text-primary" : "text-muted-foreground"
+          )}
+          onClick={() => onTypeChange("mentions")}
+        >
+          提及
+        </button>
+        <button
+          className={cn(
+            "flex-1 py-2 pl-4 text-sm font-medium",
+            activeType === "board" ? "text-primary" : "text-muted-foreground"
+          )}
+          onClick={() => onTypeChange("board")}
+        >
+          看板
+        </button>
+      </div>
+      <div className="flex gap-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 text-muted-foreground"
+          title="清除所有通知"
+          onClick={onClearAll}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 text-muted-foreground"
+          title="全部标为已读"
+          onClick={onMarkAllAsRead}
+        >
+          <CheckCheck className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }

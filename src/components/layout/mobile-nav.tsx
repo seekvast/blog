@@ -3,16 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Home, Heart, LayoutGrid, Bookmark } from "lucide-react";
-import { NotificationPopover } from "@/components/notification/notification-popover";
+import { Home, Heart, LayoutGrid, Bookmark } from "lucide-react";;
 import { LucideIcon } from "lucide-react";
-import { useEffect } from "react";
-
+import { NotificationIcon } from "@/components/notification/notification-icon";
 type NavItem = {
   label: string;
   href?: string;
   icon?: LucideIcon;
+  customIcon?: React.ReactNode;
   isPopover?: boolean;
 };
 
@@ -39,7 +37,8 @@ const navItems: NavItem[] = [
   },
   {
     label: "消息",
-    isPopover: true,
+    href: "/notifications",
+    customIcon: <NotificationIcon />,
   },
 ];
 
@@ -57,15 +56,15 @@ export function MobileNav() {
     >
       {navItems.map((item) =>
         item.isPopover ? (
-          <div
-            key="notifications"
+          <Link
+            href="/notifications"
             className="flex flex-col items-center justify-center w-16 h-full py-1"
           >
-            <NotificationPopover />
+            <NotificationIcon />
             <span className="text-xs font-medium text-muted-foreground">
               消息
             </span>
-          </div>
+          </Link>
         ) : (
           <Link
             key={item.href}
@@ -84,7 +83,11 @@ export function MobileNav() {
                 : "text-muted-foreground"
             )}
           >
-            {item.icon && <item.icon className="h-5 w-5 mb-0.5" />}
+            {item.icon ? (
+              <item.icon className="h-5 w-5 mb-0.5" />
+            ) : (
+              item.customIcon
+            )}
             <span>{item.label}</span>
           </Link>
         )

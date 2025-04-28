@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useRouter } from "next/navigation";
 import { NotificationIcon } from "./notification-icon";
+import { NotificationNav } from "./notification-nav";
 
 interface NotificationPopoverProps {
   triggerClassName?: string;
@@ -102,68 +103,16 @@ export function NotificationPopover({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-screen lg:w-80 p-0 max-h-[70vh] overflow-y-auto"
+        className="w-screen h-[calc(100vh-4rem)] lg:w-80 lg:h-auto lg:max-h-[70vh] p-0 overflow-y-auto"
         align="end"
       >
         <div className="flex flex-col">
-          <div className="flex items-center  justify-between py-2 px-4 border-b">
-            <div className="flex">
-              <button
-                className={cn(
-                  "flex-1 py-2 text-sm font-medium",
-                  activeType === "all"
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                )}
-                onClick={() => handleTypeChange("all")}
-              >
-                全部
-              </button>
-
-              <button
-                className={cn(
-                  "flex-1 py-2 pl-4 text-sm font-medium",
-                  activeType === "mentions"
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                )}
-                onClick={() => handleTypeChange("mentions")}
-              >
-                提及
-              </button>
-              <button
-                className={cn(
-                  "flex-1 py-2 pl-4 text-sm font-medium",
-                  activeType === "board"
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                )}
-                onClick={() => handleTypeChange("board")}
-              >
-                看板
-              </button>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-muted-foreground"
-                title="清除所有通知"
-                onClick={handleClearAll}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-muted-foreground"
-                title="全部标为已读"
-                onClick={handleMarkAllAsRead}
-              >
-                <CheckCheck className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          <NotificationNav
+            activeType={activeType}
+            onTypeChange={handleTypeChange}
+            onClearAll={handleClearAll}
+            onMarkAllAsRead={handleMarkAllAsRead}
+          />
         </div>
 
         <NotificationPreview
