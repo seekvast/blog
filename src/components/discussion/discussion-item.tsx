@@ -17,6 +17,7 @@ import {
   PinIcon,
   FolderEdit,
   Lock,
+  Tag,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -101,7 +102,7 @@ export const DiscussionItem = React.forwardRef<
         <Link
           href={`/u/${discussion.user.username}?hashid=${discussion.user.hashid}`}
         >
-          <Avatar className="h-14 w-14 flex-shrink-0">
+          <Avatar className="h-10 w-10 flex-shrink-0">
             <AvatarImage
               src={discussion.user.avatar_url}
               alt={discussion.user.username}
@@ -132,12 +133,12 @@ export const DiscussionItem = React.forwardRef<
             />
           </div>
 
-          <div className="mt-1">
+          <Link href={`/d/${discussion.slug}`} className="mt-1">
             <DiscussionPreview
               content={discussion.main_post.content}
               displayMode={displayMode}
             />
-          </div>
+          </Link>
 
           <div className="mt-3 flex items-center space-x-2 lg:space-x-4 text-sm text-center">
             <div className="flex items-center gap-1">
@@ -176,11 +177,20 @@ export const DiscussionItem = React.forwardRef<
             <div className="flex items-center space-x-2 text-muted-foreground">
               <span>
                 来自{" "}
-                <span className="inline-block max-w-[8ch] lg:max-w-[20ch] truncate align-bottom">
+                <Link
+                  href={`/b/${discussion.board?.slug}`}
+                  className="inline-block max-w-[8ch] lg:max-w-[20ch] truncate align-bottom"
+                >
                   {discussion.board?.name}
-                </span>
+                </Link>
               </span>
-              <span>#{discussion.board_child?.name}</span>
+              <Link
+                href={`/b/${discussion.board?.slug}?child=${discussion.board_child?.id}`}
+                className="inline-flex items-center"
+              >
+                <Tag className="h-4 w-4 text-sm mr-1" />
+                <span>{discussion.board_child?.name}</span>
+              </Link>
             </div>
           </div>
         </div>

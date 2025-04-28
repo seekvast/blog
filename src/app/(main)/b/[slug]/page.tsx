@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,7 +27,7 @@ import { JoinBoardDialog } from "@/components/board/join-board-dialog";
 
 export default function BoardPage() {
   return (
-    <ErrorBoundary fallback={<div>出错了，请刷新页面重试</div>}>
+    <ErrorBoundary>
       <Suspense
         fallback={
           <div className="flex items-center justify-center min-h-screen">
@@ -44,6 +44,7 @@ export default function BoardPage() {
 function BoardContent() {
   const queryClient = useQueryClient();
   const params = useParams();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [board, setBoard] = useState<Board | null>(null);
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
@@ -136,9 +137,17 @@ function BoardContent() {
 
   useEffect(() => {
     if (board?.id) {
-      fetchBoardChildren();
+      fetchBoardChildren().then(() => {
+        const childParam = searchParams?.get('child');
+        if (childParam) {
+          const childId = parseInt(childParam, 10);
+          if (!isNaN(childId)) {
+            setSelectedChildId(childId);
+          }
+        }
+      });
     }
-  }, [board?.id]);
+  }, [board?.id, searchParams]);
 
   useEffect(() => {
     if (board?.id) {
