@@ -110,8 +110,11 @@ export default function BoardsPage() {
   const handleJoinBoard = (boardId: number) => {
     const board = boards.find((b) => b.id === boardId);
     if (!board) return;
-    
-    if (board.approval_mode === BoardApprovalMode.NONE || board.approval_mode === BoardApprovalMode.AUTO) {
+
+    if (
+      board.approval_mode === BoardApprovalMode.NONE ||
+      board.approval_mode === BoardApprovalMode.AUTO
+    ) {
       joinBoard(board.id);
     } else {
       setSelectedBoard(board);
@@ -128,30 +131,35 @@ export default function BoardsPage() {
       {/* 顶部导航 */}
       <div className="bg-background">
         <div className="mx-auto w-full">
-          <div className="flex h-[40px] items-center justify-between lg:border-b">
-            <div className="flex items-center space-x-4 lg:space-x-4">
-              <button
-                type="button"
-                className={`font-medium text-muted-foreground ${
-                  activeTab === "recommended"
-                    ? "text-primary hover:bg-transparent hover:text-primary"
-                    : "hover:bg-transparent hover:text-foreground"
-                }`}
-                onClick={() => setActiveTab("recommended")}
-              >
-                推薦
-              </button>
-              <button
-                type="button"
-                className={`font-medium text-muted-foreground ${
-                  activeTab === "joined"
-                    ? "text-primary hover:bg-transparent hover:text-primary"
-                    : "hover:bg-transparent hover:text-foreground"
-                }`}
-                onClick={() => setActiveTab("joined")}
-              >
-                已加入
-              </button>
+          <div className="flex h-[40px] items-center justify-between relative px-6 lg:border-b">
+            <div className="flex items-center space-x-8 relative ">
+              {[
+                { key: "recommended", label: "推荐" },
+                { key: "joined", label: "已加入" },
+              ].map((tab, idx) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  className={`relative px-2 py-1 transition-colors duration-150
+                    ${
+                      activeTab === tab.key
+                        ? "text-primary font-bold"
+                        : "text-muted-foreground font-normal"
+                    }
+                  `}
+                  onClick={() =>
+                    setActiveTab(tab.key as "recommended" | "joined")
+                  }
+                >
+                  {tab.label}
+                  {activeTab === tab.key && (
+                    <span
+                      className="absolute left-0 right-0 -bottom-1 h-[3px] rounded bg-primary"
+                      style={{ width: "100%" }}
+                    />
+                  )}
+                </button>
+              ))}
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -222,12 +230,14 @@ export default function BoardsPage() {
             className="divide-y"
           >
             {boards.map((board) => (
-              <BoardItem 
-                key={board.id} 
-                board={board} 
-                onJoin={handleJoinBoard} 
-                onLeave={handleLeaveBoard} 
-              />
+              <div className="px-6">
+                <BoardItem
+                  key={board.id}
+                  board={board}
+                  onJoin={handleJoinBoard}
+                  onLeave={handleLeaveBoard}
+                />
+              </div>
             ))}
           </InfiniteScroll>
         )}

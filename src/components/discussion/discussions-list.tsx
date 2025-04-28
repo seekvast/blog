@@ -109,16 +109,16 @@ export function DiscussionsList({
       {/* 顶部导航 - 仅在非移动端显示 */}
       <div className="bg-background">
         <div className="mx-auto">
-          <div className="flex h-[40px] items-center justify-between lg:border-b">
+          <div className="flex h-[40px] items-center justify-between px-6 lg:border-b">
             {from === "index" ? (
               <div className="flex items-center space-x-4 lg:space-x-8">
                 <button
                   type="button"
                   className={cn(
-                    "h-8 font-medium hover:text-primary/90",
+                    "relative px-2 py-1 transition-colors duration-150",
                     activeTab === "recommend"
-                      ? "text-primary"
-                      : "text-muted-foreground"
+                      ? "text-primary font-bold"
+                      : "text-muted-foreground font-normal"
                   )}
                   onClick={() => {
                     setActiveTab("recommend");
@@ -126,14 +126,20 @@ export function DiscussionsList({
                   }}
                 >
                   推荐
+                  {activeTab === "recommend" && (
+                    <span
+                      className="absolute left-0 right-0 -bottom-1 h-[3px] rounded bg-primary"
+                      style={{ width: "100%" }}
+                    />
+                  )}
                 </button>
                 <button
                   type="button"
                   className={cn(
-                    "h-8 font-medium hover:text-primary/90",
+                    "relative px-2 py-1 transition-colors duration-150",
                     activeTab === "trace"
-                      ? "text-primary"
-                      : "text-muted-foreground"
+                      ? "text-primary font-bold"
+                      : "text-muted-foreground font-normal"
                   )}
                   onClick={() => {
                     setActiveTab("trace");
@@ -141,6 +147,12 @@ export function DiscussionsList({
                   }}
                 >
                   追踪
+                  {activeTab === "trace" && (
+                    <span
+                      className="absolute left-0 right-0 -bottom-1 h-[3px] rounded bg-primary"
+                      style={{ width: "100%" }}
+                    />
+                  )}
                 </button>
               </div>
             ) : (
@@ -169,13 +181,15 @@ export function DiscussionsList({
           {discussions.items.map((discussion, index) => {
             const isLastItem = index === discussions.items.length - 1;
             return (
-              <DiscussionItem
-                key={discussion.slug + index}
-                discussion={discussion}
-                displayMode={displayMode}
-                isLastItem={isLastItem}
-                onChange={handleDeleteDiscussion}
-              />
+              <div className="px-6">
+                <DiscussionItem
+                  key={discussion.slug + index}
+                  discussion={discussion}
+                  displayMode={displayMode}
+                  isLastItem={isLastItem}
+                  onChange={handleDeleteDiscussion}
+                />
+              </div>
             );
           })}
         </InfiniteScroll>
