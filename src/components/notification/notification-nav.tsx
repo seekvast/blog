@@ -5,6 +5,7 @@ import { Trash2, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { NotificationTabType } from "./notification-preview";
+import { useAuth } from "../providers/auth-provider";
 
 interface NotificationNavProps {
   activeType: NotificationTabType;
@@ -21,6 +22,8 @@ export function NotificationNav({
   onMarkAllAsRead,
   className,
 }: NotificationNavProps) {
+  const { user } = useAuth();
+
   return (
     <div
       className={cn(
@@ -48,15 +51,17 @@ export function NotificationNav({
         >
           提及
         </button>
-        <button
-          className={cn(
-            "flex-1 py-2 pl-4 text-sm font-medium",
-            activeType === "board" ? "text-primary" : "text-muted-foreground"
-          )}
-          onClick={() => onTypeChange("board")}
-        >
-          看板
-        </button>
+        {user && user?.is_board_moderator === 1 && (
+          <button
+            className={cn(
+              "flex-1 py-2 pl-4 text-sm font-medium",
+              activeType === "board" ? "text-primary" : "text-muted-foreground"
+            )}
+            onClick={() => onTypeChange("board")}
+          >
+            看板
+          </button>
+        )}
       </div>
       <div className="flex gap-2">
         <Button
