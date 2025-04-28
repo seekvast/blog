@@ -28,6 +28,7 @@ interface CommentItemProps {
   onEditComment?: (data: { id: number; content: string }) => void;
   onEdit?: (comment: Post) => void;
   level?: number;
+  isLocked?: boolean;
 }
 
 export const CommentItem = ({
@@ -38,6 +39,7 @@ export const CommentItem = ({
   onEditComment,
   onEdit,
   level = 0,
+  isLocked = false,
 }: CommentItemProps) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [isReplying, setIsReplying] = React.useState(false);
@@ -235,22 +237,15 @@ export const CommentItem = ({
               </div>
 
               <div className="flex items-center space-x-3">
-                <AuthGuard
-                  fallback={
+                <AuthGuard>
+                  {!isLocked && (
                     <button
                       className="text-sm cursor-pointer hover:text-primary"
-                      onClick={() => onReply(comment)}
+                      onClick={handleReplyClick}
                     >
                       回复
                     </button>
-                  }
-                >
-                  <button
-                    className="text-sm cursor-pointer hover:text-primary"
-                    onClick={handleReplyClick}
-                  >
-                    回复
-                  </button>
+                  )}
                 </AuthGuard>
                 <CommentActions comment={comment} onEdit={handleEdit} />
               </div>
@@ -281,6 +276,7 @@ export const CommentItem = ({
                       onEditComment={onEditComment}
                       onEdit={onEdit}
                       level={level + 1}
+                      isLocked={isLocked}
                     />
                   ))}
                   <div

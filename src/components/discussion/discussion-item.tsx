@@ -9,14 +9,6 @@ import { useAuth } from "../providers/auth-provider";
 import {
   ThumbsUp,
   MessageSquare,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Flag,
-  AlertTriangle,
-  PinIcon,
-  FolderEdit,
-  Lock,
   Tag,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";

@@ -10,6 +10,7 @@ import {
   PinIcon,
   FolderEdit,
   Lock,
+  Unlock,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -170,8 +171,7 @@ export function DiscussionActions({
       }),
     onSuccess: () => {
       toast({
-        title: "成功",
-        description: "關閉回覆功能成功",
+        description: "操作成功",
       });
       clearQueryCache();
     },
@@ -263,8 +263,14 @@ export function DiscussionActions({
                   setShowConfirm(true);
                 }}
               >
-                <Lock className="mr-2 h-4 w-4" />
-                <span>關閉回覆功能</span>
+                {discussion.is_locked === 0 ? (
+                  <Lock className="mr-2 h-4 w-4" />
+                ) : (
+                  <Unlock className="mr-2 h-4 w-4" />
+                )}
+                <span>
+                  {discussion.is_locked === 0 ? "關閉回覆功能" : "開啟回覆功能"}
+                </span>
               </DropdownMenuItem>
             </>
           )}
@@ -280,14 +286,22 @@ export function DiscussionActions({
             ? "刪除討論"
             : confirmAction === "setBoardStickied"
             ? "設為看板公告"
-            : "關閉回覆功能"
+            : confirmAction === "closeReply"
+            ? discussion.is_locked === 0
+              ? "關閉回覆功能"
+              : "開啟回覆功能"
+            : "開啟回覆功能"
         }
         description={
           confirmAction === "delete"
             ? "確定要刪除這則討論嗎？"
             : confirmAction === "setBoardStickied"
             ? "確定要設為看板公告嗎？"
-            : "確定要關閉回覆功能嗎？"
+            : confirmAction === "closeReply"
+            ? discussion.is_locked === 0
+              ? "確定要關閉回覆功能嗎？"
+              : "確定要開啟回覆功能嗎？"
+            : "確定要開啟回覆功能嗎？"
         }
         confirmText="確定"
         cancelText="取消"

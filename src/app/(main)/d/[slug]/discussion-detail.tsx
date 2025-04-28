@@ -437,6 +437,10 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
 
   const handleSubmitComment = React.useCallback(
     (postForm: PostForm) => {
+      if (currentDiscussion?.is_locked === 1) {
+        return;
+      }
+
       if (!postForm.content.trim() || isSubmitting) return;
 
       commentMutation.mutate(postForm);
@@ -447,6 +451,10 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
 
   const handleEditComment = React.useCallback(
     (data: { id: number; content: string }) => {
+      if (currentDiscussion?.is_locked === 1) {
+        return;
+      }
+
       if (!data.content.trim() || isSubmitting) return;
 
       editCommentMutation.mutate(data);
@@ -625,8 +633,9 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             <button
               className="cursor-pointer hover:text-primary"
               onClick={() => setShowCommentEditor(true)}
+              disabled={currentDiscussion?.is_locked === 1}
             >
-              回复
+              {currentDiscussion?.is_locked === 1 ? "已锁定" : "回复"}
             </button>
           </div>
 
@@ -645,6 +654,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   onVote={handleVote}
                   onSubmitReply={handleSubmitComment}
                   onEditComment={handleEditComment}
+                  isLocked={currentDiscussion?.is_locked === 1}
                 />
               </InfiniteScroll>
             </div>
@@ -840,8 +850,9 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   }
                   setShowCommentEditor(true);
                 }}
+                disabled={currentDiscussion?.is_locked === 1}
               >
-                评论
+                {currentDiscussion?.is_locked === 1 ? "已锁定" : "评论"}
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </AuthGuard>

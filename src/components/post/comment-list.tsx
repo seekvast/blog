@@ -12,6 +12,7 @@ interface CommentListProps {
   onSubmitReply?: (replyForm: PostForm) => void;
   onEditComment?: (data: { id: number; content: string }) => void;
   onEdit?: (comment: Post) => void;
+  isLocked?: boolean;
 }
 
 export const CommentList = React.memo(
@@ -23,6 +24,7 @@ export const CommentList = React.memo(
     onSubmitReply,
     onEditComment,
     onEdit,
+    isLocked,
   }: CommentListProps) => {
     if (!comments.length && isLoading) {
       return (
@@ -52,6 +54,7 @@ export const CommentList = React.memo(
               onSubmitReply={onSubmitReply}
               onEditComment={onEditComment}
               onEdit={onEdit}
+              isLocked={isLocked}
             />
           ))}
         </div>
