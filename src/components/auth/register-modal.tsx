@@ -31,7 +31,7 @@ const stepOneSchema = z.object({
     .max(100, "密碼最多100個字符")
     .regex(
       /^[0-9a-zA-Z!@#$%^&*\-_]{8,100}$/,
-      "密碼只能包含大小寫字母、數字和特殊字符（!@#$%^&*-_）"
+      "密碼至少包含8個字符，只能输入大小寫字母、數字和特殊字符（!@#$%^&*-_）"
     ),
 });
 
@@ -41,30 +41,66 @@ const CURRENT_YEAR = new Date().getFullYear();
 const stepTwoSchema = z.object({
   username: z
     .string()
-    .min(3, "賬號至少需要3個字符")
-    .max(16, "賬號最多32個字符")
-    .regex(/^[a-zA-Z0-9]+$/, "賬號只能包含英文和數字"),
+    .min(2, "賬號至少需要2個字符")
+    .max(16, "賬號最多16個字符")
+    .regex(/^[a-zA-Z0-9_]+$/, "賬號只能包含英文、數字和下劃線"),
   nickname: z
     .string()
-    .min(3, "暱稱至少需要3個字符")
-    .max(16, "暱稱最多32個字符"),
+    .min(1, "暱稱至少需要1個字符")
+    .max(16, "暱稱最多16個字符")
+    .regex(/^[a-zA-Z0-9_]+$/, "暱稱只能包含英文、數字和下劃線"),
   gender: z.enum(["0", "1", "2", "3"], {
     required_error: "請選擇性別",
   }),
-  birthday: z.object({
-    year: z
-      .string()
-      .regex(/^\d{4}$/, "請輸入有效的年份")
-      .refine(
-        (val) => {
-          const year = parseInt(val);
-          return year >= MIN_YEAR && year <= CURRENT_YEAR;
-        },
-        { message: `年份必須在 ${MIN_YEAR} 到 ${CURRENT_YEAR} 之間` }
-      ),
-    month: z.string().regex(/^(0?[1-9]|1[0-2])$/, "請輸入有效的月份"),
-    day: z.string().regex(/^(0?[1-9]|[12][0-9]|3[01])$/, "請輸入有效的日期"),
-  }),
+  birthday: z
+    .object({
+      year: z
+        .string()
+        .regex(/^\d{4}$/, "請輸入有效的年份")
+        .refine(
+          (val) => {
+            const year = parseInt(val);
+            return year >= MIN_YEAR && year <= CURRENT_YEAR;
+          },
+          { message: `年份必須在 ${MIN_YEAR} 到 ${CURRENT_YEAR} 之間` }
+        ),
+      month: z.string().regex(/^(0?[1-9]|1[0-2])$/, "請輸入有效的月份"),
+      day: z.string().regex(/^(0?[1-9]|[12][0-9]|3[01])$/, "請輸入有效的日期"),
+    })
+    .refine(
+      (birthday) => {
+        const birthDate = new Date(
+          parseInt(birthday.year),
+          parseInt(birthday.month) - 1,
+          parseInt(birthday.day)
+        );
+        const today = new Date();
+        const minAgeDate = new Date(
+          today.getFullYear() - 13,
+          today.getMonth(),
+          today.getDate()
+        );
+        return birthDate <= minAgeDate;
+      },
+      { message: "用戶年齡不能小于13歲" }
+    )
+    .refine(
+      (birthday) => {
+        const birthDate = new Date(
+          parseInt(birthday.year),
+          parseInt(birthday.month) - 1,
+          parseInt(birthday.day)
+        );
+        const today = new Date();
+        const maxAgeDate = new Date(
+          today.getFullYear() - 130,
+          today.getMonth(),
+          today.getDate()
+        );
+        return birthDate >= maxAgeDate;
+      },
+      { message: "用戶年齡不能大于130歲" }
+    ),
 });
 
 interface RegisterModalProps {
@@ -272,18 +308,23 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
 
     try {
       setIsSubmitting(true);
-      const birthday = step2Data.birthday.year && step2Data.birthday.month && step2Data.birthday.day
-        ? `${step2Data.birthday.year}-${parseInt(step2Data.birthday.month)}-${parseInt(step2Data.birthday.day)}`
-        : undefined;
-        
-      const data = await api.users.signUp({ 
-        ...step1Data, 
+      const birthday =
+        step2Data.birthday.year &&
+        step2Data.birthday.month &&
+        step2Data.birthday.day
+          ? `${step2Data.birthday.year}-${parseInt(
+              step2Data.birthday.month
+            )}-${parseInt(step2Data.birthday.day)}`
+          : undefined;
+
+      const data = await api.users.signUp({
+        ...step1Data,
         ...step2Data,
         gender: step2Data.gender ? parseInt(step2Data.gender) : undefined,
-        birthday 
+        birthday,
       });
-      
-      if(data.token) {
+
+      if (data.token) {
         await signIn("credentials", {
           email: data.email,
           password: step1Data.password,
@@ -292,7 +333,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
       }
       // 设置新注册用户状态，触发兴趣选择
       setNewlyRegistered(true);
-      
+
       toast({
         title: "註冊成功",
         description: "已自動登錄",
@@ -325,7 +366,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
 
   return (
     <>
-      <Dialog 
+      <Dialog
         open={open !== undefined ? open : isRegisterOpen}
         onOpenChange={(value) => {
           if (onOpenChange) {
@@ -339,7 +380,9 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
           <DialogHeader className="mb-4">
             <div className="space-y-2">
               <p className="text-sm text-neutral-500">第{step}步，共2步</p>
-              <DialogTitle className="text-xl font-semibold">建立一個帳號</DialogTitle>
+              <DialogTitle className="text-xl font-semibold">
+                建立一個帳號
+              </DialogTitle>
             </div>
           </DialogHeader>
 
@@ -369,7 +412,10 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="text-sm text-neutral-500">
+                    <Label
+                      htmlFor="password"
+                      className="text-sm text-neutral-500"
+                    >
                       密碼
                     </Label>
                     <Input
@@ -383,7 +429,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                       autoComplete="new-password"
                     />
                     <p className="text-sm text-neutral-500">
-                      包含至少8個字元，只能輸入英文、數字、特殊符號
+                      密碼至少包含8個字符，只能输入大小寫字母、數字和特殊字符（!@#$%^&*-_）
                     </p>
                     {errors.password && (
                       <p className="text-sm font-medium text-destructive">
@@ -408,23 +454,33 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                   <div className="text-center space-y-4 pt-2">
                     <p className="text-sm text-neutral-500">
                       已有帳戶？
-                      <Button variant="link" className="px-1 h-auto" onClick={() => {
-                        if (onOpenChange) {
-                          onOpenChange(false);
-                        } else {
-                          closeRegister();
-                        }
-                        openLogin();
-                      }}>
+                      <Button
+                        variant="link"
+                        className="px-1 h-auto"
+                        onClick={() => {
+                          if (onOpenChange) {
+                            onOpenChange(false);
+                          } else {
+                            closeRegister();
+                          }
+                          openLogin();
+                        }}
+                      >
                         登入
                       </Button>
                     </p>
                     <p className="text-xs text-neutral-500">
                       註冊登入即代表同意Kater
-                      <Link href="/terms" className="text-primary hover:underline mx-1">
+                      <Link
+                        href="/terms"
+                        className="text-primary hover:underline mx-1"
+                      >
                         《服務條款》
                       </Link>
-                      <Link href="/privacy" className="text-primary hover:underline">
+                      <Link
+                        href="/privacy"
+                        className="text-primary hover:underline"
+                      >
                         《隱私權政策》
                       </Link>
                     </p>
@@ -437,7 +493,10 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
               <form onSubmit={(e) => e.preventDefault()}>
                 <div className="space-y-5">
                   <div className="space-y-2">
-                    <Label htmlFor="username" className="text-sm text-neutral-500">
+                    <Label
+                      htmlFor="username"
+                      className="text-sm text-neutral-500"
+                    >
                       使用者帳號
                     </Label>
                     <Input
@@ -446,7 +505,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                       name="username"
                       value={step2Data.username}
                       onChange={handleStep2Change}
-                      placeholder="請輸入3-32位英文、數字帳號"
+                      placeholder="可輸入2-16位英文、數字,下劃線"
                       className="h-12 text-base"
                       autoComplete="new-username"
                     />
@@ -458,7 +517,10 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="nickname" className="text-sm text-neutral-500">
+                    <Label
+                      htmlFor="nickname"
+                      className="text-sm text-neutral-500"
+                    >
                       暱稱
                     </Label>
                     <Input
@@ -467,7 +529,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                       name="nickname"
                       value={step2Data.nickname}
                       onChange={handleStep2Change}
-                      placeholder="請輸入3-32位暱稱"
+                      placeholder="可輸入1-16位英文、數字、下劃線"
                       className="h-12 text-base"
                       autoComplete="new-nickname"
                     />
@@ -577,10 +639,16 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                   <div className="text-center pt-2">
                     <p className="text-xs text-neutral-500">
                       註冊登入即代表同意Kater
-                      <Link href="/terms" className="text-primary hover:underline mx-1">
+                      <Link
+                        href="/terms"
+                        className="text-primary hover:underline mx-1"
+                      >
                         《服務條款》
                       </Link>
-                      <Link href="/privacy" className="text-primary hover:underline">
+                      <Link
+                        href="/privacy"
+                        className="text-primary hover:underline"
+                      >
                         《隱私權政策》
                       </Link>
                     </p>

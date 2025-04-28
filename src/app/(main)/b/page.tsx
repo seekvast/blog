@@ -230,9 +230,8 @@ export default function BoardsPage() {
             className="divide-y"
           >
             {boards.map((board) => (
-              <div className="px-6">
+              <div className="px-6" key={board.id}>
                 <BoardItem
-                  key={board.id}
                   board={board}
                   onJoin={handleJoinBoard}
                   onLeave={handleLeaveBoard}

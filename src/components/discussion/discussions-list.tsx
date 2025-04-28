@@ -181,7 +181,7 @@ export function DiscussionsList({
           {discussions.items.map((discussion, index) => {
             const isLastItem = index === discussions.items.length - 1;
             return (
-              <div className="px-6">
+              <div className="px-6" key={discussion.slug + index}>
                 <DiscussionItem
                   key={discussion.slug + index}
                   discussion={discussion}
