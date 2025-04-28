@@ -144,9 +144,9 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
               <div
                 key={item.href}
                 className={cn(
-                  "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors cursor-pointer",
+                  "inline-flex items-center px-6 py-2 text-base rounded-full transition-colors cursor-pointer max-w-fit",
                   pathname === item.href
-                    ? "bg-accent text-accent-foreground"
+                    ? "bg-accent text-primary"
                     : "hover:bg-accent hover:text-accent-foreground"
                 )}
                 onClick={() => requireAuth(() => router.push(item.href))}
@@ -159,9 +159,9 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center w-full px-4 py-2 text-base rounded-lg transition-colors",
+                  "inline-flex items-center px-6 py-2 text-base rounded-full transition-colors max-w-fit",
                   pathname === item.href
-                    ? "bg-accent text-accent-foreground"
+                    ? "bg-accent text-primary"
                     : "hover:bg-accent hover:text-accent-foreground"
                 )}
               >
@@ -174,7 +174,10 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
 
         {/* 创建看板按钮 */}
         <div className="py-2">
-          <Button className="w-full text-lg" onClick={handlePublishClick}>
+          <Button
+            className="w-full text-lg font-bold"
+            onClick={handlePublishClick}
+          >
             {pathname === "/b"
               ? t("common.createBoard", { defaultValue: "创建看板" })
               : t("common.publish", { defaultValue: "发表文章" })}
