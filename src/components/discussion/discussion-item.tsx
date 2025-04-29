@@ -103,15 +103,15 @@ export const DiscussionItem = React.forwardRef<
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center space-x-2 min-w-0 flex-1">
               <h2
-                className="min-w-0 w-0 text-xl font-medium text-foreground hover:text-primary block w-full overflow-hidden text-ellipsis line-clamp-3 md:line-clamp-2 break-words"
+                className={cn(
+                  "min-w-0 w-0 text-xl font-medium text-foreground hover:text-primary block w-full overflow-hidden text-ellipsis line-clamp-3 md:line-clamp-2 break-words",
+                  discussion.discussion_user && "text-muted-foreground"
+                )}
                 style={{
                   display: "-webkit-box",
                 }}
               >
-                <Link
-                  href={`/d/${discussion.slug}`}
-                  className="w-full"
-                >
+                <Link href={`/d/${discussion.slug}`} className="w-full">
                   {discussion.title}
                 </Link>
               </h2>
@@ -130,6 +130,9 @@ export const DiscussionItem = React.forwardRef<
             <DiscussionPreview
               content={discussion.main_post.content}
               displayMode={displayMode}
+              className={cn(
+                discussion.discussion_user && "text-muted-foreground"
+              )}
             />
           </Link>
 

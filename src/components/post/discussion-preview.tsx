@@ -43,7 +43,7 @@ export function DiscussionPreview({
   return (
     <div className={className}>
       {displayMode === "grid" ? (
-        <div className="flex gap-3 items-start">
+        <div className="flex gap-3 items-start mt-2">
           {firstImgSrc && (
             <div className="flex-shrink-0">
               <Image
