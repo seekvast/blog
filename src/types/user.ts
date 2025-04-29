@@ -35,6 +35,7 @@ export interface User {
   status?: number;
   username_history?: string[];
   is_board_moderator?: number;
+  age_verified?: number;
   preferences?: {
     nsfwVisible: string;
     discloseOnline: string;

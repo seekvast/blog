@@ -50,6 +50,7 @@ export const authOptions: NextAuthOptions = {
           token: data.token,
           preferences: data.preferences,
           is_board_moderator: data.is_board_moderator,
+          age_verified: data.age_verified,
         };
       },
     }),
@@ -72,6 +73,7 @@ export const authOptions: NextAuthOptions = {
         token.preferences = user.preferences;
         token.token = user.token;
         token.is_board_moderator = user.is_board_moderator;
+        token.age_verified = user.age_verified;
       }
       if (trigger === "update" && session?.user) {
         const refreshUser = await api.users.refreshToken();
@@ -90,6 +92,7 @@ export const authOptions: NextAuthOptions = {
         token.preferences = refreshUser.preferences;
         token.token = refreshUser.token;
         token.is_board_moderator = refreshUser.is_board_moderator;
+        token.age_verified = refreshUser.age_verified;
       }
       return token;
     },

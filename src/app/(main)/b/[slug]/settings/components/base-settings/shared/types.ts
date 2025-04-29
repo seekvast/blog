@@ -1,27 +1,9 @@
 import { Board, Category } from "@/types";
 import { UseFormReturn } from "react-hook-form";
-import { z } from "zod";
+import { boardSchema, BoardFormSchema } from "@/validations/board";
 
-export const formSchema = z.object({
-  name: z.string().min(1, "看板名称不能为空"),
-  slug: z
-    .string()
-    .min(7)
-    .max(25)
-    .regex(/^[a-zA-Z0-9_-]+$/, "只能输入英文、数字和下划线"),
-  desc: z.string().max(500, "看板描述不能超过500字"),
-  badge_visible: z.array(z.number()),
-  is_nsfw: z.number(),
-  visibility: z.number(),
-  poll_role: z.array(z.number()),
-  approval_mode: z.number(),
-  question: z.string().optional(),
-  answer: z.string().optional(),
-  category_id: z.number().optional(),
-  avatar: z.string().max(500).optional(),
-});
-
-export type FormData = z.infer<typeof formSchema>;
+export { boardSchema as formSchema };
+export type FormData = BoardFormSchema;
 
 export interface BaseSettingsProps {
   board: Board;

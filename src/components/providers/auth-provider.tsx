@@ -57,6 +57,7 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
         token: session.user.token || "",
         preferences: session.user.preferences,
         is_board_moderator: session.user.is_board_moderator || 0,
+        age_verified: session.user.age_verified || 0,
       });
       // 用户登录时获取草稿
       fetchDraft();
