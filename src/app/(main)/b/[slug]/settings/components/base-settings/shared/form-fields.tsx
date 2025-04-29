@@ -49,6 +49,7 @@ export function FormFields({
               <Input
                 placeholder="可輸入英文大小寫+數字，长度7~25个字符"
                 {...field}
+                value={field.value || ''}
               />
             </FormControl>
             <FormMessage />
@@ -225,7 +226,7 @@ export function FormFields({
               <FormItem>
                 <FormLabel>问题</FormLabel>
                 <FormControl>
-                  <Input placeholder="请输入问题" {...field} />
+                  <Input placeholder="请输入问题" {...field} value={field.value || ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -239,7 +240,7 @@ export function FormFields({
                 <FormItem>
                   <FormLabel>答案</FormLabel>
                   <FormControl>
-                    <Input placeholder="请输入答案" {...field} />
+                    <Input placeholder="请输入答案" {...field} value={field.value || ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

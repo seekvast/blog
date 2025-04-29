@@ -1,38 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { Bell, Trash2, CheckCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
-
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   NotificationPreview,
   NotificationTabType,
   useNotifications,
 } from "@/components/notification/notification-preview";
-import { cn } from "@/lib/utils";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { useRouter } from "next/navigation";
-import { NotificationIcon } from "@/components/notification/notification-icon";
 import { NotificationNav } from "@/components/notification/notification-nav";
 
-interface NotificationPopoverProps {
-  triggerClassName?: string;
-  autoLoad?: boolean;
-}
 
-export default function NotificationsPage({
-  triggerClassName,
-  autoLoad = true,
-}: NotificationPopoverProps) {
-  const router = useRouter();
-  const isMobile = useMediaQuery("(max-width: 640px)");
+export default function AllNotificationPage() {
   const [open, setOpen] = React.useState(false);
   const [activeType, setActiveType] =
     React.useState<NotificationTabType>("all");
@@ -49,7 +26,7 @@ export default function NotificationsPage({
     markAsRead,
     markAllNotificationsAsRead,
     clearAllNotifications,
-  } = useNotifications(autoLoad);
+  } = useNotifications(true);
 
   const handleNotificationClick = (notification: any) => {
     // 标记为已读

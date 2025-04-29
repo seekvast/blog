@@ -17,20 +17,17 @@ export const boardSchema = z.object({
   desc: z
     .string()
     .max(500, { message: "看板简介最长500个字符" })
-    .optional()
-    .nullable(),
+    .optional(),
   
   question: z
     .string()
     .max(100, { message: "问题最长100个字符" })
-    .optional()
-    .nullable(),
+    .optional(),
   
   answer: z
     .string()
     .max(100, { message: "答案最长100个字符" })
-    .optional()
-    .nullable(),
+    .optional(),
   
   visibility: z.number(),
   category_id: z.number().optional(),
