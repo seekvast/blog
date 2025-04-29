@@ -79,7 +79,7 @@ export function useNotifications(autoLoad: boolean = true) {
       try {
         const response = await api.notifications.list({
           page: pageNum,
-          per_page: 20,
+          per_page: 50,
           ...query,
         });
 
