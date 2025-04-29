@@ -3,6 +3,9 @@ import type { Post } from "@/types/discussion";
 import { CommentItem } from "@/components/post/comment-item";
 import { PostForm } from "@/validations/post";
 import { Loading } from "@/components/ui/loading";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserRound } from "lucide-react";
+import { AuthGuard } from "@/components/auth/auth-guard";
 
 interface CommentListProps {
   comments: Post[];
@@ -58,6 +61,25 @@ export const CommentList = React.memo(
             />
           ))}
         </div>
+        <AuthGuard>
+          {!isLocked && (
+            <div className="flex items-start space-x-3 px-2 md:px-4 mt-4">
+              <Avatar className="h-10 w-10 md:h-10 md:w-10 flex-shrink-0">
+                <AvatarFallback>
+                  <UserRound className="h-4 w-4 md:h-5 md:w-5" />
+                </AvatarFallback>
+              </Avatar>
+              <div
+                className="flex-1 p-3 border border-border rounded-md bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
+                onClick={() => comments.length > 0 && onReply(comments[0])}
+              >
+                <div className="text-sm text-muted-foreground">
+                  说点什么吧...
+                </div>
+              </div>
+            </div>
+          )}
+        </AuthGuard>
       </div>
     );
   }
