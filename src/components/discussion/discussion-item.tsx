@@ -1,16 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useAuth } from "../providers/auth-provider";
 
-import {
-  ThumbsUp,
-  MessageSquare,
-  Tag,
-} from "lucide-react";
+import { ThumbsUp, MessageSquare, Tag } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { DiscussionPreview } from "@/components/post/discussion-preview";
@@ -106,10 +102,15 @@ export const DiscussionItem = React.forwardRef<
         <div className="min-w-0 flex-1 w-full">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center space-x-2 min-w-0 flex-1">
-              <h2 className="min-w-0 flex-1 w-0">
+              <h2
+                className="min-w-0 w-0 text-xl font-medium text-foreground hover:text-primary block w-full overflow-hidden text-ellipsis line-clamp-3 md:line-clamp-2 break-words"
+                style={{
+                  display: "-webkit-box",
+                }}
+              >
                 <Link
                   href={`/d/${discussion.slug}`}
-                  className="text-xl font-medium text-foreground hover:text-primary line-clamp-1 block w-full overflow-hidden text-ellipsis"
+                  className="w-full"
                 >
                   {discussion.title}
                 </Link>
