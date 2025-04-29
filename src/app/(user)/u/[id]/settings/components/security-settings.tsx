@@ -394,6 +394,12 @@ export default function SecuritySettings({ user }: { user: User | null }) {
   };
 
   const today = new Date().toISOString().split("T")[0];
+  const minDate = "1900-01-01";
+  const maxDate = (() => {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() - 13);
+    return date.toISOString().split("T")[0];
+  })();
 
   return (
     <div className="space-y-6">
@@ -643,7 +649,8 @@ export default function SecuritySettings({ user }: { user: User | null }) {
                 type="date"
                 value={birthday}
                 onChange={handleBirthdayChange}
-                max={today}
+                min={minDate}
+                max={maxDate}
                 className="w-full"
               />
               {/* <p className="text-sm text-muted-foreground">

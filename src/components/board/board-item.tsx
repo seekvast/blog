@@ -56,17 +56,26 @@ export function BoardItem({ board, onJoin, onLeave }: BoardItemProps) {
         </div>
       </div>
       <div>
-        {board.is_joined ? (
+        {!board.is_joined ? (
+          <Button
+            size="sm"
+            className="rounded-full"
+            onClick={() => onJoin?.(board.id)}
+          >
+            加入
+          </Button>
+        ) : board.board_user && [1, 2].includes(board.board_user.user_role) ? (
+          <Button variant="outline" size="sm" className="rounded-full">
+            <Link href={`/b/${board.slug}/settings`}>设定</Link>
+          </Button>
+        ) : (
           <Button
             variant="outline"
             size="sm"
+            className="rounded-full"
             onClick={() => onLeave?.(board.id)}
           >
             已加入
-          </Button>
-        ) : (
-          <Button size="sm" onClick={() => onJoin?.(board.id)}>
-            加入
           </Button>
         )}
       </div>
