@@ -96,24 +96,19 @@ const Account = () => {
   };
 
   const NOTICE_TEMPLATES = {
-    delete_post:
-      "您所發表的「{postTitle}」已被看板管理員已進行刪除。",
-    delete_reply:
-      "您於「{postTitle}」中發表的回覆已被看板管理員已進行刪除。",
+    delete_post: "您所發表的「{postTitle}」已被看板管理員已進行刪除。",
+    delete_reply: "您於「{postTitle}」中發表的回覆已被看板管理員已進行刪除。",
     ban: "您已被看板管理員禁止發表與回覆，直到{days}天後解除。",
     block: "您已被看板管理員禁止加入，點此查看詳情。",
     kick: "您已被看板管理員取消成員資格。",
     default: "您已被看板「{boardName}」禁言",
   };
 
-  const buildNotice = (
-    type: string,
-    report: Report
-  ) => {
+  const buildNotice = (type: string, report: Report) => {
     const template = NOTICE_TEMPLATES[type] || NOTICE_TEMPLATES.default;
     return template
       .replace(/{boardName}/g, report.board?.name || "")
-      .replace(/{postTitle}/g, report.discussion?.title || "")
+      .replace(/{postTitle}/g, report.discussion?.title || "");
     //   .replace(/{days}/g, report.days?.toString() || "");
   };
 
@@ -143,9 +138,11 @@ const Account = () => {
               >
                 <div className="flex-1 mr-4">
                   <div className="text-sm">{notice}</div>
-                  <p className="text-sm text-gray-500">{report.reason_text}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {report.reason_text}
+                  </p>
                   <div className="flex items-center gap-3 mb-1">
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-muted-foreground">
                       {formatDate(report.created_at)}
                     </span>
                   </div>

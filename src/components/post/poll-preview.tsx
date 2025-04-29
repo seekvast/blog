@@ -23,7 +23,7 @@ export const PollPreview: React.FC<PollPreviewProps> = ({
     <div className="mb-4 border rounded-lg p-4 bg-gray-50 relative">
       <button
         onClick={onDelete}
-        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+        className="absolute top-2 right-2 text-muted-foreground hover:text-gray-700"
         type="button"
       >
         <svg
@@ -41,7 +41,7 @@ export const PollPreview: React.FC<PollPreviewProps> = ({
       </button>
       <button
         onClick={onEdit}
-        className="absolute top-2 right-10 text-gray-500 hover:text-gray-700"
+        className="absolute top-2 right-10 text-muted-foreground hover:text-gray-700"
         type="button"
       >
         <svg
@@ -57,12 +57,12 @@ export const PollPreview: React.FC<PollPreviewProps> = ({
         <div className="space-y-2">
           {pollData.options.map((option, index) => (
             <div key={index} className="flex items-center space-x-2">
-              <span className="text-gray-500">选项 {index + 1} </span>
+              <span className="text-muted-foreground">选项 {index + 1} </span>
               <span>{option}</span>
             </div>
           ))}
         </div>
-        <div className="flex flex-wrap gap-2 text-sm text-gray-500">
+        <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
           {isMultipleChoice && (
             <Badge variant="secondary" className="text-primary">
               多选

@@ -307,7 +307,7 @@ export default function SettingsPage() {
                     <div className="py-3 border-b">
                       <Label>上線狀態顯示</Label>
                       <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-muted-foreground mt-1">
                           顯示或隱藏你的線上狀態，讓其他使用者知道你是否在線。
                         </p>
                         <Switch
@@ -343,7 +343,7 @@ export default function SettingsPage() {
                       >
                         <Label>账号状态</Label>
                         <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm text-gray-500 mt-1">
+                          <p className="text-sm text-muted-foreground mt-1">
                             当你的文章被删除，账号被停用或发送其他重大变更时，相关通知在此显示。
                           </p>
                           <div
@@ -360,7 +360,7 @@ export default function SettingsPage() {
                       >
                         <Label>活动状态</Label>
                         <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm text-gray-500 mt-1">
+                          <p className="text-sm text-muted-foreground mt-1">
                             接收看板管理员对文章，权限及其他管理操作的相关通知将在此显示。
                           </p>
                           <div

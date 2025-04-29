@@ -3,10 +3,7 @@
 import { cn } from "@/lib/utils";
 import React from "react";
 
-export type UserTabType =
-  | "replies"
-  | "posts"
-  | "history";
+export type UserTabType = "replies" | "posts" | "history";
 
 interface UserSidebarProps {
   activeTab: UserTabType;
@@ -54,13 +51,13 @@ export default function UserSidebar({
               "py-1 text-center text-sm font-medium transition-colors flex items-center justify-center",
               isActive
                 ? "text-blue-600 border-b-2 border-blue-600"
-                : "text-gray-500 hover:text-gray-700",
+                : "text-muted-foreground hover:text-gray-700",
 
               // 桌面端样式（大屏幕）
               "lg:w-auto lg:flex-auto lg:flex lg:items-center lg:justify-between lg:text-left lg:py-2 lg:px-4 lg:rounded-lg lg:border-b-0 lg:min-w-0",
               isActive
                 ? "lg:bg-blue-subtle lg:text-blue-600 lg:font-medium lg:border-none"
-                : "lg:hover:bg-subtle lg:text-gray-500"
+                : "lg:hover:bg-subtle lg:text-muted-foreground"
             )}
           >
             <span className="px-4 lg:px-0">{item.label}</span>
@@ -71,7 +68,7 @@ export default function UserSidebar({
                   "hidden",
                   // 桌面端样式（显示计数）
                   "lg:inline-block lg:text-xs lg:px-2 lg:rounded",
-                  isActive ? "lg:text-blue-600" : "lg:text-gray-500"
+                  isActive ? "lg:text-blue-600" : "lg:text-muted-foreground"
                 )}
               >
                 {/* {item.count} */}

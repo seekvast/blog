@@ -202,7 +202,7 @@ export function PostNavigator({
       <div className="flex flex-col items-start mr-4">
         <button
           onClick={scrollToTop}
-          className="flex items-center text-sm text-gray-500 hover:text-gray-700"
+          className="flex items-center text-sm text-muted-foreground hover:text-gray-700"
         >
           <ChevronsUp className="h-5 w-5 mr-1" />
           <span>最早内容</span>
@@ -240,7 +240,7 @@ export function PostNavigator({
                 <div className="text-base font-medium text-gray-800 whitespace-nowrap">
                   {currentPostIndex} / {totalPosts} 楼
                 </div>
-                <div className="text-sm text-gray-500 mt-1 whitespace-nowrap">
+                <div className="text-sm text-muted-foreground mt-1 whitespace-nowrap">
                   {formattedDate}
                 </div>
               </div>
@@ -255,7 +255,7 @@ export function PostNavigator({
 
         <button
           onClick={scrollToBottom}
-          className="flex items-center text-sm text-gray-500 hover:text-gray-700"
+          className="flex items-center text-sm text-muted-foreground hover:text-gray-700"
         >
           <ChevronsDown className="h-5 w-5 mr-1" />
           <span>最新回覆</span>

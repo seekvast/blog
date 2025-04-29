@@ -180,8 +180,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
   };
 
   const handleEmailChange =
-    (field: keyof EmailSchema) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (field: keyof EmailSchema) => (e: React.ChangeEvent<HTMLInputElement>) => {
       setEmailForm((prev) => ({
         ...prev,
         [field]: e.target.value,
@@ -215,7 +214,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
         title: "发送成功",
         description: "验证码已发送到您的新邮箱",
       });
-      
+
       // 设置倒计时
       setCountdown(60);
       const timer = setInterval(() => {
@@ -246,21 +245,21 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       // 提交到后端
       await api.users.updateEmail({
         email: validatedData.email,
-        captcha: validatedData.captcha
+        captcha: validatedData.captcha,
       });
-      
+
       toast({
         title: "修改成功",
         description: "邮箱已更新，请重新登录",
       });
-      
+
       setEmailModalOpen(false);
       // 重置表单
       setEmailForm({
         email: "",
         captcha: "",
       });
-      
+
       await signOut({
         redirect: true,
         callbackUrl: "/",
@@ -402,14 +401,14 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       <div className="py-3 border-b">
         <Label>电子邮件</Label>
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             更改你的电子邮件地址，以确保帐户安全并接收最新通知。
           </p>
-          <div 
+          <div
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => setEmailModalOpen(true)}
           >
-            <span className="text-sm text-gray-500">{user?.email}</span>
+            <span className="text-sm text-muted-foreground">{user?.email}</span>
             <ChevronRight className="h-4 w-4 text-gray-400" />
           </div>
         </div>
@@ -419,7 +418,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       <div className="py-3 border-b">
         <Label>密码</Label>
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             更新你的密码，以提升帐户安全性并保护你的个人资料。
           </p>
           <div
@@ -559,7 +558,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       {/* <div className="py-3 border-b">
         <Label>性别</Label>
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             選擇你的性別，幫助我們更準確地了解你的興趣和偏好。
           </p>
           <div
@@ -619,7 +618,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       <div className="py-3 border-b">
         <Label>生日</Label>
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             設定你的生日，讓我們為你提供更合適的內容推薦。
           </p>
           <div
@@ -669,7 +668,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       <div className="py-3 border-b">
         <Label>年龄验证</Label>
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             驗證你的年齡以存取特定內容
           </p>
           <div
@@ -708,7 +707,9 @@ export default function SecuritySettings({ user }: { user: User | null }) {
                       )}
                     </div>
                   </div>
-                  <p className="text-sm text-gray-500 mt-2">上傳證件照片</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    上傳證件照片
+                  </p>
                 </>
               ) : (
                 <div className="relative w-full">
@@ -738,9 +739,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
                 <h4 className="font-medium mb-2">要求:</h4>
                 <ul className="text-sm text-gray-600 space-y-1">
                   <li>請上傳真實有效、清晰的證件</li>
-                  <li>
-                    支持JPG、JPEG、PNG格式，大小不超過2M
-                  </li>
+                  <li>支持JPG、JPEG、PNG格式，大小不超過2M</li>
                   <li>
                     「年齡驗證所提供的個人證件僅用於確認是否為成年，驗證完畢後將於60天內銷毀證件照片。」
                   </li>
@@ -771,7 +770,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       <div className="py-3 border-b">
         <Label>成人內容</Label>
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             開啟後，可以自由選擇是否瀏覽成人文章與看板，並根據設定顯示相應的內容。
           </p>
           <Switch

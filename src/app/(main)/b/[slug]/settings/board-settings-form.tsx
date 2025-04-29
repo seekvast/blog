@@ -131,7 +131,7 @@ export function BoardSettingsForm({
             </Avatar>
             <div>
               <h2 className="text-xl font-semibold">{board.name}</h2>
-              <p className="text-sm text-gray-500 mt-1">{board.desc}</p>
+              <p className="text-sm text-muted-foreground mt-1">{board.desc}</p>
             </div>
           </div>
         </div>

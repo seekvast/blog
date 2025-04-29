@@ -573,7 +573,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                     </span>
                   </Link>
                   <span className="flex-shrink-0 mx-2 text-gray-300">·</span>
-                  <span className="text-xs md:text-sm text-gray-500 flex-shrink-0">
+                  <span className="text-xs md:text-sm text-muted-foreground flex-shrink-0">
                     {formatDistanceToNow(
                       new Date(currentDiscussion.created_at),
                       {
@@ -624,14 +624,14 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             )}
           </div>
 
-          <div className="flex items-center justify-between border-b text-sm  text-gray-500">
-            <div className="flex items-center pb-2">
+          <div className="flex items-center justify-between px-2 md:px-4 border-b text-sm  text-muted-foreground">
+            <div className="flex items-center pb-2 font-bold">
               <span>回复</span>
-              <span className="pl-2 text-blue-600">{totalPosts}</span>
+              <span className="pl-1 text-primary">{totalPosts}</span>
             </div>
 
             <button
-              className="cursor-pointer hover:text-primary"
+              className="cursor-pointer hover:text-primary font-bold"
               onClick={() => setShowCommentEditor(true)}
               disabled={currentDiscussion?.is_locked === 1}
             >

@@ -125,7 +125,7 @@ function SortableRuleItem({
           {rule.content}
         </p>
       </div>
-      <div className="flex gap-3 items-center text-gray-500">
+      <div className="flex gap-3 items-center text-muted-foreground">
         <button className="cursor-pointer text-primary" onClick={handleEdit}>
           <Pencil className="h-4 w-4" />
         </button>

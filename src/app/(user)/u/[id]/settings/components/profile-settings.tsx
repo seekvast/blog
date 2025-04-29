@@ -141,10 +141,10 @@ export default function ProfileSettings({ user }: { user: User | null }) {
           <Label>個人檔案</Label>
         </div>
         <div
-          className="flex items-center justify-between gap-2 text-gray-500 "
+          className="flex items-center justify-between gap-2 text-muted-foreground "
           onClick={() => setOpen(true)}
         >
-          <p className="text-sm text-gray-500 my-1">
+          <p className="text-sm text-muted-foreground my-1">
             更新你的個人資訊，讓其他使用者了解更多關於你的資料。
           </p>
           <div className="flex items-center">

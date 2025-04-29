@@ -47,13 +47,15 @@ function Boards({
             </Avatar>
             <div>
               <div className="font-medium">{board.name}</div>
-              <div className="text-sm text-gray-500">{board.description}</div>
+              <div className="text-sm text-muted-foreground">
+                {board.description}
+              </div>
             </div>
           </div>
           <Button
             size="sm"
             variant="secondary"
-            className="text-sm text-gray-500"
+            className="text-sm text-muted-foreground"
             onClick={() => onUnblock(board.id)}
           >
             解除封锁
@@ -97,7 +99,9 @@ function Users({
   }
 
   if (users.length === 0) {
-    return <div className="py-4 text-center text-gray-500">暂无数据</div>;
+    return (
+      <div className="py-4 text-center text-muted-foreground">暂无数据</div>
+    );
   }
 
   return (
@@ -114,13 +118,15 @@ function Users({
             </Avatar>
             <div>
               <div className="font-medium">{user.name}</div>
-              <div className="text-sm text-gray-500">{user.description}</div>
+              <div className="text-sm text-muted-foreground">
+                {user.description}
+              </div>
             </div>
           </div>
           <Button
             size="sm"
             variant="secondary"
-            className="text-sm text-gray-500"
+            className="text-sm text-muted-foreground"
             onClick={() => onUnblock(user.id)}
           >
             解除封锁

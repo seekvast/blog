@@ -169,7 +169,7 @@ export const CommentItem = ({
                 </Link>
               )}
               <span className="text-gray-300">·</span>
-              <span className="text-xs md:text-sm text-gray-500">
+              <span className="text-xs md:text-sm text-muted-foreground">
                 {formatDistanceToNow(new Date(comment.created_at), {
                   addSuffix: true,
                   locale: zhCN,
@@ -177,7 +177,7 @@ export const CommentItem = ({
               </span>
             </div>
             {comment.parent_id <= 0 && (
-              <span className="text-xs md:text-sm text-gray-500">
+              <span className="text-xs md:text-sm text-muted-foreground">
                 #{comment.number}
               </span>
             )}
@@ -198,7 +198,7 @@ export const CommentItem = ({
           </div>
 
           {!isEditing && (
-            <div className="mt-3 flex justify-between items-center space-x-4 text-sm md:text-base text-gray-500">
+            <div className="mt-3 flex justify-between items-center space-x-4 text-sm md:text-base text-muted-foreground">
               <div className="flex items-center gap-2 space-x-3 md:space-x-6">
                 <div
                   className="flex items-center space-x-1 cursor-pointer"

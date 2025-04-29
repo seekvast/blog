@@ -29,9 +29,12 @@ interface ApprovalSettingsProps {
 
 export function ApprovalSettings({ board }: ApprovalSettingsProps) {
   const { toast } = useToast();
-    const queryClient = useQueryClient();
-    
-    const isModerator = board.board_user && (board.board_user.user_role === BoardUserRole.MODERATOR || board.board_user.user_role === BoardUserRole.CREATOR);
+  const queryClient = useQueryClient();
+
+  const isModerator =
+    board.board_user &&
+    (board.board_user.user_role === BoardUserRole.MODERATOR ||
+      board.board_user.user_role === BoardUserRole.CREATOR);
   // 筛选条件
   const [filters, setFilters] = React.useState({
     apply_time: "",
@@ -85,21 +88,21 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
 
   // 处理申请
   const handleApplication = async (applicationId: number, status: 1 | 2) => {
-      await api.boards.approve({
-        history_id: applicationId,
-        status,
-      });
-      //使缓存失效
-      queryClient.invalidateQueries({
-        queryKey: ["board-applications", board.id, filters, searchQuery],
-      });
-      toast({
-        title: status === 1 ? "已通过" : "已拒绝",
-        description: "申请处理成功",
-      });
+    await api.boards.approve({
+      history_id: applicationId,
+      status,
+    });
+    //使缓存失效
+    queryClient.invalidateQueries({
+      queryKey: ["board-applications", board.id, filters, searchQuery],
+    });
+    toast({
+      title: status === 1 ? "已通过" : "已拒绝",
+      description: "申请处理成功",
+    });
 
-      // 重新加载列表
-      refetch();
+    // 重新加载列表
+    refetch();
   };
 
   // 清空筛选条件
@@ -239,7 +242,9 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
         onLoadMore={handleLoadMore}
       >
         {applications.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">暂无待审核的申请</div>
+          <div className="text-center py-8 text-muted-foreground">
+            暂无待审核的申请
+          </div>
         ) : (
           <div className="space-y-4">
             {applications.map((application) => (

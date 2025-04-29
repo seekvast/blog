@@ -98,10 +98,12 @@ export function UserReplies({}: UserRepliesProps) {
 
                 {/* 引用的内容 */}
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Reply className="w-4 h-4 flex-shrink-0" />
                     {(reply.parent_post || reply.discussion.main_post) && (
-                      <PostContent post={reply.parent_post || reply.discussion.main_post} />
+                      <PostContent
+                        post={reply.parent_post || reply.discussion.main_post}
+                      />
                     )}
                   </div>
                 </div>
@@ -112,7 +114,7 @@ export function UserReplies({}: UserRepliesProps) {
                 </div>
 
                 {/* 底部操作栏 */}
-                <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <button className="hover:text-gray-900 p-1">
                       <ThumbsUp className="w-4 h-4" />

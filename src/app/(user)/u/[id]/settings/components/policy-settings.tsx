@@ -14,7 +14,8 @@ const policyItems: PolicyItem[] = [
   {
     id: "1",
     title: "服務條款",
-    description: "查閱Kater的服務條款，了解我們提供的服務、使用規範及你的權利與義務。",
+    description:
+      "查閱Kater的服務條款，了解我們提供的服務、使用規範及你的權利與義務。",
     href: "#",
   },
   {
@@ -26,7 +27,8 @@ const policyItems: PolicyItem[] = [
   {
     id: "3",
     title: "說明中心",
-    description: "查閱常見問題、使用指南和幫助資源，快速解決你在Kater上的疑問。",
+    description:
+      "查閱常見問題、使用指南和幫助資源，快速解決你在Kater上的疑問。",
     href: "#",
   },
   {
@@ -48,7 +50,9 @@ export default function PolicySettings() {
         >
           <div className="space-y-1 flex-1">
             <div className="font-medium">{item.title}</div>
-            <div className="text-sm text-gray-500">{item.description}</div>
+            <div className="text-sm text-muted-foreground">
+              {item.description}
+            </div>
           </div>
           <ArrowUpRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 flex-shrink-0 mt-1" />
         </a>

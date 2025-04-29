@@ -39,14 +39,16 @@ export function NotificationDesktopMenu({
               "w-full flex-auto flex items-center justify-between text-left py-1 px-4 rounded-lg border-b-0 min-w-0",
               activeType === item.type
                 ? "bg-blue-50 text-blue-600 font-medium border-none"
-                : "text-gray-500"
+                : "text-muted-foreground"
             )}
           >
             <span className="px-0">{item.label}</span>
             <span
               className={cn(
                 "inline-block text-xs px-2 rounded",
-                activeType === item.type ? "text-blue-600" : "text-gray-500"
+                activeType === item.type
+                  ? "text-blue-600"
+                  : "text-muted-foreground"
               )}
             >
               {/* {0} */}
@@ -77,7 +79,7 @@ export function NotificationMobileMenu({
               "py-1 px-4 text-center text-sm font-medium transition-colors",
               activeType === item.type
                 ? "text-blue-600 border-b-2 border-blue-600"
-                : "text-gray-500 hover:text-gray-700"
+                : "text-muted-foreground hover:text-gray-700"
             )}
             onClick={() => onTypeChange(item.type as NotificationTabType)}
           >
