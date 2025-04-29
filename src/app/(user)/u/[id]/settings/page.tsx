@@ -19,14 +19,6 @@ import { Label } from "@/components/ui/label";
 import { User } from "@/types/user";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, ChevronLeft } from "lucide-react";
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { api } from "@/lib/api";
 
 export default function SettingsPage() {
@@ -267,7 +259,7 @@ export default function SettingsPage() {
                     id="profile"
                     className="py-3"
                   >
-                    <h2 className="text-xl font-semibold">个人资讯</h2>
+                    <h2 className="mb-2 text-xl font-semibold">个人资讯</h2>
                     <ProfileSettings user={user} />
                   </section>
 
@@ -307,7 +299,7 @@ export default function SettingsPage() {
                     <div className="py-3 border-b">
                       <Label>上線狀態顯示</Label>
                       <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-sm  mt-1">
                           顯示或隱藏你的線上狀態，讓其他使用者知道你是否在線。
                         </p>
                         <Switch
@@ -341,16 +333,16 @@ export default function SettingsPage() {
                         className="py-3 border-b cursor-pointer"
                         onClick={() => handleShowViolation("account")}
                       >
-                        <Label>账号状态</Label>
+                        <Label className="font-bold">账号状态</Label>
                         <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm text-muted-foreground mt-1">
+                          <p className="text-sm text- mt-1">
                             当你的文章被删除，账号被停用或发送其他重大变更时，相关通知在此显示。
                           </p>
                           <div
                             className="flex items-center gap-2 cursor-pointer"
                             onClick={() => handleShowViolation("account")}
                           >
-                            <ChevronRight className="h-4 w-4 text-gray-400" />
+                            <ChevronRight className="h-4 w-4" />
                           </div>
                         </div>
                       </div>
@@ -358,16 +350,16 @@ export default function SettingsPage() {
                         className="py-3 border-b cursor-pointer"
                         onClick={() => handleShowViolation("board")}
                       >
-                        <Label>活动状态</Label>
+                        <Label className="font-bold">活动状态</Label>
                         <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm text-muted-foreground mt-1">
+                          <p className="text-sm  mt-1">
                             接收看板管理员对文章，权限及其他管理操作的相关通知将在此显示。
                           </p>
                           <div
                             className="flex items-center gap-2 cursor-pointer"
                             onClick={() => handleShowViolation("board")}
                           >
-                            <ChevronRight className="h-4 w-4 text-gray-400" />
+                            <ChevronRight className="h-4 w-4" />
                           </div>
                         </div>
                       </div>
@@ -390,7 +382,7 @@ export default function SettingsPage() {
                     id="policy"
                     className="py-4 [scroll-margin-top:80px]"
                   >
-                    <h2 className="text-xl font-semibold mb-4">网站政策</h2>
+                    <h2 className="text-xl font-semibold">网站政策</h2>
                     <PolicySettings />
                   </section>
                 </>

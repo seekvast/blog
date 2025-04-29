@@ -49,12 +49,10 @@ export default function PolicySettings() {
           className="group flex items-start justify-between py-4 border-b last:border-b-0"
         >
           <div className="space-y-1 flex-1">
-            <div className="font-medium">{item.title}</div>
-            <div className="text-sm text-muted-foreground">
-              {item.description}
-            </div>
+            <div className="font-bold">{item.title}</div>
+            <div className="text-sm">{item.description}</div>
           </div>
-          <ArrowUpRight className="h-5 w-5 text-gray-400 group-hover:text-gray-600 flex-shrink-0 mt-1" />
+          <ArrowUpRight className="h-5 w-5 flex-shrink-0 mt-1" />
         </a>
       ))}
     </div>

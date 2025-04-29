@@ -402,29 +402,29 @@ export default function SecuritySettings({ user }: { user: User | null }) {
   })();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* 电子邮件设置 */}
       <div className="py-3 border-b">
-        <Label>电子邮件</Label>
+        <Label className="font-bold">电子邮件</Label>
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm  mt-1">
             更改你的电子邮件地址，以确保帐户安全并接收最新通知。
           </p>
           <div
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => setEmailModalOpen(true)}
           >
-            <span className="text-sm text-muted-foreground">{user?.email}</span>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <span className="text-sm">{user?.email}</span>
+            <ChevronRight className="h-4 w-4 " />
           </div>
         </div>
       </div>
 
       {/* 密码设置 */}
       <div className="py-3 border-b">
-        <Label>密码</Label>
+        <Label className="font-bold">密码</Label>
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm mt-1">
             更新你的密码，以提升帐户安全性并保护你的个人资料。
           </p>
           <div
@@ -432,7 +432,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
             onClick={() => setPasswordModalOpen(true)}
           >
             <span className="text-sm text-blue-600">修改密码</span>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="h-4 w-4 " />
           </div>
         </div>
       </div>
@@ -464,7 +464,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
                 value={passwordForm.password}
                 onChange={handlePasswordChange("password")}
               />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm ">
                 密碼至少8個字符，可输入大小寫字母、數字和特殊字符（!@#$%^&*-_）
               </p>
             </div>
@@ -572,7 +572,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
             onClick={() => setGenderModalOpen(true)}
           >
             <span className="text-sm">{getGenderText(gender)}</span>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="h-4 w-4 " />
           </div>
         </div>
       </div> */}
@@ -622,9 +622,9 @@ export default function SecuritySettings({ user }: { user: User | null }) {
 
       {/* 生日 */}
       <div className="py-3 border-b">
-        <Label>生日</Label>
+        <Label className="font-bold">生日</Label>
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm mt-1">
             設定你的生日，讓我們為你提供更合適的內容推薦。
           </p>
           <div
@@ -632,7 +632,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
             onClick={() => setBirthdayModalOpen(true)}
           >
             <span className="text-sm">{birthday || "选择生日"}</span>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="h-4 w-4 " />
           </div>
         </div>
       </div>
@@ -673,17 +673,15 @@ export default function SecuritySettings({ user }: { user: User | null }) {
 
       {/* 年龄验证 */}
       <div className="py-3 border-b">
-        <Label>年龄验证</Label>
+        <Label className="font-bold">年龄验证</Label>
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-muted-foreground mt-1">
-            驗證你的年齡以存取特定內容
-          </p>
+          <p className="text-sm mt-1">驗證你的年齡以存取特定內容</p>
           <div
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => handleAgeVerificationOpen()}
           >
             <span className="text-sm text-blue-600 ">去验证</span>
-            <ChevronRight className="h-4 w-4 text-gray-400" />
+            <ChevronRight className="h-4 w-4 " />
           </div>
         </div>
       </div>
@@ -775,9 +773,9 @@ export default function SecuritySettings({ user }: { user: User | null }) {
 
       {/* 成人内容 */}
       <div className="py-3 border-b">
-        <Label>成人內容</Label>
+        <Label className="font-bold">成人內容</Label>
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm mt-1">
             開啟後，可以自由選擇是否瀏覽成人文章與看板，並根據設定顯示相應的內容。
           </p>
           <Switch
