@@ -3,13 +3,11 @@
 import * as React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatDistanceToNow } from "date-fns";
-import { zhCN } from "date-fns/locale";
 import { api } from "@/lib/api";
 import { Notification } from "@/types";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { NotificationItem } from "@/components/notification/notification-item";
+import { useQuery } from "@tanstack/react-query";
 
 export type NotificationType =
   | "discussionRenamed"
@@ -35,7 +33,33 @@ export function markAllAsRead(notifications: Notification[]): Notification[] {
   }));
 }
 
-// 获取通知列表的Hook
+export function useUnreadNotificationCount(
+  enabled = true,
+  pollingInterval = 30000
+) {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ["notifications", "unread-count"],
+    queryFn: async () => {
+      const response = await api.notifications.list({
+        page: 1,
+        per_page: 1,
+      });
+      return response.unread_count || 0;
+    },
+    enabled,
+    refetchInterval: pollingInterval,
+    refetchIntervalInBackground: true,
+    staleTime: pollingInterval - 1000,
+  });
+
+  return {
+    unreadCount: data || 0,
+    loading: isLoading,
+    error,
+    refetch,
+  };
+}
+
 export function useNotifications(autoLoad: boolean = true) {
   const [notifications, setNotifications] = React.useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = React.useState(0);
