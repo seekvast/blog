@@ -9,11 +9,12 @@ import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { ExploreTabs } from "@/components/search/explore-tabs";
 import { DiscussionControls } from "@/components/discussion/discussion-controls";
 import { DisplayMode, SortBy } from "@/types/display-preferences";
+import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 
 export default function DiscussionsPage() {
   const searchParams = useSearchParams();
   const q = searchParams?.get("q") ?? "";
-  const [sortBy, setSortBy] = React.useState<SortBy>("hot");
+  const { sortBy, setSortBy, displayMode } = useDiscussionDisplayStore();
 
   const {
     data,
@@ -72,11 +73,7 @@ export default function DiscussionsPage() {
 
   return (
     <div className="flex flex-col">
-      <ExploreTabs
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-        showControls={true}
-      />
+      <ExploreTabs showControls={true} />
 
       <InfiniteScroll
         onLoadMore={() => fetchNextPage()}
@@ -91,7 +88,7 @@ export default function DiscussionsPage() {
                 <DiscussionItem
                   key={discussion.slug + index}
                   discussion={discussion}
-                  displayMode={"list"}
+                  displayMode={displayMode}
                 />
               );
             })}

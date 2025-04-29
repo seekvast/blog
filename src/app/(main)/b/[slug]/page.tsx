@@ -24,6 +24,7 @@ import { DisplayMode, SortBy } from "@/types/display-preferences";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
 import { JoinBoardDialog } from "@/components/board/join-board-dialog";
+import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 
 export default function BoardPage() {
   return (
@@ -56,11 +57,10 @@ function BoardContent() {
   const [error, setError] = useState<string | null>(null);
   const observerRef = useRef<IntersectionObserver>();
   const [hasMore, setHasMore] = useState(true);
-  const [displayMode, setDisplayMode] = useState<DisplayMode>("grid");
+  const { displayMode, sortBy, setSortBy } = useDiscussionDisplayStore();
   const [activeTab, setActiveTab] = useState<"posts" | "rules" | "children">(
     "posts"
   );
-  const [sortBy, setSortBy] = useState<SortBy>("hot");
   const [joinBoardOpen, setJoinBoardOpen] = useState(false);
 
   const handleLoadMore = useCallback(() => {
@@ -99,7 +99,7 @@ function BoardContent() {
     }
   };
 
-  const fetchDiscussions = async (sortBy: SortBy = "hot") => {
+  const fetchDiscussions = async (sort: SortBy = sortBy) => {
     try {
       setDiscussionsLoading(true);
       if (!board?.id) return;
@@ -110,7 +110,7 @@ function BoardContent() {
         page: currentPage,
         per_page: 10,
         from: "board",
-        sort: sortBy,
+        sort,
       });
 
       if (currentPage === 1) {
@@ -138,7 +138,7 @@ function BoardContent() {
   useEffect(() => {
     if (board?.id) {
       fetchBoardChildren().then(() => {
-        const childParam = searchParams?.get('child');
+        const childParam = searchParams?.get("child");
         if (childParam) {
           const childId = parseInt(childParam, 10);
           if (!isNaN(childId)) {
@@ -162,6 +162,15 @@ function BoardContent() {
       fetchDiscussions();
     }
   }, [currentPage]);
+
+  // 添加对sortBy变化的监听
+  useEffect(() => {
+    if (board?.id && activeTab === "posts") {
+      setCurrentPage(1);
+      setDiscussions([]);
+      fetchDiscussions();
+    }
+  }, [sortBy]);
 
   const {
     data: rules = [],
@@ -189,7 +198,7 @@ function BoardContent() {
   });
 
   const { mutate: hideChild } = useMutation({
-    mutationFn: ( child_id: number ) => 
+    mutationFn: (child_id: number) =>
       api.boards.hiddenChild({ child_id, operator: "user" }),
     onSuccess: () => {
       fetchBoardChildren();
@@ -207,7 +216,7 @@ function BoardContent() {
 
   const handleHide = (child: BoardChild) => {
     if (!board?.id) return;
-    
+
     hideChild(child.id);
   };
 
@@ -355,15 +364,7 @@ function BoardContent() {
                     子版
                   </button>
                 </div>
-                {activeTab === "posts" && (
-                  <DiscussionControls
-                    sortBy={sortBy}
-                    setSortBy={(sort) => {
-                      setSortBy(sort);
-                      fetchDiscussions(sort);
-                    }}
-                  />
-                )}
+                {activeTab === "posts" && <DiscussionControls />}
               </div>
             </div>
           </div>

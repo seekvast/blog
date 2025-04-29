@@ -5,6 +5,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { DiscussionControls } from "@/components/discussion/discussion-controls";
 import { DisplayMode, SortBy } from "@/types/display-preferences";
+import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 
 const tabs = [
   { id: "all", name: "相关", path: "/explore" },
@@ -14,20 +15,10 @@ const tabs = [
 ] as const;
 
 interface ExploreTabsProps {
-  displayMode?: DisplayMode;
-  setDisplayMode?: (mode: DisplayMode) => void;
-  sortBy?: SortBy;
-  setSortBy?: (sort: SortBy) => void;
   showControls?: boolean;
 }
 
-export function ExploreTabs({
-  displayMode = "grid",
-  setDisplayMode = () => {},
-  sortBy = "hot",
-  setSortBy = () => {},
-  showControls = false,
-}: ExploreTabsProps) {
+export function ExploreTabs({ showControls = false }: ExploreTabsProps) {
   const router = useRouter();
   const pathname = usePathname() || "";
   const searchParams = useSearchParams();
@@ -65,12 +56,7 @@ export function ExploreTabs({
         ))}
       </div>
 
-      {showControls && (
-        <DiscussionControls
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-        />
-      )}
+      {showControls && <DiscussionControls />}
     </div>
   );
 }

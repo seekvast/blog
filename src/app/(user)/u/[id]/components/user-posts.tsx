@@ -8,6 +8,8 @@ import { api } from "@/lib/api";
 import type { Discussion } from "@/types/discussion";
 import type { Pagination } from "@/types/common";
 import { LayoutGrid, List } from "lucide-react";
+import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
+import { DiscussionControls } from "@/components/discussion/discussion-controls";
 
 export function UserPosts() {
   const searchParams = useSearchParams();
@@ -26,7 +28,12 @@ export function UserPosts() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const observerRef = useRef<IntersectionObserver>();
-  const [displayMode, setDisplayMode] = useState<"grid" | "list">("grid");
+  const { displayMode, setDisplayMode, sortBy } = useDiscussionDisplayStore();
+
+  // 添加控制台日志用于调试
+  useEffect(() => {
+    console.log("当前显示模式:", displayMode);
+  }, [displayMode]);
 
   // 初始加载
   const fetchDiscussions = useCallback(async () => {
@@ -35,6 +42,7 @@ export function UserPosts() {
         page: 1,
         per_page: 10,
         user_hashid: hash || undefined,
+        sort: sortBy,
       });
 
       setDiscussions(response);
@@ -45,7 +53,7 @@ export function UserPosts() {
     } finally {
       setLoading(false);
     }
-  }, [hash]);
+  }, [hash, sortBy]);
 
   useEffect(() => {
     fetchDiscussions();
@@ -61,6 +69,7 @@ export function UserPosts() {
         page,
         per_page: 10,
         user_hashid: hash || undefined,
+        sort: sortBy,
       });
 
       if (response.items.length === 0 || page >= response.last_page) {
@@ -79,7 +88,7 @@ export function UserPosts() {
     } finally {
       setLoading(false);
     }
-  }, [loading, hasMore, page, hash]);
+  }, [loading, hasMore, page, hash, sortBy]);
 
   // 清理 observer
   useEffect(() => {
@@ -95,18 +104,9 @@ export function UserPosts() {
       <div className="bg-background">
         <div className="flex justify-between items-center lg:border-b">
           <h3 className="lg:pb-3 text-md font-semibold ">我的文章</h3>
-          <button
-            className="hover:bg-transparent hover:text-foreground"
-            onClick={() =>
-              setDisplayMode((prev) => (prev === "grid" ? "list" : "grid"))
-            }
-          >
-            {displayMode === "grid" ? (
-              <LayoutGrid className="h-4 w-4" />
-            ) : (
-              <List className="h-4 w-4" />
-            )}
-          </button>
+          <div className="flex items-center space-x-3">
+            <DiscussionControls />
+          </div>
         </div>
       </div>
       <div className="divide-y min-w-0">

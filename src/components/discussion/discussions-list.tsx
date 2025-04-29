@@ -12,6 +12,7 @@ import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { cn } from "@/lib/utils";
 import { DiscussionControls } from "@/components/discussion/discussion-controls";
 import { DisplayMode, SortBy } from "@/types/display-preferences";
+import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 
 interface DiscussionsListProps {
   initialDiscussions: Pagination<Discussion>;
@@ -34,8 +35,7 @@ export function DiscussionsList({
   const [activeTab, setActiveTab] = React.useState<"recommend" | "trace">(
     "recommend"
   );
-  const [displayMode, setDisplayMode] = React.useState<DisplayMode>("grid");
-  const [sortBy, setSortBy] = React.useState<SortBy>("hot");
+  const { displayMode, sortBy, setSortBy } = useDiscussionDisplayStore();
 
   const handleDeleteDiscussion = useCallback(
     (deletedSlug: string) => {
@@ -159,13 +159,7 @@ export function DiscussionsList({
               <div className="flex items-center space-x-4 lg:space-x-8"></div>
             )}
 
-            <DiscussionControls
-              sortBy={sortBy}
-              setSortBy={(sort) => {
-                setSortBy(sort);
-                fetchDiscussions(activeTab, 1, sort);
-              }}
-            />
+            <DiscussionControls />
           </div>
         </div>
       </div>
