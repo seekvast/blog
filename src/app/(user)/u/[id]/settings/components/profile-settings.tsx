@@ -290,9 +290,9 @@ export default function ProfileSettings({ user }: { user: User | null }) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="0">其他</SelectItem>
                         <SelectItem value="1">男</SelectItem>
                         <SelectItem value="2">女</SelectItem>
+                        <SelectItem value="0">其他</SelectItem>
                         <SelectItem value="3">不愿透露</SelectItem>
                       </SelectContent>
                     </Select>

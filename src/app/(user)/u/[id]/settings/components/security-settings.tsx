@@ -27,15 +27,15 @@ import Image from "next/image";
 
 const passwordSchema = z
   .object({
-    current_password: z.string().min(1, "请输入当前密码"),
+    current_password: z.string().min(8, "请输入当前密码"),
     password: z
       .string()
       .min(8, "密码长度至少为8位")
       .regex(
-        /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[\W_]).*$/,
-        "密码必须包含数字、字母和特殊字符"
+        /^[0-9a-zA-Z!@#$%^&*\-_]{8,100}$/,
+        "密碼至少8個字符，可输入大小寫字母、數字和特殊字符"
       ),
-    password_confirm: z.string().min(1, "请输入确认密码"),
+    password_confirm: z.string().min(8, "请输入确认密码"),
   })
   .refine((data) => data.password === data.password_confirm, {
     message: "两次输入的新密码不一致",
@@ -459,7 +459,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
                 onChange={handlePasswordChange("password")}
               />
               <p className="text-sm text-muted-foreground">
-                密码长度至少8位，必须包含数字、字母和特殊字符
+                密碼至少8個字符，可输入大小寫字母、數字和特殊字符（!@#$%^&*-_）
               </p>
             </div>
 
