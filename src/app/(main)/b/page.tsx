@@ -2,11 +2,6 @@
 
 import * as React from "react";
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { api } from "@/lib/api";
 import { Board } from "@/types/board";

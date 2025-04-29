@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { BoardSettingsForm } from "./board-settings-form";
 import { api } from "@/lib/api";
+import { BoardUserRole } from "@/constants/board-user-role";
 
 interface PageProps {
   params: {
@@ -22,6 +23,14 @@ export default async function BoardSettingsPage({ params }: PageProps) {
   if (!board) {
     notFound();
   }
-
+  const acceptRole = [BoardUserRole.CREATOR, BoardUserRole.MODERATOR];
+  if (
+    !board.board_user ||
+    !acceptRole.includes(
+      board.board_user.user_role as (typeof acceptRole)[number]
+    )
+  ) {
+    notFound();
+  }
   return <BoardSettingsForm board={board} />;
 }
