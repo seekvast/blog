@@ -9,13 +9,14 @@ import { zhCN } from "date-fns/locale";
 import type { Discussion, Pagination } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
-  ChevronUp,
   X,
   ChevronDown,
   Star,
   Bookmark,
   Check,
   EyeOff,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { PostNavigator } from "@/components/post/post-navigator";
@@ -25,12 +26,11 @@ import { api } from "@/lib/api";
 import { Preview } from "@/components/editor/Preview";
 import { toast } from "@/components/ui/use-toast";
 import { useState } from "react";
-import { format } from "date-fns";
 import {
   useMutation,
   useQueryClient,
-  useQuery,
   useInfiniteQuery,
+  QueryClient,
 } from "@tanstack/react-query";
 import { cn, debounce } from "@/lib/utils";
 import type { Post } from "@/types/discussion";
@@ -251,97 +251,125 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     },
   });
 
+  // 更新帖子投票数据的辅助函数
+  const updatePostVoteData = (
+    queryClient: QueryClient,
+    postId: number,
+    vote: "up" | "down"
+  ) => {
+    queryClient.setQueryData(
+      ["discussion-posts", slug, initialDiscussion.board_id, queryParams],
+      (oldData: any) => {
+        if (!oldData) return oldData;
+
+        const newPages = oldData.pages.map((page) => {
+          const updatePostVote = (posts: Post[]): Post[] => {
+            return posts.map((post) => {
+              if (post.id === postId) {
+                if (post.user_voted?.vote === vote) {
+                  return {
+                    ...post,
+                    up_votes_count:
+                      vote === "up"
+                        ? post.up_votes_count - 1
+                        : post.up_votes_count,
+                    down_votes_count:
+                      vote === "down"
+                        ? post.down_votes_count - 1
+                        : post.down_votes_count,
+                    user_voted: null,
+                  };
+                } else if (post.user_voted) {
+                  return {
+                    ...post,
+                    up_votes_count:
+                      vote === "up"
+                        ? post.up_votes_count + 1
+                        : post.up_votes_count -
+                          (post.user_voted.vote === "up" ? 1 : 0),
+                    down_votes_count:
+                      vote === "down"
+                        ? post.down_votes_count + 1
+                        : post.down_votes_count -
+                          (post.user_voted.vote === "down" ? 1 : 0),
+                    user_voted: {
+                      id: postId,
+                      post_id: postId,
+                      vote,
+                    },
+                  };
+                } else {
+                  return {
+                    ...post,
+                    up_votes_count:
+                      vote === "up"
+                        ? post.up_votes_count + 1
+                        : post.up_votes_count,
+                    down_votes_count:
+                      vote === "down"
+                        ? post.down_votes_count + 1
+                        : post.down_votes_count,
+                    user_voted: {
+                      id: postId,
+                      post_id: postId,
+                      vote,
+                    },
+                  };
+                }
+              }
+
+              if (post.children && post.children.length > 0) {
+                return {
+                  ...post,
+                  children: updatePostVote(post.children),
+                };
+              }
+
+              return post;
+            });
+          };
+
+          return {
+            ...page,
+            items: updatePostVote(page.items),
+          };
+        });
+
+        return {
+          ...oldData,
+          pages: newPages,
+        };
+      }
+    );
+  };
+
   const voteMutation = useMutation({
-    mutationFn: ({ postId, vote }: { postId: number; vote: "up" | "down" }) =>
+    mutationFn: ({
+      postId,
+      vote,
+      isMainPost,
+    }: {
+      postId: number;
+      vote: "up" | "down";
+      isMainPost: boolean;
+    }) =>
       api.posts.vote({
         id: postId,
         vote,
       }),
-    onSuccess: (_, { postId, vote }) => {
-      queryClient.setQueryData(
-        ["discussion-posts", slug, initialDiscussion.board_id, queryParams],
-        (oldData: any) => {
-          if (!oldData) return oldData;
-
-          const newPages = oldData.pages.map((page) => {
-            const updatePostVote = (posts: Post[]): Post[] => {
-              return posts.map((post) => {
-                if (post.id === postId) {
-                  if (post.user_voted?.vote === vote) {
-                    return {
-                      ...post,
-                      up_votes_count:
-                        vote === "up"
-                          ? post.up_votes_count - 1
-                          : post.up_votes_count,
-                      down_votes_count:
-                        vote === "down"
-                          ? post.down_votes_count - 1
-                          : post.down_votes_count,
-                      user_voted: null,
-                    };
-                  } else if (post.user_voted) {
-                    return {
-                      ...post,
-                      up_votes_count:
-                        vote === "up"
-                          ? post.up_votes_count + 1
-                          : post.up_votes_count -
-                            (post.user_voted.vote === "up" ? 1 : 0),
-                      down_votes_count:
-                        vote === "down"
-                          ? post.down_votes_count + 1
-                          : post.down_votes_count -
-                            (post.user_voted.vote === "down" ? 1 : 0),
-                      user_voted: {
-                        id: postId,
-                        post_id: postId,
-                        vote,
-                      },
-                    };
-                  } else {
-                    return {
-                      ...post,
-                      up_votes_count:
-                        vote === "up"
-                          ? post.up_votes_count + 1
-                          : post.up_votes_count,
-                      down_votes_count:
-                        vote === "down"
-                          ? post.down_votes_count + 1
-                          : post.down_votes_count,
-                      user_voted: {
-                        id: postId,
-                        post_id: postId,
-                        vote,
-                      },
-                    };
-                  }
-                }
-
-                if (post.children && post.children.length > 0) {
-                  return {
-                    ...post,
-                    children: updatePostVote(post.children),
-                  };
-                }
-
-                return post;
-              });
-            };
-
-            return {
-              ...page,
-              items: updatePostVote(page.items),
-            };
+    onSuccess: (_, { postId, vote, isMainPost }) => {
+      if (isMainPost) {
+        api.discussions
+          .get(slug)
+          .then((data) => {
+            setDiscussion(data);
+          })
+          .catch((error) => {
+            console.error("Failed to refresh discussion data:", error);
           });
-
-          return {
-            ...oldData,
-            pages: newPages,
-          };
-        }
-      );
+      } else {
+        updatePostVoteData(queryClient, postId, vote);
+      }
     },
     onError: (error) => {
       console.error("Failed to post comment:", error);
@@ -492,12 +520,15 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   );
 
   const handleVote = React.useCallback(
-    debounce((postId: number, vote: "up" | "down") => {
-      if (voteMutation.isPending) return;
-      requireAuth(() => {
-        voteMutation.mutate({ postId, vote });
-      });
-    }, 500),
+    debounce(
+      (postId: number, vote: "up" | "down", isMainPost: boolean = false) => {
+        if (voteMutation.isPending) return;
+        requireAuth(() => {
+          voteMutation.mutate({ postId, vote, isMainPost });
+        });
+      },
+      500
+    ),
     [voteMutation, requireAuth]
   );
 
@@ -623,20 +654,58 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               />
             )}
           </div>
-
-          <div className="flex items-center justify-between px-2 md:px-4 border-b text-sm  text-muted-foreground">
-            <div className="flex items-center pb-2 font-bold">
-              <span>回复</span>
-              <span className="pl-1 text-primary">{totalPosts}</span>
+          <div className="flex items-center mb-4 px-2 md:px-4 gap-2 space-x-2 md:space-x-4 text-muted-foreground text-sm">
+            <div
+              className="flex items-center space-x-1 cursor-pointer"
+              onClick={() =>
+                handleVote(currentDiscussion.main_post.id, "up", true)
+              }
+            >
+              <ThumbsUp
+                className={cn(
+                  "h-4 w-4",
+                  currentDiscussion.main_post.user_voted?.vote === "up" &&
+                    "text-primary fill-primary"
+                )}
+              />
+              {currentDiscussion.main_post.up_votes_count > 0 && (
+                <span className="text-xs md:text-sm">
+                  {currentDiscussion.main_post.up_votes_count}
+                </span>
+              )}
             </div>
-
+            <div
+              className="flex items-center space-x-1 cursor-pointer"
+              onClick={() =>
+                handleVote(currentDiscussion.main_post.id, "down", true)
+              }
+            >
+              <ThumbsDown
+                className={cn(
+                  "h-4 w-4",
+                  currentDiscussion.main_post.user_voted?.vote === "down" &&
+                    "text-destructive fill-destructive"
+                )}
+              />
+              {currentDiscussion.main_post.down_votes_count > 5 && (
+                <span className="text-xs md:text-sm">
+                  {currentDiscussion.main_post.down_votes_count}
+                </span>
+              )}
+            </div>
             <button
-              className="cursor-pointer hover:text-primary font-bold"
+              className="cursor-pointer hover:text-primary"
               onClick={() => setShowCommentEditor(true)}
               disabled={currentDiscussion?.is_locked === 1}
             >
               {currentDiscussion?.is_locked === 1 ? "已锁定" : "回复"}
             </button>
+          </div>
+          <div className="flex items-center justify-between px-2 md:px-4 border-b text-sm  text-muted-foreground">
+            <div className="flex items-center pb-2 font-bold">
+              <span>回复</span>
+              <span className="pl-1 text-primary">{totalPosts}</span>
+            </div>
           </div>
 
           <div className="mt-4">
