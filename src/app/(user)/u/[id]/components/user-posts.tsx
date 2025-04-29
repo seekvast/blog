@@ -13,7 +13,7 @@ import { DiscussionControls } from "@/components/discussion/discussion-controls"
 
 export function UserPosts() {
   const searchParams = useSearchParams();
-  const hash = searchParams?.get("hash");
+  const hashid = searchParams?.get("hashid");
   const [discussions, setDiscussions] = useState<Pagination<Discussion>>({
     code: 0,
     items: [],
@@ -41,7 +41,7 @@ export function UserPosts() {
       const response = await api.discussions.list({
         page: 1,
         per_page: 10,
-        user_hashid: hash || undefined,
+        user_hashid: hashid || undefined,
         sort: sortBy,
       });
 
@@ -53,7 +53,7 @@ export function UserPosts() {
     } finally {
       setLoading(false);
     }
-  }, [hash, sortBy]);
+  }, [hashid, sortBy]);
 
   useEffect(() => {
     fetchDiscussions();
@@ -68,7 +68,7 @@ export function UserPosts() {
       const response = await api.discussions.list({
         page,
         per_page: 10,
-        user_hashid: hash || undefined,
+        user_hashid: hashid || undefined,
         sort: sortBy,
       });
 
@@ -88,7 +88,7 @@ export function UserPosts() {
     } finally {
       setLoading(false);
     }
-  }, [loading, hasMore, page, hash, sortBy]);
+  }, [loading, hasMore, page, hashid, sortBy]);
 
   // 清理 observer
   useEffect(() => {

@@ -68,8 +68,8 @@ export function createApi(options: ApiOptions = {}) {
       getCategory: (params?: QueryParams) =>
         http.get<any>(`${prefix}/user/category`, params, { next }),
       block: (data: any) => http.post<any>(`${prefix}/user/block`, data),
-      getPosts: (params?: QueryParams) =>
-            http.get<Pagination<Post>>(`${prefix}/user/posts`, params, { next }),
+      getPosts: (data?: any) =>
+            http.get<Pagination<Post>>(`${prefix}/user/posts`, data, { next }),
       verifyAge: (data: any) => http.post<any>(`${prefix}/user/age-verify`, data),
         sendEmail: (data: any) => http.get<any>(`${prefix}/user/send-email`, data),
       updateEmail: (data: any) => http.patch<any>(`${prefix}/user/email`, data),

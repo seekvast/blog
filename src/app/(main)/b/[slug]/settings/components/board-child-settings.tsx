@@ -100,8 +100,8 @@ function SortableBoardChildItem({
       style={style}
       {...attributes}
       className={cn(
-        "flex items-center gap-2 py-4 px-2 rounded-md border",
-        isActive ? "border-primary" : "border-border"
+        "flex items-center gap-2 py-4 px-2 rounded-md",
+        isActive && "bg-subtle"
       )}
     >
       <div
@@ -112,7 +112,7 @@ function SortableBoardChildItem({
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center">
-          <span className="text-base text-gray-600 truncate">{child.name}</span>
+          <span className="font-bold truncate">{child.name}</span>
         </div>
       </div>
 
@@ -415,7 +415,7 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="font-medium">子版设置</h3>
+        <h3 className="text-lg font-bold">子版设置</h3>
         <Button
           size="sm"
           className="rounded-full"

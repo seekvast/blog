@@ -62,6 +62,7 @@ export interface QueryParams extends PaginationParams {
   to?: string;
   poll_id?: number;
   discussion_slug?: string;
+  hashid?: string;
 }
 
 export interface Attachment {

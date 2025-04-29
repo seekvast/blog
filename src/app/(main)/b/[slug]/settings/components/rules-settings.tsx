@@ -105,11 +105,8 @@ function SortableRuleItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex items-center gap-3 p-4 rounded-lg bg-muted/50 group transition-colors",
-        isDragging || isActive
-          ? "opacity-50 bg-muted/70 ring-2 ring-primary"
-          : "hover:bg-muted/70",
-        "touch-none" // 防止移动端的滚动和文本选择
+        "flex items-center gap-3 p-4 rounded-lg  group transition-colors",
+        (isDragging || isActive) && "bg-muted "
       )}
       {...attributes}
     >
@@ -120,7 +117,7 @@ function SortableRuleItem({
         <GripVertical className="h-4 w-4" />
       </div>
       <div className="flex-1 min-h-[2rem] flex flex-col justify-center">
-        <h4 className="font-medium leading-none mb-1">{rule.title}</h4>
+        <h4 className="font-bold leading-none mb-1">{rule.title}</h4>
         <p className="text-sm text-muted-foreground whitespace-pre-line">
           {rule.content}
         </p>
@@ -406,12 +403,12 @@ export function RulesSettings({ board }: RulesSettingsProps) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">规则设置</h3>
+        <h3 className="text-lg font-bold">规则设置</h3>
         <Button
           type="button"
           size="sm"
           onClick={handleAddRule}
-          className="gap-1"
+          className="rounded-full gap-1"
         >
           <Plus className="h-4 w-4" />
           添加规则

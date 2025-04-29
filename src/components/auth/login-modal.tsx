@@ -90,11 +90,6 @@ export function LoginModal({
         console.error("获取草稿失败:", error);
       }
 
-      // 登录成功
-      toast({
-        title: "登录成功",
-        description: "欢迎回来！",
-      });
       if (onOpenChange) {
         onOpenChange(false);
       } else {

@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useSearchParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/components/providers/auth-provider";
 
 const navItems = [
   {
@@ -80,9 +81,8 @@ function UsernameHistorySkeleton() {
 }
 
 export default function UserPage() {
-  const params = useParams();
+  const { user } = useAuth();
   const searchParams = useSearchParams();
-  const userId = params?.id as string;
   const hashid = searchParams?.get("hashid");
   const [activeTab, setActiveTab] = React.useState<UserTabType>("replies");
 
@@ -92,12 +92,20 @@ export default function UserPage() {
     enabled: !!hashid,
   });
 
+  const filteredNavItems = React.useMemo(() => {
+    if (user && userData?.hashid === user.hashid) {
+      return navItems;
+    } else {
+      return navItems.slice(0, -1);
+    }
+  }, [userData, user]);
+
   const renderContent = () => {
     switch (activeTab) {
       case "posts":
         return <UserPosts />;
       case "replies":
-        return <UserReplies />;
+        return <UserReplies hashid={hashid || undefined} />;
       case "history":
         return (
           <div className="min-h-screen">
@@ -121,7 +129,7 @@ export default function UserPage() {
           <UserSidebar
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            navItems={navItems}
+            navItems={filteredNavItems}
           />
         </div>
 

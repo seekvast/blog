@@ -15,9 +15,11 @@ import { Pagination } from "@/types";
 
 interface UserRepliesProps {
   replies?: Post[];
+  hashid?: string;
 }
 
-export function UserReplies({}: UserRepliesProps) {
+export function UserReplies({ hashid }: UserRepliesProps) {
+  console.log(hashid, "hhhhhhhhhhhhhh");
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery<
       Pagination<Post>,
@@ -28,7 +30,7 @@ export function UserReplies({}: UserRepliesProps) {
     >({
       queryKey: ["user-replies"],
       queryFn: ({ pageParam = 1 }) =>
-        api.users.getPosts({ page: pageParam, per_page: 10 }),
+        api.users.getPosts({ hashid: hashid || undefined, page: pageParam, per_page: 10 }),
       getNextPageParam: (lastPage) => {
         if (lastPage.current_page < lastPage.last_page) {
           return lastPage.current_page + 1;
