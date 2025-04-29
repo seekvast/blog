@@ -39,9 +39,9 @@ export const boardSchema = z.object({
   avatar: z.string().max(500).optional(),
   
   // 从 types.ts 添加的额外字段
-  badge_visible: z.array(z.number()),
-  poll_role: z.array(z.number()),
-  approval_mode: z.number(),
+  badge_visible: z.array(z.number()).optional().default([]),
+  poll_role: z.array(z.number()).optional().default([]),
+  approval_mode: z.number().optional().default(0),
 });
 
 export type BoardFormSchema = z.infer<typeof boardSchema>;

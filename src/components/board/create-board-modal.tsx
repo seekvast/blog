@@ -1,6 +1,12 @@
 import { useState } from "react";
-import { useSession } from "next-auth/react";
 import { useToast } from "@/components/ui/use-toast";
+import { useRouter } from "next/navigation";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/components/providers/auth-provider";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { boardSchema, BoardFormSchema } from "@/validations/board";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import {
   Dialog,
   DialogContent,
@@ -20,30 +26,10 @@ import {
 } from "@/components/ui/select";
 import { ImagePlus } from "lucide-react";
 import { api } from "@/lib/api";
-import { useRouter } from "next/navigation";
-import { useQueryClient, useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/components/providers/auth-provider";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { boardSchema, BoardFormSchema } from "@/validations/board";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 interface CreateBoardModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}
-
-interface BoardFormData {
-  name: string;
-  slug: string;
-  desc: string;
-  visibility: number;
-  category_id: number;
-  is_nsfw: number;
-  attachment_id?: number;
-  avatar?: string;
-  question?: string;
-  answer?: string;
 }
 
 export function CreateBoardModal({
@@ -69,6 +55,9 @@ export function CreateBoardModal({
       is_nsfw: 0,
       question: "",
       answer: "",
+      badge_visible: [],
+      poll_role: [],
+      approval_mode: 0,
     },
   });
 
@@ -80,6 +69,17 @@ export function CreateBoardModal({
 
   const handleImageUpload = async (file: File) => {
     try {
+      // 检查文件大小
+      const maxSize = 2 * 1024 * 1024; // 2MB
+      if (file.size > maxSize) {
+        toast({
+          title: "上传失败",
+          description: "图片大小超过2MB限制，请选择更小的图片",
+          variant: "destructive",
+        });
+        return null;
+      }
+
       const formData = new FormData();
       formData.append("image", file);
       formData.append("attachment_type", "board_avatars");
@@ -94,7 +94,9 @@ export function CreateBoardModal({
       toast({
         title: "上传失败",
         description:
-          error instanceof Error ? error.message : "图片上传失败，请重试",
+          error instanceof Error 
+            ? error.message 
+            : "图片上传失败，请重试。可能的原因：文件格式不支持或网络问题",
         variant: "destructive",
       });
       return null;
@@ -113,7 +115,6 @@ export function CreateBoardModal({
 
     try {
       setLoading(true);
-      // 添加头像信息到表单数据
       const formData = {
         ...data,
         attachment_id: attachmentId,
@@ -123,16 +124,33 @@ export function CreateBoardModal({
       await api.boards.create(formData);
       queryClient.invalidateQueries({ queryKey: ["boards"] });
 
+      // 重置表单数据和状态
+      form.reset({
+        name: "",
+        slug: "",
+        desc: "",
+        visibility: 0,
+        category_id: 1,
+        is_nsfw: 0,
+        question: "",
+        answer: "",
+        badge_visible: [],
+        poll_role: [],
+        approval_mode: 0,
+      });
+      setAvatar(undefined);
+      setAttachmentId(undefined);
+
       router.push(`/b/${data.slug}`);
       toast({
-        title: "创建成功",
+        title: "成功",
         description: "看板创建成功",
       });
       onOpenChange(false);
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "创建失败",
+        title: "失败",
         description: error.message || "看板创建失败，请重试",
       });
     } finally {
@@ -150,14 +168,19 @@ export function CreateBoardModal({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 py-4">
             <div className="space-y-2">
-              <Label>看板頭像</Label>
+              <Label>看板头像</Label>
               <div className="relative">
                 <input
                   type="file"
                   className="hidden"
                   id="boardImage"
                   accept="image/jpeg,image/jpg,image/png,image/gif"
-                  onChange={(e) => handleImageUpload(e.target.files?.[0] as File)}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleImageUpload(file);
+                    }
+                  }}
                 />
                 <label
                   htmlFor="boardImage"
@@ -175,7 +198,7 @@ export function CreateBoardModal({
                 </label>
               </div>
               <div className="text-sm text-neutral-500">
-                照片上傳規格要求：格式為JPG、JPEG、GIF或者png，大小 2MB以內。
+                照片上传规格要求：格式为JPG、JPEG、GIF或者PNG，大小2MB以内。
               </div>
             </div>
 
@@ -184,10 +207,10 @@ export function CreateBoardModal({
               name="name"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>看板名稱</FormLabel>
+                  <FormLabel>看板名称</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="最長15個中文字或相同長度英文字"
+                      placeholder="最长15个中文字或相同长度英文字"
                       maxLength={15}
                       {...field}
                     />
@@ -202,7 +225,7 @@ export function CreateBoardModal({
               name="slug"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>看板網址</FormLabel>
+                  <FormLabel>看板网址</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="7-25个英文字母或数字"
@@ -219,10 +242,10 @@ export function CreateBoardModal({
               name="desc"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>看板簡介</FormLabel>
+                  <FormLabel>看板简介</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="請輸入看板簡介（最多50个字符）"
+                      placeholder="请输入看板简介（最多500个字符）"
                       className="resize-none"
                       rows={4}
                       {...field}
@@ -239,18 +262,18 @@ export function CreateBoardModal({
               name="visibility"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>看板被搜尋</FormLabel>
+                  <FormLabel>看板被搜索</FormLabel>
                   <Select
                     value={String(field.value)}
                     onValueChange={(value) => field.onChange(Number(value))}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="選擇公開範圍" />
+                        <SelectValue placeholder="选择公开范围" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="0">公開</SelectItem>
+                      <SelectItem value="0">公开</SelectItem>
                       <SelectItem value="1">私密</SelectItem>
                     </SelectContent>
                   </Select>
@@ -265,14 +288,14 @@ export function CreateBoardModal({
                 name="category_id"
                 render={({ field }) => (
                   <FormItem className="space-y-2">
-                    <FormLabel>看板類型</FormLabel>
+                    <FormLabel>看板类型</FormLabel>
                     <Select
                       value={String(field.value)}
                       onValueChange={(value) => field.onChange(Number(value))}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="選擇看板類型" />
+                          <SelectValue placeholder="选择看板类型" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -303,18 +326,18 @@ export function CreateBoardModal({
                   name="is_nsfw"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel>討論類型</FormLabel>
+                      <FormLabel>讨论类型</FormLabel>
                       <Select
                         value={String(field.value)}
                         onValueChange={(value) => field.onChange(Number(value))}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="選擇討論類型" />
+                            <SelectValue placeholder="选择讨论类型" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="0">一般討論</SelectItem>
+                          <SelectItem value="0">一般讨论</SelectItem>
                           <SelectItem value="1">成人内容</SelectItem>
                         </SelectContent>
                       </Select>
@@ -336,9 +359,9 @@ export function CreateBoardModal({
         </Form>
 
         <div className="text-center text-sm text-neutral-500">
-          建立看板的同時，代表您已同意《
+          建立看板的同时，代表您已同意《
           <a href="#" className="text-blue-600 hover:underline">
-            內容政策
+            内容政策
           </a>
           》
         </div>
