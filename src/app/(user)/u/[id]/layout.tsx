@@ -155,14 +155,9 @@ export default function UserLayout({
                 ) : (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="rounded-full"
-                      >
-                        操作
-                        <ChevronDown className="h-4 w-4" />
-                      </Button>
+                      <button className="rounded-full px-4 py-2 bg-gray-500">
+                        <ChevronDown className="h-4 w-4 text-white" />
+                      </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem
