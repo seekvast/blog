@@ -51,6 +51,7 @@ export interface BoardChild {
   id: number;
   is_hidden: number;
   user_hidden: number;
+  moderator_only: number;
 }
 
 export interface BoardRule {

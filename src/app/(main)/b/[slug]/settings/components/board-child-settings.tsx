@@ -24,6 +24,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import {
@@ -151,20 +152,36 @@ function ChildModal({
 
   const formSchema = z.object({
     name: z.string().min(1, "看板名称不能为空"),
+    is_default: z.boolean().optional(),
+    is_hidden: z.boolean().optional(),
+    moderator_only: z.boolean().optional(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: editingChild?.name || "",
+      is_default: editingChild?.is_default === 1,
+      is_hidden: editingChild?.is_hidden === 1,
+      moderator_only: editingChild?.moderator_only === 1,
     },
   });
 
   React.useEffect(() => {
     if (editingChild) {
-      form.reset({ name: editingChild.name });
+      form.reset({
+        name: editingChild.name,
+        is_default: editingChild.is_default === 1,
+        is_hidden: editingChild.is_hidden === 1,
+        moderator_only: editingChild?.moderator_only === 1,
+      });
     } else {
-      form.reset({ name: "" });
+      form.reset({
+        name: "",
+        is_default: false,
+        is_hidden: false,
+        moderator_only: false,
+      });
     }
   }, [editingChild, form]);
 
@@ -176,6 +193,9 @@ function ChildModal({
         ...data,
         board_id: parentId,
         id: editingChild?.id || 0,
+        is_default: data.is_default ? 1 : 0,
+        is_hidden: data.is_hidden ? 1 : 0,
+        moderator_only: data.moderator_only ? 1 : 0,
       };
       await api.boards.saveChild(saveData);
       onOpenChange(false);
@@ -210,6 +230,61 @@ function ChildModal({
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="is_default"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>默认子版</FormLabel>
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="is_hidden"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>隐藏此子版所发表的文章</FormLabel>
+                  </div>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="moderator_only"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>仅创建者或版主才能发表</FormLabel>
+                  </div>
+                </FormItem>
+              )}
+            />
+
             <div className="flex justify-end">
               <Button size="sm" type="submit" disabled={isSubmitting}>
                 {isSubmitting

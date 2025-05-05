@@ -57,13 +57,14 @@ export function DiscussionPreview({
           )}
           <div
             className={cn(
-              "flex-1 text-sm line-clamp-3 whitespace-pre-line",
-              "prose-sm prose-a:text-primary max-w-none [&>p]:!m-0",
+              "flex-1 line-clamp-2",
+              " prose-a:text-primary max-w-none [&>p]:!m-0",
               "[&_a:not(.mention)]:text-primary [&_a:not(.mention)]:underline-offset-4",
               "[&_a:not(.mention)]:hover:underline",
               "[&_.mention]:text-primary [&_.mention]:font-medium",
               "[&_.mention]:bg-primary/10 [&_.mention]:px-1.5 [&_.mention]:py-0.5",
-              "[&_.mention]:rounded [&_.mention]:hover:bg-primary/20"
+              "[&_.mention]:rounded [&_.mention]:hover:bg-primary/20",
+              "[&_*]:!text-sm"
             )}
             dangerouslySetInnerHTML={{ __html: processedContent }}
           />
@@ -72,12 +73,13 @@ export function DiscussionPreview({
         <div
           className={cn(
             "mt-2 text-sm line-clamp-2",
-            "prose-sm prose-a:text-primary max-w-none [&>p]:!m-0",
+            "prose-a:text-primary max-w-none [&>p]:!m-0",
             "[&_a:not(.mention)]:text-primary [&_a:not(.mention)]:underline-offset-4",
             "[&_a:not(.mention)]:hover:underline",
             "[&_.mention]:text-primary [&_.mention]:font-medium",
             "[&_.mention]:bg-primary/10 [&_.mention]:px-1.5 [&_.mention]:py-0.5",
-            "[&_.mention]:rounded [&_.mention]:hover:bg-primary/20"
+            "[&_.mention]:rounded [&_.mention]:hover:bg-primary/20",
+            "[&_*]:!text-sm"
           )}
           dangerouslySetInnerHTML={{ __html: processedContent }}
         />
