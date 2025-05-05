@@ -8,6 +8,10 @@ interface PostEditorStore {
   uploadingFiles: File[];
   openFrom: "create" | "edit" | "draft";
   discussion?: Discussion;
+  boardPreselect?: {
+    boardId: number;
+    boardChildId?: number;
+  };
   setHasUnsavedContent: (hasUnsavedContent: boolean) => void;
   setIsVisible: (isVisible: boolean) => void;
   onClose: ((confirmed?: boolean) => void) | null;
@@ -17,6 +21,10 @@ interface PostEditorStore {
   insertText: (text: string) => void;
   setOpenFrom: (openFrom: "create" | "edit" | "draft") => void;
   setDiscussion: (discussion?: Discussion) => void;
+  setBoardPreselect: (boardPreselect?: {
+    boardId: number;
+    boardChildId?: number;
+  }) => void;
 }
 
 export const usePostEditorStore = create<PostEditorStore>((set) => {
@@ -32,6 +40,7 @@ export const usePostEditorStore = create<PostEditorStore>((set) => {
     uploadingFiles: [],
     openFrom: "create",
     discussion: undefined,
+    boardPreselect: undefined,
     setHasUnsavedContent: (hasUnsavedContent) => set({ hasUnsavedContent }),
     setIsVisible: (isVisible) => set({ isVisible }),
     setOnClose: (onClose) => set({ onClose }),
@@ -46,5 +55,6 @@ export const usePostEditorStore = create<PostEditorStore>((set) => {
     insertText,
     setOpenFrom: (openFrom) => set({ openFrom }),
     setDiscussion: (discussion) => set({ discussion }),
+    setBoardPreselect: (boardPreselect) => set({ boardPreselect }),
   };
 });

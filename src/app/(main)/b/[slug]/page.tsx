@@ -8,7 +8,6 @@ import { Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { Suspense } from "react";
 import { api } from "@/lib/api";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
@@ -20,7 +19,7 @@ import { BoardUserRole } from "@/constants/board-user-role";
 import { useQuery } from "@tanstack/react-query";
 import { BoardApprovalMode } from "@/constants/board-approval-mode";
 import { DiscussionControls } from "@/components/discussion/discussion-controls";
-import { DisplayMode, SortBy } from "@/types/display-preferences";
+import { SortBy } from "@/types/display-preferences";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
 import { JoinBoardDialog } from "@/components/board/join-board-dialog";
@@ -57,7 +56,7 @@ function BoardContent() {
   const [error, setError] = useState<string | null>(null);
   const observerRef = useRef<IntersectionObserver>();
   const [hasMore, setHasMore] = useState(true);
-  const { displayMode, sortBy, setSortBy } = useDiscussionDisplayStore();
+  const { displayMode, sortBy } = useDiscussionDisplayStore();
   const [activeTab, setActiveTab] = useState<"posts" | "rules" | "children">(
     "posts"
   );
@@ -81,8 +80,18 @@ function BoardContent() {
       setLoading(true);
       const data = await api.boards.get({ slug: params?.slug });
       setBoard(data);
+
+      const urlParams = new URLSearchParams(window.location.search);
+      if (!urlParams.has("bid")) {
+        urlParams.set("bid", data.id.toString());
+        const childParam = searchParams?.get("child");
+        if (childParam) {
+          urlParams.set("child", childParam);
+        }
+        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+        window.history.replaceState({}, "", newUrl);
+      }
     } catch (error) {
-      console.error("Failed to fetch board detail:", error);
       setError("获取看板详情失败");
     } finally {
       setLoading(false);
@@ -155,6 +164,12 @@ function BoardContent() {
       setDiscussions([]);
       fetchDiscussions();
     }
+    const urlParams = new URLSearchParams(window.location.search);
+    if (selectedChildId) {
+      urlParams.set("child", selectedChildId.toString());
+    }
+    const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+    window.history.replaceState({}, "", newUrl);
   }, [board?.id, selectedChildId]);
 
   useEffect(() => {

@@ -38,6 +38,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+
 interface NavItem {
   title: string;
   href: string;
@@ -117,6 +118,26 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
     }
     // 在其他页面，显示发布文章的模态框
     else {
+      const urlParams = new URLSearchParams(window.location.search);
+      const boardIdParam = urlParams.get("bid");
+      const childParam = urlParams.get("child");
+
+      if (boardIdParam) {
+        const boardId = parseInt(boardIdParam, 10);
+        const childId = childParam ? parseInt(childParam, 10) : undefined;
+
+        if (!isNaN(boardId)) {
+          // 设置发布文章时的看板ID和子看板ID
+          usePostEditorStore.setState({
+            boardPreselect: {
+              boardId: boardId,
+              boardChildId: !isNaN(Number(childId))
+                ? Number(childId)
+                : undefined,
+            },
+          });
+        }
+      }
       setIsVisible(true);
       setOpenFrom("create");
     }

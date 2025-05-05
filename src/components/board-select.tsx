@@ -32,10 +32,16 @@ export const BoardSelect = React.forwardRef<
   const [hasMore, setHasMore] = React.useState(true);
   const [isOpen, setIsOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
-
-  const selectedBoard = boards.find((board) => board.id === value);
+  const [selectedBoard, setSelectedBoard] = React.useState<Board | undefined>(
+    undefined
+  );
   const debouncedSearch = React.useRef<NodeJS.Timeout>();
-
+  React.useEffect(() => {
+    if (value) {
+      const board = boards.find((board) => board.id === value);
+      setSelectedBoard(board);
+    }
+  }, [value, boards, loading]);
   // 加载看板列表
   const loadBoards = React.useCallback(
     async (searchName: string, pageNum: number, append = false) => {
@@ -43,6 +49,7 @@ export const BoardSelect = React.forwardRef<
         setLoading(true);
         const queryParams = {
           page: pageNum,
+          per_page: 100,
           visibility: BoardVisibility.PUBLIC,
           name: "",
         };
@@ -88,10 +95,10 @@ export const BoardSelect = React.forwardRef<
 
   // 只在打开选择器时加载看板列表
   React.useEffect(() => {
-    if (isOpen && boards.length === 0) {
+    if (boards.length === 0 && !loading) {
       loadBoards("", 1);
     }
-  }, [isOpen, boards.length, loadBoards]);
+  }, [boards.length, loading, loadBoards]);
 
   // 暴露重置方法
   React.useImperativeHandle(ref, () => ({
@@ -100,6 +107,7 @@ export const BoardSelect = React.forwardRef<
       setSearchQuery("");
       setPage(1);
       setHasMore(true);
+      setSelectedBoard(undefined);
     },
   }));
 

@@ -96,8 +96,14 @@ export default function CreatePostModal() {
     setIsOpen,
     setOnClose,
   } = useMarkdownEditor();
-  const { isVisible, setIsVisible, openFrom, discussion } =
-    usePostEditorStore();
+  const {
+    isVisible,
+    setIsVisible,
+    openFrom,
+    discussion,
+    boardPreselect,
+    setBoardPreselect,
+  } = usePostEditorStore();
   const { draft, hasDraft, setDraft } = useDraftStore();
   const editorRef = React.useRef<{ reset: () => void; isFullscreen: boolean }>(
     null
@@ -123,6 +129,19 @@ export default function CreatePostModal() {
       }
     }
   }, [isVisible, hasDraft, draft]);
+
+  // 从预设的看板信息加载
+  React.useEffect(() => {
+    if (isVisible && openFrom === "create" && boardPreselect) {
+      setDiscussionForm((prev) => ({
+        ...prev,
+        board_id: boardPreselect.boardId,
+        board_child_id: boardPreselect.boardChildId,
+      }));
+
+      setBoardPreselect(undefined);
+    }
+  }, [isVisible, openFrom, boardPreselect, setBoardPreselect]);
 
   React.useEffect(() => {
     if (isVisible && openFrom === "edit" && discussion) {
@@ -186,7 +205,14 @@ export default function CreatePostModal() {
     resetModalState();
     setPendingAction(null);
     setHasUnsavedContent(false);
-  }, [resetPollState, resetDiscussionState, resetModalState]);
+    // 重置post-editor存储中的boardPreselect
+    setBoardPreselect(undefined);
+  }, [
+    resetPollState,
+    resetDiscussionState,
+    resetModalState,
+    setBoardPreselect,
+  ]);
 
   const handlePollConfirm = React.useCallback(() => {
     try {
@@ -224,13 +250,24 @@ export default function CreatePostModal() {
         dispatch({ type: "SET_LOADING_CHILDREN", payload: true });
         const data = await api.boards.getChildren(boardId);
         setBoardChildren(data);
+        if (!discussionForm.board_child_id && data.items.length > 0) {
+          const defaultChild = data.items.find(
+            (child) => child.is_default === 1
+          );
+          if (defaultChild) {
+            setDiscussionForm((prev) => ({
+              ...prev,
+              board_child_id: defaultChild.id,
+            }));
+          }
+        }
       } catch (error) {
         console.error("Failed to load board children:", error);
       } finally {
         dispatch({ type: "SET_LOADING_CHILDREN", payload: false });
       }
     },
-    [setBoardChildren]
+    [setBoardChildren, discussionForm.board_child_id, setDiscussionForm]
   );
 
   const handlePublish = React.useCallback(async () => {
@@ -641,12 +678,15 @@ export default function CreatePostModal() {
                     id: attachment.id,
                     file_name: attachment.file_name,
                     file_type: attachment.mime_type,
-                    file_path: attachment.file_path
+                    file_path: attachment.file_path,
                   };
-                  
+
                   setDiscussionForm((prev) => ({
                     ...prev,
-                    attachments: [...(prev.attachments || []), formattedAttachment]
+                    attachments: [
+                      ...(prev.attachments || []),
+                      formattedAttachment,
+                    ],
                   }));
                 }}
               />
