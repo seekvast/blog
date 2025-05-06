@@ -4,7 +4,7 @@ import * as React from "react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserRound } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
 import { JoinBoardDialog } from "@/components/board/join-board-dialog";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
+import { cn } from "@/lib/utils";
 
 export default function BoardPage() {
   return (
@@ -266,10 +267,10 @@ function BoardContent() {
     }
   };
   return (
-    <div className="flex flex-col mx-auto w-full">
+    <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto] gap-4 md:gap-6">
       {/* 看板信息 */}
-      <div className="bg-background">
-        <div className="">
+      <div className="min-w-0">
+        <div className="flex flex-col bg-background max-w-4xl">
           <div className="flex items-start space-x-3 pb-4">
             <Avatar className="h-14 w-14">
               <AvatarImage src={board.avatar} alt={board.name} />
@@ -326,8 +327,21 @@ function BoardContent() {
                 </div>
               </div>
               <div className="mt-1 text-sm text-muted-foreground">
-                {/* {board.visibility === 1 ? "私密" : "公开"} ·{" "} */}
-                {board.category?.name}
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                  {board.visibility >= 1 && (
+                    <>
+                      <span>私密</span>
+                      <span>•</span>
+                    </>
+                  )}
+
+                  <div className="flex items-center">
+                    <UserRound className="h-4" />
+                    <span>{board.users_count || 0}</span>
+                  </div>
+                  <span>•</span>
+                  <span>{board.category.name}</span>
+                </div>
               </div>
               <div className="mt-1 text-sm text-muted-foreground">
                 {board.desc}
@@ -335,172 +349,206 @@ function BoardContent() {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 顶部导航 */}
-      <div className="bg-background">
-        <div className="mx-auto w-full">
-          {/* 顶部导航 */}
-          <div className="bg-background">
-            <div className="mx-auto">
-              <div className="flex h-[40px] items-center justify-between border-b">
-                <div className="flex items-center space-x-4 lg:space-x-8">
-                  <button
-                    type="button"
-                    className={`h-8 font-medium ${
-                      activeTab === "posts"
-                        ? "text-primary hover:bg-transparent hover:text-primary"
-                        : "text-muted-foreground hover:bg-transparent hover:text-foreground"
-                    }`}
-                    onClick={() => setActiveTab("posts")}
-                  >
-                    文章
-                  </button>
-                  <button
-                    type="button"
-                    className={`h-8 font-medium ${
-                      activeTab === "rules"
-                        ? "text-primary hover:bg-transparent hover:text-primary"
-                        : "text-muted-foreground hover:bg-transparent hover:text-foreground"
-                    }`}
-                    onClick={() => setActiveTab("rules")}
-                  >
-                    规则
-                  </button>
-                  <button
-                    type="button"
-                    className={`h-8 font-medium ${
-                      activeTab === "children"
-                        ? "text-primary hover:bg-transparent hover:text-primary"
-                        : "text-muted-foreground hover:bg-transparent hover:text-foreground"
-                    }`}
-                    onClick={() => setActiveTab("children")}
-                  >
-                    子版
-                  </button>
-                </div>
-                {activeTab === "posts" && <DiscussionControls />}
+        {/* 顶部导航 */}
+        <div className="bg-background">
+          <div className="mx-auto">
+            <div className="flex h-[40px] items-center justify-between px-4 border-b">
+              <div className="flex items-center space-x-4 lg:space-x-8">
+                <button
+                  type="button"
+                  className={cn(
+                    "relative px-2 py-1 transition-colors duration-150",
+                    activeTab === "posts"
+                      ? "text-primary font-bold"
+                      : "text-muted-foreground font-normal"
+                  )}
+                  onClick={() => setActiveTab("posts")}
+                >
+                  文章
+                  {activeTab === "posts" && (
+                    <span
+                      className="absolute left-0 right-0 -bottom-1 h-[3px] rounded bg-primary"
+                      style={{ width: "100%" }}
+                    />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className={cn(
+                    "relative px-2 py-1 transition-colors duration-150",
+                    activeTab === "rules"
+                      ? "text-primary font-bold"
+                      : "text-muted-foreground font-normal"
+                  )}
+                  onClick={() => setActiveTab("rules")}
+                >
+                  规则
+                  {activeTab === "rules" && (
+                    <span
+                      className="absolute left-0 right-0 -bottom-1 h-[3px] rounded bg-primary"
+                      style={{ width: "100%" }}
+                    />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className={cn(
+                    "relative px-2 py-1 transition-colors duration-150",
+                    activeTab === "children"
+                      ? "text-primary font-bold"
+                      : "text-muted-foreground font-normal"
+                  )}
+                  onClick={() => setActiveTab("children")}
+                >
+                  子版
+                  {activeTab === "children" && (
+                    <span
+                      className="absolute left-0 right-0 -bottom-1 h-[3px] rounded bg-primary"
+                      style={{ width: "100%" }}
+                    />
+                  )}
+                </button>
               </div>
+              {activeTab === "posts" && <DiscussionControls />}
             </div>
           </div>
+        </div>
 
-          {/* 子导航 */}
-          <div className="flex items-center space-x-4 py-3 text-sm">
-            {activeTab === "posts" && (
-              <>
-                <Badge
-                  variant={!selectedChildId ? "default" : "secondary"}
-                  className={`cursor-pointer hover:bg-primary/90 ${
-                    !selectedChildId ? "" : "hover:bg-secondary/80"
-                  }`}
-                  onClick={() => setSelectedChildId(null)}
-                >
-                  全部
-                </Badge>
-                {boardChildren.map((child) => (
-                  <Badge
-                    key={child.id}
-                    variant={
-                      selectedChildId === child.id ? "default" : "secondary"
-                    }
-                    className={`cursor-pointer hover:bg-primary/90 ${
-                      selectedChildId === child.id
-                        ? ""
-                        : "hover:bg-secondary/80"
-                    }`}
-                    onClick={() => setSelectedChildId(child.id)}
-                  >
-                    {child.name}
-                  </Badge>
+        {/* 子导航 */}
+        {activeTab === "posts" && (
+          <div className="flex items-center space-x-8 px-4 pt-3 text-sm">
+            <Badge
+              variant={!selectedChildId ? "default" : "secondary"}
+              className={`cursor-pointer hover:bg-primary/90 ${
+                !selectedChildId ? "" : "hover:bg-secondary/80"
+              }`}
+              onClick={() => setSelectedChildId(null)}
+            >
+              全部
+            </Badge>
+            {boardChildren.map((child) => (
+              <Badge
+                key={child.id}
+                variant={selectedChildId === child.id ? "default" : "secondary"}
+                className={`cursor-pointer hover:bg-primary/90 ${
+                  selectedChildId === child.id ? "" : "hover:bg-secondary/80"
+                }`}
+                onClick={() => setSelectedChildId(child.id)}
+              >
+                {child.name}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {/* 帖子列表或规则列表 */}
+        <div className="mx-auto w-full">
+          {activeTab === "posts" && (
+            <>
+              <InfiniteScroll
+                loading={discussionsLoading}
+                hasMore={hasMore}
+                onLoadMore={handleLoadMore}
+                className="py-4 divide-y"
+              >
+                {discussions.map((discussion) => (
+                  <div key={discussion.slug} className="px-4">
+                    <DiscussionItem
+                      key={discussion.slug}
+                      discussion={discussion}
+                      displayMode={displayMode}
+                      onChange={handleChangeDiscussion}
+                    />
+                  </div>
                 ))}
-              </>
-            )}
+              </InfiniteScroll>
+              {/* 4. 添加加载状态指示器 */}
+              <div className="h-10 flex items-center justify-center text-muted-foreground">
+                {!hasMore && totalPages > 1 && <div>No more items</div>}
+              </div>
+            </>
+          )}
+
+          {activeTab === "rules" && (
+            <div className="py-4">
+              {rulesLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                </div>
+              ) : rulesError ? (
+                <div className="text-center py-8 text-red-500">
+                  获取规则列表失败，请重试
+                </div>
+              ) : rules.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  暂无规则
+                </div>
+              ) : (
+                <div className="space-y-6 border-b">
+                  {rules.map((rule, index) => (
+                    <div key={rule.id || index} className="px-4 pb-4">
+                      <h3 className="text-lg font-medium mb-2">{rule.title}</h3>
+                      <p className="text-muted-foreground">{rule.content}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "children" && (
+            <div className="">
+              {boardChildren.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  暂无子版块
+                </div>
+              ) : (
+                <div className="divide-y">
+                  {boardChildren.map((child) => (
+                    <div key={child.id} className="px-4 py-2">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-lg font-medium mb-2">
+                          {child.name}
+                        </h3>
+                        <button
+                          className="text-xs px-2 py-1 rounded-full bg-gray-100"
+                          onClick={() => handleHide(child)}
+                        >
+                          {child.user_hidden === 1 ? "取消隐藏" : "隐藏"}
+                        </button>
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        {child.id} 篇文章
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 右侧广告模块 */}
+      <div className="hidden lg:block w-[240px] flex-shrink-0">
+        <div className="sticky top-4">
+          <div className="rounded-lg border bg-card shadow-sm overflow-hidden">
+            <div className="p-2">
+              <div className="space-y-4">
+                <div className="rounded overflow-hidden">
+                  <img
+                    src="/placeholder-ad.jpg"
+                    alt="广告"
+                    className="w-full h-auto object-cover"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 帖子列表或规则列表 */}
-      <div className="mx-auto w-full">
-        {activeTab === "posts" && (
-          <>
-            <InfiniteScroll
-              loading={discussionsLoading}
-              hasMore={hasMore}
-              onLoadMore={handleLoadMore}
-              className="space-y-4 py-4 divide-y"
-            >
-              {discussions.map((discussion) => (
-                <DiscussionItem
-                  key={discussion.first_post_id}
-                  discussion={discussion}
-                  displayMode={displayMode}
-                  onChange={handleChangeDiscussion}
-                />
-              ))}
-            </InfiniteScroll>
-            {/* 4. 添加加载状态指示器 */}
-            <div className="h-10 flex items-center justify-center text-muted-foreground">
-              {!hasMore && totalPages > 1 && <div>No more items</div>}
-            </div>
-          </>
-        )}
-
-        {activeTab === "rules" && (
-          <div className="py-4">
-            {rulesLoading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              </div>
-            ) : rulesError ? (
-              <div className="text-center py-8 text-red-500">
-                获取规则列表失败，请重试
-              </div>
-            ) : rules.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                暂无规则
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {rules.map((rule, index) => (
-                  <div key={rule.id || index} className="border-b pb-4">
-                    <h3 className="text-lg font-medium mb-2">{rule.title}</h3>
-                    <p className="text-muted-foreground">{rule.content}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === "children" && (
-          <div className="py-4">
-            {boardChildren.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                暂无子版块
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {boardChildren.map((child) => (
-                  <div key={child.id} className="border-b pb-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-medium mb-2">{child.name}</h3>
-                      <button
-                        className="text-xs px-2 py-1 rounded-full bg-gray-100"
-                        onClick={() => handleHide(child)}
-                      >
-                        {child.user_hidden === 1 ? "取消隐藏" : "隐藏"}
-                      </button>
-                    </div>
-                    <span className="text-sm text-muted-foreground">
-                      {child.id} 篇文章
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
       {/* 加入看板对话框 */}
       {board && (
         <JoinBoardDialog
