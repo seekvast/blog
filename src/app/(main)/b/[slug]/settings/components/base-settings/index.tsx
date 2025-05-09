@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -70,7 +72,6 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
       });
       onSuccess?.();
     } catch (error) {
-      console.error("Error updating board settings:", error);
       toast({
         variant: "destructive",
         title: "保存失败",

@@ -1,7 +1,7 @@
 "use client";
 
 import { Label } from "@/components/ui/label";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Upload as UploadIcon, Trash as TrashIcon } from "lucide-react";
 import { useState, useRef } from "react";
 import {
   Dialog,
@@ -20,6 +20,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import { AvatarUpload } from "@/components/common/avatar-upload";
 import {
   Form,
@@ -71,8 +78,11 @@ export default function ProfileSettings({ user }: { user: User | null }) {
   const [bgImage, setBgImage] = useState<string | null>(user?.cover ?? null);
   const [birthday, setBirthday] = useState<string>(user?.birthday ?? "");
   const bgInputRef = useRef<HTMLInputElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // 不再需要这个状态，因为 DropdownMenu 组件会处理菜单的显示和隐藏
+  // 不再需要手动管理菜单状态，因为 DropdownMenu 组件会处理这些逻辑
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -188,14 +198,64 @@ export default function ProfileSettings({ user }: { user: User | null }) {
               {/* 左侧：头像和用户信息 */}
               <div className="flex items-center gap-4">
                 {/* 头像 */}
-                <AvatarUpload
-                  url={user.avatar_url ?? null}
-                  name={user.username}
-                  attachmentType={AttachmentType.USER_AVATAR}
-                  onUploadSuccess={(url) => {
-                    setAvatar(url);
-                  }}
-                />
+                <div className="relative">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div className="cursor-pointer">
+                        <AvatarUpload
+                          url={user.avatar_url ?? null}
+                          name={user.username}
+                          attachmentType={AttachmentType.USER_AVATAR}
+                          onUploadSuccess={(url) => {
+                            setAvatar(url);
+                          }}
+                        />
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
+                      <DropdownMenuItem 
+                        className="cursor-pointer hover:bg-slate-700 focus:bg-slate-700"
+                        onClick={() => avatarInputRef.current?.click()}
+                      >
+                        <UploadIcon className="mr-2 h-4 w-4" />
+                        <span>上传</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="cursor-pointer hover:bg-slate-700 focus:bg-slate-700"
+                        onClick={() => setAvatar(null)}
+                      >
+                        <TrashIcon className="mr-2 h-4 w-4" />
+                        <span>移除</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  
+                  <input
+                    type="file"
+                    ref={avatarInputRef}
+                    className="hidden"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      
+                      try {
+                        const data = await uploadFile(file, AttachmentType.USER_AVATAR);
+                        setAvatar(data.url);
+                        toast({
+                          description: "头像上传成功",
+                        });
+                      } catch (error) {
+                        console.error("Error uploading avatar:", error);
+                        toast({
+                          variant: "destructive",
+                          title: "上传失败",
+                          description: "头像上传失败，请重试",
+                        });
+                      }
+                    }}
+                  />
+                </div>
 
                 {/* 用户信息 */}
                 <div className="flex flex-col justify-center text-white text-center sm:text-left ">

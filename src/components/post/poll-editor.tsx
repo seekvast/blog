@@ -33,7 +33,9 @@ export const PollEditor: React.FC<PollEditorProps> = ({
   };
 
   const handleAddOption = () => {
-    onChange("options", [...values.options, ""]);
+    if (values.options.length < 10) {
+      onChange("options", [...values.options, ""]);
+    }
   };
 
   return (
@@ -71,27 +73,29 @@ export const PollEditor: React.FC<PollEditorProps> = ({
             )}
           </div>
         ))}
-        <button
-          type="button"
-          onClick={handleAddOption}
-          className="w-full flex items-center justify-center gap-1 text-blue-500 hover:text-blue-700"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+        {values.options.length < 10 && (
+          <button
+            type="button"
+            onClick={handleAddOption}
+            className="w-full flex items-center justify-center gap-1 text-blue-500 hover:text-blue-700"
           >
-            <path
-              d="M8 3V13M3 8H13"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-          增加选项
-        </button>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M8 3V13M3 8H13"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+            增加选项
+          </button>
+        )}
         <div className="flex items-center justify-between py-2">
           <span>允许多选</span>
           <Switch
@@ -119,23 +123,9 @@ export const PollEditor: React.FC<PollEditorProps> = ({
               <div className="flex-1">
                 <Input
                   type="datetime-local"
-                  value={values.start_time}
-                  onChange={(e) => onChange("start_time", e.target.value)}
-                  min={new Date().toISOString().slice(0, 16)}
-                  onClick={(e) =>
-                    (e.currentTarget as HTMLInputElement).showPicker()
-                  }
-                  className="cursor-pointer"
-                />
-              </div>
-              <div className="flex-1">
-                <Input
-                  type="datetime-local"
                   value={values.end_time}
                   onChange={(e) => onChange("end_time", e.target.value)}
-                  min={
-                    values.start_time || new Date().toISOString().slice(0, 16)
-                  }
+                  min={new Date().toISOString().slice(0, 16)}
                   onClick={(e) =>
                     (e.currentTarget as HTMLInputElement).showPicker()
                   }

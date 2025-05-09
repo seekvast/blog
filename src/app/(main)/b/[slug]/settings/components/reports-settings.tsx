@@ -30,7 +30,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   reportProcessSchema,
   type ReportProcessSchema,
-  ActionMode
+  ActionMode,
 } from "@/validations/report-process";
 
 interface ReportsSettingsProps {
@@ -312,7 +312,9 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
                   variant="secondary"
                   size="sm"
                   className="h-7"
-                  onClick={() => handleReportAction(report.id, ActionMode.REVOKE)}
+                  onClick={() =>
+                    handleReportAction(report.id, ActionMode.REVOKE)
+                  }
                   disabled={
                     report.status !== 0 || processReportMutation.isPending
                   }
@@ -332,7 +334,7 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
             </DialogHeader>
             <div className="space-y-6">
               <div className="space-y-4">
-                <Label>处理方式</Label>
+                <Label></Label>
                 <RadioGroup
                   value={String(form.watch("act_mode"))}
                   onValueChange={(value) =>
@@ -340,11 +342,17 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
                   }
                 >
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value={String(ActionMode.DELETE)} id="delete" />
+                    <RadioGroupItem
+                      value={String(ActionMode.DELETE)}
+                      id="delete"
+                    />
                     <Label htmlFor="delete">删除文章/回覆</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value={String(ActionMode.KICK_OUT)} id="kickout" />
+                    <RadioGroupItem
+                      value={String(ActionMode.KICK_OUT)}
+                      id="kickout"
+                    />
                     <Label htmlFor="kickout">踢出看板(可重複加入)</Label>
                   </div>
                   <div className="flex items-center space-x-2">

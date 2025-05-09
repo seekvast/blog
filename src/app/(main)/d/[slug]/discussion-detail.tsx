@@ -4,7 +4,7 @@ import * as React from "react";
 import { useParams } from "next/navigation";
 import { useDiscussionStore } from "@/store/discussion";
 import { useAuth } from "@/components/providers/auth-provider";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import type { Discussion, Pagination } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -17,6 +17,7 @@ import {
   EyeOff,
   ThumbsUp,
   ThumbsDown,
+  UserRound,
 } from "lucide-react";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { PostNavigator } from "@/components/post/post-navigator";
@@ -50,6 +51,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
@@ -496,7 +502,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         setReplyTo(comment);
         setPostForm((prev) => ({
           ...prev,
-          parent_id: comment.id,
+          parent_id: comment ? comment.id : 0,
         }));
         setShowCommentEditor(true);
       });
@@ -595,7 +601,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               </Link>
 
               <div className="flex-1 min-w-0 overflow-hidden">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 text-xs md:text-sm text-muted-foreground">
                   <Link
                     href={`/u/${currentDiscussion.user.username}?hashid=${currentDiscussion.user.hashid}`}
                   >
@@ -604,7 +610,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                     </span>
                   </Link>
                   <span className="flex-shrink-0 mx-2 text-gray-300">·</span>
-                  <span className="text-xs md:text-sm text-muted-foreground flex-shrink-0">
+                  <span className=" flex-shrink-0">
                     {formatDistanceToNow(
                       new Date(currentDiscussion.created_at),
                       {
@@ -613,6 +619,40 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                       }
                     )}
                   </span>
+                  {currentDiscussion.main_post.editor && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <div>
+                          <span className="flex-shrink-0 mx-2 text-gray-300">
+                            ·
+                          </span>
+                          <button className="hover:text-primary">已编辑</button>
+                        </div>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className="p-3 w-full"
+                        side="top"
+                        align="center"
+                        sideOffset={5}
+                      >
+                        <div className="space-y-2 text-muted-foreground">
+                          <div className="text-xs space-y-1">
+                            {currentDiscussion.main_post.editor.nickname ||
+                              currentDiscussion.main_post.editor.username}{" "}
+                            编辑于{" "}
+                            {currentDiscussion.main_post.edited_at
+                              ? format(
+                                  new Date(
+                                    currentDiscussion.main_post.edited_at
+                                  ),
+                                  "yyyy年M月d日"
+                                )
+                              : "未知"}
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
                 </div>
                 <div className="text-xs text-muted-foreground truncate">
                   <span>来自 {currentDiscussion.board.name}</span>
@@ -698,7 +738,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               onClick={() => setShowCommentEditor(true)}
               disabled={currentDiscussion?.is_locked === 1}
             >
-              {currentDiscussion?.is_locked === 1 ? "已锁定" : "回复"}
+              {currentDiscussion?.is_locked === 1 ? "关闭评论" : "回复"}
             </button>
           </div>
           <div className="flex items-center justify-between px-2 md:px-4 border-b text-sm  text-muted-foreground">
@@ -726,6 +766,29 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   isLocked={currentDiscussion?.is_locked === 1}
                 />
               </InfiniteScroll>
+              {!currentDiscussion?.is_locked && (
+                <div className="flex items-start space-x-3 px-2 md:px-4 mt-4">
+                  <Avatar className="h-10 w-10 md:h-10 md:w-10 flex-shrink-0">
+                    <AvatarFallback>
+                      <UserRound className="h-4 w-4 md:h-5 md:w-5" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div
+                    className="flex-1 p-3 border border-border rounded-md bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => {
+                      if (!user) {
+                        openLoginModal();
+                        return;
+                      }
+                      setShowCommentEditor(true);
+                    }}
+                  >
+                    <div className="text-sm text-muted-foreground">
+                      说点什么吧...
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {showCommentEditor && (
@@ -921,7 +984,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 }}
                 disabled={currentDiscussion?.is_locked === 1}
               >
-                {currentDiscussion?.is_locked === 1 ? "已锁定" : "评论"}
+                {currentDiscussion?.is_locked === 1 ? "关闭评论" : "评论"}
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </AuthGuard>

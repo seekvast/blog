@@ -3,12 +3,16 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '**',
+        protocol: "https",
+        hostname: "i.katerimg.com",
       },
       {
-        protocol: 'http',
-        hostname: '**',
+        protocol: "https",
+        hostname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "**",
       },
     ],
   },
@@ -16,16 +20,16 @@ const nextConfig = {
     return [
       // 排除 auth 相关的路径，这些由 NextAuth.js 处理
       {
-        source: '/api/auth/:path*',
-        destination: '/api/auth/:path*'  // 保持原路径不变
+        source: "/api/auth/:path*",
+        destination: "/api/auth/:path*", // 保持原路径不变
       },
       // 其他 API 请求代理到后端服务器
       {
-        source: '/api/:path*',
-        destination: 'http://api.kater.host/:path*'
-      }
-    ]
+        source: "/api/:path*",
+        destination: "http://api.kater.host/:path*",
+      },
+    ];
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

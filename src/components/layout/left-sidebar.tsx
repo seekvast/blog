@@ -38,7 +38,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-
 interface NavItem {
   title: string;
   href: string;
@@ -112,35 +111,37 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   });
 
   const handlePublishClick = () => {
-    // 在看板列表页面，显示创建看板的模态框
-    if (pathname === "/b") {
-      setCreateBoardOpen(true);
-    }
-    // 在其他页面，显示发布文章的模态框
-    else {
-      const urlParams = new URLSearchParams(window.location.search);
-      const boardIdParam = urlParams.get("bid");
-      const childParam = urlParams.get("child");
-
-      if (boardIdParam) {
-        const boardId = parseInt(boardIdParam, 10);
-        const childId = childParam ? parseInt(childParam, 10) : undefined;
-
-        if (!isNaN(boardId)) {
-          // 设置发布文章时的看板ID和子看板ID
-          usePostEditorStore.setState({
-            boardPreselect: {
-              boardId: boardId,
-              boardChildId: !isNaN(Number(childId))
-                ? Number(childId)
-                : undefined,
-            },
-          });
-        }
+    requireAuth(() => {
+      // 在看板列表页面，显示创建看板的模态框
+      if (pathname === "/b") {
+        setCreateBoardOpen(true);
       }
-      setIsVisible(true);
-      setOpenFrom("create");
-    }
+      // 在其他页面，显示发布文章的模态框
+      else {
+        const urlParams = new URLSearchParams(window.location.search);
+        const boardIdParam = urlParams.get("bid");
+        const childParam = urlParams.get("child");
+
+        if (boardIdParam) {
+          const boardId = parseInt(boardIdParam, 10);
+          const childId = childParam ? parseInt(childParam, 10) : undefined;
+
+          if (!isNaN(boardId)) {
+            // 设置发布文章时的看板ID和子看板ID
+            usePostEditorStore.setState({
+              boardPreselect: {
+                boardId: boardId,
+                boardChildId: !isNaN(Number(childId))
+                  ? Number(childId)
+                  : undefined,
+              },
+            });
+          }
+        }
+        setIsVisible(true);
+        setOpenFrom("create");
+      }
+    });
   };
 
   const handleJoinBoard = (board: Board) => {
@@ -172,7 +173,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                 )}
                 onClick={() => requireAuth(() => router.push(item.href))}
               >
-                <item.icon className="mr-2 h-5 w-5" />
+                <item.icon className="mr-2 h-4 w-4" />
                 {item.title}
               </div>
             ) : (
@@ -186,7 +187,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                     : "hover:bg-accent hover:text-accent-foreground"
                 )}
               >
-                <item.icon className="mr-2 h-5 w-5" />
+                <item.icon className="mr-2 h-4 w-4" />
                 {item.title}
               </Link>
             )

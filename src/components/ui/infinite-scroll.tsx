@@ -26,7 +26,7 @@ export function InfiniteScroll({
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
     </div>
   ),
-  endMessage = <div className="flex justify-center py-8"></div>,
+  endMessage = <div className="flex justify-center"></div>,
   rootMargin = "100px",
 }: InfiniteScrollProps) {
   const loadingRef = useRef(false);

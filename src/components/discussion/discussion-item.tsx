@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useRequireAuth } from "@/hooks/use-require-auth";
-import { useAuth } from "../providers/auth-provider";
+import { format } from "date-fns";
 
 import { ThumbsUp, MessageSquare, Tag } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -17,6 +17,11 @@ import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { debounce } from "@/lib/utils";
 import { DiscussionActions } from "@/components/post/discussion-actions";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface DiscussionItemProps {
   discussion: Discussion;
@@ -102,7 +107,8 @@ export const DiscussionItem = React.forwardRef<
         <div className="min-w-0 flex-1 w-full">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center space-x-2 min-w-0 flex-1">
-              <h2
+              <Link
+                href={`/d/${discussion.slug}`}
                 className={cn(
                   "min-w-0 w-0 text-xl font-medium text-foreground hover:text-primary block w-full overflow-hidden text-ellipsis line-clamp-3 md:line-clamp-2 break-words",
                   discussion.discussion_user && "text-muted-foreground"
@@ -111,13 +117,11 @@ export const DiscussionItem = React.forwardRef<
                   display: "-webkit-box",
                 }}
               >
-                <Link href={`/d/${discussion.slug}`} className="w-full">
-                  {discussion.title}
-                </Link>
-              </h2>
-              {discussion.is_private === 1 && (
+                <h2 className="w-full">{discussion.title}</h2>
+              </Link>
+              {/* {discussion.is_private === 1 && (
                 <Badge variant="secondary">私密</Badge>
-              )}
+              )} */}
             </div>
 
             <DiscussionActions
@@ -168,7 +172,49 @@ export const DiscussionItem = React.forwardRef<
             </Link>
 
             <div className="flex items-center space-x-1 text-muted-foreground">
-              <span>{discussion.diff_humans}</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="hover:text-primary">
+                    {discussion.diff_humans}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="p-2 w-auto min-w-[320px]"
+                  side="top"
+                  align="center"
+                  sideOffset={5}
+                  avoidCollisions={true}
+                >
+                  <div className="space-y-2 text-muted-foreground">
+                    {/* <p className="text-xs font-medium">分享链接</p> */}
+                    <div className="flex flex-col space-y-2 w-full">
+                      <div className="relative w-full">
+                        <input
+                          type="text"
+                          readOnly
+                          value={`${window.location.origin}/d/${discussion.slug}`}
+                          className="w-full text-xs p-2 rounded bg-background pr-16"
+                          onClick={(e) => e.currentTarget.select()}
+                        />
+                        {/* <button
+                          className="absolute right-1 top-1/2 -translate-y-1/2 text-xs px-2 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              `${window.location.origin}/d/${discussion.slug}`
+                            );
+                            toast({
+                              description: "链接已复制到剪贴板",
+                              duration: 2000,
+                            });
+                          }}
+                        >
+                          复制
+                        </button> */}
+                      </div>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="flex items-center space-x-2 text-muted-foreground">
               <span>
@@ -188,6 +234,38 @@ export const DiscussionItem = React.forwardRef<
                 <span>{discussion.board_child?.name}</span>
               </Link>
             </div>
+            {discussion.main_post.editor && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <div>
+                    <span className="flex-shrink-0 mx-2 text-gray-300">·</span>
+                    <button className="text-muted-foreground hover:text-primary">
+                      已编辑
+                    </button>
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="p-3 w-full"
+                  side="top"
+                  align="center"
+                  sideOffset={5}
+                >
+                  <div className="space-y-2 text-muted-foreground">
+                    <div className="text-xs space-y-1">
+                      {discussion.main_post.editor.nickname ||
+                        discussion.main_post.editor.username}{" "}
+                      编辑于{" "}
+                      {discussion.main_post.edited_at
+                        ? format(
+                            new Date(discussion.main_post.edited_at),
+                            "yyyy年M月d日"
+                          )
+                        : "未知"}
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
           </div>
         </div>
       </div>

@@ -5,6 +5,8 @@ import { BoardSettingsForm } from "./board-settings-form";
 import { api } from "@/lib/api";
 import { BoardUserRole } from "@/constants/board-user-role";
 
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: {
     slug: string;

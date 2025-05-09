@@ -5,13 +5,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Settings, Flag, AlertTriangle, Ban, Unlock } from "lucide-react";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { api } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { ReportDialog } from "@/components/report/report-dialog";
-import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import {
   DropdownMenu,
@@ -20,6 +19,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Image from "next/image";
 
 export default function UserLayout({
   children,
@@ -38,6 +38,8 @@ export default function UserLayout({
 
   const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
+  const [gradientColor, setGradientColor] =
+    useState<string>("rgba(0, 0, 0, 0.3)");
 
   // 获取用户详细信息
   const { data: userData } = useQuery({
@@ -52,6 +54,62 @@ export default function UserLayout({
       setIsBlocked(true);
     }
   }, [userData?.blocked]);
+
+  // 提取图片颜色
+  useEffect(() => {
+    const avatarUrl = userData?.avatar_url;
+    if (avatarUrl && typeof avatarUrl === "string") {
+      const getImageColor = async () => {
+        try {
+          const img = document.createElement("img");
+          img.src = `/api/proxy-image?url=${encodeURIComponent(avatarUrl)}`;
+
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return;
+
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+
+            const imageData = ctx.getImageData(
+              0,
+              0,
+              canvas.width,
+              canvas.height
+            );
+            const data = imageData.data;
+
+            let r = 0,
+              g = 0,
+              b = 0;
+            for (let i = 0; i < data.length; i += 4) {
+              r += data[i];
+              g += data[i + 1];
+              b += data[i + 2];
+            }
+
+            const count = data.length / 4;
+            r = Math.round(r / count);
+            g = Math.round(g / count);
+            b = Math.round(b / count);
+
+            setGradientColor(`rgba(${r}, ${g}, ${b}, 0.8)`);
+          };
+
+          img.onerror = () => {
+            console.error("Error loading image");
+            setGradientColor("rgba(0, 0, 0, 0.3)");
+          };
+        } catch (error) {
+          console.error("Error getting color:", error);
+          setGradientColor("rgba(0, 0, 0, 0.5)");
+        }
+      };
+      getImageColor();
+    }
+  }, [userData?.avatar_url]);
 
   // 拉黑用户
   const blockMutation = useMutation({
@@ -107,7 +165,12 @@ export default function UserLayout({
                   />
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
+              <div
+                className="absolute inset-0 transition-colors duration-300"
+                style={{
+                  background: `linear-gradient(to bottom, transparent, ${gradientColor})`,
+                }}
+              />
             </div>
 
             {/* 内容区 */}
@@ -126,21 +189,29 @@ export default function UserLayout({
                         {userData.nickname}
                       </h1>
                     </div>
-                    <div className="text-white">
-                      <span className="font-medium">@{userData.username} </span>
-                      <span>加入于</span>
-                      <span>
-                        {userData.created_at
-                          ? new Date(userData.created_at).toLocaleDateString(
-                              "zh-CN",
-                              {
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              }
-                            )
-                          : "未知"}
-                      </span>
+                    <div className="flex  space-x-2 text-white text-sm">
+                      <span>@{userData.username} </span>
+                      {userData.is_online === true && (
+                        <div className="flex items-center space-x-1">
+                          <span className="inline-block w-3 h-3 bg-green-500 rounded-full"></span>
+                          <span>在线上</span>
+                        </div>
+                      )}
+                      <div>
+                        <span>加入于</span>{" "}
+                        <span>
+                          {userData.created_at
+                            ? new Date(userData.created_at).toLocaleDateString(
+                                "zh-CN",
+                                {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                }
+                              )
+                            : "未知"}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -203,7 +274,7 @@ export default function UserLayout({
           user_hashid: userData.hashid,
           board_id: 0,
           post_id: 0,
-          reported_to: "moderator",
+          reported_to: "admin",
           target: 3, // 3 表示用户
         }}
       />

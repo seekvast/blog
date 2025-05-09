@@ -64,13 +64,13 @@ export function CommentActions({ comment, onEdit }: CommentActionsProps) {
   const handleDelete = () => {
     setShowDeleteConfirm(true);
   };
-  
+
   const handleEdit = () => {
     if (onEdit) {
       onEdit(comment);
     }
   };
-  
+
   return (
     <>
       <DropdownMenu>
@@ -80,10 +80,7 @@ export function CommentActions({ comment, onEdit }: CommentActionsProps) {
         <DropdownMenuContent align="end" className="w-48">
           {isAuthor ? (
             <>
-              <DropdownMenuItem 
-                className="cursor-pointer"
-                onClick={handleEdit}
-              >
+              <DropdownMenuItem className="cursor-pointer" onClick={handleEdit}>
                 <Edit className="mr-2 h-4 w-4" />
                 <span>編輯</span>
               </DropdownMenuItem>
@@ -143,7 +140,7 @@ export function CommentActions({ comment, onEdit }: CommentActionsProps) {
           board_id: comment.board_id,
           post_id: comment.id,
           target: 2,
-          reported_to: "admin",
+          reported_to: "moderator",
         }}
       />
 
@@ -157,7 +154,7 @@ export function CommentActions({ comment, onEdit }: CommentActionsProps) {
           board_id: comment.board_id,
           post_id: comment.id,
           target: 2,
-          reported_to: "moderator",
+          reported_to: "admin",
         }}
       />
     </>

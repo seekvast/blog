@@ -31,7 +31,7 @@ export default function EmailConfirmPage() {
 
   // 使用 useQuery 处理邮箱验证请求
   const { isLoading } = useQuery({
-    queryKey: ['confirmEmail', token],
+    queryKey: ["confirmEmail", token],
     queryFn: async () => {
       if (!token) {
         setStatus("error");

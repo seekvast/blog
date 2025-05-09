@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -18,7 +18,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
-import { User } from "lucide-react";
+import { UserRound } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface CommentItemProps {
   comment: Post;
@@ -152,7 +157,7 @@ export const CommentItem = ({
         </Link>
         <div className="flex-1 min-w-0 overflow-hidden">
           <div className="flex justify-between w-full items-center">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
               <Link
                 href={`/u/${comment.user.username}?hashid=${comment.user.hashid}`}
               >
@@ -169,12 +174,35 @@ export const CommentItem = ({
                 </Link>
               )}
               <span className="text-gray-300">·</span>
-              <span className="text-xs md:text-sm text-muted-foreground">
+              <span>
                 {formatDistanceToNow(new Date(comment.created_at), {
                   addSuffix: true,
                   locale: zhCN,
                 })}
               </span>
+              {comment.editor && (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="hover:text-primary">已编辑</button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="p-3 w-full"
+                    side="top"
+                    align="center"
+                    sideOffset={5}
+                  >
+                    <div className="space-y-2 text-muted-foreground">
+                      <div className="text-xs space-y-1">
+                        {comment.editor.nickname || comment.editor.username}{" "}
+                        编辑于{" "}
+                        {comment.edited_at
+                          ? format(new Date(comment.edited_at), "yyyy年M月d日")
+                          : "未知"}
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
             {comment.parent_id <= 0 && (
               <span className="text-xs md:text-sm text-muted-foreground">
@@ -279,14 +307,23 @@ export const CommentItem = ({
                       isLocked={isLocked}
                     />
                   ))}
-                  <div
-                    className="flex items-center gap-2 p-3 border border-border rounded-md bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors mt-4"
-                    onClick={() => onReply(comment)}
-                  >
-                    <div className="text-sm text-muted-foreground flex-1">
-                      点击回复...
+                  {!isLocked && (
+                    <div className="flex items-start space-x-3 px-2 md:px-4 mt-4">
+                      <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
+                        <AvatarFallback>
+                          <UserRound className="h-4 w-4 md:h-5 md:w-5" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div
+                        className="flex-1 p-3 border border-border rounded-md bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => onReply(comment)}
+                      >
+                        <div className="text-sm text-muted-foreground">
+                          点击回复...
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <div className="text-center mt-4">
                     <button
                       onClick={() => setShowChildren(false)}

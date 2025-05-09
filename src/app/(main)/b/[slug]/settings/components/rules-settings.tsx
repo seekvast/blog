@@ -54,8 +54,8 @@ import { cn } from "@/lib/utils";
 
 const ruleSchema = z.object({
   id: z.number().optional(),
-  title: z.string().min(1, "规则标题不能为空"),
-  content: z.string().min(1, "规则内容不能为空"),
+  title: z.string().min(1, "规则标题不能为空").max(50, "规则标题最多50字"),
+  content: z.string().min(1, "规则内容不能为空").max(300, "规则内容最多300字"),
   sort: z.number(),
 });
 
@@ -482,6 +482,11 @@ export function RulesSettings({ board }: RulesSettingsProps) {
                       <Textarea
                         placeholder="输入规则内容"
                         className="min-h-[100px]"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                          }
+                        }}
                         {...field}
                       />
                     </FormControl>

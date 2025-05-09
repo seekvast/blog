@@ -335,7 +335,7 @@ export function DiscussionActions({
           discussion_slug: discussion.slug,
           post_id: discussion.main_post.id,
           target: 1,
-          reported_to: "admin",
+          reported_to: "moderator",
         }}
       />
 
@@ -350,7 +350,7 @@ export function DiscussionActions({
           discussion_slug: discussion.slug,
           post_id: discussion.main_post.id,
           target: 1,
-          reported_to: "moderator",
+          reported_to: "admin",
         }}
       />
 

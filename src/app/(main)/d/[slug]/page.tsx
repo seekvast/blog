@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
 import { Loading } from "@/components/ui/loading";
 
+export const dynamic = 'force-dynamic';
+
 async function getDiscussion(slug: string) {
   try {
     const response = await api.discussions.get(slug);

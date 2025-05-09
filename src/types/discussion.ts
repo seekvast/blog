@@ -113,7 +113,6 @@ export interface Post {
   up_votes_count: number;
   down_votes_count: number;
   user_hashid: string;
-  edited_user_hashid: string;
   board_creator_hashid: string;
   type: string;
   content: string;
@@ -130,6 +129,8 @@ export interface Post {
   user_voted: PostVote | null;
   is_voted: boolean;
   children: Post[];
+  editor: User;
+  editor_hashid: string;
 }
 
 export type DiscussionResponse = Response<Pagination<Discussion>>;

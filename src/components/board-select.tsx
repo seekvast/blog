@@ -170,7 +170,12 @@ export const BoardSelect = React.forwardRef<
                       board.name.charAt(0)
                     )}
                   </div>
-                  <span className="truncate">{board.name}</span>
+                  <div className="flex flex-col item-start">
+                    <span className="truncate">{board.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {board.users_count} 成员
+                    </span>
+                  </div>
                 </div>
               </SelectItem>
             ))

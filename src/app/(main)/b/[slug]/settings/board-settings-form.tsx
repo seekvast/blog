@@ -9,7 +9,6 @@ import { MembersSettings } from "./components/members-settings";
 import { ReportsSettings } from "./components/reports-settings";
 import { BlocklistSettings } from "./components/blocklist-settings";
 import { useDevice } from "@/hooks/use-device";
-import { cn } from "@/lib/utils";
 
 import { Board as BoardType } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,10 +17,11 @@ import { SettingMenus, SettingTab } from "./components/setting-menus";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { api } from "@/lib/api";
 
 interface BoardSettingsFormProps {
   board: BoardType;
-  onSuccess?: (board: BoardType) => void;
+  onSuccess?: () => void;
 }
 
 export function BoardSettingsForm({
@@ -33,6 +33,13 @@ export function BoardSettingsForm({
   const [activeTab, setActiveTab] = React.useState<SettingTab>(
     isMobile ? "" : "general"
   );
+  const [initBoard, setInitBoard] = React.useState<BoardType>(board);
+
+  const fetchBoard = async () => {
+    const board = await api.boards.get({ slug: initBoard.slug });
+    setInitBoard(board);
+  };
+
   useEffect(() => {
     setActiveTab(isMobile ? "" : "general");
   }, [isMobile]);
@@ -40,19 +47,21 @@ export function BoardSettingsForm({
   const renderContent = () => {
     switch (activeTab) {
       case "general":
-        return <BaseSettings board={board} />;
+        return (
+          <BaseSettings board={initBoard} onSuccess={() => fetchBoard()} />
+        );
       case "child-boards":
-        return <BoardChildSettings board={board} />;
+        return <BoardChildSettings board={initBoard} />;
       case "rules":
-        return <RulesSettings board={board} />;
+        return <RulesSettings board={initBoard} />;
       case "approval":
-        return <ApprovalSettings board={board} />;
+        return <ApprovalSettings board={initBoard} />;
       case "members":
-        return <MembersSettings board={board} />;
+        return <MembersSettings board={initBoard} />;
       case "reports":
-        return <ReportsSettings board={board} />;
+        return <ReportsSettings board={initBoard} />;
       case "blocklist":
-        return <BlocklistSettings board={board} />;
+        return <BlocklistSettings board={initBoard} />;
       default:
         return null;
     }
@@ -102,7 +111,7 @@ export function BoardSettingsForm({
         {/* 移动端菜单列表 */}
         <>
           <SettingMenus
-            board={board}
+            board={initBoard}
             activeTab={activeTab}
             onTabChange={setActiveTab}
           />
@@ -116,7 +125,7 @@ export function BoardSettingsForm({
     <div className="flex gap-8 pb-10">
       <div className="w-[220px] flex-shrink-0">
         <SettingMenus
-          board={board}
+          board={initBoard}
           activeTab={activeTab}
           onTabChange={setActiveTab}
         />
@@ -126,12 +135,14 @@ export function BoardSettingsForm({
         <div className="flex pb-4 border-b">
           <div className="flex items-start gap-4">
             <Avatar className="h-20 w-20">
-              <AvatarImage src={board.avatar} alt={board.name} />
-              <AvatarFallback>{board.name[0]}</AvatarFallback>
+              <AvatarImage src={initBoard.avatar} alt={initBoard.name} />
+              <AvatarFallback>{initBoard.name[0]}</AvatarFallback>
             </Avatar>
             <div>
-              <h2 className="text-xl font-semibold">{board.name}</h2>
-              <p className="text-sm text-muted-foreground mt-1">{board.desc}</p>
+              <h2 className="text-xl font-semibold">{initBoard.name}</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {initBoard.desc}
+              </p>
             </div>
           </div>
         </div>

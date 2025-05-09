@@ -7,11 +7,9 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import { Card } from "@/components/ui/card";
-import { BoardHistory } from "@/types/board";
-import { Pagination } from "@/types/common";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-
+import { MoreHorizontal, User, Ban } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -19,6 +17,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { SearchInput } from "@/components/search/search-input";
 import { formatDate } from "@/lib/utils";
 import { BoardUserRole } from "@/constants/board-user-role";
@@ -46,7 +50,6 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
   // 搜索关键词
   const [searchQuery, setSearchQuery] = React.useState("");
 
-  // 使用 useInfiniteQuery 获取申请列表
   const {
     data,
     isLoading,
@@ -87,7 +90,10 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
   });
 
   // 处理申请
-  const handleApplication = async (applicationId: number, status: 1 | 2) => {
+  const handleApplication = async (
+    applicationId: number,
+    status: 1 | 2 | 3
+  ) => {
     await api.boards.approve({
       history_id: applicationId,
       status,
@@ -97,8 +103,7 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
       queryKey: ["board-applications", board.id, filters, searchQuery],
     });
     toast({
-      title: status === 1 ? "已通过" : "已拒绝",
-      description: "申请处理成功",
+      description: "操作成功",
     });
 
     // 重新加载列表
@@ -303,6 +308,38 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
                     >
                       拒绝
                     </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="text-muted-foreground"
+                        >
+                          <MoreHorizontal />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() =>
+                            window.open(
+                              `/u/${application.user?.username}?hashid=${application.user?.hashid}`,
+                              "_blank"
+                            )
+                          }
+                          className="cursor-pointer"
+                        >
+                          <User className="mr-2 h-4 w-4" />
+                          查看个人主页
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleApplication(application.id, 3)}
+                          className="cursor-pointer text-destructive focus:text-destructive"
+                        >
+                          <Ban className="mr-2 h-4 w-4" />
+                          拒绝并封锁
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
               </Card>

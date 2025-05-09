@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api";
-import { cn } from "@/lib/utils";
+import { cn, debounce } from "@/lib/utils";
 import { BoardSelect } from "@/components/board-select";
 import { useBoardChildrenStore } from "@/store/board-children";
 import { useMarkdownEditor } from "@/store/md-editor";
@@ -47,7 +47,6 @@ const initPollForm: PollForm = {
   is_multiple: 0,
   show_voter: 0,
   is_timed: 0,
-  start_time: "",
   end_time: "",
 };
 
@@ -162,7 +161,6 @@ export default function CreatePostModal() {
               type: "SET_DATA",
               payload: {
                 ...data.poll,
-                start_time: data.poll.start_time ?? "",
                 end_time: data.poll.end_time ?? "",
                 options: data.poll.options.map((option) => option.option),
               },
@@ -311,6 +309,11 @@ export default function CreatePostModal() {
     router,
     setIsVisible,
   ]);
+
+  const debouncedHandlePublish = React.useMemo(
+    () => debounce(handlePublish, 300), // 300ms 的防抖时间
+    [handlePublish]
+  );
 
   function modalReducer(
     state: ModalState,
@@ -582,7 +585,7 @@ export default function CreatePostModal() {
                 <Button
                   size="sm"
                   className="rounded-full w-full sm:w-auto"
-                  onClick={handlePublish}
+                  onClick={debouncedHandlePublish}
                   disabled={modalState.isSubmitting}
                 >
                   {modalState.isSubmitting ? "发布中..." : "发布"}

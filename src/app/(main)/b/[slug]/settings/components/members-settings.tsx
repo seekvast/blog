@@ -244,9 +244,9 @@ export function MembersSettings({ board }: SettingsProps) {
       <ConfirmDialog
         open={isMangerOpen}
         onOpenChange={setIsMangerOpen}
-        title={action === 2 ? "禁言" : "踢出并封禁"}
+        title={action === 5 ? "禁言" : "踢出并封禁"}
         description={
-          action === 2 ? "确定要禁言该成员吗？" : "确定要踢出并封禁该成员吗？"
+          action === 5 ? "确定要禁言该成员吗？" : "确定要踢出并封禁该成员吗？"
         }
         onConfirm={handleMangerConfirm}
       />

@@ -6,6 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Board } from "@/types";
 import { UserRound } from "lucide-react";
+import {
+  BoardUserStatus,
+  BoardUserStatusMapping,
+} from "@/constants/board-user-status";
 
 interface BoardItemProps {
   board: Board;
@@ -56,7 +60,7 @@ export function BoardItem({ board, onJoin, onLeave }: BoardItemProps) {
         </div>
       </div>
       <div>
-        {!board.is_joined ? (
+        {!board.board_user ? (
           <Button
             size="sm"
             className="rounded-full"
@@ -64,7 +68,9 @@ export function BoardItem({ board, onJoin, onLeave }: BoardItemProps) {
           >
             加入
           </Button>
-        ) : board.board_user && [1, 2].includes(board.board_user.user_role) ? (
+        ) : board.board_user &&
+          board.board_user.status === 1 &&
+          [1, 2].includes(board.board_user.user_role) ? (
           <Button variant="outline" size="sm" className="rounded-full">
             <Link href={`/b/${board.slug}/settings`}>设定</Link>
           </Button>
@@ -75,7 +81,9 @@ export function BoardItem({ board, onJoin, onLeave }: BoardItemProps) {
             className="rounded-full"
             onClick={() => onLeave?.(board.id)}
           >
-            已加入
+            {BoardUserStatusMapping[
+              board.board_user.status as keyof typeof BoardUserStatusMapping
+            ] || ""}
           </Button>
         )}
       </div>
