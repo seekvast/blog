@@ -73,10 +73,9 @@ export const PollPreview: React.FC<PollPreviewProps> = ({
               允许用户查看投票人
             </Badge>
           )}
-          {hasDeadline && pollData.start_time && pollData.end_time && (
+          {hasDeadline &&  pollData.end_time && (
             <Badge variant="secondary" className="text-primary">
               <span>限时投票：</span>
-              {new Date(pollData.start_time).toLocaleString()} -{" "}
               {new Date(pollData.end_time).toLocaleString()}
             </Badge>
           )}

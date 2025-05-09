@@ -1,6 +1,5 @@
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { fontSans } from "@/lib/fonts";
 import "@/i18n";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { LoginModalProvider } from "@/components/providers/login-modal-provider";
@@ -38,7 +37,6 @@ export default async function RootLayout({
       <body
         className={cn(
           "min-h-screen bg-background antialiased",
-          fontSans.variable
         )}
       >
         <QueryProvider>
