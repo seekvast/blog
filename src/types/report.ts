@@ -26,5 +26,6 @@ export interface ReportForm {
   post_id?: number;
   reported_to: "admin" | "moderator";
   reason?: number;
+  user_desc?: string;
   target: number;
 }

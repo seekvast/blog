@@ -1,14 +1,14 @@
 import React from "react";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { FormFields, SharedSettingsProps } from "./shared";
+import { SharedSettingsProps } from "./shared/types";
+import { FormFields } from "./shared/form-fields";
 import { AvatarUpload } from "@/components/common/avatar-upload";
 import { AttachmentType } from "@/constants/attachment-type";
 
 export function DesktopBaseSettings({
   form,
   isSubmitting,
-  boardAvatar,
   categories,
   onSubmit,
 }: SharedSettingsProps) {
@@ -20,12 +20,18 @@ export function DesktopBaseSettings({
           <div className="space-y-2">
             <div className="flex items-center gap-4">
               <AvatarUpload
-                url={form.getValues("avatar") ?? null}
-                name={form.getValues("name")}
+                url={form.watch("avatar") ?? null}
+                name={form.watch("name")}
+                onRemove={() => form.setValue("avatar", "")}
+                showDropdownMenu={true}
                 size="sm"
                 attachmentType={AttachmentType.BOARD_AVATAR}
                 onUploadSuccess={(url) => {
-                  form.setValue("avatar", url);
+                  form.setValue("avatar", url, {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                    shouldTouch: true,
+                  });
                 }}
               />
               <div>

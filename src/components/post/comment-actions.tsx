@@ -139,7 +139,7 @@ export function CommentActions({ comment, onEdit }: CommentActionsProps) {
           user_hashid: comment.user.hashid,
           board_id: comment.board_id,
           post_id: comment.id,
-          target: 2,
+          target: 1,
           reported_to: "moderator",
         }}
       />
@@ -153,7 +153,7 @@ export function CommentActions({ comment, onEdit }: CommentActionsProps) {
           user_hashid: comment.user.hashid,
           board_id: comment.board_id,
           post_id: comment.id,
-          target: 2,
+          target: 1,
           reported_to: "admin",
         }}
       />

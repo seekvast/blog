@@ -1,28 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRegistrationStore } from "@/store/registration-store";
 import { InterestSelectionModal } from "./interest-selection-modal";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/components/providers/auth-provider";
 
-export function InterestSelectionListener() {
-  const [isOpen, setIsOpen] = useState(false);
+interface InterestSelectionListenerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function InterestSelectionListener({
+  open,
+  onOpenChange,
+}: InterestSelectionListenerProps) {
   const { isNewlyRegistered, setNewlyRegistered } = useRegistrationStore();
-  const { data: session } = useSession();
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (isNewlyRegistered && session?.user) {
-      setIsOpen(true);
+    if (isNewlyRegistered && user) {
+      onOpenChange(true);
       setNewlyRegistered(false);
     }
-  }, [isNewlyRegistered, session, setNewlyRegistered]);
+  }, [isNewlyRegistered, user, setNewlyRegistered, onOpenChange]);
 
   const handleComplete = () => {};
 
   return (
     <InterestSelectionModal
-      open={isOpen}
-      onOpenChange={setIsOpen}
+      open={open}
+      onOpenChange={onOpenChange}
       onComplete={handleComplete}
     />
   );

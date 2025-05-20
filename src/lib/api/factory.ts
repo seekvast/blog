@@ -10,7 +10,6 @@ import type {
   Board,
   Post,
   BoardChild,
-  LoginResponse,
   User,
   UserBlacklist,
   BoardRule,
@@ -21,6 +20,8 @@ import type {
   BoardHistory,
   Notification,
   Draft,
+  Response,
+  PostVoter,
 } from "@/types";
 
 export interface ApiOptions {
@@ -69,11 +70,18 @@ export function createApi(options: ApiOptions = {}) {
         http.get<any>(`${prefix}/user/category`, params, { next }),
       block: (data: any) => http.post<any>(`${prefix}/user/block`, data),
       getPosts: (data?: any) =>
-            http.get<Pagination<Post>>(`${prefix}/user/posts`, data, { next }),
-      verifyAge: (data: any) => http.post<any>(`${prefix}/user/age-verify`, data),
-        sendEmail: (data: any) => http.get<any>(`${prefix}/user/send-email`, data),
+        http.get<Pagination<Post>>(`${prefix}/user/posts`, data, { next }),
+      verifyAge: (data: any) =>
+        http.post<any>(`${prefix}/user/age-verify`, data),
+      sendEmail: (data: any) =>
+        http.get<any>(`${prefix}/user/send-email`, data),
       updateEmail: (data: any) => http.patch<any>(`${prefix}/user/email`, data),
-      getBlacklist: (params?: QueryParams) => http.get<Pagination<UserBlacklist>>(`${prefix}/user/blacklist`, params, { next }),
+      getBlacklist: (params?: QueryParams) =>
+        http.get<Pagination<UserBlacklist>>(
+          `${prefix}/user/blacklist`,
+          params,
+          { next }
+        ),
     },
 
     boards: {
@@ -104,8 +112,8 @@ export function createApi(options: ApiOptions = {}) {
         http.delete<void>(`${prefix}/board/rule`, data),
       getMembers: (data: any) =>
         http.get<Pagination<User>>(`${prefix}/board/users`, data),
-      manageUser: (data: any) =>
-        http.post<BoardUser>(`${prefix}/board/manage-user`, data),
+      moderation: (data: any) =>
+        http.post<BoardUser>(`${prefix}/board/moderation`, data),
       changeUserRole: (data: any) =>
         http.post<BoardUser>(`${prefix}/board/user-role`, data),
       getBlacklist: (data: any) =>
@@ -120,6 +128,8 @@ export function createApi(options: ApiOptions = {}) {
         http.get<Board[]>(`${prefix}/board/recommend`, params, { next }),
       hiddenChild: (data: any) =>
         http.post<any>(`${prefix}/board/hidden-child`, data),
+      block: (data: any) =>
+        http.post<Response<any>>(`${prefix}/board/block`, data),
     },
 
     discussions: {
@@ -206,6 +216,8 @@ export function createApi(options: ApiOptions = {}) {
       update: (data: any) => http.patch<Post>(`${prefix}/post`, data),
       delete: (data: any) => http.delete(`${prefix}/post`, data),
       vote: (data: any) => http.post<any>(`${prefix}/post/vote`, data),
+      voters: (data: any) =>
+        http.get<Pagination<PostVoter>>(`${prefix}/post/voters`, data),
     },
 
     upload: {
@@ -219,8 +231,8 @@ export function createApi(options: ApiOptions = {}) {
         http.get<Pagination<Report>>(`${prefix}/reports`, params, { next }),
       get: (params: any) =>
         http.get<Report>(`${prefix}/report`, params, { next }),
-      process: (data: any) =>
-        http.post<any>(`${prefix}/report/process`, data),
+      moderation: (data: any) =>
+        http.post<any>(`${prefix}/report/moderation`, data),
     },
     notifications: {
       getUnread: (data: any) =>

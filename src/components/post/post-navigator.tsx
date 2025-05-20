@@ -3,8 +3,7 @@
 import * as React from "react";
 import { ChevronsUp, ChevronsDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { zhCN } from "date-fns/locale";
+import { formatDate } from "@/lib/dayjs";
 
 interface PostNavigatorProps {
   totalPosts: number;
@@ -28,9 +27,7 @@ export function PostNavigator({
   const scrollAreaRef = React.useRef<HTMLDivElement>(null);
   const scrollerRef = React.useRef<HTMLDivElement>(null);
 
-  const formattedDate = format(new Date(discussionDate || ""), "MMMM yyyy", {
-    locale: zhCN,
-  });
+  const formattedDate = formatDate(discussionDate || "", "MMMM YYYY");
 
   const scrollerHeight = 50; // 固定滑块高度
 

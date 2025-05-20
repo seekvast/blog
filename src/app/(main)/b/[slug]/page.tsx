@@ -3,21 +3,20 @@
 import * as React from "react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import { Loader2, UserRound } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Suspense } from "react";
 import { api } from "@/lib/api";
-import { ErrorBoundary } from "@/components/ui/error-boundary";
+import { ErrorBoundary } from "@/components/error/error-boundary";
 import { Board, BoardChild, BoardRule } from "@/types/board";
 import { Discussion } from "@/types/discussion";
 import { DiscussionItem } from "@/components/discussion/discussion-item";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
-import { BoardUserRole } from "@/constants/board-user-role";
-import { useQuery } from "@tanstack/react-query";
+import { BoardActionButton } from "@/components/board/board-action-button";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 import { BoardApprovalMode } from "@/constants/board-approval-mode";
+import { useQuery } from "@tanstack/react-query";
 import { DiscussionControls } from "@/components/discussion/discussion-controls";
 import { SortBy } from "@/types/display-preferences";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -25,6 +24,7 @@ import { toast } from "@/components/ui/use-toast";
 import { JoinBoardDialog } from "@/components/board/join-board-dialog";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export default function BoardPage() {
   return (
@@ -43,6 +43,8 @@ export default function BoardPage() {
 }
 
 function BoardContent() {
+  const router = useRouter();
+
   const queryClient = useQueryClient();
   const params = useParams();
   const searchParams = useSearchParams();
@@ -62,6 +64,15 @@ function BoardContent() {
     "posts"
   );
   const [joinBoardOpen, setJoinBoardOpen] = useState(false);
+  const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
+  const { requireAuth } = useRequireAuth();
+
+  const { mutate: blockBoard } = useMutation({
+    mutationFn: (boardId: number) => api.boards.block({ board_id: boardId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+    },
+  });
 
   const handleLoadMore = useCallback(() => {
     if (!discussionsLoading && hasMore) {
@@ -92,8 +103,6 @@ function BoardContent() {
         const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
         window.history.replaceState({}, "", newUrl);
       }
-    } catch (error) {
-      setError("获取看板详情失败");
     } finally {
       setLoading(false);
     }
@@ -253,18 +262,22 @@ function BoardContent() {
   }
 
   if (!board) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        看板不存在
-      </div>
-    );
+    const notFoundError = new Error("看板不存在");
+    notFoundError.name = "NotFoundError";
+    throw notFoundError;
   }
-  const handleJoinBoard = () => {
+  const handleJoinBoard = (boardId: number) => {
+    if (board.history) return;
     if (board.approval_mode === BoardApprovalMode.APPROVAL) {
       setJoinBoardOpen(true);
     } else {
-      joinBoard(board.id);
+      joinBoard(boardId);
     }
+  };
+
+  const handleBlockBoard = (boardId: number) => {
+    blockBoard(boardId);
+    router.back();
   };
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto] gap-4 md:gap-6">
@@ -285,13 +298,20 @@ function BoardContent() {
                       成人
                     </Badge>
                   )}
-                  {/* {board.visibility === 1 && (
+                  {board.visibility === 1 && (
                     <Badge variant="secondary">私密</Badge>
-                  )} */}
+                  )}
                 </div>
                 <div className="flex items-center space-x-4">
+                  <BoardActionButton
+                    board={board}
+                    onJoin={handleJoinBoard}
+                    onBlock={handleBlockBoard}
+                    requireAuth={requireAuth}
+                    setReportToKaterOpen={setReportToKaterOpen}
+                  />
                   {/* 如果是创建者或管理员，则显示设置按钮 */}
-                  {board.board_user &&
+                  {/* {board.board_user &&
                     (board.board_user?.user_role === BoardUserRole.CREATOR ||
                       board.board_user?.user_role ===
                         BoardUserRole.MODERATOR) && (
@@ -323,7 +343,7 @@ function BoardContent() {
                     >
                       加入
                     </Button>
-                  )}
+                  )} */}
                 </div>
               </div>
               <div className="mt-1 text-sm text-muted-foreground">
@@ -417,7 +437,7 @@ function BoardContent() {
 
         {/* 子导航 */}
         {activeTab === "posts" && (
-          <div className="flex items-center space-x-8 px-4 pt-3 text-sm">
+          <div className="flex flex-wrap items-center gap-x-8 gap-y-4 px-4 pt-3 text-sm">
             <Badge
               variant={!selectedChildId ? "default" : "secondary"}
               className={`cursor-pointer hover:bg-primary/90 ${
@@ -471,7 +491,7 @@ function BoardContent() {
           )}
 
           {activeTab === "rules" && (
-            <div className="py-4">
+            <div className="">
               {rulesLoading ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -485,9 +505,9 @@ function BoardContent() {
                   暂无规则
                 </div>
               ) : (
-                <div className="space-y-6 border-b">
+                <div className="divide-y">
                   {rules.map((rule, index) => (
-                    <div key={rule.id || index} className="px-4 pb-4">
+                    <div key={rule.id || index} className="p-4">
                       <h3 className="text-lg font-medium mb-2">{rule.title}</h3>
                       <p className="text-muted-foreground">{rule.content}</p>
                     </div>
@@ -506,7 +526,7 @@ function BoardContent() {
               ) : (
                 <div className="divide-y">
                   {boardChildren.map((child) => (
-                    <div key={child.id} className="px-4 py-2">
+                    <div key={child.id} className="p-4">
                       <div className="flex items-center justify-between">
                         <h3 className="text-lg font-medium mb-2">
                           {child.name}

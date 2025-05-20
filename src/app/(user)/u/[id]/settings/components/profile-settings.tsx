@@ -1,7 +1,11 @@
 "use client";
 
 import { Label } from "@/components/ui/label";
-import { ChevronRight, Upload as UploadIcon, Trash as TrashIcon } from "lucide-react";
+import {
+  ChevronRight,
+  Upload as UploadIcon,
+  Trash as TrashIcon,
+} from "lucide-react";
 import { useState, useRef } from "react";
 import {
   Dialog,
@@ -78,11 +82,8 @@ export default function ProfileSettings({ user }: { user: User | null }) {
   const [bgImage, setBgImage] = useState<string | null>(user?.cover ?? null);
   const [birthday, setBirthday] = useState<string>(user?.birthday ?? "");
   const bgInputRef = useRef<HTMLInputElement>(null);
-  const avatarInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // 不再需要这个状态，因为 DropdownMenu 组件会处理菜单的显示和隐藏
-  // 不再需要手动管理菜单状态，因为 DropdownMenu 组件会处理这些逻辑
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -121,16 +122,13 @@ export default function ProfileSettings({ user }: { user: User | null }) {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
+    console.log(values, "avatar_url");
     try {
       const updatedUser = await api.users.update({
         ...values,
-        avatar_url: avatar ?? values.avatar_url,
         cover: bgImage,
       });
-      toast({
-        title: "更新成功",
-        description: "个人资料已更新",
-      });
+
       setOpen(false);
     } catch (error: any) {
       toast({
@@ -199,61 +197,20 @@ export default function ProfileSettings({ user }: { user: User | null }) {
               <div className="flex items-center gap-4">
                 {/* 头像 */}
                 <div className="relative">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <div className="cursor-pointer">
-                        <AvatarUpload
-                          url={user.avatar_url ?? null}
-                          name={user.username}
-                          attachmentType={AttachmentType.USER_AVATAR}
-                          onUploadSuccess={(url) => {
-                            setAvatar(url);
-                          }}
-                        />
-                      </div>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-slate-800 border-slate-700 text-white">
-                      <DropdownMenuItem 
-                        className="cursor-pointer hover:bg-slate-700 focus:bg-slate-700"
-                        onClick={() => avatarInputRef.current?.click()}
-                      >
-                        <UploadIcon className="mr-2 h-4 w-4" />
-                        <span>上传</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        className="cursor-pointer hover:bg-slate-700 focus:bg-slate-700"
-                        onClick={() => setAvatar(null)}
-                      >
-                        <TrashIcon className="mr-2 h-4 w-4" />
-                        <span>移除</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  
-                  <input
-                    type="file"
-                    ref={avatarInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      
-                      try {
-                        const data = await uploadFile(file, AttachmentType.USER_AVATAR);
-                        setAvatar(data.url);
-                        toast({
-                          description: "头像上传成功",
-                        });
-                      } catch (error) {
-                        console.error("Error uploading avatar:", error);
-                        toast({
-                          variant: "destructive",
-                          title: "上传失败",
-                          description: "头像上传失败，请重试",
-                        });
-                      }
+                  <AvatarUpload
+                    url={user.avatar_url ?? null}
+                    name={user.username}
+                    attachmentType={AttachmentType.USER_AVATAR}
+                    onUploadSuccess={(url) => {
+                      setAvatar(url);
+                      form.setValue("avatar_url", url);
                     }}
+                    onRemove={() => {
+                      setAvatar(null);
+                      form.setValue("avatar_url", "");
+                    }}
+                    showDropdownMenu={true}
+                    size="lg"
                   />
                 </div>
 
@@ -280,15 +237,39 @@ export default function ProfileSettings({ user }: { user: User | null }) {
 
               {/* 右侧：背景上传按钮 */}
               <div className="flex flex-col justify-center items-center z-10">
-                <button
-                  onClick={handleBgClick}
-                  disabled={isBgUploading}
-                  className={`w-10 h-10 rounded-full ${
-                    isBgUploading ? "opacity-50" : ""
-                  } bg-white/30 transition-colors flex items-center justify-center shadow-sm`}
-                >
-                  <ImageIcon className="w-4 h-4 text-white" />
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      disabled={isBgUploading}
+                      className={`w-10 h-10 rounded-full ${
+                        isBgUploading ? "opacity-50" : ""
+                      } bg-white/30 transition-colors flex items-center justify-center shadow-sm hover:bg-white/40`}
+                    >
+                      <ImageIcon className="w-4 h-4 text-white" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={handleBgClick}
+                      disabled={isBgUploading}
+                    >
+                      <UploadIcon className="mr-2 h-4 w-4" />
+                      <span>上传</span>
+                    </DropdownMenuItem>
+                    {bgImage && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setBgImage(null);
+                          toast({ description: "背景图片已移除" });
+                        }}
+                      >
+                        <TrashIcon className="mr-2 h-4 w-4" />
+                        <span>移除</span>
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <input
                   type="file"
                   ref={bgInputRef}

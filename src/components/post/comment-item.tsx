@@ -2,8 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { formatDistanceToNow, format } from "date-fns";
-import { zhCN } from "date-fns/locale";
+import { formatDate, fromNow } from "@/lib/dayjs";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { PostContent } from "@/components/post/post-content";
@@ -13,8 +12,6 @@ import { CommentActions } from "@/components/post/comment-actions";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { EditReply } from "@/components/post/edit-reply";
 import { PostForm } from "@/validations/post";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
@@ -24,8 +21,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
+import { CommentButton } from "@/components/post/comment-button";
+import type { Discussion } from "@/types/discussion";
+import { VotersList } from "@/components/post/voters-list";
 interface CommentItemProps {
+  discussion: Discussion;
   comment: Post;
   onReply: (comment: Post) => void;
   onVote: (postId: number, vote: "up" | "down") => void;
@@ -36,7 +36,10 @@ interface CommentItemProps {
   isLocked?: boolean;
 }
 
+
+
 export const CommentItem = ({
+  discussion,
   comment,
   onReply,
   onVote,
@@ -48,6 +51,7 @@ export const CommentItem = ({
 }: CommentItemProps) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [isReplying, setIsReplying] = React.useState(false);
+  const [votersPopoverOpen, setVotersPopoverOpen] = React.useState(false);
   const [showChildren, setShowChildren] = React.useState(false);
   const [editContent, setEditContent] = React.useState(comment.raw_content);
   const { toast } = useToast();
@@ -175,10 +179,7 @@ export const CommentItem = ({
               )}
               <span className="text-gray-300">·</span>
               <span>
-                {formatDistanceToNow(new Date(comment.created_at), {
-                  addSuffix: true,
-                  locale: zhCN,
-                })}
+                {fromNow(comment.created_at)}
               </span>
               {comment.editor && (
                 <Popover>
@@ -196,7 +197,7 @@ export const CommentItem = ({
                         {comment.editor.nickname || comment.editor.username}{" "}
                         编辑于{" "}
                         {comment.edited_at
-                          ? format(new Date(comment.edited_at), "yyyy年M月d日")
+                          ? formatDate(comment.edited_at, "YYYY年M月D日")
                           : "未知"}
                       </div>
                     </div>
@@ -228,21 +229,29 @@ export const CommentItem = ({
           {!isEditing && (
             <div className="mt-3 flex justify-between items-center space-x-4 text-sm md:text-base text-muted-foreground">
               <div className="flex items-center gap-2 space-x-3 md:space-x-6">
-                <div
-                  className="flex items-center space-x-1 cursor-pointer"
-                  onClick={() => onVote(comment.id, "up")}
-                >
+                <div className="flex items-center space-x-2 cursor-pointer">
                   <ThumbsUp
                     className={cn(
                       "h-4 w-4",
                       comment.user_voted?.vote === "up" &&
                         "text-primary fill-primary"
                     )}
+                    onClick={() => onVote(comment.id, "up")}
                   />
                   {comment.up_votes_count > 0 && (
-                    <span className="text-xs md:text-sm">
-                      {comment.up_votes_count}
-                    </span>
+                    <Popover
+                      open={votersPopoverOpen}
+                      onOpenChange={setVotersPopoverOpen}
+                    >
+                      <PopoverTrigger asChild>
+                        <button className="text-xs md:text-sm hover:text-primary">
+                          {comment.up_votes_count}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-80 p-0" align="start">
+                        <VotersList postId={comment.id} />
+                      </PopoverContent>
+                    </Popover>
                   )}
                 </div>
                 <div
@@ -266,14 +275,16 @@ export const CommentItem = ({
 
               <div className="flex items-center space-x-3">
                 <AuthGuard>
-                  {!isLocked && (
-                    <button
-                      className="text-sm cursor-pointer hover:text-primary"
-                      onClick={handleReplyClick}
-                    >
-                      回复
-                    </button>
-                  )}
+                  <CommentButton
+                    discussion={discussion}
+                    isLocked={isLocked}
+                    isReply={true}
+                    isSubmitting={isReplying}
+                    showEditor={isReplying}
+                    onClick={handleReplyClick}
+                    variant="text"
+                    size="sm"
+                  />
                 </AuthGuard>
                 <CommentActions comment={comment} onEdit={handleEdit} />
               </div>
@@ -297,6 +308,7 @@ export const CommentItem = ({
                   {comment.children.map((childComment) => (
                     <CommentItem
                       key={childComment.id}
+                      discussion={discussion}
                       comment={childComment}
                       onReply={onReply}
                       onVote={onVote}

@@ -86,7 +86,7 @@ export function BlocklistSettings({ board }: BlocklistSettingsProps) {
   // 处理解除封锁
   const handleUnblock = async (item: BoardBlacklist) => {
     try {
-      await api.boards.manageUser({
+      await api.boards.moderation({
         board_id: board.id,
         user_hashid: item.user_hashid,
         action: 1,
@@ -114,6 +114,7 @@ export function BlocklistSettings({ board }: BlocklistSettingsProps) {
 
   return (
     <div className="space-y-4">
+      <h3 className="text-lg font-medium">封锁名单</h3>
       {/* 筛选栏 */}
       <div className="flex flex-wrap gap-4">
         <Select value={adminFilter} onValueChange={setAdminFilter}>

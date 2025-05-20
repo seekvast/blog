@@ -1,6 +1,6 @@
 import React from "react";
 import { UseFormReturn } from "react-hook-form";
-import { FormData } from "./types";
+import { BoardSettingsFormValues } from "./types";
 import { Category } from "@/types";
 import {
   FormControl,
@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 
 interface FormFieldsProps {
-  form: UseFormReturn<FormData>;
+  form: UseFormReturn<BoardSettingsFormValues>;
   categories: Category[];
   variant?: "mobile" | "desktop";
 }

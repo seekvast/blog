@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { Post } from "@/types/discussion";
+import type { Discussion, Post } from "@/types/discussion";
 import { CommentItem } from "@/components/post/comment-item";
 import { PostForm } from "@/validations/post";
 import { Loading } from "@/components/ui/loading";
@@ -8,6 +8,7 @@ import { UserRound } from "lucide-react";
 import { AuthGuard } from "@/components/auth/auth-guard";
 
 interface CommentListProps {
+  discussion: Discussion;
   comments: Post[];
   isLoading: boolean;
   onReply: (comment: Post) => void;
@@ -20,6 +21,7 @@ interface CommentListProps {
 
 export const CommentList = React.memo(
   ({
+    discussion,
     comments,
     isLoading,
     onReply,
@@ -53,6 +55,7 @@ export const CommentList = React.memo(
           {comments.map((comment) => (
             <CommentItem
               key={comment.id}
+              discussion={discussion}
               comment={comment}
               onReply={onReply}
               onVote={onVote}

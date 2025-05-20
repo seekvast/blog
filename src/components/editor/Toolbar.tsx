@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Bold,
@@ -17,6 +17,8 @@ import {
   Strikethrough,
   Maximize2,
   Minimize2,
+  Loader,
+  Loader2,
 } from "lucide-react";
 import {
   Tooltip,
@@ -201,7 +203,8 @@ export function Toolbar({
     [content, selection, onContentChange, onSelectionChange, textareaRef]
   );
 
-  // 添加图片上传处理函数
+  const [isImageUploading, setIsImageUploading] = useState(false);
+
   const handleImageUpload = React.useCallback(() => {
     const input = document.createElement("input");
     input.type = "file";
@@ -210,7 +213,13 @@ export function Toolbar({
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
-      await onImageUpload(file);
+
+      setIsImageUploading(true);
+      try {
+        await onImageUpload(file);
+      } finally {
+        setIsImageUploading(false);
+      }
     };
 
     input.click();
@@ -243,9 +252,10 @@ export function Toolbar({
       onClick: () => wrapText("[", "](url)"),
     },
     {
-      icon: Image,
-      tooltip: "上传图片",
+      icon: isImageUploading ? Loader2 : Image,
+      tooltip: isImageUploading ? "图片上传中..." : "上传图片",
       onClick: handleImageUpload,
+      disabled: isImageUploading,
     },
     {
       icon: List,
@@ -279,9 +289,15 @@ export function Toolbar({
                 variant="ghost"
                 size="sm"
                 onClick={tool.onClick}
+                disabled={tool.disabled}
                 className="h-8 w-8 p-0"
               >
-                <tool.icon className="h-4 w-4" />
+                <tool.icon
+                  className={cn(
+                    "h-4 w-4",
+                    tool.icon === Loader2 && "animate-spin"
+                  )}
+                />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -313,7 +329,12 @@ export function Toolbar({
           </Tooltip>
         </TooltipProvider>
       </div> */}
-      <div className={cn("flex items-center gap-0.5 ml-auto", isFullscreen && "pr-4")}>
+      <div
+        className={cn(
+          "flex items-center gap-0.5 ml-auto",
+          isFullscreen && "pr-4"
+        )}
+      >
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>

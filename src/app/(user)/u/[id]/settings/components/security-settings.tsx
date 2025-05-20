@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useCountdown } from "@/store/countdown-store";
 import { Label } from "@/components/ui/label";
 import { ChevronRight } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -19,11 +20,11 @@ import { User } from "@/types/user";
 import { api } from "@/lib/api";
 import { z } from "zod";
 import { signOut } from "next-auth/react";
-import { ImageUpload } from "@/components/ui/image-upload";
 import { Attachment } from "@/types";
 import { PlusIcon } from "lucide-react";
 import { X } from "lucide-react";
 import Image from "next/image";
+import { AttachmentType } from "@/constants/attachment-type";
 
 const passwordSchema = z
   .object({
@@ -76,7 +77,8 @@ export default function SecuritySettings({ user }: { user: User | null }) {
     captcha: "",
   });
   const [isSendingCode, setIsSendingCode] = useState(false);
-  const [countdown, setCountdown] = useState(0);
+  const { remainingSeconds: countdown, startCountdown } =
+    useCountdown("email-verification");
   const [nsfwVisible, setNsfwVisible] = useState(user.preferences?.nsfwVisible);
   const [verificationImageUrl, setVerificationImageUrl] = useState<
     string | null
@@ -84,7 +86,6 @@ export default function SecuritySettings({ user }: { user: User | null }) {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const getGenderText = (value: string | undefined) => {
     switch (value) {
       case "0":
@@ -141,10 +142,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
 
   const handlePasswordSubmit = async () => {
     try {
-      // 使用 zod 验证表单
       const validatedData = passwordSchema.parse(passwordForm);
-
-      // 提交到后端
       await api.users.changePassword(validatedData);
       toast({
         title: "修改成功",
@@ -163,10 +161,9 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        // 显示第一个验证错误
         toast({
           variant: "destructive",
-          title: "验证错误",
+          title: "错误",
           description: error.errors[0].message,
         });
       } else {
@@ -215,17 +212,8 @@ export default function SecuritySettings({ user }: { user: User | null }) {
         description: "验证码已发送到您的新邮箱",
       });
 
-      // 设置倒计时
-      setCountdown(60);
-      const timer = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+      // 使用hook启动倒计时
+      startCountdown(60);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -328,11 +316,12 @@ export default function SecuritySettings({ user }: { user: User | null }) {
     }
 
     // 检查文件类型
-    if (!file.type.startsWith("image/")) {
+    const allowedFormats = ["image/jpeg", "image/jpg", "image/png"];
+    if (!allowedFormats.includes(file.type)) {
       toast({
         variant: "destructive",
         title: "格式不支持",
-        description: "只支持图片格式",
+        description: "只支持JPG、JPEG、PNG格式",
       });
       return;
     }
@@ -341,16 +330,15 @@ export default function SecuritySettings({ user }: { user: User | null }) {
     try {
       const formData = new FormData();
       formData.append("image", file);
-      formData.append("attachment_type", "profile_avatars");
+      formData.append("attachment_type", AttachmentType.AGE_KYC);
 
       const data = await api.upload.image(formData);
       handleAgeVerificationImageUpload(data);
 
       toast({
-        description: "圖片上傳成功",
+        description: "上傳成功",
       });
     } catch (error) {
-      console.error("圖片上傳失敗:", error);
       toast({
         variant: "destructive",
         title: "上傳失敗",
@@ -678,9 +666,19 @@ export default function SecuritySettings({ user }: { user: User | null }) {
           <p className="text-sm mt-1">驗證你的年齡以存取特定內容</p>
           <div
             className="flex items-center gap-2 cursor-pointer"
-            onClick={() => handleAgeVerificationOpen()}
+            onClick={() => {
+              if (user.age_verified !== 1 && user.age_verified !== 2) {
+                handleAgeVerificationOpen();
+              }
+            }}
           >
-            <span className="text-sm text-blue-600 ">去验证</span>
+            {user.age_verified === 1 ? (
+              <span className="text-sm">已验证</span>
+            ) : user.age_verified === 2 ? (
+              <span className="text-sm">审核中</span>
+            ) : (
+              <span className="text-sm text-blue-600 ">去验证</span>
+            )}
             <ChevronRight className="h-4 w-4 " />
           </div>
         </div>
@@ -772,20 +770,22 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       </Dialog>
 
       {/* 成人内容 */}
-      <div className="py-3 border-b">
-        <Label className="font-bold">成人內容</Label>
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-sm mt-1">
-            開啟後，可以自由選擇是否瀏覽成人文章與看板，並根據設定顯示相應的內容。
-          </p>
-          <Switch
-            checked={nsfwVisible === "yes"}
-            onCheckedChange={(checked) => {
-              handleToggle("nsfwVisible", checked);
-            }}
-          />
+      {user.age_verified === 1 && (
+        <div className="py-3 border-b">
+          <Label className="font-bold">成人內容</Label>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-sm mt-1">
+              開啟後，可以自由選擇是否瀏覽成人文章與看板，並根據設定顯示相應的內容。
+            </p>
+            <Switch
+              checked={nsfwVisible === "yes"}
+              onCheckedChange={(checked) => {
+                handleToggle("nsfwVisible", checked);
+              }}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

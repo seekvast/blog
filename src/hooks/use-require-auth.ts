@@ -1,12 +1,12 @@
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/components/providers/auth-provider";
 import { useLoginModal } from "@/components/providers/login-modal-provider";
 
 export function useRequireAuth() {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const { openLoginModal } = useLoginModal();
 
   const requireAuth = (callback: () => void) => {
-    if (!session?.user) {
+    if (!user) {
       openLoginModal();
       return false;
     }
@@ -14,5 +14,5 @@ export function useRequireAuth() {
     return true;
   };
 
-  return { requireAuth, user: session?.user };
+  return { requireAuth, user };
 }

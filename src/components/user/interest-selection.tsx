@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckIcon } from "lucide-react";
 import Twemoji from "react-twemoji";
+import { useAuth } from "@/components/providers/auth-provider";
 
 interface InterestSelectionProps {
   onComplete?: () => void;
@@ -25,16 +26,33 @@ export function InterestSelection({
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
-  // 获取分类列表
   useEffect(() => {
-    fetchCategories();
+    fetchCategoriesAndUserSelections();
   }, []);
 
-  const fetchCategories = async () => {
+  const { user } = useAuth();
+
+  const fetchCategoriesAndUserSelections = async () => {
     try {
       setIsLoading(true);
-      const response = await api.common.categories();
-      setCategories(response.map((cat) => ({ ...cat, selected: false })));
+      
+      const allCategories = await api.common.categories();
+      
+      if (user) {
+        const userInfo = await api.users.get({hashid: user.hashid});
+        
+        const userSelectedIds = userInfo.categories?.map((cat: Category) => cat.id) || [];
+        
+        setCategories(allCategories.map((cat) => ({
+          ...cat,
+          selected: userSelectedIds.includes(cat.id)
+        })));
+      } else {
+        setCategories(allCategories.map((cat) => ({
+          ...cat,
+          selected: false
+        })));
+      }
     } catch (error) {
       toast({
         variant: "destructive",
@@ -63,11 +81,6 @@ export function InterestSelection({
 
       await api.users.saveCategory({
         category_id: selectedIds.length > 0 ? selectedIds : undefined,
-      });
-
-      toast({
-        title: "保存成功",
-        description: "您的兴趣已保存",
       });
 
       if (onComplete) onComplete();
@@ -117,11 +130,13 @@ export function InterestSelection({
                 }
               `}
             >
-              <span className="text-base mr-1.5">
-                <Twemoji options={{ className: "w-6 h-6" }}>
-                  {category.icon}
-                </Twemoji>
-              </span>
+              {!category.selected && (
+                <span className="text-base mr-1.5">
+                  <Twemoji options={{ className: "w-6 h-6" }}>
+                    {category.icon}
+                  </Twemoji>
+                </span>
+              )}
               <p className="text-sm font-medium">{category.name}</p>
               {category.selected && (
                 <div className="ml-auto">

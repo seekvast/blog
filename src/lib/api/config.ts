@@ -11,5 +11,5 @@ export const getBaseUrl = (isServer: boolean): string => {
 
 export const API_CONFIG = {
   DEFAULT_RETRY: 1,
-  DEFAULT_TIMEOUT: 10000,
+  DEFAULT_TIMEOUT: 10000 * 10,
 } as const;

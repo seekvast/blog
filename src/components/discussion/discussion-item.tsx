@@ -4,7 +4,7 @@ import * as React from "react";
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useRequireAuth } from "@/hooks/use-require-auth";
-import { format } from "date-fns";
+import { formatDate, fromNow } from "@/lib/dayjs";
 
 import { ThumbsUp, MessageSquare, Tag } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -186,7 +186,13 @@ export const DiscussionItem = React.forwardRef<
                   avoidCollisions={true}
                 >
                   <div className="space-y-2 text-muted-foreground">
-                    {/* <p className="text-xs font-medium">分享链接</p> */}
+                    <div className="text-xs font-medium">
+                      <span className="font-bold">发表 #1 </span>
+                      {formatDate(
+                        discussion.created_at,
+                        "YYYY年M月D日 dddd HH:mm:ss"
+                      )}
+                    </div>
                     <div className="flex flex-col space-y-2 w-full">
                       <div className="relative w-full">
                         <input
@@ -256,9 +262,9 @@ export const DiscussionItem = React.forwardRef<
                         discussion.main_post.editor.username}{" "}
                       编辑于{" "}
                       {discussion.main_post.edited_at
-                        ? format(
-                            new Date(discussion.main_post.edited_at),
-                            "yyyy年M月d日"
+                        ? formatDate(
+                            discussion.main_post.edited_at,
+                            "YYYY年M月D日"
                           )
                         : "未知"}
                     </div>

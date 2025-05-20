@@ -24,28 +24,42 @@ import {
   ActionMode,
 } from "@/validations/moderation";
 
-interface ReportActionProps {
+// 定义场景类型
+export type ModerationScene = "report" | "board";
+
+interface ModerationActionProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onProcess: (data: ModerationProcessSchema) => void;
   isPending: boolean;
+  scene?: ModerationScene;
+  defaultAction?: ActionMode;
 }
 
-export function ReportAction({
+export function ModerationAction({
   isOpen,
   onOpenChange,
   onProcess,
   isPending,
-}: ReportActionProps) {
+  scene = "board",
+  defaultAction,
+}: ModerationActionProps) {
   const form = useForm<ModerationProcessSchema>({
     resolver: zodResolver(moderationProcessSchema),
     defaultValues: {
-      act_mode: ActionMode.DELETE,
+      act_mode: defaultAction,
+      mute_days: undefined,
       act_explain: "",
       reason_desc: "",
       delete_range: "none",
     },
   });
+
+  React.useEffect(() => {
+    if (defaultAction !== undefined) {
+      form.setValue("act_mode", defaultAction);
+    }
+  }, [defaultAction, form]);
 
   const handleProcess = (data: ModerationProcessSchema) => {
     onProcess(data);
@@ -68,13 +82,15 @@ export function ReportAction({
                   form.setValue("act_mode", Number(value) as ActionMode)
                 }
               >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    value={String(ActionMode.DELETE)}
-                    id="delete"
-                  />
-                  <Label htmlFor="delete">删除文章/回覆</Label>
-                </div>
+                {scene === "report" && (
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem
+                      value={String(ActionMode.DELETE)}
+                      id="delete"
+                    />
+                    <Label htmlFor="delete">删除文章/回覆</Label>
+                  </div>
+                )}
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
                     value={String(ActionMode.KICK_OUT)}
@@ -89,6 +105,23 @@ export function ReportAction({
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value={String(ActionMode.MUTE)} id="mute" />
                   <Label htmlFor="mute">禁言</Label>
+                  {form.watch("act_mode") === ActionMode.MUTE && (
+                    <div className="ml-4 flex items-center">
+                      <input
+                        type="number"
+                        className="w-16 h-7 p-1 border rounded-md"
+                        min="0"
+                        max="31"
+                        onChange={(e) =>
+                          form.setValue(
+                            "mute_days",
+                            parseInt(e.target.value) || undefined
+                          )
+                        }
+                      />
+                      <span className="ml-1">天</span>
+                    </div>
+                  )}
                 </div>
               </RadioGroup>
               {form.formState.errors.act_mode && (
@@ -101,9 +134,9 @@ export function ReportAction({
               <Label>删除讯息历史</Label>
               <Select
                 value={form.watch("delete_range")}
-                onValueChange={(value: ModerationProcessSchema["delete_range"]) =>
-                  form.setValue("delete_range", value)
-                }
+                onValueChange={(
+                  value: ModerationProcessSchema["delete_range"]
+                ) => form.setValue("delete_range", value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="选择删除历史时间范围" />

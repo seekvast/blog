@@ -3,21 +3,24 @@
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Board } from "@/types";
 import { UserRound } from "lucide-react";
-import {
-  BoardUserStatus,
-  BoardUserStatusMapping,
-} from "@/constants/board-user-status";
+import { Board } from "@/types";
+import { BoardActionButton } from "./board-action-button";
+import { useRequireAuth } from "@/hooks/use-require-auth";
+import { ReportDialog } from "@/components/report/report-dialog";
+import { useBoardActions } from "@/hooks/use-board-actions";
 
 interface BoardItemProps {
   board: Board;
   onJoin?: (boardId: number) => void;
+  onBlock?: (boardId: number) => void;
   onLeave?: (boardId: number) => void;
 }
 
-export function BoardItem({ board, onJoin, onLeave }: BoardItemProps) {
+export function BoardItem({ board, onJoin, onBlock, onLeave }: BoardItemProps) {
+  const { requireAuth } = useRequireAuth();
+  const { reportDialogOpen, setReportDialogOpen } = useBoardActions();
+
   return (
     <div className="flex items-center justify-between py-4">
       <div className="flex items-center space-x-4">
@@ -60,33 +63,27 @@ export function BoardItem({ board, onJoin, onLeave }: BoardItemProps) {
         </div>
       </div>
       <div>
-        {!board.board_user ? (
-          <Button
-            size="sm"
-            className="rounded-full"
-            onClick={() => onJoin?.(board.id)}
-          >
-            加入
-          </Button>
-        ) : board.board_user &&
-          board.board_user.status === 1 &&
-          [1, 2].includes(board.board_user.user_role) ? (
-          <Button variant="outline" size="sm" className="rounded-full">
-            <Link href={`/b/${board.slug}/settings`}>设定</Link>
-          </Button>
-        ) : (
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-full"
-            onClick={() => onLeave?.(board.id)}
-          >
-            {BoardUserStatusMapping[
-              board.board_user.status as keyof typeof BoardUserStatusMapping
-            ] || ""}
-          </Button>
-        )}
+        <BoardActionButton
+          board={board}
+          onJoin={onJoin}
+          onBlock={onBlock}
+          onLeave={onLeave}
+          requireAuth={requireAuth}
+          setReportToKaterOpen={setReportDialogOpen}
+        />
       </div>
+
+      <ReportDialog
+        open={reportDialogOpen}
+        onOpenChange={setReportDialogOpen}
+        title="向Kater檢舉"
+        form={{
+          user_hashid: board.creator_hashid,
+          board_id: board.id,
+          target: 2,
+          reported_to: "admin",
+        }}
+      />
     </div>
   );
 }

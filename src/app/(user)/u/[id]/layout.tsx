@@ -39,7 +39,7 @@ export default function UserLayout({
   const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
   const [gradientColor, setGradientColor] =
-    useState<string>("rgba(0, 0, 0, 0.3)");
+    useState<string>("rgba(0, 0, 0, 0)");
 
   // 获取用户详细信息
   const { data: userData } = useQuery({
@@ -95,16 +95,16 @@ export default function UserLayout({
             g = Math.round(g / count);
             b = Math.round(b / count);
 
-            setGradientColor(`rgba(${r}, ${g}, ${b}, 0.8)`);
+            setGradientColor(`rgba(${r}, ${g}, ${b}, 0.5)`);
           };
 
           img.onerror = () => {
             console.error("Error loading image");
-            setGradientColor("rgba(0, 0, 0, 0.3)");
+            setGradientColor("rgba(0, 0, 0, 0)");
           };
         } catch (error) {
           console.error("Error getting color:", error);
-          setGradientColor("rgba(0, 0, 0, 0.5)");
+          setGradientColor("rgba(0, 0, 0, 0)");
         }
       };
       getImageColor();
@@ -117,14 +117,6 @@ export default function UserLayout({
       api.users.block({ block_user_hashid }),
     onSuccess: (response) => {
       setIsBlocked(!isBlocked);
-      toast({
-        title: "成功",
-        description: isBlocked
-          ? "已将该用户从黑名单中移除"
-          : "已将该用户加入黑名单",
-      });
-
-      // 刷新用户数据
       queryClient.invalidateQueries({ queryKey: ["user", username] });
     },
     onError: (error) => {
@@ -168,7 +160,7 @@ export default function UserLayout({
               <div
                 className="absolute inset-0 transition-colors duration-300"
                 style={{
-                  background: `linear-gradient(to bottom, transparent, ${gradientColor})`,
+                  backgroundColor: gradientColor,
                 }}
               />
             </div>
@@ -191,12 +183,13 @@ export default function UserLayout({
                     </div>
                     <div className="flex  space-x-2 text-white text-sm">
                       <span>@{userData.username} </span>
-                      {userData.is_online === true && (
-                        <div className="flex items-center space-x-1">
-                          <span className="inline-block w-3 h-3 bg-green-500 rounded-full"></span>
-                          <span>在线上</span>
-                        </div>
-                      )}
+                      {userData.preferences?.discloseOnline === "yes" &&
+                        userData.is_online === true && (
+                          <div className="flex items-center space-x-1">
+                            <span className="inline-block w-3 h-3 bg-green-500 rounded-full"></span>
+                            <span>在线上</span>
+                          </div>
+                        )}
                       <div>
                         <span>加入于</span>{" "}
                         <span>

@@ -14,6 +14,7 @@ export interface Board {
   name: string;
   avatar: string;
   creator_id: number;
+  creator_hashid: string;
   slug: string;
   desc: string;
   visibility: number;
@@ -28,12 +29,14 @@ export interface Board {
   status: number;
   users_count: number;
   is_joined: number;
+  history: BoardHistory;
   board_user: {
     id: number;
     user_role: number;
     posts_count: number;
     replies_count: number;
     status: number;
+    muted_until: string | null;
   };
   manager: BoardManager;
   category: {

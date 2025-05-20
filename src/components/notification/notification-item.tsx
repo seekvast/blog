@@ -2,8 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
-import { zhCN } from "date-fns/locale";
+import { fromNow } from "@/lib/dayjs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Notification } from "@/types";
@@ -91,10 +90,7 @@ export function NotificationItem({
             </Link>
           )}
           <span className="text-xs text-muted-foreground">
-            {formatDistanceToNow(new Date(notification.created_at), {
-              addSuffix: true,
-              locale: zhCN,
-            })}
+            {fromNow(notification.created_at)}
           </span>
         </div>
 

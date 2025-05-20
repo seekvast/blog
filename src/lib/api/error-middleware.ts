@@ -69,11 +69,20 @@ export async function handleApiError(error: unknown): Promise<void> {
           break;
 
         case 404:
+          // 创建一个特殊的 404 错误，可以被 ErrorBoundary 识别
+          const notFoundError = new Error("请求的资源不存在或已被删除");
+          notFoundError.name = "NotFoundError";
+          (notFoundError as any).status = 404;
+          
+          // 显示一个 toast 提示
           toast({
             title: "资源不存在",
             description: "请求的资源不存在或已被删除",
             variant: "destructive",
           });
+          
+          // 抛出错误，让 ErrorBoundary 捕获
+          throw notFoundError;
           break;
 
         case 422:

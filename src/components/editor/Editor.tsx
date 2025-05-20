@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { getCaretCoordinates } from "@/lib/utils/caret";
 import { uploadFile, AttachmentType } from "@/lib/utils/upload";
 import { Attachment } from "@/types";
+import { Loader2 } from "lucide-react";
 
 interface EditorProps {
   className?: string;
@@ -288,11 +289,9 @@ export const Editor = React.forwardRef<
       const before = content.slice(0, cursorPosition);
       const after = content.slice(cursorPosition);
 
-      // Find the last @ symbol before cursor
       const lastAtPos = before.lastIndexOf("@");
       if (lastAtPos === -1) return content;
 
-      // Replace the @username with the markdown mention format
       const newContent =
         before.slice(0, lastAtPos) +
         `[@${user.username}](@${user.username})` +
@@ -425,6 +424,26 @@ export const Editor = React.forwardRef<
               content={content}
               className={cn(isFullscreen && "h-full")}
             />
+          </div>
+        )}
+
+        {/* 上传状态指示器 */}
+        {uploadingFiles.length > 0 && (
+          <div className="absolute bottom-4 right-4 flex flex-col gap-2 max-w-[250px]">
+            {uploadingFiles.map((file, index) => (
+              <div
+                key={`${file.name}-${index}`}
+                className="bg-background/80 backdrop-blur-sm border rounded-md p-2 shadow-md flex items-center gap-2 text-sm"
+              >
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <div className="flex-1 truncate">
+                  <div className="font-medium truncate">{file.name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    图片上传中...
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

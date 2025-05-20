@@ -20,7 +20,6 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
   const { isMobile } = useDevice();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [boardAvatar, setBoardAvatar] = useState<string | null>(board.avatar);
   const [categories, setCategories] = useState<Category[]>([]);
 
   const form = useForm<BoardSettingsFormValues>({
@@ -85,7 +84,6 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
   const props = {
     form,
     isSubmitting,
-    boardAvatar,
     categories,
     onSubmit,
   };

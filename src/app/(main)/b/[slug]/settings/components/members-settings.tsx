@@ -14,7 +14,8 @@ import { Board, Pagination, User } from "@/types";
 import Link from "next/link";
 import { SearchInput } from "@/components/search/search-input";
 import { ChangeRoleDialog } from "@/components/board/change-role-dialog";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { ModerationAction } from "@/components/board/moderation-action";
+import { ModerationProcessSchema } from "@/validations/moderation";
 import { BoardUserRole } from "@/constants/board-user-role";
 import { useAuth } from "@/components/providers/auth-provider";
 
@@ -35,6 +36,7 @@ export function MembersSettings({ board }: SettingsProps) {
   const [isChangeRoleOpen, setIsChangeRoleOpen] = useState(false);
   const [isMuteOpen, setIsMuteOpen] = useState(false);
   const [isMangerOpen, setIsMangerOpen] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const [action, setAction] = useState(0);
   const isModerator =
     board.board_user &&
@@ -91,20 +93,6 @@ export function MembersSettings({ board }: SettingsProps) {
     }
   };
 
-  const handleMuteConfirm = () => {
-    if (!selectedMember) return;
-    api.boards.manageUser({
-      board_id: board.id,
-      user_hashid: selectedMember.hashid,
-      action: 2,
-    });
-    toast({
-      title: "禁言成功",
-    });
-    setIsMuteOpen(false);
-    fetchMembers();
-  };
-
   const handleChangeRole = (member: User) => {
     setSelectedMember(member);
     setIsChangeRoleOpen(true);
@@ -121,20 +109,38 @@ export function MembersSettings({ board }: SettingsProps) {
     setIsMangerOpen(true);
   };
 
-  const handleMangerConfirm = () => {
+  const handleMangerConfirm = async (data: ModerationProcessSchema) => {
     if (!selectedMember) return;
-    api.boards.manageUser({
-      board_id: board.id,
-      user_hashid: selectedMember.hashid,
-      action: action,
-    });
-    toast({
-      title: "操作成功",
-    });
-    setIsMangerOpen(false);
-    setSelectedMember(null);
-    setAction(0);
-    fetchMembers();
+
+    setIsPending(true);
+    try {
+      await api.boards.moderation({
+        board_id: board.id,
+        user_hashid: selectedMember.hashid,
+        action: data.act_mode,
+        act_explain: data.act_explain,
+        reason_desc: data.reason_desc,
+        delete_range: data.delete_range,
+        mute_days: data.mute_days,
+      });
+
+      toast({
+        title: "操作成功",
+      });
+      setIsMangerOpen(false);
+      setSelectedMember(null);
+      setAction(0);
+      fetchMembers();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "操作失败",
+        description:
+          error instanceof Error ? error.message : "服务器错误，请稍后重试",
+      });
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
@@ -206,22 +212,12 @@ export function MembersSettings({ board }: SettingsProps) {
                     变更身份组
                   </DropdownMenuItem>
                   {user && member.hashid !== user.hashid && (
-                    <>
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() =>
-                          handleManger(member, member.status === 5 ? 1 : 5)
-                        }
-                      >
-                        {member.status === 5 ? "解除禁言" : "禁言"}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer text-destructive"
-                        onClick={() => handleManger(member, 4)}
-                      >
-                        踢出并封禁
-                      </DropdownMenuItem>
-                    </>
+                    <DropdownMenuItem
+                      className="cursor-pointer text-destructive"
+                      onClick={() => handleManger(member, 4)}
+                    >
+                      处置
+                    </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -241,14 +237,11 @@ export function MembersSettings({ board }: SettingsProps) {
         />
       )}
 
-      <ConfirmDialog
-        open={isMangerOpen}
+      <ModerationAction
+        isOpen={isMangerOpen}
         onOpenChange={setIsMangerOpen}
-        title={action === 5 ? "禁言" : "踢出并封禁"}
-        description={
-          action === 5 ? "确定要禁言该成员吗？" : "确定要踢出并封禁该成员吗？"
-        }
-        onConfirm={handleMangerConfirm}
+        onProcess={handleMangerConfirm}
+        isPending={isPending}
       />
     </div>
   );

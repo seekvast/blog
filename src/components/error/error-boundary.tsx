@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
+import { NotFoundContent } from "@/components/ui/not-found-content";
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -13,6 +14,7 @@ interface ErrorBoundaryProps {
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  isNotFound: boolean;
 }
 
 export class ErrorBoundary extends React.Component<
@@ -21,11 +23,23 @@ export class ErrorBoundary extends React.Component<
 > {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, isNotFound: false };
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
+    // 检查是否为 404 错误
+    const isNotFound =
+      error.name === "NotFoundError" ||
+      (error as any).status === 404 ||
+      error.message.includes("not found") ||
+      error.message.includes("未找到") ||
+      error.message.includes("不存在");
+
+    return {
+      hasError: true,
+      error,
+      isNotFound,
+    };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
@@ -41,6 +55,11 @@ export class ErrorBoundary extends React.Component<
         return this.props.fallback;
       }
 
+      if (this.state.isNotFound) {
+        return <NotFoundContent />;
+      }
+
+      // 其他错误显示通用错误提示
       return (
         <div className="flex flex-col items-center justify-center min-h-[400px] p-4">
           <AlertCircle className="h-12 w-12 text-destructive mb-4" />
@@ -50,7 +69,11 @@ export class ErrorBoundary extends React.Component<
           </p>
           <Button
             onClick={() => {
-              this.setState({ hasError: false, error: null });
+              this.setState({
+                hasError: false,
+                error: null,
+                isNotFound: false,
+              });
               window.location.reload();
             }}
           >

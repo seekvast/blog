@@ -1,9 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { api } from "@/lib/api";
+import { debounce } from "@/lib/utils";
 import { Board } from "@/types/board";
 import { ChevronDown } from "lucide-react";
 import {
@@ -24,6 +25,7 @@ import {
 import { JoinBoardDialog } from "@/components/board/join-board-dialog";
 import { BoardApprovalMode } from "@/constants/board-approval-mode";
 import { BoardItem } from "@/components/board/board-item";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 
 export default function BoardsPage() {
   const [boards, setBoards] = useState<Board[]>([]);
@@ -31,6 +33,7 @@ export default function BoardsPage() {
   const [activeTab, setActiveTab] = useState<"recommended" | "joined">(
     "recommended"
   );
+  const { requireAuth } = useRequireAuth();
   const queryClient = useQueryClient();
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
   const [joinBoardOpen, setJoinBoardOpen] = useState(false);
@@ -44,16 +47,8 @@ export default function BoardsPage() {
 
   const { mutate: joinBoard } = useMutation({
     mutationFn: (boardId: number) => api.boards.join({ board_id: boardId }),
-    onSuccess: (_, boardId) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["boards"] });
-      setBoards((currentBoards) =>
-        currentBoards.map((board) => {
-          if (board.id === boardId) {
-            return { ...board, is_joined: 1 };
-          }
-          return board;
-        })
-      );
     },
   });
 
@@ -105,11 +100,8 @@ export default function BoardsPage() {
   const handleJoinBoard = (boardId: number) => {
     const board = boards.find((b) => b.id === boardId);
     if (!board) return;
-
-    if (
-      board.approval_mode === BoardApprovalMode.NONE ||
-      board.approval_mode === BoardApprovalMode.AUTO
-    ) {
+    if (board.history) return;
+    if (board.approval_mode === BoardApprovalMode.NONE) {
       joinBoard(board.id);
     } else {
       setSelectedBoard(board);
@@ -119,6 +111,25 @@ export default function BoardsPage() {
 
   const handleLeaveBoard = (boardId: number) => {
     // TODO: 实现退出看板逻辑
+  };
+
+  const { mutate: blockBoard } = useMutation({
+    mutationFn: (boardId: number) => api.boards.block({ board_id: boardId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+    },
+  });
+
+  const debouncedBlockBoard = useMemo(
+    () =>
+      debounce((boardId: number) => {
+        blockBoard(boardId);
+      }, 300),
+    [blockBoard]
+  );
+
+  const handleBlockBoard = (boardId: number) => {
+    debouncedBlockBoard(boardId);
   };
 
   return (
@@ -142,9 +153,15 @@ export default function BoardsPage() {
                         : "text-muted-foreground font-normal"
                     }
                   `}
-                  onClick={() =>
-                    setActiveTab(tab.key as "recommended" | "joined")
-                  }
+                  onClick={() => {
+                    if (tab.key === "joined") {
+                      requireAuth(() => {
+                        setActiveTab("joined");
+                      });
+                    } else {
+                      setActiveTab("recommended");
+                    }
+                  }}
                 >
                   {tab.label}
                   {activeTab === tab.key && (
@@ -230,6 +247,7 @@ export default function BoardsPage() {
                   board={board}
                   onJoin={handleJoinBoard}
                   onLeave={handleLeaveBoard}
+                  onBlock={handleBlockBoard}
                 />
               </div>
             ))}
@@ -243,9 +261,9 @@ export default function BoardsPage() {
           onOpenChange={setJoinBoardOpen}
           boardId={selectedBoard.id}
           question={selectedBoard.question}
-          onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
-          }}
+          onSuccess={() =>
+            queryClient.invalidateQueries({ queryKey: ["boards"] })
+          }
         />
       )}
     </div>

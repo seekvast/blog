@@ -13,6 +13,13 @@ export interface PostVote {
   vote: string;
 }
 
+export interface PostVoter {
+  id: number;
+  post_id: number;
+  user_hashid: string;
+  user: User;
+}
+
 export interface PollOption {
   id: number;
   poll_id: number;

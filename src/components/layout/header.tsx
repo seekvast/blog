@@ -3,18 +3,9 @@
 import * as React from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/providers/auth-provider";
+import { useInterestSelection } from "@/components/providers/interest-selection-provider";
 import { signOut } from "next-auth/react";
-import {
-  Search,
-  Bell,
-  PenSquare,
-  Moon,
-  LogOut,
-  Settings,
-  User2,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PenSquare, LogOut, Settings, User2, Heart } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuthModal } from "@/components/auth/auth-modal-store";
@@ -26,7 +17,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { api } from "@/lib/api";
 import { usePostEditorStore } from "@/store/post-editor";
 import { cn } from "@/lib/utils";
 import { useDraftStore } from "@/store/draft";
@@ -42,13 +32,12 @@ interface HeaderProps {
 
 export function Header({ className }: HeaderProps) {
   const router = useRouter();
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const { openLogin, openRegister } = useAuthModal();
+  const { user, loading } = useAuth();
+  const { openRegister, openLogin } = useAuthModal();
+  const { openInterestSelection } = useInterestSelection();
   const { hasUnsavedContent, isVisible, onClose, setIsVisible, setOpenFrom } =
     usePostEditorStore();
   const { hasDraft } = useDraftStore();
-  const isMobile = useMediaQuery("(max-width: 640px)");
 
   const handleLogoClick = React.useCallback(
     (e: React.MouseEvent) => {
@@ -154,7 +143,15 @@ export function Header({ className }: HeaderProps) {
                         <span>个人设定</span>
                       </DropdownMenuItem>
                     </Link>
+                    <DropdownMenuItem 
+                      className="cursor-pointer"
+                      onClick={openInterestSelection}
+                    >
+                      <Heart className="mr-2 h-4 w-4" />
+                      <span>兴趣选择</span>
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
+
                     <DropdownMenuItem
                       className="cursor-pointer"
                       onClick={handleLogout}

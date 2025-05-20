@@ -1,4 +1,4 @@
-import { Response } from "./common";
+import { Category, Response } from "./common";
 
 export interface UserProfile {
   email: string;
@@ -37,6 +37,7 @@ export interface User {
   is_board_moderator?: number;
   age_verified?: number;
   is_online?: boolean;
+  categories?: Category[];
   preferences?: {
     nsfwVisible: string;
     discloseOnline: string;
