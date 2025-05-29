@@ -5,37 +5,23 @@ import { useSession } from "next-auth/react";
 import { X } from "lucide-react";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
-import Link from "next/link";
+import { useCountdown } from "@/store/countdown-store";
 
-// 常量定义
-const COOLDOWN_TIME = 60; // 普通冷却时间（秒）
-const MAX_ATTEMPTS = 10; // 5分钟内最大尝试次数
-const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5分钟（毫秒）
-const RATE_LIMIT_COOLDOWN = 30 * 60; // 频率限制后的冷却时间（秒）
+const COOLDOWN_TIME = 60;
+const MAX_ATTEMPTS = 10;
+const RATE_LIMIT_WINDOW = 5 * 60 * 1000;
+const RATE_LIMIT_COOLDOWN = 30 * 60;
 
 export function EmailVerificationBanner() {
   const { data: session } = useSession();
   const { toast } = useToast();
   const [isVisible, setIsVisible] = useState(true);
   const [isSending, setIsSending] = useState(false);
-  const [countdown, setCountdown] = useState(0);
+  const { remainingSeconds: countdown, startCountdown } = useCountdown("email-resend");
   const [attempts, setAttempts] = useState<number[]>([]);
   const [isRateLimited, setIsRateLimited] = useState(false);
 
-  // 处理倒计时
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (countdown > 0) {
-      timer = setInterval(() => {
-        setCountdown((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [countdown]);
-
-  // 处理频率限制
-  useEffect(() => {
-    // 清理5分钟前的尝试记录
     const now = Date.now();
     const filteredAttempts = attempts.filter(
       (timestamp) => now - timestamp < RATE_LIMIT_WINDOW
@@ -45,12 +31,9 @@ export function EmailVerificationBanner() {
       setAttempts(filteredAttempts);
     }
 
-    // 检查是否超过频率限制
     if (filteredAttempts.length >= MAX_ATTEMPTS && !isRateLimited) {
       setIsRateLimited(true);
-      setCountdown(RATE_LIMIT_COOLDOWN);
-
-      // 设置定时器，在冷却时间结束后重置频率限制
+      startCountdown(RATE_LIMIT_COOLDOWN);
       const rateLimitTimer = setTimeout(() => {
         setIsRateLimited(false);
         setAttempts([]);
@@ -68,7 +51,6 @@ export function EmailVerificationBanner() {
         const parsedAttempts = JSON.parse(storedAttempts);
         setAttempts(parsedAttempts);
 
-        // 检查是否处于冷却状态
         const now = Date.now();
         const recentAttempts = parsedAttempts.filter(
           (timestamp: number) => now - timestamp < RATE_LIMIT_WINDOW
@@ -85,7 +67,7 @@ export function EmailVerificationBanner() {
 
           if (remainingCooldown > 0) {
             setIsRateLimited(true);
-            setCountdown(Math.ceil(remainingCooldown));
+            startCountdown(Math.ceil(remainingCooldown));
           }
         } else {
           // 检查是否在普通冷却时间内
@@ -93,7 +75,7 @@ export function EmailVerificationBanner() {
           const timeSinceLastAttempt = (now - lastAttempt) / 1000;
 
           if (lastAttempt > 0 && timeSinceLastAttempt < COOLDOWN_TIME) {
-            setCountdown(Math.ceil(COOLDOWN_TIME - timeSinceLastAttempt));
+            startCountdown(Math.ceil(COOLDOWN_TIME - timeSinceLastAttempt));
           }
         }
       } catch (e) {
@@ -125,7 +107,7 @@ export function EmailVerificationBanner() {
       setAttempts(newAttempts);
 
       // 设置冷却时间
-      setCountdown(COOLDOWN_TIME);
+      startCountdown(COOLDOWN_TIME);
 
       toast({
         title: "发送成功",

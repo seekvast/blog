@@ -1,8 +1,9 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCountdown } from "@/store/countdown-store";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -16,8 +17,12 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 
 export default function EmailConfirmPage() {
   const { data: session, update } = useSession();
-  const searchParams = useSearchParams();
   const router = useRouter();
+  if (session?.user && session.user.is_email_confirmed === 1) {
+    router.push("/");
+    return;
+  }
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const { openLogin } = useAuthModal();
   const [status, setStatus] = useState<"loading" | "success" | "error">(
@@ -25,11 +30,11 @@ export default function EmailConfirmPage() {
   );
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isResending, setIsResending] = useState(false);
-  const [countdown, setCountdown] = useState(0);
+  const { remainingSeconds: countdown, startCountdown } =
+    useCountdown("email-resend");
 
   const token = searchParams?.get("token");
 
-  // 使用 useQuery 处理邮箱验证请求
   const { isLoading } = useQuery({
     queryKey: ["confirmEmail", token],
     queryFn: async () => {
@@ -61,7 +66,6 @@ export default function EmailConfirmPage() {
           description: "您的邮箱已成功验证",
         });
 
-        // 延迟跳转，让用户看到成功提示
         if (session?.user) {
           setTimeout(() => {
             router.push("/");
@@ -80,12 +84,12 @@ export default function EmailConfirmPage() {
         throw error;
       }
     },
-    enabled: !!token, // 只有当 token 存在时才执行查询
-    retry: false, // 不重试失败的请求
-    refetchOnWindowFocus: false, // 窗口聚焦时不重新获取
-    refetchOnMount: false, // 组件挂载时不重新获取
-    refetchOnReconnect: false, // 重新连接时不重新获取
-    staleTime: Infinity, // 数据永不过期
+    enabled: !!token,
+    retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity,
   });
 
   const resendMutation = useMutation({
@@ -97,7 +101,7 @@ export default function EmailConfirmPage() {
         title: "发送成功",
         description: "新的验证邮件已发送到您的邮箱",
       });
-      setCountdown(60);
+      startCountdown(60);
     },
     onError: (error) => {
       toast({
@@ -111,17 +115,6 @@ export default function EmailConfirmPage() {
       setIsResending(false);
     },
   });
-
-  // 处理倒计时
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (status === "error" && countdown > 0) {
-      timer = setInterval(() => {
-        setCountdown((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [status, countdown]);
 
   const handleResendEmail = async () => {
     if (countdown > 0 || isResending) return;

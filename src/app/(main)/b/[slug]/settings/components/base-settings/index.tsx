@@ -33,7 +33,7 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
       visibility: board.visibility ?? 0,
       poll_role: board.poll_role || [],
       approval_mode: board.approval_mode ?? 0,
-      question: board.desc || "",
+      question: board.question || "",
       answer: board.answer || "",
       category_id: board.category_id ?? 0,
       avatar: board.avatar,

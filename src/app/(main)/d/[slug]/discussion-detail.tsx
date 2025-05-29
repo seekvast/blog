@@ -17,6 +17,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   UserRound,
+  Tag,
 } from "lucide-react";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { PostNavigator } from "@/components/post/post-navigator";
@@ -380,7 +381,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       }
     },
     onError: (error) => {
-      console.error("Failed to post comment:", error);
       toast({
         title: "失败",
         description: "请稍后重试",
@@ -413,13 +413,8 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           queryParams,
         ],
       });
-      toast({
-        title: "发布成功",
-        variant: "default",
-      });
     },
     onError: (error) => {
-      console.error("Failed to post comment:", error);
       toast({
         title: "发布失败",
         description: "请稍后重试",
@@ -453,13 +448,8 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           queryParams,
         ],
       });
-      toast({
-        title: "评论已更新",
-        variant: "default",
-      });
     },
     onError: (error) => {
-      console.error("Failed to edit comment:", error);
       toast({
         title: "评论更新失败",
         description: "请稍后重试",
@@ -587,7 +577,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               </h2>
             </div>
 
-            <div className="mt-2 flex items-start space-x-3">
+            <div className="mt-2 flex items-center space-x-3">
               <Link
                 href={`/u/${currentDiscussion.user.username}?hashid=${currentDiscussion.user.hashid}`}
               >
@@ -602,58 +592,113 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 </Avatar>
               </Link>
 
-              <div className="flex-1 min-w-0 overflow-hidden">
-                <div className="flex items-center space-x-2 text-xs md:text-sm text-muted-foreground">
-                  <Link
-                    href={`/u/${currentDiscussion.user.username}?hashid=${currentDiscussion.user.hashid}`}
-                  >
-                    <span className="text-base md:text-lg font-medium truncate">
-                      {currentDiscussion.user.username}
-                    </span>
-                  </Link>
-                  <span className="flex-shrink-0 mx-2 text-gray-300">·</span>
-                  <span className=" flex-shrink-0">
-                    {fromNow(currentDiscussion.created_at)}
-                  </span>
-                  {currentDiscussion.main_post.editor && (
+              <div className="flex-1 min-w-0 overflow-hidden space-y-1">
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center space-x-2 min-w-0 flex-1">
+                    <Link
+                      href={`/u/${currentDiscussion.user.username}?hashid=${currentDiscussion.user.hashid}`}
+                    >
+                      <span className="text-base md:text-lg font-medium truncate">
+                        {currentDiscussion.user.username}
+                      </span>
+                    </Link>
+                  </div>
+                  <DiscussionActions discussion={currentDiscussion} />
+                </div>
+
+                <div className="flex items-center space-x-2 lg:space-x-4 text-sm text-muted-foreground">
+                  <div className="flex items-center space-x-1">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <div>
-                          <span className="flex-shrink-0 mx-2 text-gray-300">
-                            ·
-                          </span>
-                          <button className="hover:text-primary">已编辑</button>
-                        </div>
+                        <button className="hover:text-primary">
+                          {fromNow(currentDiscussion.created_at)}
+                        </button>
                       </PopoverTrigger>
                       <PopoverContent
-                        className="p-3 w-full"
+                        className="p-2 w-auto min-w-[320px]"
                         side="top"
                         align="center"
                         sideOffset={5}
+                        avoidCollisions={true}
                       >
                         <div className="space-y-2 text-muted-foreground">
-                          <div className="text-xs space-y-1">
-                            {currentDiscussion.main_post.editor.nickname ||
-                              currentDiscussion.main_post.editor.username}{" "}
-                            编辑于{" "}
-                            {currentDiscussion.main_post.edited_at
-                              ? formatDate(
-                                  currentDiscussion.main_post.edited_at,
-                                  "YYYY年M月D日"
-                                )
-                              : "未知"}
+                          <div className="text-xs font-medium">
+                            <span className="font-bold">发表 #1 </span>
+                            {formatDate(
+                              currentDiscussion.created_at,
+                              "YYYY年M月D日 dddd HH:mm:ss"
+                            )}
+                          </div>
+                          <div className="flex flex-col space-y-2 w-full">
+                            <div className="relative w-full">
+                              <input
+                                type="text"
+                                readOnly
+                                value={`${window.location.origin}/d/${currentDiscussion.slug}`}
+                                className="w-full text-xs p-2 rounded bg-background pr-16"
+                                onClick={(e) => e.currentTarget.select()}
+                              />
+                            </div>
                           </div>
                         </div>
                       </PopoverContent>
                     </Popover>
-                  )}
-                </div>
-                <div className="text-xs text-muted-foreground truncate">
-                  <span>来自 {currentDiscussion.board.name}</span>
-                  <span> # {currentDiscussion.board_child.name}</span>
+                    {currentDiscussion.main_post.editor && (
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <div>
+                            <span className="flex-shrink-0 mx-2 text-gray-300">
+                              ·
+                            </span>
+                            <button className="text-muted-foreground hover:text-primary">
+                              已编辑
+                            </button>
+                          </div>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="p-3 w-full"
+                          side="top"
+                          align="center"
+                          sideOffset={5}
+                        >
+                          <div className="space-y-2 text-muted-foreground">
+                            <div className="text-xs space-y-1">
+                              {currentDiscussion.main_post.editor.nickname ||
+                                currentDiscussion.main_post.editor
+                                  .username}{" "}
+                              编辑于{" "}
+                              {currentDiscussion.main_post.edited_at
+                                ? formatDate(
+                                    currentDiscussion.main_post.edited_at,
+                                    "YYYY年M月D日"
+                                  )
+                                : "未知"}
+                            </div>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-2 text-muted-foreground">
+                    <span>
+                      来自{" "}
+                      <Link
+                        href={`/b/${currentDiscussion.board.slug}`}
+                        className="inline-block max-w-[8ch] lg:max-w-[20ch] truncate align-bottom hover:text-primary"
+                      >
+                        {currentDiscussion.board.name}
+                      </Link>
+                    </span>
+                    <Link
+                      href={`/b/${currentDiscussion.board.slug}?child=${currentDiscussion.board_child.id}`}
+                      className="inline-flex items-center hover:text-primary"
+                    >
+                      <Tag className="h-4 w-4 text-sm mr-1" />
+                      <span>{currentDiscussion.board_child.name}</span>
+                    </Link>
+                  </div>
                 </div>
               </div>
-              <DiscussionActions discussion={currentDiscussion} />
             </div>
           </div>
 
@@ -842,7 +887,8 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                             <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
                               <AvatarImage src={user.avatar_url} />
                               <AvatarFallback>
-                                {user.nickname?.[0].toUpperCase() || user.username?.[0].toUpperCase()}
+                                {user.nickname?.[0].toUpperCase() ||
+                                  user.username?.[0].toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0 overflow-hidden">

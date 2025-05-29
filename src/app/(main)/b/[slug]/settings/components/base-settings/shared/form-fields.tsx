@@ -49,7 +49,7 @@ export function FormFields({
               <Input
                 placeholder="可輸入英文大小寫+數字，长度7~25个字符"
                 {...field}
-                value={field.value || ''}
+                value={field.value || ""}
               />
             </FormControl>
             <FormMessage />
@@ -187,13 +187,7 @@ export function FormFields({
             <FormLabel>看板加入方式</FormLabel>
             <FormControl>
               <RadioGroup
-                onValueChange={(value) => {
-                  form.setValue('approval_mode', Number(value), {
-                    shouldValidate: true,
-                    shouldDirty: true,
-                    shouldTouch: true,
-                  });
-                }}
+                onValueChange={(value) => field.onChange(Number(value))}
                 defaultValue={String(field.value)}
                 className="space-y-4"
               >
@@ -226,13 +220,18 @@ export function FormFields({
               <FormItem>
                 <FormLabel>问题</FormLabel>
                 <FormControl>
-                  <Input placeholder="请输入问题" {...field} value={field.value || ''} />
+                  <Input
+                    placeholder="请输入问题"
+                    {...field}
+                    value={field.value || ""}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          {form.watch("approval_mode") === 1 && (
+          {(form.watch("approval_mode") === 1 ||
+            form.watch("approval_mode") === 2) && (
             <FormField
               control={form.control}
               name="answer"
@@ -240,7 +239,11 @@ export function FormFields({
                 <FormItem>
                   <FormLabel>答案</FormLabel>
                   <FormControl>
-                    <Input placeholder="请输入答案" {...field} value={field.value || ''} />
+                    <Input
+                      placeholder="请输入答案"
+                      {...field}
+                      value={field.value || ""}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

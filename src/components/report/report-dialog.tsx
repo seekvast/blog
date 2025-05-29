@@ -280,8 +280,13 @@ export function ReportDialog({
                   <Textarea
                     className="resize-none"
                     value={otherReasonText}
-                    onChange={(e) => setOtherReasonText(e.target.value)}
+                    onChange={(e) => setOtherReasonText(e.target.value.slice(0, 150))}
+                    maxLength={150}
+                    placeholder="最多150个字符"
                   />
+                  <div className="mt-1 text-xs text-muted-foreground text-right">
+                    {otherReasonText.length}/150
+                  </div>
                 </div>
               )}
             </div>

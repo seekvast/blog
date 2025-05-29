@@ -202,20 +202,6 @@ export const DiscussionItem = React.forwardRef<
                           className="w-full text-xs p-2 rounded bg-background pr-16"
                           onClick={(e) => e.currentTarget.select()}
                         />
-                        {/* <button
-                          className="absolute right-1 top-1/2 -translate-y-1/2 text-xs px-2 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90"
-                          onClick={() => {
-                            navigator.clipboard.writeText(
-                              `${window.location.origin}/d/${discussion.slug}`
-                            );
-                            toast({
-                              description: "链接已复制到剪贴板",
-                              duration: 2000,
-                            });
-                          }}
-                        >
-                          复制
-                        </button> */}
                       </div>
                     </div>
                   </div>
