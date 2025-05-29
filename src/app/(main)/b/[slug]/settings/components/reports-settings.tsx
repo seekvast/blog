@@ -274,7 +274,7 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
                   />
                 )}
                 <AvatarFallback>
-                  {report.user?.nickname?.charAt(0) || "U"}
+                  {report.user?.nickname?.charAt(0).toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">

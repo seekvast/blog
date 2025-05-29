@@ -14,7 +14,7 @@ export function UserItem({ user, className }: UserItemProps) {
       <Link href={`/u/${user.username}?hashid=${user.hashid}`}>
         <Avatar className="h-14 w-14">
           <AvatarImage src={user.avatar_url} alt={user.username} />
-          <AvatarFallback>{user.username?.[0]}</AvatarFallback>
+          <AvatarFallback>{user.username?.[0].toUpperCase()}</AvatarFallback>
         </Avatar>
       </Link>
 

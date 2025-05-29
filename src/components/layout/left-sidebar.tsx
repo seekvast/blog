@@ -262,7 +262,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                   className="rounded-full h-6"
                   onClick={(e) => {
                     e.preventDefault();
-                    handleJoinBoard(board);
+                    requireAuth(() => handleJoinBoard(board));
                   }}
                 >
                   加入

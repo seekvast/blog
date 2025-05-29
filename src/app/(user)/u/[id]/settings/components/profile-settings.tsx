@@ -30,7 +30,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { useQueryClient } from "@tanstack/react-query";
 import { AvatarUpload } from "@/components/common/avatar-upload";
 import {
   Form,
@@ -49,6 +49,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ImageIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 const formSchema = z.object({
   username: z
@@ -75,6 +76,9 @@ export default function ProfileSettings({ user }: { user: User | null }) {
       </div>
     );
   }
+
+  const { data: session, update } = useSession();
+  const queryClient = useQueryClient();
 
   const [open, setOpen] = useState(false);
   const [isBgUploading, setIsBgUploading] = useState(false);
@@ -130,6 +134,21 @@ export default function ProfileSettings({ user }: { user: User | null }) {
       });
 
       setOpen(false);
+      if (session?.user) {
+        await update({
+          user: {
+            ...updatedUser,
+          },
+        });
+      }
+      //更新user缓存
+      queryClient.setQueryData<User>(["user", user.hashid], (user) => {
+        if (!user) return user;
+        return {
+          ...user,
+          ...updatedUser,
+        };
+      });
     } catch (error: any) {
       toast({
         variant: "destructive",

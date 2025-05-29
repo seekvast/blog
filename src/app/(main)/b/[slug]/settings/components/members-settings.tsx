@@ -169,7 +169,7 @@ export function MembersSettings({ board }: SettingsProps) {
             <div className="flex items-center gap-3">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={member.avatar_url} />
-                <AvatarFallback>{member.username[0]}</AvatarFallback>
+                <AvatarFallback>{member.username[0].toUpperCase()}</AvatarFallback>
               </Avatar>
               <div>
                 <div className="font-medium">{member.username}</div>

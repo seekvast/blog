@@ -24,7 +24,7 @@ export function RecommendedBoards({ boards }: RecommendedBoardsProps) {
           <div className="flex items-center space-x-2">
             <Avatar className="h-6 w-6">
               <AvatarImage src={board.avatar} />
-              <AvatarFallback>{board.name[0]}</AvatarFallback>
+              <AvatarFallback>{board.name[0].toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="flex-1 space-y-1 text-left">
               <p className="text-sm leading-none">{board.name}</p>

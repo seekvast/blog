@@ -176,7 +176,7 @@ export function BlocklistSettings({ board }: BlocklistSettingsProps) {
                   />
                 )}
                 <AvatarFallback>
-                  {item.user ? item.user.nickname.charAt(0) : "U"}
+                  {item.user ? item.user.nickname.charAt(0).toUpperCase() : "U"}
                 </AvatarFallback>
               </Avatar>
               <div>

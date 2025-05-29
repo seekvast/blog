@@ -43,7 +43,7 @@ function Boards({
           <div className="flex items-center gap-3">
             <Avatar className="w-12 h-12 flex-shrink-0">
               <AvatarImage src={board.avatar} />
-              <AvatarFallback>{board.name[0]}</AvatarFallback>
+              <AvatarFallback>{board.name[0].toUpperCase()}</AvatarFallback>
             </Avatar>
             <div>
               <div className="font-medium">{board.name}</div>
@@ -114,7 +114,7 @@ function Users({
           <div className="flex items-center gap-3">
             <Avatar className="w-12 h-12 flex-shrink-0">
               <AvatarImage src={user.avatar} />
-              <AvatarFallback>{user.name[0]}</AvatarFallback>
+              <AvatarFallback>{user.name[0].toUpperCase()}</AvatarFallback>
             </Avatar>
             <div>
               <div className="font-medium">{user.name}</div>

@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { DiscussionControls } from "@/components/discussion/discussion-controls";
 import { DisplayMode, SortBy } from "@/types/display-preferences";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 
 interface DiscussionsListProps {
   initialDiscussions: Pagination<Discussion>;
@@ -26,6 +27,8 @@ export function DiscussionsList({
   initialDiscussions,
   from,
 }: DiscussionsListProps) {
+  const { requireAuth } = useRequireAuth();
+
   const [discussions, setDiscussions] = React.useState(initialDiscussions);
   const [page, setPage] = React.useState(2);
   const [loading, setLoading] = React.useState(false);
@@ -142,8 +145,10 @@ export function DiscussionsList({
                       : "text-muted-foreground font-normal"
                   )}
                   onClick={() => {
-                    setActiveTab("trace");
-                    fetchDiscussions("trace", 1);
+                    requireAuth(() => {
+                      setActiveTab("trace");
+                      fetchDiscussions("trace", 1);
+                    });
                   }}
                 >
                   追踪

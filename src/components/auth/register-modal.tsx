@@ -35,7 +35,7 @@ const stepOneSchema = z.object({
     ),
 });
 
-const MIN_YEAR = 1900;
+const MIN_YEAR = 1;
 const CURRENT_YEAR = new Date().getFullYear();
 
 const stepTwoSchema = z.object({

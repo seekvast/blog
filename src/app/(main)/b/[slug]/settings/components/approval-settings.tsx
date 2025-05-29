@@ -262,7 +262,7 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
                         alt={application.user?.nickname}
                       />
                       <AvatarFallback>
-                        {application.user?.nickname[0]}
+                        {application.user?.nickname[0].toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div>

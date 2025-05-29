@@ -842,7 +842,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                             <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
                               <AvatarImage src={user.avatar_url} />
                               <AvatarFallback>
-                                {user.nickname?.[0] || user.username?.[0]}
+                                {user.nickname?.[0].toUpperCase() || user.username?.[0].toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex-1 min-w-0 overflow-hidden">

@@ -100,7 +100,7 @@ export const DiscussionItem = React.forwardRef<
               src={discussion.user.avatar_url}
               alt={discussion.user.username}
             />
-            <AvatarFallback>{discussion.user.username[0]}</AvatarFallback>
+            <AvatarFallback>{discussion.user.username[0].toUpperCase()}</AvatarFallback>
           </Avatar>
         </Link>
 
@@ -175,7 +175,7 @@ export const DiscussionItem = React.forwardRef<
               <Popover>
                 <PopoverTrigger asChild>
                   <button className="hover:text-primary">
-                    {discussion.diff_humans}
+                    {fromNow(discussion.created_at)}
                   </button>
                 </PopoverTrigger>
                 <PopoverContent

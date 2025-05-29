@@ -3,7 +3,7 @@
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Settings, Flag, AlertTriangle, Ban, Unlock } from "lucide-react";
+import { AlertTriangle, Ban, Unlock } from "lucide-react";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
@@ -16,10 +16,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Image from "next/image";
+import { ReportTarget } from "@/constants/report-target";
 
 export default function UserLayout({
   children,
@@ -58,6 +57,10 @@ export default function UserLayout({
   // 提取图片颜色
   useEffect(() => {
     const avatarUrl = userData?.avatar_url;
+    if (userData?.cover) {
+      setGradientColor(`rgba(0, 0, 0, 0.5)`);
+      return;
+    }
     if (avatarUrl && typeof avatarUrl === "string") {
       const getImageColor = async () => {
         try {
@@ -172,7 +175,7 @@ export default function UserLayout({
                   <Avatar className="h-16 w-16 lg:h-24 lg:w-24 border-4 border-background">
                     <AvatarImage src={userData.avatar_url || ""} />
                     <AvatarFallback>
-                      {userData.nickname?.slice(0, 2).toUpperCase()}
+                      {userData.nickname?.[0].toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="text-white">
@@ -268,7 +271,7 @@ export default function UserLayout({
           board_id: 0,
           post_id: 0,
           reported_to: "admin",
-          target: 3, // 3 表示用户
+          target: ReportTarget.USER,
         }}
       />
     </div>

@@ -89,7 +89,7 @@ export function PollVotersDialog({
                       <Avatar>
                         <AvatarImage src={voter.user.avatar_url} />
                         <AvatarFallback>
-                          {voter.user.nickname?.[0] || voter.user.username[0]}
+                          {voter.user.nickname?.[0].toUpperCase() || voter.user.username[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="space-y-1">

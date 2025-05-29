@@ -9,6 +9,7 @@ import { BoardActionButton } from "./board-action-button";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { ReportDialog } from "@/components/report/report-dialog";
 import { useBoardActions } from "@/hooks/use-board-actions";
+import { ReportTarget } from "@/constants/report-target";
 
 interface BoardItemProps {
   board: Board;
@@ -27,7 +28,7 @@ export function BoardItem({ board, onJoin, onBlock, onLeave }: BoardItemProps) {
         <Link href={`/b/${board.slug}`}>
           <Avatar className="h-14 w-14">
             <AvatarImage src={board.avatar} alt={board.name} />
-            <AvatarFallback>{board.name[0]}</AvatarFallback>
+            <AvatarFallback>{board.name[0].toUpperCase()}</AvatarFallback>
           </Avatar>
         </Link>
         <div className="space-y-1">
@@ -80,7 +81,7 @@ export function BoardItem({ board, onJoin, onBlock, onLeave }: BoardItemProps) {
         form={{
           user_hashid: board.creator_hashid,
           board_id: board.id,
-          target: 2,
+          target: ReportTarget.BOARD,
           reported_to: "admin",
         }}
       />

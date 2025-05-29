@@ -136,7 +136,7 @@ export function BoardSettingsForm({
           <div className="flex items-start gap-4">
             <Avatar className="h-20 w-20">
               <AvatarImage src={initBoard.avatar} alt={initBoard.name} />
-              <AvatarFallback>{initBoard.name[0]}</AvatarFallback>
+              <AvatarFallback>{initBoard.name[0].toUpperCase()}</AvatarFallback>
             </Avatar>
             <div>
               <h2 className="text-xl font-semibold">{initBoard.name}</h2>

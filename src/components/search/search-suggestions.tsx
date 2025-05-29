@@ -98,7 +98,7 @@ export function SearchSuggestions({
                   >
                     <Avatar className="h-16 w-16 flex-shrink-0">
                       <AvatarImage src={board.avatar} alt={board.name} />
-                      <AvatarFallback>{board.name[0]}</AvatarFallback>
+                      <AvatarFallback>{board.name[0].toUpperCase()}</AvatarFallback>
                     </Avatar>
                   </Link>
                   <div className="text-center">

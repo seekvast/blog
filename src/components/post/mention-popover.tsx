@@ -61,7 +61,7 @@ export function MentionPopover({
               >
                 <Avatar className="h-6 w-6">
                   <AvatarImage src={user.avatar_url} />
-                  <AvatarFallback>{user.nickname[0]}</AvatarFallback>
+                  <AvatarFallback>{user.nickname[0].toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
                   <span className="font-medium">{user.nickname}</span>

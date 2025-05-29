@@ -13,7 +13,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { ReportDialog } from "@/components/report/report-dialog";
 import { useState } from "react";
@@ -22,8 +21,8 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
-import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { ReportTarget } from "@/constants/report-target";
 
 interface CommentActionsProps {
   comment: Post;
@@ -139,7 +138,7 @@ export function CommentActions({ comment, onEdit }: CommentActionsProps) {
           user_hashid: comment.user.hashid,
           board_id: comment.board_id,
           post_id: comment.id,
-          target: 1,
+          target: ReportTarget.POST,
           reported_to: "moderator",
         }}
       />
@@ -153,7 +152,7 @@ export function CommentActions({ comment, onEdit }: CommentActionsProps) {
           user_hashid: comment.user.hashid,
           board_id: comment.board_id,
           post_id: comment.id,
-          target: 1,
+          target: ReportTarget.POST,
           reported_to: "admin",
         }}
       />

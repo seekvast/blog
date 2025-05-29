@@ -287,7 +287,7 @@ function BoardContent() {
           <div className="flex items-start space-x-3 pb-4">
             <Avatar className="h-14 w-14">
               <AvatarImage src={board.avatar} alt={board.name} />
-              <AvatarFallback>{board.name[0]}</AvatarFallback>
+              <AvatarFallback>{board.name[0].toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between">

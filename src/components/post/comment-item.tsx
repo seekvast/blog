@@ -156,7 +156,7 @@ export const CommentItem = ({
         >
           <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
             <AvatarImage src={comment.user.avatar_url} />
-            <AvatarFallback>{comment.user.nickname[0]}</AvatarFallback>
+            <AvatarFallback>{comment.user.nickname[0].toUpperCase()}</AvatarFallback>
           </Avatar>
         </Link>
         <div className="flex-1 min-w-0 overflow-hidden">

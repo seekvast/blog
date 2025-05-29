@@ -89,7 +89,7 @@ export const VotersList = ({ postId }: VotersListProps) => {
               >
                 <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
                   <AvatarImage src={voter.user.avatar_url} />
-                  <AvatarFallback>{voter.user.nickname[0]}</AvatarFallback>
+                  <AvatarFallback>{voter.user.nickname[0].toUpperCase()}</AvatarFallback>
                 </Avatar>
               </Link>
             ))}
