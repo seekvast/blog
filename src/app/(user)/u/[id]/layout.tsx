@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ReportTarget } from "@/constants/report-target";
+import { fromNow } from "@/lib/dayjs";
 
 export default function UserLayout({
   children,
@@ -187,12 +188,16 @@ export default function UserLayout({
                     <div className="flex  space-x-2 text-white text-sm">
                       <span>@{userData.username} </span>
                       {userData.preferences?.discloseOnline === "yes" &&
-                        userData.is_online === true && (
-                          <div className="flex items-center space-x-1">
-                            <span className="inline-block w-3 h-3 bg-green-500 rounded-full"></span>
-                            <span>在线上</span>
-                          </div>
-                        )}
+                      userData.is_online ? (
+                        <div className="flex items-center space-x-1">
+                          <span className="inline-block w-3 h-3 bg-green-500 rounded-full"></span>
+                          <span>在线上</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-1">
+                          <span>{fromNow(userData?.last_seen_at || "")}</span>
+                        </div>
+                      )}
                       <div>
                         <span>加入于</span>{" "}
                         <span>

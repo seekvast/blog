@@ -11,7 +11,7 @@ import { DiscussionItem } from "@/components/discussion/discussion-item";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { cn } from "@/lib/utils";
 import { DiscussionControls } from "@/components/discussion/discussion-controls";
-import { DisplayMode, SortBy } from "@/types/display-preferences";
+import { SortBy } from "@/types/display-preferences";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 
@@ -38,15 +38,12 @@ export function DiscussionsList({
   const [activeTab, setActiveTab] = React.useState<"recommend" | "trace">(
     "recommend"
   );
-  const { displayMode, sortBy, setSortBy } = useDiscussionDisplayStore();
+  const { getDisplayMode, getSortBy } = useDiscussionDisplayStore();
+  const displayMode = getDisplayMode();
+  const sortBy = getSortBy();
 
   const handleDeleteDiscussion = useCallback(
     (deletedSlug: string) => {
-      //   // 如果删除的是下一页的第一条数据，pageNum=当前页-上一页
-      //   setDiscussions((prev) => ({
-      //     ...prev,
-      //     items: prev.items.filter((item) => item.slug !== deletedSlug),
-      //   }));
       fetchDiscussions(activeTab, discussions.current_page, sortBy);
     },
     [activeTab, discussions.current_page, sortBy]
@@ -55,7 +52,7 @@ export function DiscussionsList({
   const fetchDiscussions = async (
     tab: "recommend" | "trace",
     pageNum: number = 1,
-    sort: SortBy = sortBy
+    sort: SortBy = getSortBy('discussion-list')
   ) => {
     setLoading(true);
     try {

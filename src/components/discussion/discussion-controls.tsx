@@ -16,23 +16,26 @@ interface DiscussionControlsProps {
   sortBy?: SortBy;
   setSortBy?: (sort: SortBy) => void;
   className?: string;
+  pageId?: string;
 }
 
 export function DiscussionControls({
   sortBy: externalSortBy,
   setSortBy: externalSetSortBy,
   className,
+  pageId,
 }: DiscussionControlsProps) {
   const {
-    displayMode,
+    getDisplayMode,
     setDisplayMode,
-    sortBy: storeSortBy,
+    getSortBy,
     setSortBy: storeSetSortBy,
   } = useDiscussionDisplayStore();
 
-  // 使用外部传入的状态或者 store 中的状态
-  const sortBy = externalSortBy ?? storeSortBy;
-  const setSortBy = externalSetSortBy ?? storeSetSortBy;
+  const displayMode = getDisplayMode(pageId);
+  
+  const sortBy = externalSortBy ?? getSortBy(pageId);
+  const setSortBy = externalSetSortBy ?? ((sort: SortBy) => storeSetSortBy(sort, pageId));
 
   const sortOptions = {
     hot: "热门",
@@ -68,7 +71,7 @@ export function DiscussionControls({
         type="button"
         className="inline-flex h-8 items-center justify-center font-medium text-muted-foreground"
         onClick={() =>
-          setDisplayMode(displayMode === "grid" ? "list" : "grid")
+          setDisplayMode(displayMode === "grid" ? "list" : "grid", pageId)
         }
       >
         {displayMode === "grid" ? (
