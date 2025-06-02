@@ -18,6 +18,11 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAuthModal } from "./auth-modal-store";
 import { useDraftStore } from "@/store/draft";
 import { api } from "@/lib/api";
+import { Turnstile } from "@marsidev/react-turnstile";
+
+const TURNSTILE_SITE_KEY =
+  process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY ||
+  "1x00000000000000000000AA";
 
 interface LoginModalProps {
   open?: boolean;
@@ -38,19 +43,19 @@ export function LoginModal({
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isValid, setIsValid] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   useEffect(() => {
-    // 简单的邮箱格式验证
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmailValid = emailRegex.test(email);
-    const isPasswordValid = password.length >= 6;
+    const isPasswordValid = password.length >= 8;
 
     setIsValid(isEmailValid && isPasswordValid);
   }, [email, password]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isValid || isLoading) return;
+    if (!isValid || isLoading || !turnstileToken) return;
 
     setIsLoading(true);
 
@@ -59,10 +64,10 @@ export function LoginModal({
         email,
         password,
         redirect: false,
+        turnstile_token: turnstileToken,
       });
 
       if (!result?.ok) {
-        // 显示具体的错误信息
         toast({
           variant: "destructive",
           title: "登录失败",
@@ -71,7 +76,6 @@ export function LoginModal({
         return;
       }
       if (result.error) {
-        // 显示具体的错误信息
         toast({
           variant: "destructive",
           title: "登录失败",
@@ -101,7 +105,6 @@ export function LoginModal({
         router.refresh();
       }
     } catch (error) {
-      // 显示具体的错误信息
       toast({
         variant: "destructive",
         title: "登录失败",
@@ -183,8 +186,24 @@ export function LoginModal({
               />
             </div>
             <div className="space-y-4">
-              <div className="h-[100px] bg-muted rounded-md">
-                {/* reCAPTCHA placeholder */}
+              <div className="cf-turnstile flex justify-center">
+                <Turnstile
+                  siteKey={TURNSTILE_SITE_KEY}
+                  onSuccess={(token) => {
+                    setTurnstileToken(token);
+                  }}
+                  onError={(error) => {
+                    setTurnstileToken(null);
+                  }}
+                  onExpire={() => {
+                    setTurnstileToken(null);
+                  }}
+                  options={{
+                    theme: "auto",
+                    size: "normal",
+                  }}
+                  className="flex justify-center items-center bg-muted rounded-md"
+                />
               </div>
               <Button
                 type="submit"
@@ -194,7 +213,7 @@ export function LoginModal({
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "bg-neutral-100 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-400"
                 )}
-                disabled={!isValid || isLoading}
+                disabled={!isValid || isLoading || !turnstileToken}
               >
                 {isLoading ? (
                   <>

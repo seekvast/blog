@@ -57,7 +57,7 @@ export async function middleware(request: NextRequest) {
   //TODO:生产环境配置客户可请求API域名
   response.headers.set(
     "Content-Security-Policy",
-    "default-src 'self'; frame-src https://www.youtube.com https://www.youtube-nocookie.com; connect-src 'self' http://localhost:8000; img-src 'self' data: https:; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline';"
+    "default-src 'self'; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://challenges.cloudflare.com; connect-src 'self' http://localhost:8000 https://challenges.cloudflare.com; img-src 'self' data: https:; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.youtube.com https://s.ytimg.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline';"
   );
 
   return response;

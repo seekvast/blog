@@ -249,5 +249,11 @@ export function createApi(options: ApiOptions = {}) {
       readAll: () => http.get<any>(`${prefix}/notification/read-all`),
       clear: () => http.get<any>(`${prefix}/notification/clear`),
     },
+    auth: {
+      login: (data: any) => http.post<User>(`${prefix}/login`, data),
+      register: (data: any) => http.post<User>(`${prefix}/user`, data),
+      verifyTurnstile: (token: string) => 
+        http.post<{success: boolean}>(`/api/auth/verify-turnstile`, { token }),
+    },
   };
 }

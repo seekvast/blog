@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { z } from "zod";
 import {
   Dialog,
@@ -22,6 +22,11 @@ import Link from "next/link";
 import { useAuthModal } from "./auth-modal-store";
 import { useRegistrationStore } from "@/store/registration-store";
 import { signIn } from "next-auth/react";
+import { Turnstile } from "@marsidev/react-turnstile";
+
+const TURNSTILE_SITE_KEY =
+  process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY ||
+  "1x00000000000000000000AA";
 
 const stepOneSchema = z.object({
   email: z.string().email("請輸入有效的郵箱地址"),
@@ -113,6 +118,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   // 表单错误状态
   const [errors, setErrors] = useState<{
@@ -281,6 +287,14 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
 
   const nextStep = async () => {
     const isValid = await validateStep1();
+    if (!turnstileToken) {
+      toast({
+        description: "請完成人機驗證",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (isValid) {
       setStep(2);
     }
@@ -288,7 +302,6 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
 
   const prevStep = () => {
     setStep(1);
-    // 清除第二步的错误
     setErrors({});
   };
 
@@ -305,8 +318,17 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
       return;
     }
 
+    if (!turnstileToken) {
+      toast({
+        description: "請完成人機驗證",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsSubmitting(true);
+
       const birthday =
         step2Data.birthday.year &&
         step2Data.birthday.month &&
@@ -321,6 +343,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
         ...step2Data,
         gender: step2Data.gender ? parseInt(step2Data.gender) : undefined,
         birthday,
+        turnstile_token: turnstileToken,
       });
 
       if (data.token) {
@@ -438,8 +461,30 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                   </div>
 
                   <div className="space-y-5">
-                    <div className="h-[100px] bg-muted rounded-md">
-                      {/* reCAPTCHA placeholder */}
+                    {/* Cloudflare Turnstile 验证 */}
+                    <div className="flex justify-center w-full">
+                      <div className="cf-turnstile flex justify-center">
+                        <Turnstile
+                          siteKey={TURNSTILE_SITE_KEY}
+                          onSuccess={(token) => {
+                            console.log("Turnstile success:", token);
+                            setTurnstileToken(token);
+                          }}
+                          onError={() => {
+                            console.log("Turnstile error");
+                            setTurnstileToken(null);
+                          }}
+                          onExpire={() => {
+                            console.log("Turnstile expired");
+                            setTurnstileToken(null);
+                          }}
+                          options={{
+                            theme: "auto",
+                            size: "normal"
+                          }}
+                          className="flex justify-center items-center"
+                        />
+                      </div>
                     </div>
                     <Button
                       type="button"
@@ -616,6 +661,29 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                     </div>
                   </div>
 
+                  {/* Cloudflare Turnstile 验证 */}
+                  <div className="flex justify-center my-4 w-full">
+                    <div className="cf-turnstile flex justify-center">
+                      <Turnstile
+                        siteKey={TURNSTILE_SITE_KEY}
+                        onSuccess={(token) => {
+                          setTurnstileToken(token);
+                        }}
+                        onError={() => {
+                          setTurnstileToken(null);
+                        }}
+                        onExpire={() => {
+                          setTurnstileToken(null);
+                        }}
+                        options={{
+                          theme: "auto",
+                          size: "normal"
+                        }}
+                        className="flex justify-center items-center"
+                      />
+                    </div>
+                  </div>
+
                   <div className="flex gap-4 pt-4">
                     <Button
                       type="button"
@@ -629,7 +697,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                       type="button"
                       onClick={handleSubmit}
                       className="flex-1 h-12 text-base"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !turnstileToken}
                     >
                       {isSubmitting ? "註冊中..." : "完成"}
                     </Button>
