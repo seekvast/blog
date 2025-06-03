@@ -1,8 +1,13 @@
 import { DiscussionsList } from "@/components/discussion/discussions-list";
 import { api } from "@/lib/api";
+import { getBookmarksMetadata } from "@/lib/metadata";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { LoginPrompt } from "@/components/auth/login-prompt";
+
+export const generateMetadata = () => {
+  return getBookmarksMetadata();
+};
 
 async function getDiscussions() {
   try {

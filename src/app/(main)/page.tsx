@@ -1,7 +1,12 @@
 import { DiscussionsList } from "@/components/discussion/discussions-list";
 import { api } from "@/lib/api";
+import { getHomeMetadata } from "@/lib/metadata";
 import type { Pagination } from "@/types/common";
 import type { Discussion } from "@/types/discussion";
+
+export const generateMetadata = () => {
+  return getHomeMetadata();
+};
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
