@@ -1,96 +1,60 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { DiscussionItem } from "@/components/discussion/discussion-item";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { api } from "@/lib/api";
 import type { Discussion } from "@/types/discussion";
 import type { Pagination } from "@/types/common";
-import { LayoutGrid, List } from "lucide-react";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 import { DiscussionControls } from "@/components/discussion/discussion-controls";
 
 export function UserPosts() {
   const searchParams = useSearchParams();
   const hashid = searchParams?.get("hashid");
-  const [discussions, setDiscussions] = useState<Pagination<Discussion>>({
-    code: 0,
-    items: [],
-    current_page: 1,
-    last_page: 1,
-    total: 0,
-    per_page: 10,
-    message: "",
-    unread_count: 0,
-  });
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
   const observerRef = useRef<IntersectionObserver>();
-  const { displayMode, setDisplayMode, sortBy } = useDiscussionDisplayStore();
+  const displayMode = useDiscussionDisplayStore((state) =>
+    state.getDisplayMode()
+  );
+  const sortBy = useDiscussionDisplayStore((state) => state.getSortBy());
 
-  // 添加控制台日志用于调试
-  useEffect(() => {
-    console.log("当前显示模式:", displayMode);
-  }, [displayMode]);
-
-  // 初始加载
-  const fetchDiscussions = useCallback(async () => {
-    try {
-      const response = await api.discussions.list({
-        page: 1,
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetching,
+    isError,
+    error,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ["userDiscussions", hashid, sortBy],
+    queryFn: async ({ pageParam = 1 }) => {
+      return api.discussions.list({
+        page: pageParam,
         per_page: 10,
         user_hashid: hashid || undefined,
         sort: sortBy,
       });
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) => {
+      return lastPage.current_page < lastPage.last_page
+        ? lastPage.current_page + 1
+        : undefined;
+    },
+    enabled: !!hashid,
+    staleTime: 0,
+    retry: 1,
+  });
 
-      setDiscussions(response);
-      setHasMore(response.current_page < response.last_page);
-      setPage(2);
-    } catch (error) {
-      console.error("Failed to fetch initial discussions:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [hashid, sortBy]);
-
-  useEffect(() => {
-    fetchDiscussions();
-  }, [fetchDiscussions]);
-
-  // 加载更多
   const loadMore = useCallback(async () => {
-    if (loading || !hasMore) return;
-    setLoading(true);
+    if (!hasNextPage || isFetchingNextPage) return;
+    fetchNextPage();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-    try {
-      const response = await api.discussions.list({
-        page,
-        per_page: 10,
-        user_hashid: hashid || undefined,
-        sort: sortBy,
-      });
-
-      if (response.items.length === 0 || page >= response.last_page) {
-        setHasMore(false);
-      } else {
-        setDiscussions((prev) => ({
-          ...prev,
-          items: [...prev.items, ...response.items],
-          current_page: page,
-          last_page: response.last_page,
-        }));
-        setPage((prev) => prev + 1);
-      }
-    } catch (error) {
-      console.error("Failed to load more discussions:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [loading, hasMore, page, hashid, sortBy]);
-
-  // 清理 observer
   useEffect(() => {
     return () => {
       if (observerRef.current) {
@@ -98,6 +62,13 @@ export function UserPosts() {
       }
     };
   }, []);
+
+  const handleRetry = () => {
+    refetch();
+  };
+
+  const discussions = data?.pages.flatMap((page) => page.items) || [];
+  const loading = isFetching && !isFetchingNextPage;
 
   return (
     <div className="flex flex-col min-w-0 overflow-hidden px-4">
@@ -109,25 +80,51 @@ export function UserPosts() {
           </div>
         </div>
       </div>
-      <div className="divide-y min-w-0">
-        <InfiniteScroll
-          loading={loading}
-          hasMore={hasMore}
-          onLoadMore={loadMore}
-        >
-          {discussions.items.map((discussion, index) => {
-            const isLastItem = index === discussions.items.length - 1;
-            return (
-              <DiscussionItem
-                key={discussion.slug}
-                discussion={discussion}
-                displayMode={displayMode}
-                isLastItem={isLastItem}
-              />
-            );
-          })}
-        </InfiniteScroll>
-      </div>
+
+      {isError && discussions.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-10">
+          <p className="text-destructive mb-4">加载数据时出错</p>
+          <button
+            onClick={handleRetry}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            重试
+          </button>
+        </div>
+      ) : (
+        <div className="divide-y min-w-0">
+          <InfiniteScroll
+            loading={isFetchingNextPage}
+            hasMore={!!hasNextPage}
+            onLoadMore={loadMore}
+          >
+            {discussions.map((discussion, index) => {
+              const isLastItem = index === discussions.length - 1;
+              return (
+                <DiscussionItem
+                  key={discussion.slug}
+                  discussion={discussion}
+                  displayMode={displayMode}
+                  isLastItem={isLastItem}
+                />
+              );
+            })}
+          </InfiniteScroll>
+
+          {/* 加载更多时出错显示 */}
+          {isError && discussions.length > 0 && (
+            <div className="flex flex-col items-center justify-center py-4">
+              <p className="text-destructive mb-2">加载更多数据时出错</p>
+              <button
+                onClick={handleRetry}
+                className="px-3 py-1 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 text-sm"
+              >
+                重试加载
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

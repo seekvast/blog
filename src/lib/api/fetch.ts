@@ -144,11 +144,13 @@ export async function fetchApi<T>(
       attempts++;
 
       // 如果是最后一次尝试或者是不需要重试的错误，直接抛出
+      const apiError = error as ApiError;
       if (
         attempts === retry ||
-        (error as ApiError).status === 401 ||
-        (error as ApiError).status === 403 ||
-        (error as ApiError).status === 422
+        apiError.status === 401 ||
+        apiError.status === 403 ||
+        apiError.status === 422 ||
+        (apiError.status && apiError.status >= 500 && apiError.status < 600) // 添加500系列错误
       ) {
         throw error;
       }

@@ -79,6 +79,10 @@ export function DiscussionActions({
     queryClient.invalidateQueries({
       queryKey: ["discussions", "trace"],
     });
+    // 更新用户文章列表
+    queryClient.invalidateQueries({
+      queryKey: ["userDiscussions"],
+    });
     onChange?.(discussion.slug);
   };
   //获取看板子版列表
@@ -91,10 +95,6 @@ export function DiscussionActions({
   const deleteMutation = useMutation({
     mutationFn: () => api.discussions.delete({ slug: discussion.slug }),
     onSuccess: () => {
-      toast({
-        title: "刪除成功",
-        description: "刪除成功",
-      });
       clearQueryCache();
     },
     onError: (error) => {
@@ -114,10 +114,6 @@ export function DiscussionActions({
         action: "board_child",
       }),
     onSuccess: () => {
-      toast({
-        title: "成功",
-        description: "更改子版成功",
-      });
       clearQueryCache();
       setShowDialog(false);
       setSelectedBoardChildId(discussion.board_child_id);
@@ -151,9 +147,6 @@ export function DiscussionActions({
         action: "stickied",
       }),
     onSuccess: () => {
-      toast({
-        description: "成功",
-      });
       clearQueryCache();
     },
     onError: (error) => {
@@ -171,9 +164,6 @@ export function DiscussionActions({
         action: "close_reply",
       }),
     onSuccess: () => {
-      toast({
-        description: "操作成功",
-      });
       clearQueryCache();
     },
     onError: (error) => {
