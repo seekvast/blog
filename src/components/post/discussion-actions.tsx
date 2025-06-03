@@ -37,6 +37,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { usePostEditorStore } from "@/store/post-editor";
+import { useLoginModal } from "@/components/providers/login-modal-provider";
 interface DiscussionActionsProps {
   discussion: Discussion;
   onChange?: (deletedSlug: string) => void;
@@ -48,6 +49,7 @@ export function DiscussionActions({
 }: DiscussionActionsProps) {
   const { isVisible, onClose, setIsVisible, setOpenFrom } =
     usePostEditorStore();
+  const { openLoginModal } = useLoginModal();
   const [reportToAdminOpen, setReportToAdminOpen] = useState(false);
   const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -150,8 +152,7 @@ export function DiscussionActions({
       }),
     onSuccess: () => {
       toast({
-        title: "成功",
-        description: "設為看板公告成功",
+        description: "成功",
       });
       clearQueryCache();
     },
@@ -184,11 +185,12 @@ export function DiscussionActions({
   });
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <MoreHorizontal className="flex-shrink-0 h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
+      {user ? (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <MoreHorizontal className="flex-shrink-0 h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
           {isAuthor && (
             <>
               <DropdownMenuItem
@@ -274,8 +276,14 @@ export function DiscussionActions({
               </DropdownMenuItem>
             </>
           )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ) : (
+        <MoreHorizontal 
+          className="flex-shrink-0 h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground" 
+          onClick={() => openLoginModal()}
+        />
+      )}
 
       {/* 删除确认对话框 */}
       <ConfirmDialog

@@ -108,7 +108,7 @@ export const DiscussionItem = React.forwardRef<
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center space-x-2 min-w-0 flex-1">
               <Link
-                href={`/d/${discussion.slug}`}
+                href={`/d/${discussion.slug}?bid=${discussion.board_id}`}
                 className={cn(
                   "min-w-0 w-0 text-xl font-medium text-foreground hover:text-primary block w-full overflow-hidden text-ellipsis line-clamp-3 md:line-clamp-2 break-words",
                   discussion.discussion_user && "text-muted-foreground"
@@ -130,7 +130,7 @@ export const DiscussionItem = React.forwardRef<
             />
           </div>
 
-          <Link href={`/d/${discussion.slug}`} className="mt-1">
+          <Link href={`/d/${discussion.slug}?bid=${discussion.board_id}`} className="mt-1">
             <DiscussionPreview
               content={discussion.main_post.content}
               displayMode={displayMode}
@@ -164,7 +164,7 @@ export const DiscussionItem = React.forwardRef<
               )}
             </div>
             <Link
-              href={`/d/${discussion.slug}#comment`}
+              href={`/d/${discussion.slug}?bid=${discussion.board_id}#comment`}
               className="flex items-center space-x-1 text-muted-foreground"
             >
               <MessageSquare className="h-4 w-4 text-sm cursor-pointer" />

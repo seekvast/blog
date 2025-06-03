@@ -202,7 +202,7 @@ export function LoginModal({
                     theme: "auto",
                     size: "normal",
                   }}
-                  className="flex justify-center items-center bg-muted rounded-md"
+                  className="flex justify-center items-center"
                 />
               </div>
               <Button

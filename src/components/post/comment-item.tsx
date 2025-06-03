@@ -3,7 +3,16 @@
 import * as React from "react";
 import Link from "next/link";
 import { formatDate, fromNow } from "@/lib/dayjs";
-import { ThumbsUp, ThumbsDown } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  MoreHorizontal,
+  Reply,
+  ThumbsDown,
+  ThumbsUp,
+  UserRound,
+  MinusCircle,
+} from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { PostContent } from "@/components/post/post-content";
 import { cn } from "@/lib/utils";
@@ -15,7 +24,6 @@ import { PostForm } from "@/validations/post";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
-import { UserRound } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -36,8 +44,6 @@ interface CommentItemProps {
   isLocked?: boolean;
 }
 
-
-
 export const CommentItem = ({
   discussion,
   comment,
@@ -52,7 +58,18 @@ export const CommentItem = ({
   const [isEditing, setIsEditing] = React.useState(false);
   const [isReplying, setIsReplying] = React.useState(false);
   const [votersPopoverOpen, setVotersPopoverOpen] = React.useState(false);
-  const [showChildren, setShowChildren] = React.useState(false);
+  // 使用useRef来存储是否手动折叠过，而不是使用state
+  const hasManuallyCollapsed = React.useRef(false);
+  const [showChildren, setShowChildren] = React.useState(true);
+  const [visibleChildrenCount, setVisibleChildrenCount] = React.useState(15);
+
+  // 重写setShowChildren，记录手动折叠状态
+  const handleToggleChildren = (show: boolean) => {
+    if (!show) {
+      hasManuallyCollapsed.current = true;
+    }
+    setShowChildren(show);
+  };
   const [editContent, setEditContent] = React.useState(comment.raw_content);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -156,7 +173,9 @@ export const CommentItem = ({
         >
           <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
             <AvatarImage src={comment.user.avatar_url} />
-            <AvatarFallback>{comment.user.nickname[0].toUpperCase()}</AvatarFallback>
+            <AvatarFallback>
+              {comment.user.nickname[0].toUpperCase()}
+            </AvatarFallback>
           </Avatar>
         </Link>
         <div className="flex-1 min-w-0 overflow-hidden">
@@ -178,9 +197,7 @@ export const CommentItem = ({
                 </Link>
               )}
               <span className="text-gray-300">·</span>
-              <span>
-                {fromNow(comment.created_at)}
-              </span>
+              <span>{fromNow(comment.created_at)}</span>
               {comment.editor && (
                 <Popover>
                   <PopoverTrigger asChild>
@@ -294,10 +311,11 @@ export const CommentItem = ({
           {/* 渲染子评论 */}
           {comment.children && comment.children.length > 0 && (
             <div className="mt-2 space-y-4 py-4">
-              {!showChildren ? (
+              {/* 只有在用户手动折叠过的情况下才显示折叠状态 */}
+              {hasManuallyCollapsed.current && !showChildren ? (
                 <div className="text-center">
                   <button
-                    onClick={() => setShowChildren(true)}
+                    onClick={() => handleToggleChildren(true)}
                     className="text-sm text-primary hover:text-primary/80 font-medium"
                   >
                     查看 {comment.children.length} 条回复
@@ -305,20 +323,49 @@ export const CommentItem = ({
                 </div>
               ) : (
                 <>
-                  {comment.children.map((childComment) => (
-                    <CommentItem
-                      key={childComment.id}
-                      discussion={discussion}
-                      comment={childComment}
-                      onReply={onReply}
-                      onVote={onVote}
-                      onSubmitReply={onSubmitReply}
-                      onEditComment={onEditComment}
-                      onEdit={onEdit}
-                      level={level + 1}
-                      isLocked={isLocked}
-                    />
-                  ))}
+                  {comment.children
+                    .slice(0, visibleChildrenCount)
+                    .map((childComment) => (
+                      <CommentItem
+                        key={childComment.id}
+                        discussion={discussion}
+                        comment={childComment}
+                        onReply={onReply}
+                        onVote={onVote}
+                        onSubmitReply={onSubmitReply}
+                        onEditComment={onEditComment}
+                        onEdit={onEdit}
+                        level={level + 1}
+                        isLocked={isLocked}
+                      />
+                    ))}
+
+                  <div className="flex justify-between items-center mt-4 px-2">
+                    {comment.children.length > visibleChildrenCount ? (
+                      <button
+                        onClick={() =>
+                          setVisibleChildrenCount((prev) => prev + 15)
+                        }
+                        className="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
+                      >
+                        <span>
+                          查看剩余{" "}
+                          {comment.children.length - visibleChildrenCount}{" "}
+                          条回复
+                        </span>
+                      </button>
+                    ) : (
+                      <div></div>
+                    )}
+
+                    <button
+                      onClick={() => handleToggleChildren(false)}
+                      className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+                    >
+                      <MinusCircle className="h-3.5 w-3.5" />
+                      <span>收起</span>
+                    </button>
+                  </div>
                   {!isLocked && (
                     <div className="flex items-start space-x-3 px-2 md:px-4 mt-4">
                       <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
@@ -336,14 +383,6 @@ export const CommentItem = ({
                       </div>
                     </div>
                   )}
-                  <div className="text-center mt-4">
-                    <button
-                      onClick={() => setShowChildren(false)}
-                      className="text-sm text-primary hover:text-primary/80 font-medium"
-                    >
-                      收起回复
-                    </button>
-                  </div>
                 </>
               )}
             </div>

@@ -92,11 +92,6 @@ export function AvatarUpload({
       onUploadSuccess?.(data.url);
     } catch (error) {
       onUploadError?.(error as Error);
-      toast({
-        variant: "destructive",
-        title: "上传失败",
-        description: "头像上传失败，请重试",
-      });
     } finally {
       setIsUploading(false);
       setRawImg(null);

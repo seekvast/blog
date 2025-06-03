@@ -115,13 +115,7 @@ export function ImageUpload({
         description: "图片上传成功",
       });
     } catch (error) {
-      console.error("图片上传失败:", error);
       onUploadError?.(error as Error);
-      toast({
-        variant: "destructive",
-        title: "上传失败",
-        description: "图片上传失败，请重试",
-      });
       if (!externalPreviewUrl) {
         setPreviewUrl(null);
       }

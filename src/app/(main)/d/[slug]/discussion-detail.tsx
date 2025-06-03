@@ -825,7 +825,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               </InfiniteScroll>
               {!currentDiscussion?.is_locked && (
                 <div className="flex items-start space-x-3 px-2 md:px-4 mt-4">
-                  <Avatar className="h-10 w-10 md:h-10 md:w-10 flex-shrink-0">
+                  <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
                     <AvatarFallback>
                       <UserRound className="h-4 w-4 md:h-5 md:w-5" />
                     </AvatarFallback>
