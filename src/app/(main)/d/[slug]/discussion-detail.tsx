@@ -59,6 +59,7 @@ import {
 } from "@/components/ui/popover";
 import { CommentButton } from "@/components/post/comment-button";
 import { DiscussionActions } from "@/components/post/discussion-actions";
+import { useCompactNumberFormat } from "@/lib/utils/format";
 
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
@@ -82,6 +83,9 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   if (!slug) {
     return <div>Invalid discussion URL</div>;
   }
+
+  const formatCompactNumber = useCompactNumberFormat();
+
   const [postForm, setPostForm] = React.useState(initPostForm);
 
   const { user } = useAuth();
@@ -216,12 +220,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         variant: "destructive",
       });
     },
-    onSuccess: () => {
-      toast({
-        title: isBookmarked ? "已取消收藏" : "已收藏",
-        variant: "default",
-      });
-    },
+    onSuccess: () => {},
   });
 
   const followMutation = useMutation({
@@ -243,20 +242,20 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       });
     },
     onSuccess: () => {
-      toast({
-        title:
-          followStatus === "follow"
-            ? "已关注"
-            : followStatus === "ignore"
-            ? "已忽视"
-            : "已取消关注",
-        description:
-          followStatus === "follow"
-            ? "将接收此讨论的更新"
-            : followStatus === "ignore"
-            ? "将不再接收此讨论的更新"
-            : "已取消关注此讨论",
-      });
+      //   toast({
+      //     title:
+      //       followStatus === "follow"
+      //         ? "已关注"
+      //         : followStatus === "ignore"
+      //         ? "已忽视"
+      //         : "已取消关注",
+      //     description:
+      //       followStatus === "follow"
+      //         ? "将接收此讨论的更新"
+      //         : followStatus === "ignore"
+      //         ? "将不再接收此讨论的更新"
+      //         : "已取消关注此讨论",
+      //   });
     },
   });
 
@@ -751,7 +750,9 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   <Popover>
                     <PopoverTrigger asChild>
                       <button className="text-xs md:text-sm hover:text-primary">
-                        {currentDiscussion.main_post.up_votes_count}
+                        {formatCompactNumber(
+                          currentDiscussion.main_post.up_votes_count
+                        )}
                       </button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80 p-0" align="start">
@@ -764,6 +765,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 onClick={() =>
                   handleVote(currentDiscussion.main_post.id, "down", true)
                 }
+                className="flex items-center space-x-2"
               >
                 <ThumbsDown
                   className={cn(
@@ -774,7 +776,9 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 />
                 {currentDiscussion.main_post.down_votes_count > 5 && (
                   <span className="text-xs md:text-sm">
-                    {currentDiscussion.main_post.down_votes_count}
+                    {formatCompactNumber(
+                      currentDiscussion.main_post.down_votes_count
+                    )}
                   </span>
                 )}
               </button>
@@ -940,7 +944,13 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant={followStatus ? "default" : "secondary"}
+                    variant={
+                      followStatus === "ignore"
+                        ? "destructive"
+                        : followStatus
+                        ? "default"
+                        : "secondary"
+                    }
                     className="w-full justify-between"
                     onClick={() =>
                       handleFollow(followStatus === "follow" ? null : "follow")

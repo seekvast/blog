@@ -8,7 +8,6 @@ import { formatDate, fromNow } from "@/lib/dayjs";
 
 import { ThumbsUp, MessageSquare, Tag } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { DiscussionPreview } from "@/components/post/discussion-preview";
 import type { Discussion } from "@/types/discussion";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,6 +15,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { debounce } from "@/lib/utils";
+import { useCompactNumberFormat } from "@/lib/utils/format";
 import { DiscussionActions } from "@/components/post/discussion-actions";
 import {
   Popover,
@@ -39,6 +39,7 @@ export const DiscussionItem = React.forwardRef<
   const [isVoting, setIsVoting] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const formatCompactNumber = useCompactNumberFormat();
 
   // 点赞 mutation
   const voteMutation = useMutation({
@@ -159,7 +160,7 @@ export const DiscussionItem = React.forwardRef<
               </div>
               {discussion.up_votes > 0 && (
                 <span className="text-sm text-muted-foreground">
-                  {discussion.up_votes}
+                  {formatCompactNumber(discussion.up_votes)}
                 </span>
               )}
             </div>
@@ -168,7 +169,7 @@ export const DiscussionItem = React.forwardRef<
               className="flex items-center space-x-1 text-muted-foreground"
             >
               <MessageSquare className="h-4 w-4 text-sm cursor-pointer" />
-              <span>{discussion.comment_count}</span>
+              <span>{formatCompactNumber(discussion.comment_count)}</span>
             </Link>
 
             <div className="flex items-center space-x-1 text-muted-foreground">

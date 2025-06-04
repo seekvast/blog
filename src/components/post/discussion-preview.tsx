@@ -15,26 +15,21 @@ export function DiscussionPreview({
   displayMode,
   className,
 }: DiscussionPreviewProps) {
-  // 从 HTML 中提取第一张图片并移除所有图片
   const processContent = React.useCallback((html: string) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
 
-    // 获取第一张图片的 URL
     const firstImg = doc.querySelector("img");
     const firstImgSrc = firstImg?.src;
 
-    // 移除所有图片
     doc.querySelectorAll("img").forEach((img) => img.remove());
 
-    // 返回处理后的内容和第一张图片 URL
     return {
       processedContent: doc.body.innerHTML,
       firstImgSrc,
     };
   }, []);
 
-  // 使用 useMemo 缓存处理结果
   const { processedContent, firstImgSrc } = React.useMemo(
     () => processContent(content),
     [content, processContent]
@@ -50,8 +45,9 @@ export function DiscussionPreview({
                 src={firstImgSrc}
                 alt=""
                 width={120}
-                height={80}
-                className="object-cover rounded-lg"
+                height={90}
+                className="object-cover rounded-lg w-[120px] h-[90px]"
+                style={{ aspectRatio: '4/3', objectFit: 'cover' }}
               />
             </div>
           )}

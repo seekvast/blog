@@ -265,7 +265,7 @@ export default function CreatePostModal() {
         dispatch({ type: "SET_LOADING_CHILDREN", payload: false });
       }
     },
-    [setBoardChildren, discussionForm.board_child_id, setDiscussionForm]
+    [setBoardChildren, setDiscussionForm]
   );
 
   const handlePublish = React.useCallback(async () => {
@@ -387,7 +387,6 @@ export default function CreatePostModal() {
         current_page: 1,
         last_page: 1,
         message: "",
-        unread_count: 0,
       });
     }
   }, [discussionForm.board_id, loadBoardChildren]);

@@ -32,6 +32,8 @@ import {
 import { CommentButton } from "@/components/post/comment-button";
 import type { Discussion } from "@/types/discussion";
 import { VotersList } from "@/components/post/voters-list";
+import { useCompactNumberFormat } from "@/lib/utils/format";
+
 interface CommentItemProps {
   discussion: Discussion;
   comment: Post;
@@ -55,15 +57,16 @@ export const CommentItem = ({
   level = 0,
   isLocked = false,
 }: CommentItemProps) => {
+  const formatCompactNumber = useCompactNumberFormat();
+
   const [isEditing, setIsEditing] = React.useState(false);
   const [isReplying, setIsReplying] = React.useState(false);
   const [votersPopoverOpen, setVotersPopoverOpen] = React.useState(false);
-  // 使用useRef来存储是否手动折叠过，而不是使用state
+
   const hasManuallyCollapsed = React.useRef(false);
   const [showChildren, setShowChildren] = React.useState(true);
   const [visibleChildrenCount, setVisibleChildrenCount] = React.useState(15);
 
-  // 重写setShowChildren，记录手动折叠状态
   const handleToggleChildren = (show: boolean) => {
     if (!show) {
       hasManuallyCollapsed.current = true;
@@ -262,7 +265,7 @@ export const CommentItem = ({
                     >
                       <PopoverTrigger asChild>
                         <button className="text-xs md:text-sm hover:text-primary">
-                          {comment.up_votes_count}
+                          {formatCompactNumber(comment.up_votes_count)}
                         </button>
                       </PopoverTrigger>
                       <PopoverContent className="w-80 p-0" align="start">
@@ -284,7 +287,7 @@ export const CommentItem = ({
                   />
                   {comment.down_votes_count > 5 && (
                     <span className="text-xs md:text-sm">
-                      {comment.down_votes_count}
+                      {formatCompactNumber(comment.down_votes_count)}
                     </span>
                   )}
                 </div>
