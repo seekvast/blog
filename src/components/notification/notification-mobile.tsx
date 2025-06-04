@@ -47,7 +47,6 @@ export function NotificationPopover({
     fetchNotifications,
     loadMore,
     markAsRead,
-    markAllNotificationsAsRead,
     clearAllNotifications,
   } = useNotifications(autoLoad);
 
@@ -62,10 +61,6 @@ export function NotificationPopover({
     //   e.preventDefault();
     //   router.push("/notifications");
     // }
-  };
-
-  const handleMarkAllAsRead = () => {
-    markAllNotificationsAsRead();
   };
 
   const handleClearAll = () => {

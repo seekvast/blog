@@ -18,7 +18,6 @@ export const useBoardChildrenStore = create<BoardChildrenState>((set) => ({
     per_page: 20,
     current_page: 1,
     last_page: 1,
-    unread_count: 0,
     message: "",
   },
   isLoading: false,

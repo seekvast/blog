@@ -11,8 +11,8 @@ import {
 import {
   NotificationPreview,
   NotificationTabType,
-  useNotifications,
 } from "./notification-preview";
+import { useNotifications } from "@/hooks/use-notification";
 import { cn } from "@/lib/utils";
 import { NotificationIcon } from "./notification-icon";
 import { NotificationNav } from "./notification-nav";
@@ -37,7 +37,6 @@ export function NotificationPopover({
     fetchNotifications,
     loadMore,
     markAsRead,
-    markAllNotificationsAsRead,
     clearAllNotifications,
   } = useNotifications(autoLoad);
 
@@ -54,9 +53,6 @@ export function NotificationPopover({
     // }
   };
 
-  const handleMarkAllAsRead = () => {
-    markAllNotificationsAsRead();
-  };
 
   const handleClearAll = () => {
     clearAllNotifications();
@@ -101,7 +97,6 @@ export function NotificationPopover({
             activeType={activeType}
             onTypeChange={handleTypeChange}
             onClearAll={handleClearAll}
-            onMarkAllAsRead={handleMarkAllAsRead}
           />
         </div>
 

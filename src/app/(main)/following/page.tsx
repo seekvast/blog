@@ -26,7 +26,6 @@ async function getDiscussions() {
       per_page: 10,
       current_page: 1,
       last_page: 1,
-      unread_count: 0,
       message:
         error instanceof Error ? error.message : "Failed to fetch discussions",
     };

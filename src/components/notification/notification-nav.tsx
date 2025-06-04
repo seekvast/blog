@@ -11,7 +11,6 @@ interface NotificationNavProps {
   activeType: NotificationTabType;
   onTypeChange: (type: NotificationTabType) => void;
   onClearAll: () => void;
-  onMarkAllAsRead: () => void;
   className?: string;
 }
 
@@ -19,7 +18,6 @@ export function NotificationNav({
   activeType,
   onTypeChange,
   onClearAll,
-  onMarkAllAsRead,
   className,
 }: NotificationNavProps) {
   const { user } = useAuth();
@@ -72,15 +70,6 @@ export function NotificationNav({
           onClick={onClearAll}
         >
           <Trash2 className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6 text-muted-foreground"
-          title="全部标为已读"
-          onClick={onMarkAllAsRead}
-        >
-          <CheckCheck className="h-4 w-4" />
         </Button>
       </div>
     </div>

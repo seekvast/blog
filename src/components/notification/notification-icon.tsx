@@ -4,26 +4,38 @@ import * as React from "react";
 import { Bell } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useNotifications, useUnreadNotificationCount } from "./notification-preview";
+import { useUnreadNotificationCount, useMarkAllNotificationsAsRead } from "@/hooks/use-notification";
 
 interface NotificationIconProps {
   className?: string;
   iconClassName?: string;
   autoLoad?: boolean;
   pollingInterval?: number;
+  onClick?: () => void;
 }
 
 export function NotificationIcon({
   className,
   iconClassName,
   autoLoad = true,
-  pollingInterval = 30000, // 默认30秒轮询一次
+  pollingInterval = 30000,
+  onClick,
 }: NotificationIconProps) {
-  // 使用新的 hook 获取未读通知数量，支持轮询
   const { unreadCount } = useUnreadNotificationCount(autoLoad, pollingInterval);
+  const { markAllAsRead } = useMarkAllNotificationsAsRead();
+
+  const handleClick = (e: React.MouseEvent) => {
+    markAllAsRead();
+    onClick?.();
+  };
 
   return (
-    <div className={cn("relative", className)}>
+    <div
+      className={cn("relative", className)}
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+    >
       <Bell className={cn("h-5 w-5", iconClassName)} />
       {unreadCount > 0 && (
         <Badge

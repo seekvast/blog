@@ -247,7 +247,8 @@ export function createApi(options: ApiOptions = {}) {
         }),
       read: (data: any) => http.get<any>(`${prefix}/notification/read`, data),
       readAll: () => http.get<any>(`${prefix}/notification/read-all`),
-      clear: () => http.get<any>(`${prefix}/notification/clear`),
+        clear: () => http.get<any>(`${prefix}/notification/clear`),
+      unreadCount: () => http.get<any>(`${prefix}/notification/unread-count`),
     },
     auth: {
       login: (data: any) => http.post<User>(`${prefix}/login`, data),

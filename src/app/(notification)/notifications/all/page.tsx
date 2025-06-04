@@ -1,11 +1,8 @@
 "use client";
 
 import * as React from "react";
-import {
-  NotificationPreview,
-  NotificationTabType,
-  useNotifications,
-} from "@/components/notification/notification-preview";
+import { NotificationPreview } from "@/components/notification/notification-preview";
+import { NotificationTabType, useNotifications } from "@/hooks/use-notification";
 import { Trash2, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -28,17 +25,12 @@ export default function AllNotificationsPage() {
     fetchNotifications,
     loadMore,
     markAsRead,
-    markAllNotificationsAsRead,
     clearAllNotifications,
   } = useNotifications();
 
   const handleNotificationClick = (notification: Notification) => {
     // 标记为已读
     markAsRead(notification.id);
-  };
-
-  const handleMarkAllAsRead = () => {
-    markAllNotificationsAsRead();
   };
 
   const handleClearAll = () => {
