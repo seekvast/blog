@@ -20,6 +20,7 @@ import {
   Pin,
   Lock,
   Star,
+  Heart,
   BookmarkCheck,
 } from "lucide-react";
 import { AuthGuard } from "@/components/auth/auth-guard";
@@ -609,13 +610,13 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                     {currentDiscussion.is_sticky === 1 && (
                       <Pin className="h-4 w-4 text-red-500" />
                     )}
-                    {currentDiscussion.is_locked === 1 && <Lock className="h-4 w-4" />}
-                    {currentDiscussion?.discussion_user?.subscription === "follow" && (
-                      <Star className="h-4 w-4 text-primary" />
+                    {currentDiscussion.is_locked === 1 && (
+                      <Lock className="h-4 w-4" />
                     )}
-                    {currentDiscussion?.discussion_user?.is_bookmarked === "yes" && (
-                      <BookmarkCheck className="h-4 w-4" />
-                    )}
+                    {currentDiscussion?.discussion_user?.subscription ===
+                      "follow" && <Heart className="h-4 w-4 text-primary" />}
+                    {currentDiscussion?.discussion_user?.is_bookmarked ===
+                      "yes" && <BookmarkCheck className="h-4 w-4" />}
                     <DiscussionActions discussion={currentDiscussion} />
                   </div>
                 </div>

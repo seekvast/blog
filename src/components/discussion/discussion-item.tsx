@@ -10,7 +10,7 @@ import {
   ThumbsUp,
   MessageSquare,
   Tag,
-  Star,
+  Heart,
   Lock,
   BookmarkCheck,
   Pin,
@@ -141,7 +141,7 @@ export const DiscussionItem = React.forwardRef<
               )}
               {discussion.is_locked === 1 && <Lock className="h-4 w-4" />}
               {discussion?.discussion_user?.subscription === "follow" && (
-                <Star className="h-4 w-4 text-primary" />
+                <Heart className="h-4 w-4 text-primary" />
               )}
               {discussion?.discussion_user?.is_bookmarked === "yes" && (
                 <BookmarkCheck className="h-4 w-4" />
