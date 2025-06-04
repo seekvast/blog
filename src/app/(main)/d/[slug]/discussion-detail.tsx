@@ -10,7 +10,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   X,
   ChevronDown,
-  Star,
   Bookmark,
   Check,
   EyeOff,
@@ -18,6 +17,10 @@ import {
   ThumbsDown,
   UserRound,
   Tag,
+  Pin,
+  Lock,
+  Star,
+  BookmarkCheck,
 } from "lucide-react";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { PostNavigator } from "@/components/post/post-navigator";
@@ -602,7 +605,19 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                       </span>
                     </Link>
                   </div>
-                  <DiscussionActions discussion={currentDiscussion} />
+                  <div className="flex items-center space-x-2 cursor-pointer text-muted-foreground">
+                    {currentDiscussion.is_sticky === 1 && (
+                      <Pin className="h-4 w-4 text-red-500" />
+                    )}
+                    {currentDiscussion.is_locked === 1 && <Lock className="h-4 w-4" />}
+                    {currentDiscussion?.discussion_user?.subscription === "follow" && (
+                      <Star className="h-4 w-4 text-primary" />
+                    )}
+                    {currentDiscussion?.discussion_user?.is_bookmarked === "yes" && (
+                      <BookmarkCheck className="h-4 w-4" />
+                    )}
+                    <DiscussionActions discussion={currentDiscussion} />
+                  </div>
                 </div>
 
                 <div className="flex items-center space-x-2 lg:space-x-4 text-sm text-muted-foreground">

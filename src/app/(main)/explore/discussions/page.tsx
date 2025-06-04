@@ -8,13 +8,14 @@ import { DiscussionItem } from "@/components/discussion/discussion-item";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { ExploreTabs } from "@/components/search/explore-tabs";
 import { DiscussionControls } from "@/components/discussion/discussion-controls";
-import { DisplayMode, SortBy } from "@/types/display-preferences";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 
 export default function DiscussionsPage() {
   const searchParams = useSearchParams();
   const q = searchParams?.get("q") ?? "";
-  const { sortBy, setSortBy, displayMode } = useDiscussionDisplayStore();
+  const sortBy = useDiscussionDisplayStore(state => state.getSortBy());
+  const displayMode = useDiscussionDisplayStore(state => state.getDisplayMode());
+  const setSortBy = useDiscussionDisplayStore(state => state.setSortBy);
 
   const {
     data,

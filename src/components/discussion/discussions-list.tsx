@@ -18,6 +18,7 @@ import { useRequireAuth } from "@/hooks/use-require-auth";
 interface DiscussionsListProps {
   initialDiscussions: Pagination<Discussion>;
   from: string;
+  sticky?: Discussion[];
 }
 
 export const dynamic = "force-dynamic";
@@ -26,6 +27,7 @@ export const revalidate = 0;
 export function DiscussionsList({
   initialDiscussions,
   from,
+  sticky,
 }: DiscussionsListProps) {
   const { requireAuth } = useRequireAuth();
 
@@ -52,7 +54,7 @@ export function DiscussionsList({
   const fetchDiscussions = async (
     tab: "recommend" | "trace",
     pageNum: number = 1,
-    sort: SortBy = getSortBy('discussion-list')
+    sort: SortBy = getSortBy("discussion-list")
   ) => {
     setLoading(true);
     try {
@@ -166,7 +168,23 @@ export function DiscussionsList({
         </div>
       </div>
 
-      {/* 帖子列表 */}
+      {/* 置顶讨论列表 */}
+      {sticky && sticky.length > 0 && (
+        <div className="divide-y border-b">
+          {sticky.map((discussion, index) => (
+            <div className="px-6" key={`sticky-${discussion.slug}-${index}`}>
+              <DiscussionItem
+                discussion={discussion}
+                displayMode={displayMode}
+                isLastItem={false}
+                onChange={handleDeleteDiscussion}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 普通帖子列表 */}
       <div className="divide-y">
         <InfiniteScroll
           loading={loading}

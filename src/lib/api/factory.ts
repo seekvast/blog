@@ -87,7 +87,6 @@ export function createApi(options: ApiOptions = {}) {
     boards: {
       list: (params?: QueryParams) =>
         http.get<Pagination<Board>>(`${prefix}/boards`, params, { next }),
-
       get: (params: any) =>
         http.get<Board>(`${prefix}/board`, params, { next }),
 
@@ -142,6 +141,7 @@ export function createApi(options: ApiOptions = {}) {
           }
         );
       },
+      getSticky: (data: any) => http.get<Discussion[]>(`${prefix}/discussion/sticky`, data),
 
       get: (slug: string) =>
         http.get<Discussion>(`${prefix}/discussion?slug=${slug}`, undefined, {

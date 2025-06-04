@@ -59,7 +59,8 @@ function BoardContent() {
   const [error, setError] = useState<string | null>(null);
   const observerRef = useRef<IntersectionObserver>();
   const [hasMore, setHasMore] = useState(true);
-  const { displayMode, sortBy } = useDiscussionDisplayStore();
+  const displayMode = useDiscussionDisplayStore((state) => state.getDisplayMode());
+  const sortBy = useDiscussionDisplayStore((state) => state.getSortBy());
   const [activeTab, setActiveTab] = useState<"posts" | "rules" | "children">(
     "posts"
   );

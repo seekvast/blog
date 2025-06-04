@@ -6,7 +6,15 @@ import Link from "next/link";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { formatDate, fromNow } from "@/lib/dayjs";
 
-import { ThumbsUp, MessageSquare, Tag } from "lucide-react";
+import {
+  ThumbsUp,
+  MessageSquare,
+  Tag,
+  Star,
+  Lock,
+  BookmarkCheck,
+  Pin,
+} from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { DiscussionPreview } from "@/components/post/discussion-preview";
 import type { Discussion } from "@/types/discussion";
@@ -101,7 +109,9 @@ export const DiscussionItem = React.forwardRef<
               src={discussion.user.avatar_url}
               alt={discussion.user.username}
             />
-            <AvatarFallback>{discussion.user.username[0].toUpperCase()}</AvatarFallback>
+            <AvatarFallback>
+              {discussion.user.username[0].toUpperCase()}
+            </AvatarFallback>
           </Avatar>
         </Link>
 
@@ -125,13 +135,29 @@ export const DiscussionItem = React.forwardRef<
               )} */}
             </div>
 
-            <DiscussionActions
-              discussion={discussion}
-              onChange={() => onChange?.(discussion.slug)}
-            />
+            <div className="flex items-center space-x-2 cursor-pointer text-muted-foreground">
+              {discussion.is_sticky === 1 && (
+                <Pin className="h-4 w-4 text-red-500" />
+              )}
+              {discussion.is_locked === 1 && <Lock className="h-4 w-4" />}
+              {discussion?.discussion_user?.subscription === "follow" && (
+                <Star className="h-4 w-4 text-primary" />
+              )}
+              {discussion?.discussion_user?.is_bookmarked === "yes" && (
+                <BookmarkCheck className="h-4 w-4" />
+              )}
+
+              <DiscussionActions
+                discussion={discussion}
+                onChange={() => onChange?.(discussion.slug)}
+              />
+            </div>
           </div>
 
-          <Link href={`/d/${discussion.slug}?bid=${discussion.board_id}`} className="mt-1">
+          <Link
+            href={`/d/${discussion.slug}?bid=${discussion.board_id}`}
+            className="mt-1"
+          >
             <DiscussionPreview
               content={discussion.main_post.content}
               displayMode={displayMode}
