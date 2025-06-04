@@ -342,7 +342,7 @@ export function ReportDialog({
         <DialogContent className="max-w-md flex flex-col items-center text-center">
           <div className="flex justify-center w-full py-6">
             <Image
-              src="/report.png"
+              src="/report.svg"
               alt="Report Success"
               width={240}
               height={240}

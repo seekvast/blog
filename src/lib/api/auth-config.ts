@@ -30,7 +30,11 @@ export const SKIP_ENDPOINTS: {
   paths: string[];
   methods?: string[];
 } = {
-  paths: ["/api/notifications", "/api/discussion/draft"],
+  paths: [
+    "/api/notifications",
+    "/api/discussion/draft",
+    "/api/notification/unread-count",
+  ],
   methods: ["GET"],
 };
 

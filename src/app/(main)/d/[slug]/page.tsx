@@ -5,18 +5,14 @@ import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
 import { Loading } from "@/components/ui/loading";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 async function getDiscussion(slug: string) {
-  try {
-    const response = await api.discussions.get(slug);
-    return response;
-  } catch (error: any) {
-    if (error.status === 404) {
-      notFound();
-    }
-    throw error;
+  const response = await api.discussions.get(slug);
+  if (!response) {
+    notFound();
   }
+  return response;
 }
 
 export default async function Page({ params }: { params: { slug: string } }) {

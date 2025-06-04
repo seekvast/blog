@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams, usePathname, useSearchParams } from "next/navigation";
+import NotFound from "@/app/not-found";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Ban, Unlock } from "lucide-react";
@@ -42,11 +43,14 @@ export default function UserLayout({
     useState<string>("rgba(0, 0, 0, 0)");
 
   // 获取用户详细信息
-  const { data: userData } = useQuery({
+  const { data: userData, isError, error, status } = useQuery({
     queryKey: ["user", hashid],
     queryFn: () => api.users.get({ hashid: hashid }),
     enabled: !!hashid,
   });
+  
+  // 判断是否显示404页面
+  const notFound = (status === 'error' || (status === 'success' && !userData)) && !!hashid;
   const isCurrentUser = session?.user?.hashid === userData?.hashid;
   // 使用 useEffect 处理 blocked 状态
   useEffect(() => {
@@ -136,6 +140,12 @@ export default function UserLayout({
     blockMutation.mutate(block_user_hashid);
   };
 
+  // 如果API请求完成但未获取到用户数据，显示404页面
+  if (notFound) {
+    return <NotFound />;
+  }
+  
+  // 如果API请求中，显示加载状态
   if (!userData) {
     return (
       <div className="flex items-center justify-center p-8">

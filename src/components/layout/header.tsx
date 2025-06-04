@@ -143,7 +143,7 @@ export function Header({ className }: HeaderProps) {
                         <span>个人设定</span>
                       </DropdownMenuItem>
                     </Link>
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       className="cursor-pointer"
                       onClick={openInterestSelection}
                     >
