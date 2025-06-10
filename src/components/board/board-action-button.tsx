@@ -15,40 +15,40 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useBoardActions } from "@/hooks/use-board-actions";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 
 interface BoardActionButtonProps {
   board: Board;
-  onJoin?: (boardId: number) => void;
+  onSubscribe?: (boardId: number) => void;
   onBlock?: (boardId: number) => void;
-  onLeave?: (boardId: number) => void;
-  requireAuth: (callback: () => void) => void;
   setReportToKaterOpen?: (open: boolean) => void;
 }
 
 export function BoardActionButton({
   board,
-  onJoin,
+  onSubscribe,
   onBlock,
-  onLeave,
-  requireAuth,
   setReportToKaterOpen,
 }: BoardActionButtonProps) {
-  // 使用自定义 Hook 获取默认实现
-  const { handleJoin, handleBlock, handleReport, setReportDialogOpen } =
-    useBoardActions();
+  const { requireAuth } = useRequireAuth();
+  const {
+    handleSubscribe,
+    handleBlock,
+    handleUnsubscribe,
+    handleReport,
+    setReportDialogOpen,
+  } = useBoardActions();
 
-  // 处理加入板块
-  const handleJoinBoard = () => {
+  const handleSubscribeBoard = () => {
     requireAuth(() => {
-      if (onJoin) {
-        onJoin(board.id);
+      if (onSubscribe) {
+        onSubscribe(board.id);
       } else {
-        handleJoin(board.id);
+        handleSubscribe(board.id);
       }
     });
   };
 
-  // 处理屏蔽板块
   const handleBlockBoard = () => {
     requireAuth(() => {
       if (onBlock) {
@@ -59,7 +59,6 @@ export function BoardActionButton({
     });
   };
 
-  // 处理举报板块
   const handleReportBoard = () => {
     requireAuth(() => {
       if (setReportToKaterOpen) {
@@ -70,15 +69,35 @@ export function BoardActionButton({
     });
   };
 
-  // 未加入板块
+  // 未加入
   if (
     !board.board_user ||
     board.board_user.status === BoardUserStatus.KICK_OUT
   ) {
     return board.history ? (
-      <Button size="sm" className="rounded-full" disabled>
-        审核中
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            size="sm"
+            className="rounded-full flex items-center gap-1"
+            variant="outline"
+          >
+            审核中 <ChevronDown className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-40">
+          <DropdownMenuItem
+            onClick={() =>
+              requireAuth(() => {
+                handleUnsubscribe(board.id);
+              })
+            }
+            className="cursor-pointer text-destructive hover:text-destructive"
+          >
+            取消申请
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     ) : (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -91,7 +110,7 @@ export function BoardActionButton({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-40">
           <DropdownMenuItem
-            onClick={handleJoinBoard}
+            onClick={handleSubscribeBoard}
             className="cursor-pointer"
           >
             <UserRound className="mr-2 h-4 w-4" />
@@ -123,6 +142,35 @@ export function BoardActionButton({
       <Button variant="outline" size="sm" className="rounded-full">
         <Link href={`/b/${board.slug}/settings`}>设定</Link>
       </Button>
+    );
+  }
+
+  // 已加入状态（通过审核但不是管理员）
+  if (status === 1) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            size="sm"
+            className="rounded-full flex items-center gap-1"
+            variant="outline"
+          >
+            已加入 <ChevronDown className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-40">
+          <DropdownMenuItem
+            onClick={() =>
+              requireAuth(() => {
+                handleUnsubscribe(board.id);
+              })
+            }
+            className="cursor-pointer text-destructive hover:text-destructive"
+          >
+            退出并拉黑
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
 

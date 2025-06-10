@@ -2,39 +2,87 @@
 
 import { useState } from "react";
 import { Board } from "@/types";
+import { api } from "@/lib/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/components/ui/use-toast";
 
 export function useBoardActions() {
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
 
-  const handleJoin = async (boardId: number) => {
-    // 实现加入板块的逻辑
-    // 这里可以添加API调用等实际逻辑
-    console.log(`加入板块: ${boardId}`);
+  // 加入看板
+  const { mutate: subscribeAction } = useMutation({
+    mutationFn: (boardId: number) =>
+      api.boards.subscribe({ board_id: boardId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+      queryClient.invalidateQueries({ queryKey: ["board_detail"] });
+      queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "错误",
+        description: "加入看板失败",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const { mutate: blockAction } = useMutation({
+    mutationFn: (boardId: number) => api.boards.block({ board_id: boardId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+      queryClient.invalidateQueries({ queryKey: ["board_detail"] });
+      queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "错误",
+        description: "拉黑看板失败",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // 退出看板
+  const { mutate: unsubscribeAction } = useMutation({
+    mutationFn: (boardId: number) => api.boards.unsubscribe({ board_id: boardId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+      queryClient.invalidateQueries({ queryKey: ["board_detail"] });
+      queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "错误",
+        description: "退出看板失败",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSubscribe = async (boardId: number) => {
+    subscribeAction(boardId);
   };
-  
+
   const handleBlock = async (boardId: number) => {
-    // 实现屏蔽板块的逻辑
-    // 这里可以添加API调用等实际逻辑
-    console.log(`屏蔽板块: ${boardId}`);
+    blockAction(boardId);
   };
-  
-  const handleLeave = async (boardId: number) => {
-    // 实现离开板块的逻辑
-    // 这里可以添加API调用等实际逻辑
-    console.log(`离开板块: ${boardId}`);
+
+  const handleUnsubscribe = async (boardId: number) => {
+    unsubscribeAction(boardId);
   };
-  
+
   const handleReport = () => {
-    // 打开举报对话框
     setReportDialogOpen(true);
   };
-  
+
   return {
     reportDialogOpen,
     setReportDialogOpen,
-    handleJoin,
+    handleSubscribe,
     handleBlock,
-    handleLeave,
-    handleReport
+    handleUnsubscribe,
+    handleReport,
   };
 }

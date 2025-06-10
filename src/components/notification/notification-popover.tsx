@@ -8,11 +8,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { NotificationPreview } from "./notification-preview";
 import {
-  NotificationPreview,
+  useNotifications,
   NotificationTabType,
-} from "./notification-preview";
-import { useNotifications } from "@/hooks/use-notification";
+} from "@/hooks/use-notification";
 import { cn } from "@/lib/utils";
 import { NotificationIcon } from "./notification-icon";
 import { NotificationNav } from "./notification-nav";
@@ -52,7 +52,6 @@ export function NotificationPopover({
     //   router.push("/notifications");
     // }
   };
-
 
   const handleClearAll = () => {
     clearAllNotifications();

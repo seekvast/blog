@@ -10,7 +10,7 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 
-interface JoinBoardDialogProps {
+interface SubscribeBoardDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   boardId: number;
@@ -18,13 +18,13 @@ interface JoinBoardDialogProps {
   onSuccess?: () => void;
 }
 
-export function JoinBoardDialog({
+export function SubscribeBoardDialog({
   open,
   onOpenChange,
   boardId,
   question,
   onSuccess,
-}: JoinBoardDialogProps) {
+}: SubscribeBoardDialogProps) {
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -40,7 +40,7 @@ export function JoinBoardDialog({
 
     try {
       setIsLoading(true);
-      await api.boards.join({
+      await api.boards.subscribe({
         board_id: boardId,
         answer: answer.trim(),
       });

@@ -1,26 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Bell, Trash2, CheckCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  NotificationPreview,
   NotificationTabType,
   useNotifications,
-} from "./notification-preview";
-import { cn } from "@/lib/utils";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { useRouter } from "next/navigation";
-import { NotificationIcon } from "./notification-icon";
+} from "@/hooks/use-notification";
 import { NotificationNav } from "./notification-nav";
+import { NotificationPreview } from "./notification-preview";
 
 interface NotificationPopoverProps {
   triggerClassName?: string;
@@ -28,22 +15,16 @@ interface NotificationPopoverProps {
 }
 
 export function NotificationPopover({
-  triggerClassName,
   autoLoad = true,
 }: NotificationPopoverProps) {
-  const router = useRouter();
-  const isMobile = useMediaQuery("(max-width: 640px)");
   const [open, setOpen] = React.useState(false);
   const [activeType, setActiveType] =
     React.useState<NotificationTabType>("all");
 
   const {
     notifications,
-    total,
     loading,
-    error,
     hasMore,
-    unreadCount,
     fetchNotifications,
     loadMore,
     markAsRead,
@@ -95,7 +76,6 @@ export function NotificationPopover({
             activeType={activeType}
             onTypeChange={handleTypeChange}
             onClearAll={handleClearAll}
-            onMarkAllAsRead={handleMarkAllAsRead}
           />
         </div>
 

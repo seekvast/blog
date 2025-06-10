@@ -15,13 +15,14 @@ import { DiscussionItem } from "@/components/discussion/discussion-item";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { BoardActionButton } from "@/components/board/board-action-button";
 import { useRequireAuth } from "@/hooks/use-require-auth";
+import { useBoardActions } from "@/hooks/use-board-actions";
 import { BoardApprovalMode } from "@/constants/board-approval-mode";
 import { useQuery } from "@tanstack/react-query";
 import { DiscussionControls } from "@/components/discussion/discussion-controls";
 import { SortBy } from "@/types/display-preferences";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
-import { JoinBoardDialog } from "@/components/board/join-board-dialog";
+import { SubscribeBoardDialog } from "@/components/board/subscribe-board-dialog";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -64,9 +65,10 @@ function BoardContent() {
   const [activeTab, setActiveTab] = useState<"posts" | "rules" | "children">(
     "posts"
   );
-  const [joinBoardOpen, setJoinBoardOpen] = useState(false);
+  const [subscribeBoardOpen, setSubscribeBoardOpen] = useState(false);
   const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
   const { requireAuth } = useRequireAuth();
+  const { handleSubscribe } = useBoardActions();
 
   const { mutate: blockBoard } = useMutation({
     mutationFn: (boardId: number) => api.boards.block({ board_id: boardId }),
@@ -212,25 +214,11 @@ function BoardContent() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { mutate: joinBoard } = useMutation({
-    mutationFn: (boardId: number) => api.boards.join({ board_id: boardId }),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["board_detail"] });
-      fetchBoardDetail();
-      toast({
-        title: "加入看板成功",
-      });
-    },
-  });
-
   const { mutate: hideChild } = useMutation({
     mutationFn: (child_id: number) =>
       api.boards.hiddenChild({ child_id, operator: "user" }),
     onSuccess: () => {
       fetchBoardChildren();
-      toast({
-        title: "操作成功",
-      });
     },
     onError: () => {
       toast({
@@ -267,12 +255,12 @@ function BoardContent() {
     notFoundError.name = "NotFoundError";
     throw notFoundError;
   }
-  const handleJoinBoard = (boardId: number) => {
+  const handleSubscribeBoard = (boardId: number) => {
     if (board.history) return;
     if (board.approval_mode === BoardApprovalMode.APPROVAL) {
-      setJoinBoardOpen(true);
+      setSubscribeBoardOpen(true);
     } else {
-      joinBoard(boardId);
+      handleSubscribe(boardId);
     }
   };
 
@@ -306,7 +294,7 @@ function BoardContent() {
                 <div className="flex items-center space-x-4">
                   <BoardActionButton
                     board={board}
-                    onJoin={handleJoinBoard}
+                    onSubscribe={handleSubscribeBoard}
                     onBlock={handleBlockBoard}
                     requireAuth={requireAuth}
                     setReportToKaterOpen={setReportToKaterOpen}
@@ -572,9 +560,9 @@ function BoardContent() {
 
       {/* 加入看板对话框 */}
       {board && (
-        <JoinBoardDialog
-          open={joinBoardOpen}
-          onOpenChange={setJoinBoardOpen}
+        <SubscribeBoardDialog
+          open={subscribeBoardOpen}
+          onOpenChange={setSubscribeBoardOpen}
           boardId={board.id}
           question={board.question}
           onSuccess={() => {

@@ -26,10 +26,11 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useMutation } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { JoinBoardDialog } from "@/components/board/join-board-dialog";
+import { SubscribeBoardDialog } from "@/components/board/subscribe-board-dialog";
 import { BoardApprovalMode } from "@/constants/board-approval-mode";
 import { Board } from "@/types/board";
 import { useRequireAuth } from "@/hooks/use-require-auth";
+import { useBoardActions } from "@/hooks/use-board-actions";
 import { useLanguageName } from "@/hooks/use-language-name";
 import {
   DropdownMenu,
@@ -79,6 +80,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   const router = useRouter();
   const { t, i18n } = useTranslation();
   const { requireAuth } = useRequireAuth();
+  const { handleSubscribe } = useBoardActions();
   const {
     getCurrentLanguageName,
     getCurrentLanguageCode,
@@ -86,7 +88,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
     languages,
   } = useLanguageName();
   const [createBoardOpen, setCreateBoardOpen] = useState(false);
-  const [joinBoardOpen, setJoinBoardOpen] = useState(false);
+  const [subscribeBoardOpen, setSubscribeBoardOpen] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
   const { setIsVisible, setOpenFrom } = usePostEditorStore();
   const queryClient = useQueryClient();
@@ -98,13 +100,6 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
 
   const { mutate: refreshBoards } = useMutation({
     mutationFn: () => api.boards.recommend({}),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
-    },
-  });
-
-  const { mutate: joinBoard } = useMutation({
-    mutationFn: (boardId: number) => api.boards.join({ board_id: boardId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
     },
@@ -144,13 +139,13 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
     });
   };
 
-  const handleJoinBoard = (board: Board) => {
+  const handleSubscribeBoard = (board: Board) => {
     if (board.approval_mode === BoardApprovalMode.APPROVAL) {
       setSelectedBoard(board);
-      setJoinBoardOpen(true);
+      setSubscribeBoardOpen(true);
     } else {
-      joinBoard(board.id);
-    }
+      handleSubscribe(board.id);
+    }   
   };
 
   return (
@@ -262,7 +257,7 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                   className="rounded-full h-6"
                   onClick={(e) => {
                     e.preventDefault();
-                    requireAuth(() => handleJoinBoard(board));
+                    requireAuth(() => handleSubscribeBoard(board));
                   }}
                 >
                   加入
@@ -274,9 +269,9 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
 
         {/* 加入看板对话框 */}
         {selectedBoard && (
-          <JoinBoardDialog
-            open={joinBoardOpen}
-            onOpenChange={setJoinBoardOpen}
+          <SubscribeBoardDialog
+            open={subscribeBoardOpen}
+            onOpenChange={setSubscribeBoardOpen}
             boardId={selectedBoard.id}
             question={selectedBoard.question}
             onSuccess={() => {

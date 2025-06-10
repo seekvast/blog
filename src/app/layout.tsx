@@ -16,6 +16,7 @@ export const metadata = {
   cache: "no-cache", //TODO: 测试环境禁用缓存
   title: "Kater",
   description: "Kater",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
 };
 
 export default async function RootLayout({

@@ -22,10 +22,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { JoinBoardDialog } from "@/components/board/join-board-dialog";
+import { SubscribeBoardDialog } from "@/components/board/subscribe-board-dialog";
 import { BoardApprovalMode } from "@/constants/board-approval-mode";
 import { BoardItem } from "@/components/board/board-item";
 import { useRequireAuth } from "@/hooks/use-require-auth";
+import { useBoardActions } from "@/hooks/use-board-actions";
 
 export default function BoardsPage() {
   const [boards, setBoards] = useState<Board[]>([]);
@@ -36,20 +37,14 @@ export default function BoardsPage() {
   const { requireAuth } = useRequireAuth();
   const queryClient = useQueryClient();
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
-  const [joinBoardOpen, setJoinBoardOpen] = useState(false);
+  const [subscribeBoardOpen, setSubscribeBoardOpen] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
+  const { handleSubscribe } = useBoardActions();
 
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
     queryKey: ["categories"],
     queryFn: () => api.common.categories(),
     staleTime: 1 * 60 * 1000,
-  });
-
-  const { mutate: joinBoard } = useMutation({
-    mutationFn: (boardId: number) => api.boards.join({ board_id: boardId }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["boards"] });
-    },
   });
 
   const {
@@ -97,20 +92,16 @@ export default function BoardsPage() {
     }
   };
 
-  const handleJoinBoard = (boardId: number) => {
+  const handleSubscribeBoard = (boardId: number) => {
     const board = boards.find((b) => b.id === boardId);
     if (!board) return;
     if (board.history) return;
     if (board.approval_mode === BoardApprovalMode.NONE) {
-      joinBoard(board.id);
+      handleSubscribe(board.id);
     } else {
       setSelectedBoard(board);
-      setJoinBoardOpen(true);
+      setSubscribeBoardOpen(true);
     }
-  };
-
-  const handleLeaveBoard = (boardId: number) => {
-    // TODO: 实现退出看板逻辑
   };
 
   const { mutate: blockBoard } = useMutation({
@@ -245,8 +236,7 @@ export default function BoardsPage() {
               <div className="px-6" key={board.id}>
                 <BoardItem
                   board={board}
-                  onJoin={handleJoinBoard}
-                  onLeave={handleLeaveBoard}
+                  onSubscribe={handleSubscribeBoard}
                   onBlock={handleBlockBoard}
                 />
               </div>
@@ -256,9 +246,9 @@ export default function BoardsPage() {
       </div>
       {/* 加入看板对话框 */}
       {selectedBoard && (
-        <JoinBoardDialog
-          open={joinBoardOpen}
-          onOpenChange={setJoinBoardOpen}
+        <SubscribeBoardDialog
+          open={subscribeBoardOpen}
+          onOpenChange={setSubscribeBoardOpen}
           boardId={selectedBoard.id}
           question={selectedBoard.question}
           onSuccess={() =>

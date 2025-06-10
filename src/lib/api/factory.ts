@@ -59,7 +59,7 @@ export function createApi(options: ApiOptions = {}) {
         http.patch<User>(`${prefix}/user/birthday`, data),
       changePassword: (data: any) =>
         http.patch<void>(`${prefix}/user/password`, data),
-      joinBoard: (data: any) => http.post<any>(`${prefix}/user/board`, data),
+      subscribeBoard: (data: any) => http.post<any>(`${prefix}/user/board`, data),
       saveCategory: (data: any) =>
         http.post<any>(`${prefix}/user/category`, data),
       savePreferences: (data: any) =>
@@ -122,13 +122,15 @@ export function createApi(options: ApiOptions = {}) {
       getManagers: (data: any) =>
         http.get<BoardUser[]>(`${prefix}/board/managers`, data),
       approve: (data: any) => http.post<any>(`${prefix}/board/approve`, data),
-      join: (data: any) => http.post<any>(`${prefix}/board/join`, data),
+      subscribe: (data: any) => http.post<any>(`${prefix}/board/subscribe`, data),
       recommend: (params?: QueryParams) =>
         http.get<Board[]>(`${prefix}/board/recommend`, params, { next }),
       hiddenChild: (data: any) =>
         http.post<any>(`${prefix}/board/hidden-child`, data),
       block: (data: any) =>
-        http.post<Response<any>>(`${prefix}/board/block`, data),
+            http.post<Response<any>>(`${prefix}/board/block`, data),
+      unsubscribe: (data: any) =>
+            http.post<Response<any>>(`${prefix}/board/unsubscribe`, data),
     },
 
     discussions: {

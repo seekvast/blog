@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { NotificationTabType } from "./notification-preview";
+import { NotificationTabType } from "@/hooks/use-notification";
 
 const navItems = [
   { label: "全部通知", type: "all" },

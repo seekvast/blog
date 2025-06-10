@@ -6,20 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { UserRound } from "lucide-react";
 import { Board } from "@/types";
 import { BoardActionButton } from "./board-action-button";
-import { useRequireAuth } from "@/hooks/use-require-auth";
 import { ReportDialog } from "@/components/report/report-dialog";
 import { useBoardActions } from "@/hooks/use-board-actions";
 import { ReportTarget } from "@/constants/report-target";
 
 interface BoardItemProps {
   board: Board;
-  onJoin?: (boardId: number) => void;
+  onSubscribe?: (boardId: number) => void;
   onBlock?: (boardId: number) => void;
-  onLeave?: (boardId: number) => void;
 }
 
-export function BoardItem({ board, onJoin, onBlock, onLeave }: BoardItemProps) {
-  const { requireAuth } = useRequireAuth();
+export function BoardItem({ board, onSubscribe, onBlock }: BoardItemProps) {
   const { reportDialogOpen, setReportDialogOpen } = useBoardActions();
 
   return (
@@ -66,10 +63,8 @@ export function BoardItem({ board, onJoin, onBlock, onLeave }: BoardItemProps) {
       <div>
         <BoardActionButton
           board={board}
-          onJoin={onJoin}
+          onSubscribe={onSubscribe}
           onBlock={onBlock}
-          onLeave={onLeave}
-          requireAuth={requireAuth}
           setReportToKaterOpen={setReportDialogOpen}
         />
       </div>

@@ -4,7 +4,7 @@ import * as React from "react";
 import { Trash2, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { NotificationTabType } from "./notification-preview";
+import { NotificationTabType } from "@/hooks/use-notification";
 import { useAuth } from "../providers/auth-provider";
 
 interface NotificationNavProps {
