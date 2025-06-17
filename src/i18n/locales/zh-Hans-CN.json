@@ -64,5 +64,129 @@
     "dark": "夜间模式",
     "auto": "自动",
     "system": "跟随系统"
+  },
+  "notifications": {
+    "discussionUpVoted": {
+      "title": "{{from_user}} 推了你的文章",
+      "content": "{{article_title}}"
+    },
+    "discussionUpVotedMultiple": {
+      "title": "{{from_user}} 和其他 {{count}} 人推了你的文章",
+      "content": "{{article_title}}"
+    },
+    "replyUpVoted": {
+      "title": "{{from_user}} 推了你的回覆",
+      "content": "{{excerpt}}"
+    },
+    "replyUpVotedMultiple": {
+      "title": "{{from_user}} 和其他 {{count}} 人推了你的回覆",
+      "content": "{{excerpt}}"
+    },
+    "replied": {
+      "title": "{{from_user}} 回覆了你",
+      "content": "{{excerpt}}"
+    },
+    "newPost": {
+      "title": "{{from_user}} 回覆了你的文章",
+      "content": "{{title}}\n{{excerpt}}"
+    },
+    "userMentioned": {
+      "title": "{{from_user}} 提及了你",
+      "content": "{{title}}\n{{excerpt}}"
+    },
+    "followedNewPost": {
+      "title": "{{from_user}} 回覆了你關注的文章",
+      "content": "{{title}}\n{{excerpt}}"
+    },
+    "postDeleted": {
+      "title": "已移除你的文章",
+      "content": "你的文章「{{title}}」違反了《內容政策》中的「{{reason}}」，因此我們已進行刪除。"
+    },
+    "replyDeleted": {
+      "title": "已移除你的回覆",
+      "content": "你於「{{title}}」中發表的「{{excerpt}}」違反了《內容政策》中的「{{reason}}」，因此我們已進行刪除。"
+    },
+    "userWarned": {
+      "title": "帳號被警告",
+      "content": "我們發現你頻繁違反了我們的《內容政策》，如果你繼續這樣做，我們可能不得不考慮採取進一步的行動。"
+    },
+    "userBanned": {
+      "title": "帳號已被停用",
+      "content": "你因「{{reason}}」屢次或嚴重違反了我們的《內容政策》，已將你的帳號永久停用。"
+    },
+    "userRestricted": {
+      "title": "帳號部份編輯功能被暫時限制",
+      "content": "你因「{{reason}}」屢次或嚴重違反了我們的《內容政策》，我們已暫停你的上傳頭像和更改名稱相關功能。此限制將於 {{days}} 天後解除。"
+    },
+    "userBannedTemporarily": {
+      "title": "帳號已被暫停使用",
+      "content": "你因「{{reason}}」屢次或嚴重違反了我們的《內容政策》，已將你的帳號暫時停用，於 {{days}} 天後解除。"
+    },
+    "boardWarned": {
+      "title": "你所管理的看板已被警告",
+      "content": "我們發現你所管理的看板「{{name}}」有潛在違反《內容政策》中的「{{reason}}」疑慮，建議加強管理以維護社群風氣。"
+    },
+    "boardDeleted": {
+      "title": "你所管理的看板已被刪除",
+      "content": "你所管理的看板「{{name}}」屢次或嚴重違反了我們的《內容政策》，已將你的看板進行刪除。"
+    },
+    "boardRestricted": {
+      "title": "看板部份功能已被暫時限制",
+      "content": "你因「{{reason}}」屢次或嚴重違反了我們的《內容政策》，我們已暫停你管理的看板上傳頭像和更改看板名稱的功能。此限制將於 {{days}} 天後解除。"
+    },
+    "boardConverted": {
+      "title": "看板狀態已被改變",
+      "content": "你所管理的看板「{{name}}」充斥著成人內容，已將你的看板變更為成人類型看板。"
+    },
+    "ageVerified": {
+      "title": "年龄验证成功",
+      "content": "您的年龄验证已通过审核，现在可以访问所有内容。"
+    },
+    "ageVerificationFailed": {
+      "title": "年龄验证失败",
+      "content": "您的年龄验证未通过审核，请重新提交有效证明。"
+    },
+    "boardDeletedPost": {
+      "title": "你的文章已被看板管理員刪除",
+      "content": "{{name}}\n{{title}}",
+      "meta": {
+        "reason": "你所發表的「{{title}}」已被看板管理員已進行刪除。\n原因：{{reason}}"
+      }
+    },
+    "boardDeletedReply": {
+      "title": "你的回覆已被看板管理員刪除",
+      "content": "{{name}}\n{{excerpt}}",
+      "meta": {
+        "reason": "你於「{{title}}」中發表的「{{excerpt}}」已被看板管理員已進行刪除。\n原因：{{reason}}"
+      }
+    },
+    "boardMutedUser": {
+      "title": "你被看板管理員暫時禁止發言，{{days}}天後解除。",
+      "content": "{{name}}",
+      "meta": {
+        "reason": "你已被看板管理員禁止發表與回覆，直到{{days}}天後解除。\n原因：{{reason}}"
+      }
+    },
+    "boardBannedUser": {
+      "title": "你已被看板管理員禁止加入",
+      "content": "{{name}}",
+      "meta": {
+        "reason": "你已被看板管理員禁止加入，點此查看詳情。\n原因：{{reason}}"
+      }
+    },
+    "boardKickedUser": {
+      "title": "你已被看板管理員取消成員資格",
+      "content": "{{name}}",
+      "meta": {
+        "reason": "你已被看板管理員取消成員資格。"
+      }
+    },
+    "boardChangedUserRole": {
+      "title": "你的身份組已被看板管理員變更為 {{role}}",
+      "content": "{{name}}",
+      "meta": {
+        "reason": "你的身份組已被看板管理員變更為 {{role}}。"
+      }
+    }
   }
 }

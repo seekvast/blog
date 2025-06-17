@@ -248,6 +248,12 @@ export function createApi(options: ApiOptions = {}) {
           next,
         }),
       read: (data: any) => http.get<any>(`${prefix}/notification/read`, data),
+      getTemplates: () => 
+        http.get<{templates: Record<string, any>, version: string, timestamp: number}>(
+          `${prefix}/notification/templates`,
+          undefined,
+          { next }
+        ),
       readAll: () => http.get<any>(`${prefix}/notification/read-all`),
         clear: () => http.get<any>(`${prefix}/notification/clear`),
       unreadCount: () => http.get<any>(`${prefix}/notification/unread-count`),

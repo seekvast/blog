@@ -6,6 +6,8 @@ import { fromNow } from "@/lib/dayjs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Notification } from "@/types";
+import { useNotificationRenderer } from "@/hooks/use-notification-renderer";
+import { getNotificationLink } from "@/lib/utils/notification";
 
 export type NotificationType =
   | "discussionRenamed"
@@ -27,6 +29,7 @@ interface NotificationItemProps {
   className?: string;
 }
 
+// 旧的消息构建函数，保留作为备用
 export function buildMessage(notification: Notification) {
   switch (notification.type) {
     case "upVoted":
@@ -49,10 +52,18 @@ export function NotificationItem({
   onClick,
 }: NotificationItemProps) {
   const isUnread = !notification.read_at;
-  const message = buildMessage(notification);
-  const title = notification.discussion
-    ? notification.discussion.title
-    : `通知 #${notification.id}`;
+  const { renderContent, renderTitle, isTemplatesLoaded } = useNotificationRenderer();
+  
+  // 如果模板已加载，使用模板渲染，否则使用备用方法
+  const message = isTemplatesLoaded 
+    ? renderContent(notification)
+    : buildMessage(notification);
+    
+  const title = isTemplatesLoaded
+    ? renderTitle(notification)
+    : (notification.discussion
+      ? notification.discussion.title
+      : `通知 #${notification.id}`);
 
   const handleClick = () => {
     if (onClick) {
@@ -81,14 +92,12 @@ export function NotificationItem({
 
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-center gap-2">
-          {notification.discussion && (
-            <Link
-              href={`/d/${notification.subject_slug}`}
-              className="font-medium"
-            >
-              {title}
-            </Link>
-          )}
+          <Link
+            href={getNotificationLink(notification)}
+            className="font-medium"
+          >
+            {title}
+          </Link>
           <span className="text-xs text-muted-foreground">
             {fromNow(notification.created_at)}
           </span>
