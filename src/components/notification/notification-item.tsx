@@ -52,18 +52,19 @@ export function NotificationItem({
   onClick,
 }: NotificationItemProps) {
   const isUnread = !notification.read_at;
-  const { renderContent, renderTitle, isTemplatesLoaded } = useNotificationRenderer();
-  
+  const { renderContent, renderTitle, isTemplatesLoaded } =
+    useNotificationRenderer();
+
   // 如果模板已加载，使用模板渲染，否则使用备用方法
-  const message = isTemplatesLoaded 
+  const message = isTemplatesLoaded
     ? renderContent(notification)
     : buildMessage(notification);
-    
+
   const title = isTemplatesLoaded
     ? renderTitle(notification)
-    : (notification.discussion
-      ? notification.discussion.title
-      : `通知 #${notification.id}`);
+    : notification.discussion
+    ? notification.discussion.title
+    : `通知 #${notification.id}`;
 
   const handleClick = () => {
     if (onClick) {
@@ -73,7 +74,7 @@ export function NotificationItem({
 
   return (
     <div
-      className={cn("flex items-start gap-2 py-4 px-2")}
+      className={cn("flex items-center gap-2 py-4 px-2")}
       onClick={handleClick}
     >
       <Link
@@ -94,7 +95,7 @@ export function NotificationItem({
         <div className="flex justify-between items-center gap-2">
           <Link
             href={getNotificationLink(notification)}
-            className="font-medium"
+            className=" text-base font-medium"
           >
             {title}
           </Link>
@@ -102,8 +103,20 @@ export function NotificationItem({
             {fromNow(notification.created_at)}
           </span>
         </div>
-
-        <p className="text-sm text-muted-foreground mt-1">{message}</p>
+        <div
+          className={cn(
+            "mt-1 text-sm text-muted-foreground line-clamp-2",
+            "prose-a:text-primary max-w-none [&>p]:!m-0",
+            "[&_a:not(.mention)]:text-primary [&_a:not(.mention)]:underline-offset-4",
+            "[&_a:not(.mention)]:hover:underline",
+            "[&_.mention]:text-primary [&_.mention]:font-medium",
+            "[&_.mention]:bg-primary/10 [&_.mention]:px-1.5 [&_.mention]:py-0.5",
+            "[&_.mention]:rounded [&_.mention]:hover:bg-primary/20",
+            "[&_*]:!text-sm"
+          )}
+          dangerouslySetInnerHTML={{ __html: message }}
+        />
+        {/* <p className="text-sm text-muted-foreground mt-1">{message}</p> */}
       </div>
       {isUnread && (
         <div className="h-2 w-2 rounded-full bg-primary shrink-0 mt-2" />

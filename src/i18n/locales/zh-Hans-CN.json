@@ -68,11 +68,11 @@
   "notifications": {
     "discussionUpVoted": {
       "title": "{{from_user}} 推了你的文章",
-      "content": "{{article_title}}"
+      "content": "{{title}}"
     },
     "discussionUpVotedMultiple": {
       "title": "{{from_user}} 和其他 {{count}} 人推了你的文章",
-      "content": "{{article_title}}"
+      "content": "{{title}}"
     },
     "replyUpVoted": {
       "title": "{{from_user}} 推了你的回覆",
@@ -84,7 +84,7 @@
     },
     "replied": {
       "title": "{{from_user}} 回覆了你",
-      "content": "{{excerpt}}"
+      "content": "{{excerpt}}\n{{their_excerpt}}"
     },
     "newPost": {
       "title": "{{from_user}} 回覆了你的文章",
@@ -187,6 +187,14 @@
       "meta": {
         "reason": "你的身份組已被看板管理員變更為 {{role}}。"
       }
+    },
+    "boardUserSubscribe": {
+      "title": "有 {{count}} 名用戶申請加入看板{{name}}",
+      "content": ""
+    },
+    "boardUserReport": {
+      "title": "有 {{count}} 筆待處理的舉報內容{{name}}",
+      "content": ""
     }
   }
 }
