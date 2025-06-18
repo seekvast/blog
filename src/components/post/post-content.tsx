@@ -3,11 +3,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Post } from "@/types";
-import {
-  X,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PostContentProps {
   post: Post;
@@ -259,7 +255,7 @@ export function PostContent({ post, className }: PostContentProps) {
 
           // 链接样式
           "[&_a:not(.mention)]:text-primary [&_a:not(.mention)]:underline-offset-4",
-          "[&_a:not(.mention)]:hover:underline [&_a:not(.mention)]:[word-break:break-all]",
+          "[&_a:not(.mention)]:[word-break:break-all]",
 
           // 分割线样式
           "[&_hr]:my-8 [&_hr]:border-t [&_hr]:border-border",

@@ -9,7 +9,7 @@ import { cn, debounce } from "@/lib/utils";
 import { BoardSelect } from "@/components/board-select";
 import { useBoardChildrenStore } from "@/store/board-children";
 import { useMarkdownEditor } from "@/store/md-editor";
-import { Editor } from "@/components/editor/Editor";
+import { Editor } from "@/components/editor/editor";
 import { AlertTriangle } from "lucide-react";
 import { AttachmentType } from "@/constants/attachment-type";
 import { usePostEditorStore } from "@/store/post-editor";

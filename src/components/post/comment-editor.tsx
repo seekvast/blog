@@ -1,11 +1,12 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { Editor } from "@/components/editor/Editor";
+import { Editor } from "@/components/editor/editor";
 import { AttachmentType } from "@/constants/attachment-type";
 import type { Post } from "@/types/discussion";
 import type { User } from "@/types/user";
 import type { Attachment } from "@/types";
 import { PostForm } from "@/validations/post";
+import { useAuth } from "@/hooks/use-auth";
 
 interface CommentEditorProps {
   user: User | null;

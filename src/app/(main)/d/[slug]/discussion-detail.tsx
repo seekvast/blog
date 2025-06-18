@@ -28,7 +28,7 @@ import { PostNavigator } from "@/components/post/post-navigator";
 import { useLoginModal } from "@/components/providers/login-modal-provider";
 import { PostContent } from "@/components/post/post-content";
 import { api } from "@/lib/api";
-import { Preview } from "@/components/editor/Preview";
+import { Preview } from "@/components/editor/preview";
 import { toast } from "@/components/ui/use-toast";
 import { VotersList } from "@/components/post/voters-list";
 import { useState } from "react";

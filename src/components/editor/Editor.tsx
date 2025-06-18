@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Toolbar } from "./Toolbar";
-import { Preview } from "./Preview";
-import { MentionPicker } from "./MentionPicker";
+import { Toolbar } from "./toolbar";
+import { Preview } from "./preview";
+import { MentionPicker } from "./mention-picker";
 import { cn } from "@/lib/utils";
 import { getCaretCoordinates } from "@/lib/utils/caret";
 import { uploadFile, AttachmentType } from "@/lib/utils/upload";
