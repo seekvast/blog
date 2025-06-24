@@ -16,7 +16,7 @@ import { SettingMenus, SettingTab } from "./components/setting-menus";
 
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 
 interface BoardSettingsFormProps {
@@ -30,8 +30,17 @@ export function BoardSettingsForm({
 }: BoardSettingsFormProps) {
   const { isMobile } = useDevice();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // 安全地获取 tab 参数，确保 searchParams 不为 null
+  const tabParam = searchParams ? searchParams.get("tab") as SettingTab | null : null;
+  const isValidTab = tabParam && [
+    "general", "rules", "child-boards", "approval", 
+    "members", "reports", "records", "blocklist"
+  ].includes(tabParam);
+  
   const [activeTab, setActiveTab] = React.useState<SettingTab>(
-    isMobile ? "" : "general"
+    isMobile ? "" : (isValidTab ? tabParam : "general")
   );
   const [initBoard, setInitBoard] = React.useState<BoardType>(board);
 
@@ -41,8 +50,25 @@ export function BoardSettingsForm({
   };
 
   useEffect(() => {
-    setActiveTab(isMobile ? "" : "general");
-  }, [isMobile]);
+    // 如果存在有效的 URL 参数中的 tab，则使用它，否则使用默认值
+    const defaultTab = isMobile ? "" : "general";
+    setActiveTab(isValidTab ? tabParam! : defaultTab);
+  }, [isMobile, tabParam, isValidTab]);
+  
+  const handleTabClick = (tab: SettingTab) => {
+    // 更新 URL 参数，同时更新状态
+    const params = new URLSearchParams(searchParams?.toString() || "");
+    if (tab) {
+      params.set("tab", tab);
+    } else {
+      params.delete("tab");
+    }
+    
+    // 使用 replace 而不是 push，避免创建新的历史记录
+    router.replace(`?${params.toString()}`);
+    setActiveTab(tab);
+  };
+
   // 根据activeTab渲染对应的内容
   const renderContent = () => {
     switch (activeTab) {
@@ -113,7 +139,7 @@ export function BoardSettingsForm({
           <SettingMenus
             board={initBoard}
             activeTab={activeTab}
-            onTabChange={setActiveTab}
+            onTabChange={handleTabClick}
           />
         </>
       </div>
@@ -127,7 +153,7 @@ export function BoardSettingsForm({
         <SettingMenus
           board={initBoard}
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={handleTabClick}
         />
       </div>
       <div className="flex-1 min-w-0">

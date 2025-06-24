@@ -25,12 +25,14 @@ export default function SettingsPage() {
   const queryClient = useQueryClient();
   const params = useSearchParams();
   const userId = params?.get("hashid");
+  const violationTypeParam = params?.get("violation");
   const [activeTab, setActiveTab] = React.useState<SettingsTabType>("profile");
   const [blacklistType, setBlacklistType] = React.useState<"board" | "user">(
     "user"
   );
   const [showViolation, setShowViolation] = React.useState<boolean>(false);
   const [violationType, setViolationType] = React.useState<string>("account");
+  const [hashParam, setHashParam] = React.useState<string>("");
 
   const sectionRefs = {
     profile: useRef<HTMLElement>(null),
@@ -99,6 +101,12 @@ export default function SettingsPage() {
           }
         }
       }
+
+      if (hash === "violation") {
+        setShowViolation(true);
+      } else {
+        setShowViolation(false);
+      }
     };
 
     if (window.location.hash) {
@@ -108,10 +116,15 @@ export default function SettingsPage() {
       setActiveTab("profile");
     }
 
-    // 监听hash变化
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
+
+  useEffect(() => {
+    if (violationTypeParam) {
+      setViolationType(violationTypeParam);
+    }
+  }, [violationTypeParam]);
 
   // 处理 Tab 切换
   const handleTabChange = (tab: SettingsTabType) => {

@@ -6,7 +6,7 @@ export interface Notification {
     subject_id: number;
     subject_slug: string;
     type: string;
-    data: string;
+    data: Record<string, any>;
     discussion: Discussion;
     user: User;
     from_user: User;

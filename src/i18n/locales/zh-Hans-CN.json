@@ -146,42 +146,42 @@
       "title": "年龄验证失败",
       "content": "您的年龄验证未通过审核，请重新提交有效证明。"
     },
-    "boardDeletedPost": {
+    "boardPostDeleted": {
       "title": "你的文章已被看板管理員刪除",
       "content": "{{name}}\n{{title}}",
       "meta": {
         "reason": "你所發表的「{{title}}」已被看板管理員已進行刪除。\n原因：{{reason}}"
       }
     },
-    "boardDeletedReply": {
+    "boardReplyDeleted": {
       "title": "你的回覆已被看板管理員刪除",
       "content": "{{name}}\n{{excerpt}}",
       "meta": {
         "reason": "你於「{{title}}」中發表的「{{excerpt}}」已被看板管理員已進行刪除。\n原因：{{reason}}"
       }
     },
-    "boardMutedUser": {
+    "boardUserMuted": {
       "title": "你被看板管理員暫時禁止發言，{{days}}天後解除。",
       "content": "{{name}}",
       "meta": {
         "reason": "你已被看板管理員禁止發表與回覆，直到{{days}}天後解除。\n原因：{{reason}}"
       }
     },
-    "boardBannedUser": {
+    "boardUserBanned": {
       "title": "你已被看板管理員禁止加入",
       "content": "{{name}}",
       "meta": {
         "reason": "你已被看板管理員禁止加入，點此查看詳情。\n原因：{{reason}}"
       }
     },
-    "boardKickedUser": {
+    "boardUserKicked": {
       "title": "你已被看板管理員取消成員資格",
       "content": "{{name}}",
       "meta": {
         "reason": "你已被看板管理員取消成員資格。"
       }
     },
-    "boardChangedUserRole": {
+    "boardUserRoleChanged": {
       "title": "你的身份組已被看板管理員變更為 {{role}}",
       "content": "{{name}}",
       "meta": {

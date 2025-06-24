@@ -100,7 +100,7 @@ export function NotificationItem({
             {title}
           </Link>
           <span className="text-xs text-muted-foreground">
-            {fromNow(notification.created_at)}
+            {fromNow(notification.updated_at)}
           </span>
         </div>
         <div
