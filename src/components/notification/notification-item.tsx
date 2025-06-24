@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Notification } from "@/types";
 import { useNotificationRenderer } from "@/hooks/use-notification-renderer";
-import { getNotificationLink } from "@/lib/utils/notification";
+import { getNotificationLink, getNotificationAvatar } from "@/lib/utils/notification";
 
 export type NotificationType =
   | "discussionRenamed"
@@ -77,19 +77,23 @@ export function NotificationItem({
       className={cn("flex items-center gap-2 py-4 px-2")}
       onClick={handleClick}
     >
-      <Link
-        href={`/u/${notification.from_user.username}?hashid=${notification.from_user.hashid}`}
-      >
-        <Avatar className="h-10 w-10 shrink-0">
-          <AvatarImage
-            src={notification.from_user.avatar_url}
-            alt={notification.from_user.username}
-          />
-          <AvatarFallback>
-            {notification.from_user.username.slice(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-      </Link>
+      {/* 使用getNotificationAvatar获取正确的头像信息 */}
+      {(() => {
+        const avatarInfo = getNotificationAvatar(notification);
+        return (
+          <Link href={avatarInfo.href}>
+            <Avatar className="h-10 w-10 shrink-0">
+              <AvatarImage
+                src={avatarInfo.avatarUrl}
+                alt={avatarInfo.username}
+              />
+              <AvatarFallback>
+                {avatarInfo.username.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
+        );
+      })()}
 
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-center gap-2">

@@ -1,5 +1,46 @@
 import { Notification } from "@/types";
 
+export interface NotificationAvatarInfo {
+  href: string;
+  avatarUrl: string;
+  username: string;
+  hashid: string;
+}
+
+export function getNotificationAvatar(
+  notification: Notification
+): NotificationAvatarInfo {
+  const { type, from_user, data } = notification;
+
+  const defaultInfo: NotificationAvatarInfo = {
+    href: `/u/${from_user.username}?hashid=${from_user.hashid}`,
+    avatarUrl: from_user.avatar_url || "",
+    username: from_user.username,
+    hashid: from_user.hashid,
+  };
+
+  switch (notification.category) {
+    case "board_user":
+    case "board_manage":
+      return {
+        href: `/b/${notification.subject_slug}?bid=${data.board_id || ""}`,
+        avatarUrl: notification.subject.avatar || "",
+        username: notification.subject.name || "board",
+        hashid: data.slug || "",
+      };
+    case "account":
+    case "board_violation":
+      return {
+        href: "/notifications",
+        avatarUrl: "/logo.png",
+        username: "system",
+        hashid: "",
+      };
+    default:
+      return defaultInfo;
+  }
+}
+
 /**
  * @param notification 通知对象
  * @returns 生成的链接
@@ -85,7 +126,7 @@ export function getNotificationLink(notification: Notification): string {
     case "discussionStickied":
     case "discussionUnstickied":
       return `/d/${notification.subject_slug}`;
-      case "boardUserReport":
+    case "boardUserReport":
       return `/b/${notification.subject_slug}/settings?bid=${data.board_id}&tab=reports`;
     case "boardUserSubscribe":
       return `/b/${notification.subject_slug}/settings?bid=${data.board_id}&tab=approval`;
