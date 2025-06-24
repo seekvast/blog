@@ -7,21 +7,26 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { formatDate, fromNow } from "@/lib/dayjs";
 import type { Discussion, Pagination } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { BoardUserRole } from "@/constants/board-user-role";
+import { Badge } from "@/components/ui/badge";
 import {
-  X,
-  ChevronDown,
+  ArrowUp,
   Bookmark,
-  Check,
-  EyeOff,
-  ThumbsUp,
-  ThumbsDown,
-  UserRound,
-  Tag,
-  Pin,
-  Lock,
-  Star,
-  Heart,
   BookmarkCheck,
+  Check,
+  ChevronDown,
+  EyeOff,
+  Heart,
+  Lock,
+  MessageSquare,
+  Pin,
+  Reply,
+  Star,
+  Tag,
+  ThumbsDown,
+  ThumbsUp,
+  UserRound,
+  X,
 } from "lucide-react";
 import { AuthGuard } from "@/components/auth/auth-guard";
 import { PostNavigator } from "@/components/post/post-navigator";
@@ -605,7 +610,14 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                         {currentDiscussion.user.username}
                       </span>
                     </Link>
+                    <div className="flex items-center space-x-2 min-w-0 text-muted-foreground">
+                      <span>@{currentDiscussion.user.nickname}</span>
+                      {currentDiscussion.board_user_role && currentDiscussion.board_user_role < 3 && (
+                        <Badge variant="secondary" className="text-primary">{BoardUserRole[currentDiscussion.board_user_role]}</Badge>
+                      )}
+                    </div>
                   </div>
+
                   <div className="flex items-center space-x-2 cursor-pointer text-muted-foreground">
                     {currentDiscussion.is_sticky === 1 && (
                       <Pin className="h-4 w-4 text-red-500" />
@@ -957,123 +969,154 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         <aside className="hidden lg:block sticky top-20 w-full lg:w-[220px] xl:w-[256px] self-start pl-2">
           {user ? (
             <div className="flex w-full flex-col space-y-3">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant={
-                      followStatus === "ignore"
-                        ? "destructive"
-                        : followStatus
-                        ? "default"
-                        : "secondary"
-                    }
-                    className="w-full justify-between"
-                    onClick={() =>
-                      handleFollow(followStatus === "follow" ? null : "follow")
-                    }
-                    disabled={followMutation.isPending}
-                  >
-                    <div className="flex items-center">
-                      <Star
-                        className={`mr-2 h-4 w-4 ${
-                          followStatus === "follow" ? "fill-current" : ""
-                        }`}
-                      />
-                      {followMutation.isPending
-                        ? "处理中..."
-                        : followStatus === "follow"
-                        ? "已关注"
-                        : followStatus === "ignore"
-                        ? "已忽视"
-                        : "关注"}
-                    </div>
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem
-                    className="flex flex-col items-start cursor-pointer py-2"
+              {/* Reply Button */}
+              {!showCommentEditor && (
+                <div className="inline-flex rounded-md shadow-sm w-full">
+                  <CommentButton
+                    discussion={currentDiscussion}
+                    isLocked={currentDiscussion?.is_locked === 1}
+                    isSubmitting={isSubmitting}
+                    showEditor={showCommentEditor}
+                    isReply={true}
                     onClick={() => {
-                      if (followStatus) handleFollow(null);
+                      if (!user) {
+                        openLoginModal();
+                        return;
+                      }
+                      setShowCommentEditor(true);
                     }}
-                  >
-                    <div className="flex w-full items-center">
-                      <Star className="mr-2 h-4 w-4" />
-                      不关注
-                      {!followStatus && <Check className="ml-auto h-4 w-4" />}
-                    </div>
-                    <span className="text-xs text-muted-foreground mt-1 pl-6">
-                      停当有人標註我時通知我。
-                    </span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="flex flex-col items-start cursor-pointer py-2"
-                    onClick={() => {
-                      if (followStatus !== "follow") handleFollow("follow");
-                    }}
-                  >
-                    <div className="flex w-full items-center">
-                      <Star className="mr-2 h-4 fill-current" />
-                      关注中
-                      {followStatus === "follow" && (
-                        <Check className="ml-auto h-4 w-4" />
-                      )}
-                    </div>
-                    <span className="text-xs text-muted-foreground mt-1 pl-6">
-                      當有人回覆此文章時通知我。
-                    </span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="flex flex-col items-start cursor-pointer py-2"
-                    onClick={() => {
-                      if (followStatus !== "ignore") handleFollow("ignore");
-                    }}
-                  >
-                    <div className="flex w-full items-center">
-                      <EyeOff className="mr-2 h-4 w-4" />
-                      忽视中
-                      {followStatus === "ignore" && (
-                        <Check className="ml-auto h-4 w-4" />
-                      )}
-                    </div>
-                    <span className="text-xs text-muted-foreground mt-1 pl-6">
-                      不接收任何通知並從文章列表中隱藏此文章。
-                    </span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Button
-                variant={isBookmarked ? "default" : "secondary"}
-                className="w-full justify-between"
-                onClick={handleBookmark}
-                disabled={bookmarkMutation.isPending}
-              >
-                <div className="flex items-center">
+                    className="rounded-r-none rounded-l-md"
+                    size="default"
+                    variant="button"
+                  />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="default"
+                        size="default"
+                        className="px-3 rounded-l-none rounded-r-md border-l border-primary-foreground/20"
+                      >
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                  </DropdownMenu>
+                </div>
+              )}
+              {/* Follow Button */}
+              <div className="inline-flex rounded-md shadow-sm w-full">
+                <Button
+                  variant="secondary"
+                  className="flex-grow justify-start rounded-r-none rounded-l-md"
+                  onClick={() =>
+                    handleFollow(followStatus === "follow" ? null : "follow")
+                  }
+                  disabled={followMutation.isPending}
+                >
+                  <Star
+                    className={`mr-2 h-4 w-4 ${
+                      followStatus === "follow" ? "fill-current" : ""
+                    }`}
+                  />
+                  {followMutation.isPending
+                    ? "处理中..."
+                    : followStatus === "follow"
+                    ? "已关注"
+                    : followStatus === "ignore"
+                    ? "已忽视"
+                    : "关注"}
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      className="px-3 rounded-l-none rounded-r-md border-l"
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem
+                      className="flex flex-col items-start cursor-pointer py-2"
+                      onClick={() => {
+                        if (followStatus) handleFollow(null);
+                      }}
+                    >
+                      <div className="flex w-full items-center">
+                        <Star className="mr-2 h-4 w-4" />
+                        不关注
+                        {!followStatus && <Check className="ml-auto h-4 w-4" />}
+                      </div>
+                      <span className="text-xs text-muted-foreground mt-1 pl-6">
+                        停当有人標註我時通知我。
+                      </span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="flex flex-col items-start cursor-pointer py-2"
+                      onClick={() => {
+                        if (followStatus !== "follow") handleFollow("follow");
+                      }}
+                    >
+                      <div className="flex w-full items-center">
+                        <Star className="mr-2 h-4 fill-current" />
+                        关注中
+                        {followStatus === "follow" && (
+                          <Check className="ml-auto h-4 w-4" />
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground mt-1 pl-6">
+                        當有人回覆此文章時通知我。
+                      </span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="flex flex-col items-start cursor-pointer py-2"
+                      onClick={() => {
+                        if (followStatus !== "ignore") handleFollow("ignore");
+                      }}
+                    >
+                      <div className="flex w-full items-center">
+                        <EyeOff className="mr-2 h-4 w-4" />
+                        忽视中
+                        {followStatus === "ignore" && (
+                          <Check className="ml-auto h-4 w-4" />
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground mt-1 pl-6">
+                        不接收任何通知並從文章列表中隱藏此文章。
+                      </span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* Bookmark Button */}
+              <div className="inline-flex rounded-md shadow-sm w-full">
+                <Button
+                  variant="secondary"
+                  className="flex-grow justify-start rounded-r-none rounded-l-md"
+                  onClick={handleBookmark}
+                  disabled={bookmarkMutation.isPending}
+                >
                   <Bookmark
                     className={`mr-2 h-4 w-4 ${
                       isBookmarked ? "fill-current" : ""
                     }`}
                   />
                   {isBookmarked ? "已添加书签" : "书签"}
-                </div>
-              </Button>
-              <AuthGuard>
-                <CommentButton
-                  discussion={currentDiscussion}
-                  isLocked={currentDiscussion?.is_locked === 1}
-                  isSubmitting={isSubmitting}
-                  showEditor={showCommentEditor}
-                  onClick={() => {
-                    if (!user) {
-                      openLoginModal();
-                      return;
-                    }
-                    setShowCommentEditor(true);
-                  }}
-                  className="w-full justify-between"
-                  size="lg"
-                />
-              </AuthGuard>
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="secondary"
+                      className="px-3 rounded-l-none rounded-r-md border-l"
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>添加到书签</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           ) : (
             <Button

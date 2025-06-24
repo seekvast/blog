@@ -54,7 +54,7 @@ export function PollContent({ poll: initialPoll, onVote }: PollContentProps) {
 
   const [showVoters, setShowVoters] = React.useState(false);
 
-    useEffect(() => {
+  useEffect(() => {
     if (poll.user_voted) {
       setSelectedOptions(poll.user_voted.options);
       setIsVoted(true);
@@ -110,9 +110,12 @@ export function PollContent({ poll: initialPoll, onVote }: PollContentProps) {
             const percentage =
               totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
             return (
-              <div key={option.id} className="relative">
+              <div
+                key={option.id}
+                className="relative w-full border rounded-md"
+              >
                 <div
-                  className="absolute inset-0 bg-muted rounded-md"
+                  className="absolute inset-0 bg-muted"
                   style={{ width: `${percentage}%` }}
                 />
                 <div className="relative flex items-center space-x-2 p-2">
@@ -129,7 +132,7 @@ export function PollContent({ poll: initialPoll, onVote }: PollContentProps) {
                     {option.option}
                   </label>
                   <span className="text-sm text-muted-foreground">
-                    {percentage.toFixed(1)}% ({option.votes})
+                    {percentage.toFixed(0)}% ({option.votes})
                   </span>
                 </div>
               </div>
@@ -145,9 +148,12 @@ export function PollContent({ poll: initialPoll, onVote }: PollContentProps) {
               const percentage =
                 totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
               return (
-                <div key={option.id} className="relative">
+                <div
+                  key={option.id}
+                  className="relative w-full border rounded-md"
+                >
                   <div
-                    className="absolute inset-0 bg-muted rounded-md"
+                    className="absolute inset-0 bg-muted  "
                     style={{ width: `${percentage}%` }}
                   />
                   <div className="relative flex items-center space-x-2 p-2">
@@ -162,7 +168,7 @@ export function PollContent({ poll: initialPoll, onVote }: PollContentProps) {
                       {option.option}
                     </label>
                     <span className="text-sm text-muted-foreground">
-                      {percentage.toFixed(1)}% ({option.votes})
+                      {percentage.toFixed(0)}% ({option.votes})
                     </span>
                   </div>
                 </div>
@@ -181,7 +187,7 @@ export function PollContent({ poll: initialPoll, onVote }: PollContentProps) {
             selectedOptions.length === 0 || isEnded || !isStarted || isVoted
           }
         >
-          {isEnded ? "结束投票" : "确认投票"}
+          {isEnded ? "结束投票" : isVoted ? "已投票" : "确认投票"}
         </Button>
       </div>
 

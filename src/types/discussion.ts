@@ -106,6 +106,7 @@ export interface Discussion {
   discussion_user: DiscussionUser;
   user_voted: PostVote;
   poll?: Poll;
+  board_user_role: number | null;
 }
 
 export interface Post {

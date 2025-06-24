@@ -6,7 +6,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useBoardPermission } from "@/hooks/use-board-permission";
-import { Loader2 } from "lucide-react";
+import { Loader2, CornerUpLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Discussion } from "@/types";
 import { useMemo } from "react";
@@ -84,7 +84,7 @@ export function CommentButton({
       hidden: false,
       disabled: false,
       loading: false,
-      text: isReply ? "回复" : "评论",
+      text: isReply ? "评论" : "回复",
       tooltip: isReply ? "发表回复" : "发表评论",
     };
   }, [showEditor, isSubmitting, isLocked, canPost, statusText, status]);
@@ -116,6 +116,7 @@ export function CommentButton({
               onClick={onClick}
               disabled={buttonState.disabled}
             >
+              <CornerUpLeft className="mr-2 h-4 w-4" />
               {buttonContent}
             </button>
           </TooltipTrigger>
@@ -136,10 +137,11 @@ export function CommentButton({
           <Button
             variant={buttonState.disabled ? "secondary" : "default"}
             size={size}
-            className={cn("w-full", className)}
+            className={cn("flex-grow justify-start  w-full", className)}
             onClick={onClick}
             disabled={buttonState.disabled}
           >
+            <CornerUpLeft className="mr-2 h-4 w-4" />
             {buttonContent}
           </Button>
         </TooltipTrigger>
