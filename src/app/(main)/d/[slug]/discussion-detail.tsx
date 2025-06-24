@@ -575,7 +575,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         <div className="min-w-0">
           <div className="border-b pb-4 flex-1 max-w-4xl">
             <div className="w-full">
-              <h2 className="text-xl md:text-2xl font-medium overflow-hidden text-ellipsis whitespace-nowrap">
+              <h2 className="text-xl md:text-2xl font-bold overflow-hidden text-ellipsis whitespace-nowrap">
                 {currentDiscussion.title}
               </h2>
             </div>
@@ -954,7 +954,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           </div>
         </div>
 
-        <aside className="hidden lg:block sticky top-20 w-full lg:w-40 xl:w-60 self-start pl-2">
+        <aside className="hidden lg:block sticky top-20 w-full lg:w-[220px] xl:w-[256px] self-start pl-2">
           {user ? (
             <div className="flex w-full flex-col space-y-3">
               <DropdownMenu>

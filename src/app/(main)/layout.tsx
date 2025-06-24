@@ -61,7 +61,7 @@ export default function MainLayout({
         <div className="mx-auto w-full lg:max-w-7xl flex flex-col lg:flex-row pt-4">
           {/* 左侧边栏 - 桌面端显示 */}
           {LeftSidebarComponent && (
-            <aside className="hidden lg:block lg:w-[300px] flex-shrink-0 px-4">
+            <aside className="hidden lg:block lg:w-[240px] xl:w-[280px] flex-shrink-0 px-4">
               <LeftSidebarComponent />
             </aside>
           )}
@@ -71,7 +71,7 @@ export default function MainLayout({
 
           {/* 右侧边栏 - 仅在桌面端显示 */}
           {showRightSidebar && RightSidebar && (
-            <aside className="hidden lg:block lg:w-[240px] xl:w-[300px] flex-shrink-0 lg:px-4">
+            <aside className="hidden lg:block lg:w-[240px] xl:w-[280px] flex-shrink-0 lg:px-4">
               <RightSidebar />
             </aside>
           )}
