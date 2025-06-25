@@ -65,7 +65,7 @@ export function NotificationPreview({
         <div className="p-3 text-center">
           <Link
             href="/notifications/all"
-            className="text-xs text-muted-foreground hover:text-primary"
+            className="font-medium hover:text-primary"
           >
             查看全部
           </Link>

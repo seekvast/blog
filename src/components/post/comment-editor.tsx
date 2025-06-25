@@ -90,8 +90,10 @@ export const CommentEditor = React.memo(
           initialContent={postForm.content}
           onChange={handleContentChange}
           onAttachmentUpload={handleAttachmentUpload}
+          onPublish={handleSubmit}
+          publishLoading={isSubmitting}
         />
-        <div className="mt-2 flex items-center justify-between">
+        {/* <div className="mt-2 flex items-center justify-between">
           <div></div>
           <Button
             size="sm"
@@ -100,7 +102,7 @@ export const CommentEditor = React.memo(
           >
             {isSubmitting ? "保存中..." : "确定"}
           </Button>
-        </div>
+        </div> */}
       </div>
     );
   }

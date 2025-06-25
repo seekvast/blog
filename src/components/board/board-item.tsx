@@ -43,12 +43,8 @@ export function BoardItem({ board, onSubscribe, onBlock }: BoardItemProps) {
             )}
           </div>
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            {board.visibility >= 1 && (
-              <>
-                <span>私密</span>
-                <span>•</span>
-              </>
-            )}
+            <span>{board.visibility >= 1 ? "私密" : "公開"}</span>
+            <span>•</span>
 
             <div className="flex items-center">
               <UserRound className="h-4" />

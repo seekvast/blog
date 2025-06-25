@@ -25,15 +25,15 @@ export function NotificationNav({
   return (
     <div
       className={cn(
-        "flex items-center justify-between py-2 px-4 border-b",
+        "flex items-center justify-between py-2 px-4  border-b",
         className
       )}
     >
-      <div className="flex">
+      <div className="flex space-x-8">
         <button
           className={cn(
-            "flex-1 py-2 text-sm font-medium",
-            activeType === "all" ? "text-primary" : "text-muted-foreground"
+            "flex-1 py-2 font-medium",
+            activeType === "all" ? "text-primary" : ""
           )}
           onClick={() => onTypeChange("all")}
         >
@@ -42,8 +42,8 @@ export function NotificationNav({
 
         <button
           className={cn(
-            "flex-1 py-2 pl-4 text-sm font-medium",
-            activeType === "mentions" ? "text-primary" : "text-muted-foreground"
+            "flex-1 py-2 font-medium",
+            activeType === "mentions" ? "text-primary" : ""
           )}
           onClick={() => onTypeChange("mentions")}
         >
@@ -52,8 +52,8 @@ export function NotificationNav({
         {user && user?.is_board_moderator === 1 && (
           <button
             className={cn(
-              "flex-1 py-2 pl-4 text-sm font-medium",
-              activeType === "board" ? "text-primary" : "text-muted-foreground"
+              "flex-1 py-2 font-medium",
+              activeType === "board" ? "text-primary" : ""
             )}
             onClick={() => onTypeChange("board")}
           >

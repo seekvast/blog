@@ -99,7 +99,7 @@ export function NotificationItem({
         <div className="flex justify-between items-center gap-2">
           <Link
             href={getNotificationLink(notification)}
-            className=" text-base font-medium"
+            className="text-base font-medium"
           >
             {title}
           </Link>

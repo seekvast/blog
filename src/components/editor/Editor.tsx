@@ -9,6 +9,7 @@ import { getCaretCoordinates } from "@/lib/utils/caret";
 import { uploadFile, AttachmentType } from "@/lib/utils/upload";
 import { Attachment } from "@/types";
 import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface EditorProps {
   className?: string;
@@ -19,6 +20,8 @@ interface EditorProps {
   onSave?: () => void;
   onFullscreenChange?: (isFullscreen: boolean) => void;
   onAttachmentUpload?: (attachment: Attachment) => void;
+  onPublish?: () => void;
+  publishLoading?: boolean;
 }
 
 export const Editor = React.forwardRef<
@@ -37,6 +40,8 @@ export const Editor = React.forwardRef<
     onSave,
     onFullscreenChange,
     onAttachmentUpload,
+    onPublish,
+    publishLoading,
   }: EditorProps,
   ref
 ) {
@@ -378,7 +383,7 @@ export const Editor = React.forwardRef<
               onPaste={handlePaste}
               placeholder={placeholder}
               className={cn(
-                "w-full p-3 outline-none border-none",
+                "w-full px-3 pt-3 pb-16 outline-none border-none",
                 "bg-background",
                 "resize-none",
                 "whitespace-pre-wrap",
@@ -414,6 +419,16 @@ export const Editor = React.forwardRef<
                   });
                 }}
               />
+            )}
+            {onPublish && (
+              <Button
+                size="sm"
+                className="absolute left-4 bottom-4 z-10"
+                onClick={onPublish}
+                disabled={publishLoading}
+              >
+                {publishLoading ? "发布中..." : "发布"}
+              </Button>
             )}
           </>
         )}
