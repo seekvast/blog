@@ -9,11 +9,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { SearchInput } from "@/components/search/search-input";
 import { Board, BoardBlacklist } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { api } from "@/lib/api";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
-import { formatDate } from "@/lib/utils";
 import { Pagination } from "@/types/common";
 import { BoardUser } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
@@ -28,6 +28,7 @@ interface BlacklistParams {
   moderator_hashid?: string;
   start_date?: string;
   end_date?: string;
+  keyword?: string;
 }
 
 export function BlocklistSettings({ board }: BlocklistSettingsProps) {
@@ -35,6 +36,7 @@ export function BlocklistSettings({ board }: BlocklistSettingsProps) {
   const slug = params?.slug as string;
   const [adminFilter, setAdminFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 10;
   const queryClient = useQueryClient();
@@ -49,13 +51,14 @@ export function BlocklistSettings({ board }: BlocklistSettingsProps) {
 
   // 获取封锁列表数据
   const { data, isLoading, refetch } = useQuery<Pagination<BoardBlacklist>>({
-    queryKey: ["board-blacklist", board.id, page, adminFilter, timeFilter],
+    queryKey: ["board-blacklist", board.id, page, adminFilter, timeFilter, searchQuery],
     queryFn: async () => {
       // 构建查询参数
       const queryParams: BlacklistParams = {
         board_id: board.id,
         page,
         page_size: pageSize,
+        keyword: searchQuery,
       };
 
       // 添加筛选条件
@@ -108,13 +111,22 @@ export function BlocklistSettings({ board }: BlocklistSettingsProps) {
   // 重置筛选时重置页码
   useEffect(() => {
     setPage(1);
-  }, [adminFilter, timeFilter]);
+  }, [adminFilter, timeFilter, searchQuery]);
   // 计算是否还有更多数据
   const hasMore = data ? data.current_page < data.last_page : false;
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">封锁名单</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-medium">封锁名单</h3>
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onSearch={setSearchQuery}
+          placeholder="依昵称或账号搜索"
+          className="w-full md:w-auto"
+        />
+      </div>
       {/* 筛选栏 */}
       <div className="flex flex-wrap gap-4">
         <Select value={adminFilter} onValueChange={setAdminFilter}>
@@ -155,7 +167,7 @@ export function BlocklistSettings({ board }: BlocklistSettingsProps) {
         loading={isLoading}
         hasMore={hasMore}
         onLoadMore={loadMore}
-        className="space-y-4"
+
         endMessage={
           <div className="text-center py-4 text-sm text-muted-foreground">
             没有更多封锁用户
@@ -165,10 +177,10 @@ export function BlocklistSettings({ board }: BlocklistSettingsProps) {
         {data?.items.map((item: BoardBlacklist) => (
           <div
             key={item.id}
-            className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors gap-4"
+            className="flex items-start justify-between py-4 border-b last:border-b-0"
           >
-            <div className="flex items-center gap-3">
-              <Avatar className="h-16 w-16">
+            <div className="flex items-start gap-3">
+              <Avatar className="h-10 w-10">
                 {item.user && (
                   <AvatarImage
                     src={item.user.avatar_url}
@@ -179,7 +191,7 @@ export function BlocklistSettings({ board }: BlocklistSettingsProps) {
                   {item.user ? item.user.nickname.charAt(0).toUpperCase() : "U"}
                 </AvatarFallback>
               </Avatar>
-              <div>
+              <div className="flex flex-col gap-1">
                 <div className="font-medium">
                   {item.user ? item.user.nickname : "用户已删除"}
                 </div>
@@ -189,11 +201,11 @@ export function BlocklistSettings({ board }: BlocklistSettingsProps) {
                     ? item.user.username || item.user.hashid
                     : item.user_hashid}
                 </div>
-                <div className="flex flex-col text-sm text-muted-foreground">
-                  <div>封锁时间：{formatDate(item.created_at)}</div>
-                  {item.reason && (
-                    <div className="line-clamp-1">原因：{item.reason}</div>
-                  )}
+                <div className="text-sm text-muted-foreground">
+                  状态：永久封锁
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  原因：{item.act_explain || "-"}
                 </div>
               </div>
             </div>
@@ -205,7 +217,7 @@ export function BlocklistSettings({ board }: BlocklistSettingsProps) {
                 className="h-7 whitespace-nowrap"
                 onClick={() => item.user && handleUnblock(item)}
               >
-                解除封锁
+                撤销
               </Button>
             </div>
           </div>

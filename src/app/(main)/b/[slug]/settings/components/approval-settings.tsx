@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
-import { Card } from "@/components/ui/card";
+
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { MoreHorizontal, User, Ban } from "lucide-react";
@@ -44,7 +44,6 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
     apply_time: "",
     register_time: "",
     board_count: "",
-    gender: "",
   });
 
   // 搜索关键词
@@ -116,7 +115,6 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
       apply_time: "",
       register_time: "",
       board_count: "",
-      gender: "",
     });
     setSearchQuery("");
   };
@@ -210,29 +208,11 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
           </SelectContent>
         </Select>
 
-        <Select
-          value={filters.gender}
-          onValueChange={(value) => setFilters({ ...filters, gender: value })}
-        >
-          <SelectTrigger className="w-24 h-8">
-            <SelectValue placeholder="性别" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="1" className="h-8">
-              男
-            </SelectItem>
-            <SelectItem value="2" className="h-8">
-              女
-            </SelectItem>
-            <SelectItem value="0" className="h-8">
-              其他
-            </SelectItem>
-          </SelectContent>
-        </Select>
+
 
         <Button
           size="sm"
-          variant="outline"
+          variant="secondary"
           onClick={clearFilters}
           className="ml-auto"
         >
@@ -251,98 +231,107 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
             暂无待审核的申请
           </div>
         ) : (
-          <div className="space-y-4">
+          <div>
             {applications.map((application) => (
-              <Card key={application.id} className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage
-                        src={application.user?.avatar_url}
-                        alt={application.user?.nickname}
-                      />
-                      <AvatarFallback>
-                        {application.user?.nickname[0].toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-medium">
-                        {application.user?.nickname}
-                        <span className="ml-2 text-sm text-muted-foreground">
-                          @{application.user?.username}
+              <div
+                key={application.id}
+                className="flex items-start justify-between py-4 border-b last:border-b-0"
+              >
+                <div className="flex items-start gap-4">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage
+                      src={application.user?.avatar_url}
+                      alt={application.user?.nickname}
+                    />
+                    <AvatarFallback>
+                      {application.user?.nickname
+                        ? application.user.nickname[0].toUpperCase()
+                        : "N"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col gap-1">
+                    <div className="font-medium">
+                      {application.user?.nickname}
+                      <span className="ml-2 text-sm text-muted-foreground">
+                        @{application.user?.username}
+                      </span>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      注册时间：
+                      {application.user?.created_at
+                        ? formatDate(application.user.created_at)
+                        : "-"}
+                      <span className="mx-2">·</span>
+                      申请时间：
+                      {application.created_at
+                        ? formatDate(application.created_at)
+                        : "-"}
+                    </div>
+                    <div className="mt-2 space-y-1 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">
+                          看板问题：
                         </span>
+                        {board.question}？
                       </div>
-                      <div className="text-sm text-muted-foreground">
-                        注册时间：
-                        {application.user?.created_at
-                          ? formatDate(application.user.created_at)
-                          : "-"}
-                        <span className="mx-2">·</span>
-                        申请时间：
-                        {application.created_at
-                          ? formatDate(application.created_at)
-                          : "-"}
-                      </div>
-                      <div className="mt-2">
-                        <div className="text-sm">
-                          看板问题：{board.question}？
-                        </div>
-                        <div className="text-sm">
-                          看板答案：{application.user_answer}
-                        </div>
+                      <div>
+                        <span className="text-muted-foreground">
+                          看板答案：
+                        </span>
+                        {application.user_answer}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="default"
-                      onClick={() => handleApplication(application.id, 1)}
-                    >
-                      通过
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleApplication(application.id, 2)}
-                    >
-                      拒绝
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          className="text-muted-foreground"
-                        >
-                          <MoreHorizontal />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() =>
-                            window.open(
-                              `/u/${application.user?.username}?hashid=${application.user?.hashid}`,
-                              "_blank"
-                            )
-                          }
-                          className="cursor-pointer"
-                        >
-                          <User className="mr-2 h-4 w-4" />
-                          查看个人主页
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleApplication(application.id, 3)}
-                          className="cursor-pointer text-destructive focus:text-destructive"
-                        >
-                          <Ban className="mr-2 h-4 w-4" />
-                          拒绝并封锁
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
                 </div>
-              </Card>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="default"
+                    onClick={() => handleApplication(application.id, 1)}
+                  >
+                    通过
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => handleApplication(application.id, 2)}
+                  >
+                    拒绝
+                  </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="text-muted-foreground"
+                      >
+                        <MoreHorizontal />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() =>
+                          window.open(
+                            `/u/${application.user?.username}?hashid=${application.user?.hashid}`,
+                            "_blank"
+                          )
+                        }
+                        className="cursor-pointer"
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        查看个人主页
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleApplication(application.id, 3)}
+                        className="cursor-pointer text-destructive focus:text-destructive"
+                      >
+                        <Ban className="mr-2 h-4 w-4" />
+                        拒绝并封锁
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
             ))}
           </div>
         )}

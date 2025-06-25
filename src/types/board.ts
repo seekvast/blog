@@ -78,7 +78,8 @@ export interface BoardBlacklist {
   id: number;
   board_id: number;
   user_hashid: string;
-  reason: string;
+  reason_desc: string;
+  act_explain: string;
   created_at: string;
   updated_at: string;
   user?: User;
