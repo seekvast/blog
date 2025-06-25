@@ -128,7 +128,7 @@ export default function BoardsPage() {
       {/* 顶部导航 */}
       <div className="bg-background">
         <div className="mx-auto w-full">
-          <div className="flex h-[40px] items-center justify-between relative px-6 lg:border-b">
+          <div className="flex h-[40px] items-center justify-between relative lg:px-6 lg:border-b">
             <div className="flex items-center space-x-8 relative ">
               {[
                 { key: "recommended", label: "推荐" },
@@ -233,7 +233,7 @@ export default function BoardsPage() {
             className="divide-y"
           >
             {boards.map((board) => (
-              <div className="px-6" key={board.id}>
+              <div className="lg:px-6" key={board.id}>
                 <BoardItem
                   board={board}
                   onSubscribe={handleSubscribeBoard}

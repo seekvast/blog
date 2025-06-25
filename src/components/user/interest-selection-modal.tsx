@@ -27,8 +27,8 @@ export function InterestSelectionModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[400px] w-[calc(100%-2rem)] rounded-lg p-0 overflow-hidden">
-        <DialogHeader className="px-6 pt-4 pb-0">
-          <DialogTitle className="text-xl font-semibold">
+        <DialogHeader className="px-6 pb-0 pt-4">
+          <DialogTitle className="text-xl font-semibold pt-0">
             选择感兴趣内容
           </DialogTitle>
         </DialogHeader>

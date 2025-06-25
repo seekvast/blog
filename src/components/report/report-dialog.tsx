@@ -23,6 +23,7 @@ import { ReportForm } from "@/types/report";
 import Image from "next/image";
 import Link from "next/link";
 import { Board } from "@/types/board";
+import { ReportTarget } from "@/constants/report-target";
 
 const moderatorReportOptions = [
   { id: 8, label: "離題", description: "此內容與當前討論主題無關" },
@@ -280,7 +281,9 @@ export function ReportDialog({
                   <Textarea
                     className="resize-none"
                     value={otherReasonText}
-                    onChange={(e) => setOtherReasonText(e.target.value.slice(0, 150))}
+                    onChange={(e) =>
+                      setOtherReasonText(e.target.value.slice(0, 150))
+                    }
                     maxLength={150}
                     placeholder="最多150个字符"
                   />
@@ -352,11 +355,17 @@ export function ReportDialog({
           <DialogHeader>
             <DialogTitle className="text-xl">感谢您的检举</DialogTitle>
             <DialogDescription className="mt-2">
-              如果我们确认该内容确实违反
-              <Link href="/" className="text-primary hover:underline">
-                《内容守则》
-              </Link>
-              ,就会将其移除.
+              {form.target === ReportTarget.BOARD ? (
+                <p>如果看板管理人员确认已违反规范，将会进行处置。</p>
+              ) : (
+                <p>
+                  如果我们确认该内容确实违反
+                  <Link href="/" className="text-primary hover:underline">
+                    《内容守则》
+                  </Link>
+                  ,就会将其移除.
+                </p>
+              )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="w-full mt-6">

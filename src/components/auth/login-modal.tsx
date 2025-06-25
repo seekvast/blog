@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuthModal } from "./auth-modal-store";
 import { useDraftStore } from "@/store/draft";
@@ -44,6 +45,7 @@ export function LoginModal({
   const [isLoading, setIsLoading] = useState(false);
   const [isValid, setIsValid] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -134,7 +136,7 @@ export function LoginModal({
       >
         <DialogContent className="max-w-[480px] p-8">
           <DialogHeader className="mb-6">
-            <DialogTitle className="text-2xl font-medium">登入</DialogTitle>
+            <DialogTitle className="text-3xl font-medium">登入</DialogTitle>
             <div className="text-sm text-muted-foreground">
               還沒有賬號？
               <Button
@@ -174,16 +176,29 @@ export function LoginModal({
               <Label htmlFor="password" className="text-sm text-neutral-500">
                 密碼
               </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="請輸入密碼"
-                className="h-12 text-base"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-                required
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="請輸入密碼"
+                  className="h-12 text-base pr-10"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-500 hover:text-neutral-700"
+                >
+                  {showPassword ? (
+                    <Eye className="h-5 w-5" />
+                  ) : (
+                    <EyeOff className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
             </div>
             <div className="space-y-4">
               <div className="cf-turnstile flex justify-center">

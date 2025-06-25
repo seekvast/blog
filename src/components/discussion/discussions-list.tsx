@@ -111,7 +111,7 @@ export function DiscussionsList({
       {/* 顶部导航 - 仅在非移动端显示 */}
       <div className="bg-background">
         <div className="mx-auto">
-          <div className="flex h-[40px] items-center justify-between px-6 lg:border-b">
+          <div className="flex h-[40px] items-center justify-between lg:px-6 lg:border-b">
             {from === "index" ? (
               <div className="flex items-center space-x-4 lg:space-x-8">
                 <button
@@ -172,7 +172,7 @@ export function DiscussionsList({
       {sticky && sticky.length > 0 && (
         <div className="divide-y border-b">
           {sticky.map((discussion, index) => (
-            <div className="px-6" key={`sticky-${discussion.slug}-${index}`}>
+            <div className="lg:px-6" key={`sticky-${discussion.slug}-${index}`}>
               <DiscussionItem
                 discussion={discussion}
                 displayMode={displayMode}
@@ -195,7 +195,7 @@ export function DiscussionsList({
           {discussions.items.map((discussion, index) => {
             const isLastItem = index === discussions.items.length - 1;
             return (
-              <div className="px-6" key={discussion.slug + index}>
+              <div className="lg:px-6" key={discussion.slug + index}>
                 <DiscussionItem
                   key={discussion.slug + index}
                   discussion={discussion}

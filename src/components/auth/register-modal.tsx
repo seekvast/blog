@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useTranslation } from "react-i18next";
+import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -121,6 +122,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   // 表单错误状态
   const [errors, setErrors] = useState<{
@@ -404,9 +406,25 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
           <DialogHeader className="mb-4">
             <div className="space-y-2">
               <p className="text-sm text-neutral-500">第{step}步，共2步</p>
-              <DialogTitle className="text-xl font-semibold">
+              <DialogTitle className="text-3xl font-medium">
                 建立一個帳號
               </DialogTitle>
+              <p className="text-sm text-neutral-500">
+                已有帳號？
+                <span
+                  className="text-primary cursor-pointer"
+                  onClick={() => {
+                    if (onOpenChange) {
+                      onOpenChange(false);
+                    } else {
+                      closeRegister();
+                    }
+                    openLogin();
+                  }}
+                >
+                  去登入
+                </span>
+              </p>
             </div>
           </DialogHeader>
 
@@ -442,24 +460,34 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                     >
                       密碼
                     </Label>
-                    <Input
-                      type="password"
-                      id="password"
-                      name="password"
-                      value={step1Data.password}
-                      onChange={handleStep1Change}
-                      placeholder="請輸入密碼"
-                      className="h-12 text-base"
-                      autoComplete="new-password"
-                    />
-                    <p className="text-sm text-neutral-500">
-                      {t('auth.password_prompt')}
-                    </p>
-                    {errors.password && (
-                      <p className="text-sm font-medium text-destructive">
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        id="password"
+                        name="password"
+                        value={step1Data.password}
+                        onChange={handleStep1Change}
+                        placeholder="請輸入密碼"
+                        className="h-12 text-base pr-10"
+                        autoComplete="new-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-500 hover:text-neutral-700"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                    {errors.password ? (
+                      <p className="text-sm text-red-500 text-xs">
                         {errors.password}
                       </p>
-                    )}
+                    ) : null}
                   </div>
 
                   <div className="space-y-5">
@@ -498,23 +526,6 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                   </div>
 
                   <div className="text-center space-y-4 pt-2">
-                    <p className="text-sm text-neutral-500">
-                      已有帳戶？
-                      <Button
-                        variant="link"
-                        className="px-1 h-auto"
-                        onClick={() => {
-                          if (onOpenChange) {
-                            onOpenChange(false);
-                          } else {
-                            closeRegister();
-                          }
-                          openLogin();
-                        }}
-                      >
-                        登入
-                      </Button>
-                    </p>
                     <p className="text-xs text-neutral-500">
                       註冊登入即代表同意Kater
                       <Link
