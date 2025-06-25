@@ -24,6 +24,7 @@ export const authOptions: NextAuthOptions = {
         },
         password: { label: "Password", type: "password" },
         turnstile_token: { label: "Turnstile Token", type: "text" },
+        auth_token: { label: "Token", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -33,7 +34,8 @@ export const authOptions: NextAuthOptions = {
         const data = await api.users.login({
           email: credentials.email,
           password: credentials.password,
-          turnstile_token: credentials.turnstile_token,
+          turnstile_token: credentials.turnstile_token ?? "",
+          auth_token: credentials.auth_token ?? "",
         });
         return {
           id: data.hashid,

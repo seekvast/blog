@@ -31,7 +31,7 @@ import { useBoardActions } from "@/hooks/use-board-actions";
 export default function BoardsPage() {
   const [boards, setBoards] = useState<Board[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"recommended" | "joined">(
+  const [activeTab, setActiveTab] = useState<"recommended" | "subscribed">(
     "recommended"
   );
   const { requireAuth } = useRequireAuth();
@@ -132,7 +132,7 @@ export default function BoardsPage() {
             <div className="flex items-center space-x-8 relative ">
               {[
                 { key: "recommended", label: "推荐" },
-                { key: "joined", label: "已加入" },
+                { key: "subscribed", label: "已加入" },
               ].map((tab, idx) => (
                 <button
                   key={tab.key}
@@ -145,9 +145,9 @@ export default function BoardsPage() {
                     }
                   `}
                   onClick={() => {
-                    if (tab.key === "joined") {
+                    if (tab.key === "subscribed") {
                       requireAuth(() => {
-                        setActiveTab("joined");
+                        setActiveTab("subscribed");
                       });
                     } else {
                       setActiveTab("recommended");

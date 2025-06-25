@@ -52,6 +52,7 @@ export const BoardSelect = React.forwardRef<
           per_page: 100,
           visibility: BoardVisibility.PUBLIC,
           name: "",
+          q: !searchName ? 'subscribed' : 'all',
         };
         if (searchName) queryParams.name = searchName;
 
@@ -78,7 +79,7 @@ export const BoardSelect = React.forwardRef<
     }
     debouncedSearch.current = setTimeout(() => {
       setPage(1);
-      loadBoards(value, 1);
+      loadBoards(value, 1); // 当 value 不为空时，loadBoards 内部会自动不添加 q: 'subscribed'
     }, 300);
   };
 

@@ -354,6 +354,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
         await signIn("credentials", {
           email: data.email,
           password: step1Data.password,
+          auth_token: data.token,
           redirect: false,
         });
       }
