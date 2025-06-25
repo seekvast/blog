@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -114,6 +115,7 @@ interface RegisterModalProps {
 
 export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
   const { isRegisterOpen, closeRegister, openLogin } = useAuthModal();
+  const { t } = useTranslation();
   const { setNewlyRegistered } = useRegistrationStore();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -451,7 +453,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                       autoComplete="new-password"
                     />
                     <p className="text-sm text-neutral-500">
-                      密碼至少包含8個字符，只能输入大小寫字母、數字和特殊字符（!@#$%^&*-_）
+                      {t('auth.password_prompt')}
                     </p>
                     {errors.password && (
                       <p className="text-sm font-medium text-destructive">
@@ -480,7 +482,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                           }}
                           options={{
                             theme: "auto",
-                            size: "normal"
+                            size: "normal",
                           }}
                           className="flex justify-center items-center"
                         />
@@ -677,7 +679,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                         }}
                         options={{
                           theme: "auto",
-                          size: "normal"
+                          size: "normal",
                         }}
                         className="flex justify-center items-center"
                       />

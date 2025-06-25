@@ -25,6 +25,7 @@ import { PlusIcon } from "lucide-react";
 import { X } from "lucide-react";
 import Image from "next/image";
 import { AttachmentType } from "@/constants/attachment-type";
+import { useTranslation } from "react-i18next";
 
 const passwordSchema = z
   .object({
@@ -52,6 +53,7 @@ type PasswordSchema = z.infer<typeof passwordSchema>;
 type EmailSchema = z.infer<typeof emailSchema>;
 
 export default function SecuritySettings({ user }: { user: User | null }) {
+  const { t } = useTranslation();
   if (!user) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -453,7 +455,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
                 onChange={handlePasswordChange("password")}
               />
               <p className="text-sm ">
-                密碼至少8個字符，可输入大小寫字母、數字和特殊字符（!@#$%^&*-_）
+                {t('auth.password_prompt')}
               </p>
             </div>
 

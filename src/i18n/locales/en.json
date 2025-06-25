@@ -38,6 +38,7 @@
     "password": "Password",
     "username": "Username",
     "nickname": "Nickname",
-    "birthday": "Birthday"
+    "birthday": "Birthday",
+    "password_prompt": "Password must be at least 8 characters long and can contain uppercase and lowercase letters, numbers, and special characters."
   }
 }

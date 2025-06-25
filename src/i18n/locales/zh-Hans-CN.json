@@ -59,6 +59,9 @@
     "helpCenter": "说明中心",
     "language": "语言"
   },
+  "auth": {
+    "password_prompt": "密碼至少8個字符，可输入大小寫字母、數字和特殊字符"
+  },
   "theme": {
     "light": "日间模式",
     "dark": "夜间模式",
