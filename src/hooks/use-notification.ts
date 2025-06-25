@@ -19,7 +19,13 @@ export type NotificationType =
   | "discussionLocked"
   | "postLiked";
 
-export type NotificationTabType = "all" | "mentions" | "board";
+export type NotificationTabType =
+  | "all"
+  | "mentions"
+  | "replies"
+  | "voted"
+  | "system"
+  | "board";
 
 export function useMarkAllNotificationsAsRead() {
   const queryClient = useQueryClient();
@@ -80,7 +86,7 @@ export function useNotifications(autoLoad: boolean = true) {
   const queryClient = useQueryClient();
 
   const fetchNotifications = React.useCallback(
-    async (pageNum: number, query?: any) => {
+    async (pageNum: number, type?: NotificationTabType, query?: any) => {
       if (loadingRef.current) return;
       loadingRef.current = true;
       setLoading(true);
@@ -89,6 +95,7 @@ export function useNotifications(autoLoad: boolean = true) {
         const response = await api.notifications.list({
           page: pageNum,
           per_page: 50,
+          q: type !== 'all' ? type : undefined,
           ...query,
         });
 
@@ -102,7 +109,6 @@ export function useNotifications(autoLoad: boolean = true) {
 
         setPage(pageNum);
         setTotal(response.total);
-
       } catch (err) {
         setError("获取通知失败");
       } finally {
@@ -113,18 +119,25 @@ export function useNotifications(autoLoad: boolean = true) {
     [queryClient]
   );
 
+  const [activeType, setActiveType] = React.useState<NotificationTabType>("all");
+
   const loadMore = React.useCallback(() => {
     if (!loadingRef.current && hasMore) {
-      fetchNotifications(page + 1);
+      fetchNotifications(page + 1, activeType);
     }
-  }, [hasMore, page, fetchNotifications]);
+  }, [hasMore, page, fetchNotifications, activeType]);
+  
+  const changeType = React.useCallback((type: NotificationTabType) => {
+    setActiveType(type);
+    fetchNotifications(1, type);
+  }, [fetchNotifications]);
 
   // 自动加载第一页数据
   React.useEffect(() => {
     if (autoLoad) {
-      fetchNotifications(1);
+      fetchNotifications(1, activeType);
     }
-  }, [autoLoad, fetchNotifications]);
+  }, [autoLoad, fetchNotifications, activeType]);
 
   const markAsRead = React.useCallback(
     async (notificationId: number) => {
@@ -168,11 +181,12 @@ export function useNotifications(autoLoad: boolean = true) {
     loading,
     error,
     hasMore,
-    total,
-    unreadCount,
     fetchNotifications,
     loadMore,
     markAsRead,
     clearAllNotifications,
+    unreadCount,
+    activeType,
+    changeType,
   };
 }

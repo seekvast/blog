@@ -8,7 +8,7 @@ const navItems = [
   { label: "全部通知", type: "all" },
   { label: "回复我的", type: "replies" },
   { label: "@我的", type: "mentions" },
-  { label: "收到的赞", type: "likes" },
+  { label: "收到的赞", type: "voted" },
   { label: "系统消息", type: "system" },
 ];
 

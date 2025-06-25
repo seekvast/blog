@@ -34,7 +34,7 @@ export function NotificationPreview({
 
   return (
     <div className="relative flex flex-col h-full">
-      <div className={cn("flex-1 flex flex-col", className)}>
+      <div className={cn("flex-1 flex flex-col overflow-y-auto", className)}>
         {loading && notifications.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center text-muted-foreground">加载中...</div>
@@ -61,7 +61,7 @@ export function NotificationPreview({
         )}
       </div>
 
-      <div className="mt-auto border-t border-border bg-background">
+      <div className="sticky bottom-0 bg-background w-full">
         <div className="p-3 text-center">
           <Link
             href="/notifications/all"

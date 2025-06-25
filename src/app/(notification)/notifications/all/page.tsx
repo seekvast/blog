@@ -15,17 +15,15 @@ import {
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 
 export default function AllNotificationsPage() {
-  const [activeType, setActiveType] =
-    React.useState<NotificationTabType>("all");
-
   const {
     notifications,
     loading,
     hasMore,
-    fetchNotifications,
     loadMore,
     markAsRead,
     clearAllNotifications,
+    activeType,
+    changeType,
   } = useNotifications();
 
   const handleNotificationClick = (notification: Notification) => {
@@ -38,15 +36,10 @@ export default function AllNotificationsPage() {
   };
 
   const handleTypeChange = (type: NotificationTabType) => {
-    setActiveType(type);
-    // 切换标签时重置并重新加载
-    fetchNotifications(1);
+    changeType(type);
   };
 
-  // 页面加载时获取通知
-  React.useEffect(() => {
-    fetchNotifications(1);
-  }, [fetchNotifications]);
+  // 不需要额外的 useEffect，因为 useNotifications 内部已经处理了自动加载
 
   return (
     <div className="">
