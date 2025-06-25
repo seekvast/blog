@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -164,35 +165,48 @@ export function MembersSettings({ board }: SettingsProps) {
         {members?.items.map((member) => (
           <div
             key={member.hashid}
-            className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors"
+            className="flex items-start justify-between py-4 border-b"
           >
-            <div className="flex items-center gap-3">
-              <Avatar className="h-8 w-8">
+            <div className="flex items-start gap-3">
+              <Avatar className="h-10 w-10">
                 <AvatarImage src={member.avatar_url} />
                 <AvatarFallback>{member.username[0].toUpperCase()}</AvatarFallback>
               </Avatar>
-              <div>
-                <div className="font-medium">{member.username}</div>
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-1 font-medium">
+                  {member.username}
+                  {/* 身份组徽章 */}
+                  {member.user_role !== undefined && member.user_role !== 0 && member.user_role !== 3 && (
+                    <Badge
+                      className={cn(
+                        "ml-1",
+                        member.user_role === 1 && "bg-blue-500/10 text-blue-600",
+                        member.user_role === 2 && "bg-amber-400/20 text-amber-600"
+                      )}
+                      variant="secondary"
+                    >
+                      {member.user_role === 1 ? "创建者" : member.user_role === 2 ? "管理员" : null}
+                    </Badge>
+                  )}
+                </div>
                 <div className="text-sm text-muted-foreground">
                   @{member.nickname}
+                </div>
+                {/* 调整统计顺序和间距 */}
+                <div className="flex gap-4 text-sm text-muted-foreground mt-1">
+                  <div>
+                    回帖数:{" "}
+                    <span className="text-foreground">{member.replies_count}</span>
+                  </div>
+                  <div>
+                    发帖数:{" "}
+                    <span className="text-foreground">{member.posts_count}</span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-8">
-              <div className="flex gap-4 text-sm text-muted-foreground">
-                <div>
-                  发帖数:{" "}
-                  <span className="text-foreground">{member.posts_count}</span>
-                </div>
-                <div>
-                  回帖数:{" "}
-                  <span className="text-foreground">
-                    {member.replies_count}
-                  </span>
-                </div>
-              </div>
-
+            <div className="flex items-center">
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-muted">
                   <MoreHorizontal className="h-4 w-4" />
