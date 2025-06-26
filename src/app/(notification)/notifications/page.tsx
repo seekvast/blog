@@ -2,9 +2,12 @@
 
 import * as React from "react";
 import { NotificationPreview } from "@/components/notification/notification-preview";
-import { useMarkAllNotificationsAsRead, useNotifications, NotificationTabType } from "@/hooks/use-notification";
+import {
+  useMarkAllNotificationsAsRead,
+  useNotifications,
+  NotificationTabType,
+} from "@/hooks/use-notification";
 import { NotificationNav } from "@/components/notification/notification-nav";
-
 
 export default function Notification() {
   const [open, setOpen] = React.useState(true); // 设置为true，因为在通知页面中通知列表应该是打开的
@@ -38,12 +41,12 @@ export default function Notification() {
 
   React.useEffect(() => {
     if (open) {
-      fetchNotifications(1, { q: activeType });
+      fetchNotifications(1, activeType);
     }
   }, [activeType, open, fetchNotifications]);
 
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       markAllAsRead();
     }
   }, []);

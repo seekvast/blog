@@ -595,7 +595,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                     alt={currentDiscussion.user.username}
                   />
                   <AvatarFallback>
-                    {currentDiscussion.user.username[0]}
+                    {currentDiscussion.user.username[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </Link>

@@ -55,14 +55,14 @@ export function NotificationPopover({
   // 当弹出框打开时刷新通知
   React.useEffect(() => {
     if (open) {
-      fetchNotifications(1, { q: activeType });
+      fetchNotifications(1, activeType);
     }
   }, [open, fetchNotifications]);
 
   // 当标签页改变时重新加载
   React.useEffect(() => {
     if (open) {
-      fetchNotifications(1, { q: activeType });
+      fetchNotifications(1, activeType);
     }
   }, [activeType, open, fetchNotifications]);
 

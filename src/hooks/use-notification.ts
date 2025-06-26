@@ -5,20 +5,6 @@ import { api } from "@/lib/api";
 import { Notification } from "@/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export type NotificationType =
-  | "discussionRenamed"
-  | "userSuspended"
-  | "userUnsuspended"
-  | "newPost"
-  | "replied"
-  | "upVoted"
-  | "downVoted"
-  | "postMentioned"
-  | "userMentioned"
-  | "groupMentioned"
-  | "discussionLocked"
-  | "postLiked";
-
 export type NotificationTabType =
   | "all"
   | "mentions"

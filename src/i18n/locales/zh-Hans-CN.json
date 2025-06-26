@@ -103,92 +103,155 @@
     },
     "postDeleted": {
       "title": "已移除你的文章",
-      "content": "你的文章「{{title}}」違反了《內容政策》中的「{{reason}}」，因此我們已進行刪除。"
+      "content": "你的文章「{{title}}」違反了《內容政策》中的「{{reason}}」，因此我們已進行刪除。",
+      "simple": {
+        "title": "內容安全",
+        "content": "已移除你的文章"
+      }
     },
     "replyDeleted": {
       "title": "已移除你的回覆",
-      "content": "你於「{{title}}」中發表的「{{excerpt}}」違反了《內容政策》中的「{{reason}}」，因此我們已進行刪除。"
+      "content": "你於「{{title}}」中發表的「{{excerpt}}」違反了《內容政策》中的「{{reason}}」，因此我們已進行刪除。",
+      "simple": {
+        "title": "內容安全",
+        "content": "已移除你的回覆"
+      }
     },
     "userWarned": {
       "title": "帳號被警告",
-      "content": "我們發現你頻繁違反了我們的《內容政策》，如果你繼續這樣做，我們可能不得不考慮採取進一步的行動。"
+      "content": "我們發現你頻繁違反了我們的《內容政策》，如果你繼續這樣做，我們可能不得不考慮採取進一步的行動。",
+      "simple": {
+        "title": "內容安全",
+        "content": "帳號被警告"
+      }
     },
     "userBanned": {
       "title": "帳號已被停用",
-      "content": "你因「{{reason}}」屢次或嚴重違反了我們的《內容政策》，已將你的帳號永久停用。"
+      "content": "你因「{{reason}}」屢次或嚴重違反了我們的《內容政策》，已將你的帳號永久停用。",
+      "simple": {
+        "title": "內容安全",
+        "content": "帳號已被停用"
+      }
     },
     "userRestricted": {
       "title": "帳號部份編輯功能被暫時限制",
-      "content": "你因「{{reason}}」屢次或嚴重違反了我們的《內容政策》，我們已暫停你的上傳頭像和更改名稱相關功能。此限制將於 {{days}} 天後解除。"
+      "content": "你因「{{reason}}」屢次或嚴重違反了我們的《內容政策》，我們已暫停你的上傳頭像和更改名稱相關功能。此限制將於 {{days}} 天後解除。",
+      "simple": {
+        "title": "內容安全",
+        "content": "帳號部份編輯功能被暫時限制"
+      }
     },
     "userBannedTemporarily": {
       "title": "帳號已被暫停使用",
-      "content": "你因「{{reason}}」屢次或嚴重違反了我們的《內容政策》，已將你的帳號暫時停用，於 {{days}} 天後解除。"
+      "content": "你因「{{reason}}」屢次或嚴重違反了我們的《內容政策》，已將你的帳號暫時停用，於 {{days}} 天後解除。",
+      "simple": {
+        "title": "內容安全",
+        "content": "帳號已被暫停使用"
+      }
     },
     "boardWarned": {
       "title": "你所管理的看板已被警告",
-      "content": "我們發現你所管理的看板「{{name}}」有潛在違反《內容政策》中的「{{reason}}」疑慮，建議加強管理以維護社群風氣。"
+      "content": "我們發現你所管理的看板「{{name}}」有潛在違反《內容政策》中的「{{reason}}」疑慮，建議加強管理以維護社群風氣。",
+      "simple": {
+        "title": "內容安全",
+        "content": "你所管理的看板已被警告"
+      }
     },
     "boardDeleted": {
       "title": "你所管理的看板已被刪除",
-      "content": "你所管理的看板「{{name}}」屢次或嚴重違反了我們的《內容政策》，已將你的看板進行刪除。"
+      "content": "你所管理的看板「{{name}}」屢次或嚴重違反了我們的《內容政策》，已將你的看板進行刪除。",
+      "simple": {
+        "title": "內容安全",
+        "content": "你所管理的看板已被刪除"
+      }
     },
     "boardRestricted": {
       "title": "看板部份功能已被暫時限制",
-      "content": "你因「{{reason}}」屢次或嚴重違反了我們的《內容政策》，我們已暫停你管理的看板上傳頭像和更改看板名稱的功能。此限制將於 {{days}} 天後解除。"
+      "content": "你因「{{reason}}」屢次或嚴重違反了我們的《內容政策》，我們已暫停你管理的看板上傳頭像和更改看板名稱的功能。此限制將於 {{days}} 天後解除。",
+      "simple": {
+        "title": "內容安全",
+        "content": "看板部份功能已被暫時限制"
+      }
     },
     "boardConverted": {
       "title": "看板狀態已被改變",
-      "content": "你所管理的看板「{{name}}」充斥著成人內容，已將你的看板變更為成人類型看板。"
+      "content": "你所管理的看板「{{name}}」充斥著成人內容，已將你的看板變更為成人類型看板。",
+      "simple": {
+        "title": "內容安全",
+        "content": "看板狀態已被改變"
+      }
     },
     "ageVerified": {
       "title": "年龄验证成功",
-      "content": "您的年龄验证已通过审核，现在可以访问所有内容。"
+      "content": "您的年龄验证已通过审核，现在可以访问所有内容。",
+      "simple": {
+        "title": "內容安全",
+        "content": "年齡驗證已通過"
+      }
     },
     "ageVerificationFailed": {
       "title": "年龄验证失败",
-      "content": "您的年龄验证未通过审核，请重新提交有效证明。"
+      "content": "您的年龄验证未通过审核，请重新提交有效证明。",
+      "simple": {
+        "title": "內容安全",
+        "content": "年齡驗證已被駁回"
+      }
     },
     "boardPostDeleted": {
-      "title": "你的文章已被看板管理員刪除",
-      "content": "{{name}}\n{{title}}",
+      "title": "{{name}}",
+      "content": "你所發表的「{{title}}」已被看板管理員已進行刪除。\n原因：{{reason}}",
+      "simple": {
+        "title": "你的文章已被看板管理員刪除",
+        "content": "{{name}}\n{{title}}"
+      },
       "meta": {
         "reason": "你所發表的「{{title}}」已被看板管理員已進行刪除。\n原因：{{reason}}"
       }
     },
     "boardReplyDeleted": {
-      "title": "你的回覆已被看板管理員刪除",
-      "content": "{{name}}\n{{excerpt}}",
+      "title": "{{name}}",
+      "content": "你於「{{title}}」中發表的「{{excerpt}}」已被看板管理員已進行刪除。\n原因：{{reason}}",
+      "simple": {
+        "title": "你的回覆已被看板管理員刪除",
+        "content": "{{name}}\n{{excerpt}}"
+      },
       "meta": {
         "reason": "你於「{{title}}」中發表的「{{excerpt}}」已被看板管理員已進行刪除。\n原因：{{reason}}"
       }
     },
     "boardUserMuted": {
-      "title": "你被看板管理員暫時禁止發言，{{days}}天後解除。",
-      "content": "{{name}}",
+      "title": "{{name}}",
+      "content": "你已被看板管理員禁止發表與回覆，直到{{days}}天後解除。\n原因：{{reason}}",
+      "simple": {
+        "title": "你被看板管理員暫時禁止發言，{{days}}天後解除。",
+        "content": "{{name}}"
+      },
       "meta": {
         "reason": "你已被看板管理員禁止發表與回覆，直到{{days}}天後解除。\n原因：{{reason}}"
       }
     },
     "boardUserBanned": {
-      "title": "你已被看板管理員禁止加入",
-      "content": "{{name}}",
-      "meta": {
-        "reason": "你已被看板管理員禁止加入，點此查看詳情。\n原因：{{reason}}"
+      "title": "{{name}}",
+      "content": "你已被看板管理員禁止加入，\n原因：{{reason}}",
+      "simple": {
+        "title": "你已被看板管理員禁止加入",
+        "content": "{{name}}"
       }
     },
     "boardUserKicked": {
-      "title": "你已被看板管理員取消成員資格",
-      "content": "{{name}}",
-      "meta": {
-        "reason": "你已被看板管理員取消成員資格。"
+      "title": "{{name}}",
+      "content": "你已被看板管理員取消成員資格。",
+      "simple": {
+        "title": "你已被看板管理員取消成員資格",
+        "content": "{{name}}"
       }
     },
     "boardUserRoleChanged": {
-      "title": "你的身份組已被看板管理員變更為 {{role}}",
-      "content": "{{name}}",
-      "meta": {
-        "reason": "你的身份組已被看板管理員變更為 {{role}}。"
+      "title": "{{name}}",
+      "content": "你的身份組已被看板管理員變更為 {{role}}。",
+      "simple": {
+        "title": "你的身份組已被看板管理員變更為 {{role}}",
+        "content": "{{name}}"
       }
     },
     "boardUserSubscribe": {

@@ -40,7 +40,7 @@ const Account = () => {
   } = useNotifications(false);
 
   React.useEffect(() => {
-    fetchNotifications(1, { category: "account" });
+    fetchNotifications(1, undefined, { category: "account" });
   }, [fetchNotifications]);
 
   const handleNotificationClick = (notification: Notification) => {
@@ -69,6 +69,7 @@ const Account = () => {
               key={notification.id}
               notification={notification}
               onClick={handleNotificationClick}
+              simple={false}
             />
           ))}
         </InfiniteScroll>
@@ -88,7 +89,7 @@ const Board = () => {
   } = useNotifications(false);
 
   React.useEffect(() => {
-    fetchNotifications(1, { category: "board_user" });
+    fetchNotifications(1, undefined, { category: "board_user" });
   }, [fetchNotifications]);
 
   const handleNotificationClick = (notification: Notification) => {
@@ -119,6 +120,7 @@ const Board = () => {
                 key={notification.id}
                 notification={notification}
                 onClick={handleNotificationClick}
+                simple={false}
               />
             ))}
           </InfiniteScroll>

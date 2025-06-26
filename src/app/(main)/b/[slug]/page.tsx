@@ -296,7 +296,6 @@ function BoardContent() {
                     board={board}
                     onSubscribe={handleSubscribeBoard}
                     onBlock={handleBlockBoard}
-                    requireAuth={requireAuth}
                     setReportToKaterOpen={setReportToKaterOpen}
                   />
                   {/* 如果是创建者或管理员，则显示设置按钮 */}

@@ -7,61 +7,31 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { Notification } from "@/types";
 import { useNotificationRenderer } from "@/hooks/use-notification-renderer";
-import { getNotificationLink, getNotificationAvatar } from "@/lib/utils/notification";
-
-export type NotificationType =
-  | "discussionRenamed"
-  | "userSuspended"
-  | "userUnsuspended"
-  | "newPost"
-  | "replied"
-  | "upVoted"
-  | "downVoted"
-  | "postMentioned"
-  | "userMentioned"
-  | "groupMentioned"
-  | "discussionLocked"
-  | "postLiked";
+import {
+  getNotificationLink,
+  getNotificationAvatar,
+} from "@/lib/utils/notification";
 
 interface NotificationItemProps {
   notification: Notification;
   onClick?: (notification: Notification) => void;
   className?: string;
-}
-
-// 旧的消息构建函数，保留作为备用
-export function buildMessage(notification: Notification) {
-  switch (notification.type) {
-    case "upVoted":
-      return notification.from_user.username + " 對你的文章按了推";
-    case "downVoted":
-      return notification.from_user.username + " 對你的文章按了嘘";
-    case "newPost":
-      return notification.from_user.username + " 回覆了你發表的文章";
-    case "replied":
-      return notification.from_user.username + " 回覆了你的評論";
-    case "postLiked":
-      return notification.from_user.username + " 對你的文章按了推";
-    default:
-      return "";
-  }
+  simple?: boolean;
 }
 
 export function NotificationItem({
   notification,
   onClick,
+  simple = true,
 }: NotificationItemProps) {
   const isUnread = !notification.read_at;
   const { renderContent, renderTitle, isTemplatesLoaded } =
     useNotificationRenderer();
 
-  // 如果模板已加载，使用模板渲染，否则使用备用方法
-  const message = isTemplatesLoaded
-    ? renderContent(notification)
-    : buildMessage(notification);
+  const message = isTemplatesLoaded ? renderContent(notification, simple) : "";
 
   const title = isTemplatesLoaded
-    ? renderTitle(notification)
+    ? renderTitle(notification, simple)
     : notification.discussion
     ? notification.discussion.title
     : `通知 #${notification.id}`;
@@ -88,7 +58,7 @@ export function NotificationItem({
                 alt={avatarInfo.username}
               />
               <AvatarFallback>
-                {avatarInfo.username.slice(0, 2).toUpperCase()}
+                {avatarInfo.username.slice(0, 1).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </Link>
