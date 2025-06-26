@@ -32,7 +32,6 @@ export function BoardSettingsForm({
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // 安全地获取 tab 参数，确保 searchParams 不为 null
   const tabParam = searchParams ? searchParams.get("tab") as SettingTab | null : null;
   const isValidTab = tabParam && [
     "general", "rules", "child-boards", "approval", 
@@ -50,13 +49,11 @@ export function BoardSettingsForm({
   };
 
   useEffect(() => {
-    // 如果存在有效的 URL 参数中的 tab，则使用它，否则使用默认值
     const defaultTab = isMobile ? "" : "general";
     setActiveTab(isValidTab ? tabParam! : defaultTab);
   }, [isMobile, tabParam, isValidTab]);
   
   const handleTabClick = (tab: SettingTab) => {
-    // 更新 URL 参数，同时更新状态
     const params = new URLSearchParams(searchParams?.toString() || "");
     if (tab) {
       params.set("tab", tab);
@@ -64,7 +61,6 @@ export function BoardSettingsForm({
       params.delete("tab");
     }
     
-    // 使用 replace 而不是 push，避免创建新的历史记录
     router.replace(`?${params.toString()}`);
     setActiveTab(tab);
   };

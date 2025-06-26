@@ -1,4 +1,4 @@
-import type { Board, BoardChild, User } from "@/types";
+import type { Board, BoardChild, User, BoardUser } from "@/types";
 import type { Response, Pagination } from "./common";
 
 export interface DiscussionUser {
@@ -106,7 +106,7 @@ export interface Discussion {
   discussion_user: DiscussionUser;
   user_voted: PostVote;
   poll?: Poll;
-  board_user_role: number | null;
+  board_user: BoardUser;
 }
 
 export interface Post {

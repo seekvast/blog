@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -65,7 +64,7 @@ export function FormFields({
           <FormItem>
             <FormLabel>看板说明</FormLabel>
             <FormControl>
-              <Textarea placeholder="只能输入文字，最长500字" {...field} />
+              <Input placeholder="只能输入文字，最长500字" {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -182,32 +181,51 @@ export function FormFields({
       <FormField
         control={form.control}
         name="approval_mode"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>看板加入方式</FormLabel>
-            <FormControl>
-              <RadioGroup
-                onValueChange={(value) => field.onChange(Number(value))}
-                defaultValue={String(field.value)}
-                className="space-y-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="0" id="free" />
-                  <Label htmlFor="free">无需审核可直接加入</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="2" id="manual" />
-                  <Label htmlFor="manual">输入问题由管理员审核</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="1" id="auto" />
-                  <Label htmlFor="auto">输入问题系统自动审核</Label>
-                </div>
-              </RadioGroup>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
+        render={({ field }) => {
+          // 当看板为公开时，自动设置为无需审核可直接加入
+          React.useEffect(() => {
+            if (form.watch("visibility") === 0) {
+              field.onChange(0);
+            }
+          }, [form.watch("visibility")]);
+          
+          return (
+            <FormItem>
+              <FormLabel>看板加入方式</FormLabel>
+              <FormControl>
+                <RadioGroup
+                  onValueChange={(value) => field.onChange(Number(value))}
+                  value={String(field.value)}
+                  className="space-y-4"
+                  disabled={form.watch("visibility") === 0}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="0" id="free" />
+                    <Label htmlFor="free">无需审核可直接加入</Label>
+                  </div>
+                  {form.watch("visibility") !== 0 && (
+                    <>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="2" id="manual" />
+                        <Label htmlFor="manual">输入问题由管理员审核</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="1" id="auto" />
+                        <Label htmlFor="auto">输入问题系统自动审核</Label>
+                      </div>
+                    </>
+                  )}
+                </RadioGroup>
+              </FormControl>
+              {/* {form.watch("visibility") === 0 && (
+                <FormDescription className="text-amber-500">
+                  公开看板只能选择无需审核可直接加入
+                </FormDescription>
+              )} */}
+              <FormMessage />
+            </FormItem>
+          );
+        }}
       />
 
       {/* 条件性显示问题和答案输入框 */}

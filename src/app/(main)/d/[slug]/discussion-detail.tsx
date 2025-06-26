@@ -612,9 +612,12 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                     </Link>
                     <div className="flex items-center space-x-2 min-w-0 text-muted-foreground">
                       <span>@{currentDiscussion.user.nickname}</span>
-                      {currentDiscussion.board_user_role && currentDiscussion.board_user_role < 3 && (
-                        <Badge variant="secondary" className="text-primary">{BoardUserRole[currentDiscussion.board_user_role]}</Badge>
-                      )}
+                      {currentDiscussion.board_user &&
+                        currentDiscussion.board_user.role < 3 && (
+                          <Badge variant="secondary" className="text-primary">
+                            {BoardUserRole[currentDiscussion.board_user.role]}
+                          </Badge>
+                        )}
                     </div>
                   </div>
 
@@ -732,33 +735,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           <div className="py-4 px-2 md:px-4 text-muted-foreground w-full text-base">
             <PostContent post={currentDiscussion.main_post} />
             {currentDiscussion.poll && (
-              <PollContent
-                poll={currentDiscussion.poll}
-                onVote={async (optionIds) => {
-                  try {
-                    const response = await api.discussions.votePoll({
-                      slug: currentDiscussion.slug,
-                      poll_id: currentDiscussion.poll?.id,
-                      options: optionIds,
-                    });
-                    queryClient.invalidateQueries({
-                      queryKey: ["discussion", slug],
-                    });
-                    toast({
-                      title: "投票成功",
-                      variant: "default",
-                    });
-                    return response;
-                  } catch (error) {
-                    toast({
-                      title: "投票失败",
-                      description: "请稍后重试",
-                      variant: "destructive",
-                    });
-                    return null;
-                  }
-                }}
-              />
+              <PollContent discussion={currentDiscussion} />
             )}
           </div>
           <div className="flex justify-between items-center mb-4 px-2 text-muted-foreground text-sm">

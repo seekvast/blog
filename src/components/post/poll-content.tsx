@@ -7,14 +7,41 @@ import { Check, Clock, Users } from "lucide-react";
 import { PollVotersDialog } from "./poll-voters-dialog";
 import { Poll, PollOption } from "@/types/discussion";
 import { useEffect } from "react";
+import { api } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/use-toast";
+import type { Discussion } from "@/types";
 
 interface PollContentProps {
-  poll: Poll;
-  onVote?: (optionIds: number[]) => Promise<Poll | null>;
+  discussion: Discussion;
 }
 
-export function PollContent({ poll: initialPoll, onVote }: PollContentProps) {
-  const [poll, setPoll] = React.useState(initialPoll);
+export function PollContent({ discussion }: PollContentProps) {
+  if (!discussion.poll) {
+    return null;
+  }
+
+  const [poll, setPoll] = React.useState(discussion.poll);
+  const initialPoll = discussion.poll;
+
+  // 检查用户是否有投票权限
+  const hasVotePermission = React.useMemo(() => {
+    if (
+      !discussion.board?.poll_role ||
+      discussion.board.poll_role.length === 0
+    ) {
+      return true;
+    }
+
+    if (!discussion.board.board_user) {
+      return false;
+    }
+
+    return discussion.board.poll_role.includes(
+      discussion.board.board_user.user_role
+    );
+  }, [discussion.board?.poll_role, discussion.board?.board_user]);
+
   const [selectedOptions, setSelectedOptions] = React.useState<number[]>(
     initialPoll.user_voted?.options || []
   );
@@ -42,12 +69,34 @@ export function PollContent({ poll: initialPoll, onVote }: PollContentProps) {
     }
   };
 
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
   const handleSubmitVote = async () => {
-    if (selectedOptions.length > 0 && onVote) {
-      const updatedPoll = await onVote(selectedOptions);
-      if (updatedPoll) {
-        setPoll(updatedPoll);
-        setIsVoted(true);
+    if (selectedOptions.length > 0) {
+      try {
+        const response = await api.discussions.votePoll({
+          slug: poll.discussion_slug,
+          poll_id: poll.id,
+          options: selectedOptions,
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["discussion", poll.discussion_slug],
+        });
+        toast({
+          title: "投票成功",
+          variant: "default",
+        });
+        if (response) {
+          setPoll(response);
+          setIsVoted(true);
+        }
+      } catch (error) {
+        toast({
+          title: "投票失败",
+          description: "请稍后重试",
+          variant: "destructive",
+        });
       }
     }
   };
@@ -123,7 +172,9 @@ export function PollContent({ poll: initialPoll, onVote }: PollContentProps) {
                     id={`option-${option.id}`}
                     checked={selectedOptions.includes(option.id)}
                     onCheckedChange={() => handleVoteChange(option.id)}
-                    disabled={isEnded || !isStarted || isVoted}
+                    disabled={
+                      isEnded || !isStarted || isVoted || !hasVotePermission
+                    }
                   />
                   <label
                     htmlFor={`option-${option.id}`}
@@ -142,7 +193,7 @@ export function PollContent({ poll: initialPoll, onVote }: PollContentProps) {
           <RadioGroup
             value={selectedOptions[0]?.toString()}
             onValueChange={(value) => handleVoteChange(parseInt(value))}
-            disabled={isEnded || !isStarted || isVoted}
+            disabled={isEnded || !isStarted || isVoted || !hasVotePermission}
           >
             {poll.options.map((option) => {
               const percentage =
@@ -184,7 +235,11 @@ export function PollContent({ poll: initialPoll, onVote }: PollContentProps) {
           className="w-auto"
           onClick={handleSubmitVote}
           disabled={
-            selectedOptions.length === 0 || isEnded || !isStarted || isVoted
+            selectedOptions.length === 0 ||
+            isEnded ||
+            !isStarted ||
+            isVoted ||
+            !hasVotePermission
           }
         >
           {isEnded ? "结束投票" : isVoted ? "已投票" : "确认投票"}
