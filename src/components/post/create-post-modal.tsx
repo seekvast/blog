@@ -26,6 +26,7 @@ import {
   discussionSchema,
   pollSchema,
 } from "@/validations/discussion";
+import { Board } from "@/types/board";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const initDiscussionForm: DiscussionForm = {
@@ -87,6 +88,7 @@ export default function CreatePostModal() {
 
   const [discussionForm, setDiscussionForm] =
     React.useState(initDiscussionForm);
+  const [selectedBoard, setSelectedBoard] = React.useState<Board | null>(null);
   const {
     content,
     setContent,
@@ -141,6 +143,13 @@ export default function CreatePostModal() {
       setBoardPreselect(undefined);
     }
   }, [isVisible, openFrom, boardPreselect, setBoardPreselect]);
+
+  // 当 board_id 为 0 或未定义时，重置 selectedBoard
+  React.useEffect(() => {
+    if (!discussionForm.board_id) {
+      setSelectedBoard(null);
+    }
+  }, [discussionForm.board_id]);
 
   React.useEffect(() => {
     if (isVisible && openFrom === "edit" && discussion) {
@@ -541,12 +550,15 @@ export default function CreatePostModal() {
                   <BoardSelect
                     ref={boardSelectRef}
                     value={discussionForm.board_id}
-                    onChange={(value) =>
+                    onChange={(value, board) => {
                       setDiscussionForm((prev) => ({
                         ...prev,
                         board_id: value,
-                      }))
-                    }
+                      }));
+                      if (board) {
+                        setSelectedBoard(board);
+                      }
+                    }}
                   />
                 </div>
               </div>
@@ -568,7 +580,15 @@ export default function CreatePostModal() {
                       dispatchPoll({ type: "EDIT" });
                     }
                   }}
-                  disabled={!!pollState.data || pollState.isEditing}
+                  disabled={
+                    !!pollState.data || 
+                    pollState.isEditing || 
+                    !selectedBoard || 
+                    !selectedBoard.board_user || 
+                    !selectedBoard.poll_role || 
+                    !selectedBoard.poll_role.includes(selectedBoard.board_user.user_role)
+                  }
+                  title={!selectedBoard || !selectedBoard.board_user || !selectedBoard.poll_role || !selectedBoard.poll_role.includes(selectedBoard.board_user.user_role) ? "您没有在当前看板发起投票的权限" : ""}
                 >
                   投票
                 </Button>

@@ -24,23 +24,7 @@ export function PollContent({ discussion }: PollContentProps) {
   const [poll, setPoll] = React.useState(discussion.poll);
   const initialPoll = discussion.poll;
 
-  // 检查用户是否有投票权限
-  const hasVotePermission = React.useMemo(() => {
-    if (
-      !discussion.board?.poll_role ||
-      discussion.board.poll_role.length === 0
-    ) {
-      return true;
-    }
-
-    if (!discussion.board.board_user) {
-      return false;
-    }
-
-    return discussion.board.poll_role.includes(
-      discussion.board.board_user.user_role
-    );
-  }, [discussion.board?.poll_role, discussion.board?.board_user]);
+  const hasVotePermission = true;
 
   const [selectedOptions, setSelectedOptions] = React.useState<number[]>(
     initialPoll.user_voted?.options || []

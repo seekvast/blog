@@ -17,7 +17,7 @@ import { BoardVisibility } from "@/constants/board-visibility";
 
 interface BoardSelectProps {
   value?: number;
-  onChange?: (value: number) => void;
+  onChange?: (value: number, board?: Board) => void;
   ref?: React.ForwardedRef<{ reset: () => void }>;
 }
 
@@ -115,7 +115,11 @@ export const BoardSelect = React.forwardRef<
   return (
     <Select
       value={value?.toString()}
-      onValueChange={(value) => onChange?.(parseInt(value))}
+      onValueChange={(value) => {
+        const boardId = parseInt(value);
+        const selectedBoard = boards.find(board => board.id === boardId);
+        onChange?.(boardId, selectedBoard);
+      }}
       onOpenChange={setIsOpen}
     >
       <SelectTrigger className="w-full py-2">
