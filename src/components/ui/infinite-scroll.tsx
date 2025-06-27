@@ -13,6 +13,7 @@ interface InfiniteScrollProps {
   loadingComponent?: React.ReactNode;
   endMessage?: React.ReactNode;
   rootMargin?: string;
+  waitForScroll?: boolean;
 }
 
 export function InfiniteScroll({
@@ -28,11 +29,24 @@ export function InfiniteScroll({
   ),
   endMessage = <div className="flex justify-center"></div>,
   rootMargin = "100px",
+  waitForScroll = false,
 }: InfiniteScrollProps) {
+  const [hasScrolled, setHasScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!waitForScroll) {
+      setHasScrolled(true);
+      return;
+    }
+    const handleScroll = () => setHasScrolled(true);
+    window.addEventListener("scroll", handleScroll, { once: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [waitForScroll]);
   const loadingRef = useRef(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastItemRef = useCallback(
     (node: HTMLDivElement) => {
+      if (waitForScroll && !hasScrolled) return;
       if (loading) return;
       if (observerRef.current) observerRef.current.disconnect();
 
@@ -50,7 +64,7 @@ export function InfiniteScroll({
 
       if (node) observerRef.current.observe(node);
     },
-    [loading, hasMore, onLoadMore, rootMargin]
+    [loading, hasMore, onLoadMore, rootMargin, waitForScroll, hasScrolled]
   );
 
   useEffect(() => {
@@ -60,7 +74,6 @@ export function InfiniteScroll({
   return (
     <div className={className}>
       {children}
-      {/* 添加一个专门的观察元素，而不是依赖于克隆最后一个子元素 */}
       {hasMore && (
         <div ref={lastItemRef} style={{ height: "1px", margin: 0 }} />
       )}

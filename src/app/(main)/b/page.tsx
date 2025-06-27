@@ -60,7 +60,7 @@ export default function BoardsPage() {
     queryFn: async ({ pageParam = 1 }) => {
       return api.boards.list({
         page: pageParam,
-        per_page: 10,
+        per_page: 20,
         q: activeTab,
         ...(categoryFilter && { category_id: categoryFilter }),
       });
@@ -75,7 +75,6 @@ export default function BoardsPage() {
 
   useEffect(() => {
     if (data) {
-      // 合并所有页面的数据
       const allBoards = data.pages.flatMap((page) => page.items);
       setBoards(allBoards);
     }
@@ -119,6 +118,17 @@ export default function BoardsPage() {
     [blockBoard]
   );
 
+
+  const handleTabChange = useCallback(
+    (tabKey: "recommended" | "subscribed") => {
+      queryClient.removeQueries({ queryKey: ["boards", tabKey] });
+      setActiveTab(tabKey);
+      setBoards([]);
+      window.scrollTo(0, 0);
+    },
+    [queryClient]
+  );
+
   const handleBlockBoard = (boardId: number) => {
     debouncedBlockBoard(boardId);
   };
@@ -146,11 +156,9 @@ export default function BoardsPage() {
                   `}
                   onClick={() => {
                     if (tab.key === "subscribed") {
-                      requireAuth(() => {
-                        setActiveTab("subscribed");
-                      });
+                      requireAuth(() => handleTabChange("subscribed"));
                     } else {
-                      setActiveTab("recommended");
+                      handleTabChange("recommended");
                     }
                   }}
                 >
@@ -230,6 +238,7 @@ export default function BoardsPage() {
             loading={isFetchingNextPage}
             hasMore={hasNextPage}
             onLoadMore={handleLoadMore}
+            rootMargin="-10px"
             className="divide-y"
           >
             {boards.map((board) => (
