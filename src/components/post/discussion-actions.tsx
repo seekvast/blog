@@ -62,7 +62,6 @@ export function DiscussionActions({
   >(null);
   const { user } = useAuth();
   const isAuthor = user?.hashid === discussion.user.hashid;
-  const isManager = user?.hashid === discussion.board.manager?.user_hashid;
   const { toast } = useToast();
   const queryClient = useQueryClient();
 

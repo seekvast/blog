@@ -11,7 +11,6 @@ import { BlocklistSettings } from "./components/blocklist-settings";
 import { useDevice } from "@/hooks/use-device";
 
 import { Board as BoardType } from "@/types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SettingMenus, SettingTab } from "./components/setting-menus";
 
 import { Button } from "@/components/ui/button";
@@ -144,7 +143,7 @@ export function BoardSettingsForm({
 
   // 桌面端布局
   return (
-    <div className="flex gap-8 pb-10">
+    <div className="flex gap-8">
       <div className="w-[220px] flex-shrink-0">
         <SettingMenus
           board={initBoard}
@@ -152,25 +151,7 @@ export function BoardSettingsForm({
           onTabChange={handleTabClick}
         />
       </div>
-      <div className="flex-1 min-w-0">
-        {/* 顶部用户信息 */}
-        <div className="flex pb-4 border-b">
-          <div className="flex items-start gap-4">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={initBoard.avatar} alt={initBoard.name} />
-              <AvatarFallback>{initBoard.name[0].toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <div>
-              <h2 className="text-xl font-semibold">{initBoard.name}</h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                {initBoard.desc}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="pt-4">{renderContent()}</div>
-      </div>
+      <div className="flex-1 min-w-0">{renderContent()}</div>
     </div>
   );
 }

@@ -92,7 +92,7 @@ export function FormFields({
                       }}
                     />
                   </FormControl>
-                  <FormLabel className="!mt-0">管理</FormLabel>
+                  <FormLabel className="!mt-0">创建者</FormLabel>
                 </FormItem>
               )}
             />
@@ -188,7 +188,7 @@ export function FormFields({
               field.onChange(0);
             }
           }, [form.watch("visibility")]);
-          
+
           return (
             <FormItem>
               <FormLabel>看板加入方式</FormLabel>

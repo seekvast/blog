@@ -78,8 +78,7 @@ const menuItems: MenuItem[] = [
   {
     id: "blocklist",
     label: "封鎖名單",
-    description:
-      "管理封鎖名單，限制特定用戶或 IP 地址存取看板的功能。",
+    description: "管理封鎖名單，限制特定用戶或 IP 地址存取看板的功能。",
     group: "board",
   },
 ];
@@ -133,7 +132,8 @@ export function SettingMenus({
       <div>
         <div className="flex items-center gap-2 pb-4">
           <Settings className="w-4 h-4" />
-          <span className="text-sm font-medium">全域設定</span>
+          <h3 className="text-lg font-bold">全域設定</h3>
+          {/* <span className="text-sm font-medium">全域設定</span> */}
         </div>
         <nav className="space-y-1">
           {menuItems
@@ -144,7 +144,7 @@ export function SettingMenus({
                 href="#"
                 onClick={(e) => handleTabClick(e, item.id)}
                 className={cn(
-                  "flex items-center p-2 text-sm rounded-lg transition-colors",
+                  "flex items-center p-2 rounded-lg transition-colors",
                   activeTab === item.id
                     ? "bg-blue-subtle text-primary font-medium"
                     : "text-muted-foreground hover:bg-blue-subtle"
@@ -160,7 +160,9 @@ export function SettingMenus({
       <div>
         <div className="flex items-center gap-2 pb-4">
           <Users2 className="w-4 h-4" />
-          <span className="text-sm font-medium">看板管理</span>
+          <h3 className="text-lg font-bold">看板管理</h3>
+
+          {/* <span className="text-sm font-medium">看板管理</span> */}
         </div>
         <nav className="space-y-1">
           {menuItems
@@ -171,7 +173,7 @@ export function SettingMenus({
                 href="#"
                 onClick={(e) => handleTabClick(e, item.id)}
                 className={cn(
-                  "flex items-center p-2 text-sm rounded-lg transition-colors",
+                  "flex items-center p-2 rounded-lg transition-colors",
                   activeTab === item.id
                     ? "bg-blue-subtle text-primary font-medium"
                     : "text-muted-foreground hover:bg-blue-subtle"
