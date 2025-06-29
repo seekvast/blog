@@ -7,7 +7,7 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { formatDate, fromNow } from "@/lib/dayjs";
 import type { Discussion, Pagination } from "@/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { BoardUserRole } from "@/constants/board-user-role";
+import { UserRoleBadge } from "@/components/board/user-role-badge";
 import { Badge } from "@/components/ui/badge";
 import {
   ArrowUp,
@@ -612,12 +612,10 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                     </Link>
                     <div className="flex items-center space-x-2 min-w-0 text-muted-foreground">
                       <span>@{currentDiscussion.user.nickname}</span>
-                      {currentDiscussion.board_user &&
-                        currentDiscussion.board_user.role < 3 && (
-                          <Badge variant="secondary" className="text-primary">
-                            {BoardUserRole[currentDiscussion.board_user.role]}
-                          </Badge>
-                        )}
+                      <UserRoleBadge 
+                        boardUser={currentDiscussion.board_user} 
+                        board={currentDiscussion.board} 
+                      />
                     </div>
                   </div>
 

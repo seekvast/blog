@@ -18,6 +18,7 @@ import { ChangeRoleDialog } from "@/components/board/change-role-dialog";
 import { ModerationAction } from "@/components/board/moderation-action";
 import { ModerationProcessSchema } from "@/validations/moderation";
 import { BoardUserRole } from "@/constants/board-user-role";
+import { UserRoleBadge } from "@/components/board/user-role-badge";
 import { useAuth } from "@/components/providers/auth-provider";
 
 interface SettingsProps {
@@ -176,18 +177,10 @@ export function MembersSettings({ board }: SettingsProps) {
                 <div className="flex items-center gap-1 font-medium">
                   {member.username}
                   {/* 身份组徽章 */}
-                  {member.user_role !== undefined && member.user_role !== 0 && member.user_role !== 3 && (
-                    <Badge
-                      className={cn(
-                        "ml-1",
-                        member.user_role === 1 && "bg-blue-500/10 text-blue-600",
-                        member.user_role === 2 && "bg-amber-400/20 text-amber-600"
-                      )}
-                      variant="secondary"
-                    >
-                      {member.user_role === 1 ? "创建者" : member.user_role === 2 ? "管理员" : null}
-                    </Badge>
-                  )}
+                  <UserRoleBadge 
+                    boardUser={{ user_role: member.user_role } as any} 
+                    board={board}
+                  />
                 </div>
                 <div className="text-sm text-muted-foreground">
                   @{member.nickname}

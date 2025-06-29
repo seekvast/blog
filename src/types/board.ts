@@ -31,14 +31,7 @@ export interface Board {
   is_joined: number;
   history: BoardHistory;
   scheduled_deleted_at: string | null;
-  board_user: {
-    id: number;
-    user_role: number;
-    posts_count: number;
-    replies_count: number;
-    status: number;
-    muted_until: string | null;
-  };
+  board_user: BoardUser;
   manager: BoardManager;
   category: {
     id: number;
@@ -69,7 +62,11 @@ export interface BoardUser {
   id: number;
   board_id: number;
   user_hashid: string;
-  role: number;
+  user_role: number;
+  posts_count: number;
+  replies_count: number;
+  status: number;
+  muted_until: string | null;
   created_at: string;
   updated_at: string;
   user?: User;
