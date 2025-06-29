@@ -30,6 +30,7 @@ export interface Board {
   users_count: number;
   is_joined: number;
   history: BoardHistory;
+  scheduled_deleted_at: string | null;
   board_user: {
     id: number;
     user_role: number;

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { api } from "@/lib/api";
@@ -14,7 +14,8 @@ import { FormFields } from "./form-fields";
 import { AvatarUpload } from "@/components/common/avatar-upload";
 import { AttachmentType } from "@/constants/attachment-type";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
+import { useRouter } from "next/navigation";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 interface BaseSettingsProps {
   board: Board;
   onSuccess?: () => void;
@@ -24,6 +25,8 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
   const { isMobile } = useDevice();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const { data: categories = [], error: categoriesError } = useQuery({
     queryKey: ["categories"],
@@ -58,15 +61,12 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
     },
   });
 
-  const { mutate, isPending } = useMutation({
+  const { mutate, isPending: isUpdatePending } = useMutation({
     mutationFn: (values: BoardSettingsFormValues) => {
       const updateData = { ...values, id: board.id };
       return api.boards.update(updateData);
     },
     onSuccess: () => {
-      toast({
-        description: "设置已保存",
-      });
       onSuccess?.();
       queryClient.invalidateQueries({ queryKey: ["board", board.slug] });
     },
@@ -79,8 +79,60 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
     },
   });
 
+  const { mutate: deleteBoard, isPending: isDeletePending } = useMutation({
+    mutationFn: () => api.boards.delete(board.id),
+    onSuccess: () => {
+      setShowDeleteDialog(false);
+
+      if (board.users_count <= 2000) {
+        setTimeout(() => {
+          router.push("/b");
+        }, 2000);
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["board", board.slug] });
+        onSuccess?.();
+      }
+    },
+    onError: () => {
+      toast({
+        variant: "destructive",
+        title: "删除失败",
+        description: "删除看板失败，请重试",
+      });
+      setShowDeleteDialog(false);
+    },
+  });
+
   const onSubmit = (values: BoardSettingsFormValues) => {
     mutate(values);
+  };
+
+  const handleDelete = () => {
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
+    deleteBoard();
+  };
+
+  const { mutate: revokeDelete, isPending: isRevokeDeletePending } =
+    useMutation({
+      mutationFn: () => api.boards.revokeDelete(board.id),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["board", board.slug] });
+        onSuccess?.();
+      },
+      onError: () => {
+        toast({
+          variant: "destructive",
+          title: "撤回失败",
+          description: "撤回删除请求失败，请重试",
+        });
+      },
+    });
+
+  const handleRevoke = () => {
+    revokeDelete();
   };
 
   return (
@@ -126,16 +178,52 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
 
           {/* 提交按钮 */}
           <div className="flex justify-start space-x-4">
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "保存中..." : "保存设置"}
+            <Button type="submit" size="sm" disabled={isUpdatePending}>
+              {isUpdatePending ? "保存中..." : "保存设置"}
             </Button>
 
-            <Button variant="destructive" type="button">
-              删除看板
-            </Button>
+            {board.scheduled_deleted_at &&
+            new Date(board.scheduled_deleted_at) > new Date() ? (
+              <Button
+                size="sm"
+                variant="secondary"
+                type="button"
+                onClick={handleRevoke}
+                disabled={isUpdatePending || isRevokeDeletePending}
+              >
+                {isRevokeDeletePending ? "处理中..." : "撤回删除"}
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                variant="destructive"
+                type="button"
+                onClick={handleDelete}
+                disabled={isUpdatePending || isDeletePending}
+              >
+                删除看板
+              </Button>
+            )}
           </div>
         </form>
       </Form>
+
+      {/* 删除确认对话框 */}
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title="删除看板"
+        description={
+          board.users_count <= 2000
+            ? "执行此操作后，你将无法恢复看板"
+            : "执行此操作后，你有15天的反悔期，这期间你可以随时撤回删除请求"
+        }
+        confirmText="删除看板"
+        cancelText="取消"
+        onConfirm={handleConfirmDelete}
+        variant="destructive"
+        loading={isDeletePending}
+      />
     </div>
   );
 }

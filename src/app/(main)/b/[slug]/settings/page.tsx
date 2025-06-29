@@ -28,6 +28,7 @@ export default async function BoardSettingsPage({ params }: PageProps) {
   if (!board) {
     notFound();
   }
+
   const acceptRole = [BoardUserRole.CREATOR, BoardUserRole.MODERATOR];
   if (
     !board.board_user ||
