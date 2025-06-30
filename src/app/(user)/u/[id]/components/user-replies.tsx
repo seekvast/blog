@@ -19,7 +19,6 @@ interface UserRepliesProps {
 }
 
 export function UserReplies({ hashid }: UserRepliesProps) {
-  console.log(hashid, "hhhhhhhhhhhhhh");
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery<
       Pagination<Post>,

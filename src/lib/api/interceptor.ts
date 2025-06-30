@@ -77,7 +77,7 @@ export async function runResponseDataInterceptors(
   return interceptedData;
 }
 
-// 添加默认拦截器
+// 默认拦截器
 addRequestInterceptor(async (options) => {
   // 处理查询参数
   if (options.params) {
@@ -88,20 +88,27 @@ addRequestInterceptor(async (options) => {
         url.searchParams.append(key, String(value));
       }
     });
-    options.params = undefined; // Clear params after processing
+    options.params = undefined;
   }
   return options;
 });
 
-// 添加响应拦截器
+// 响应拦截器
 addResponseInterceptor(async (response) => {
-  // 可以在这里处理通用响应逻辑
+  if (response.headers.get("X-User-Data-Changed") === "true") {
+    if (typeof window === "undefined") {
+      return response;
+    }
+    const { refreshUserData } = await import("@/lib/auth");
+    refreshUserData().catch((error) => {
+      console.error("刷新用户数据失败:", error);
+    });
+  }
   return response;
 });
 
-// 添加响应数据拦截器
 addResponseDataInterceptor(async (data) => {
-  // 可以在这里处理通用数据转换
+  // 通用数据转换
   return data;
 });
 

@@ -30,13 +30,17 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Please enter your email and password");
         }
-
-        const data = await api.users.login({
-          email: credentials.email,
-          password: credentials.password,
-          turnstile_token: credentials.turnstile_token ?? "",
-          auth_token: credentials.auth_token ?? "",
-        });
+        let data: ApiUser;
+        if (credentials.auth_token) {
+          data = await api.users.refreshToken();
+        } else {
+          data = await api.users.login({
+            email: credentials.email,
+            password: credentials.password,
+            turnstile_token: credentials.turnstile_token ?? "",
+            auth_token: credentials.auth_token ?? "",
+          });
+        }
         return {
           id: data.hashid,
           hashid: data.hashid,
@@ -130,7 +134,7 @@ export async function getSession() {
   }
 }
 
-// 创建一个带有认证token的fetch函数
+// 带有认证token的fetch函数
 export async function authenticatedFetch(
   url: string,
   options: RequestInit = {}
@@ -173,4 +177,56 @@ export async function authMiddleware(request: Request) {
   }
 
   return null;
+}
+
+// 防抖标志
+let isRefreshing = false;
+let refreshTimeout: NodeJS.Timeout | null = null;
+
+// 刷新用户数据
+export async function refreshUserData() {
+  try {
+    if (typeof window === "undefined") {
+      console.log('服务端环境，跳过刷新用户数据');
+      return;
+    }
+
+    if (isRefreshing) {
+      return;
+    }
+
+    isRefreshing = true;
+    if (refreshTimeout) {
+      clearTimeout(refreshTimeout);
+    }
+
+    refreshTimeout = setTimeout(() => {
+      isRefreshing = false;
+      refreshTimeout = null;
+    }, 5000);
+
+    const { signIn } = await import("next-auth/react");
+
+    const currentSession = await getSession();
+    if (!currentSession?.user) {
+      console.log('用户未登录，无需刷新数据');
+      isRefreshing = false;
+      return;
+    }
+    try {
+      await signIn("credentials", {
+        redirect: false,
+        email: currentSession.user.email,
+        password: "dummy-password",
+        auth_token: currentSession.user.token,
+      });
+    } catch (signInError) {
+      throw signInError;
+    } finally {
+      isRefreshing = false;
+    }
+  } catch (error) {
+    isRefreshing = false;
+    throw error;
+  }
 }
