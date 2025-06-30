@@ -42,11 +42,14 @@ export function BoardActionButton({
   onBlockSuccess,
 }: BoardActionButtonProps) {
   const { requireAuth } = useRequireAuth();
-  const { handleBlock, handleUnsubscribe, handleReport, setReportDialogOpen } =
-    useBoardActions();
+  const { 
+    handleBlock, 
+    handleUnsubscribe, 
+    handleReport, 
+    handleSubscribe,
+  } = useBoardActions();
 
   const [subscribeBoardOpen, setSubscribeBoardOpen] = useState(false);
-  const { toast } = useToast();
 
   // 渲染对话框
   const renderSubscribeDialog = () => {
@@ -70,22 +73,8 @@ export function BoardActionButton({
       ) {
         setSubscribeBoardOpen(true);
       } else {
-        api.boards
-          .subscribe({
-            board_id: board.id,
-            answer: "",
-          })
-          .then(() => {
-            onSubscribeSuccess?.();
-          })
-          .catch((error) => {
-            toast({
-              variant: "destructive",
-              title: "加入失败",
-              description:
-                error instanceof Error ? error.message : "加入失败，请重试",
-            });
-          });
+        handleSubscribe(board.id);
+        onSubscribeSuccess?.();
       }
     });
   };
