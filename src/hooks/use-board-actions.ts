@@ -4,13 +4,14 @@ import { useState } from "react";
 import { Board } from "@/types";
 import { api } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@/components/ui/use-toast";
+import { toast, useToast } from "@/components/ui/use-toast";
 
 export function useBoardActions() {
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  // 加入看板
+  // 加入看板（不需要回答问题）
   const { mutate: subscribeAction } = useMutation({
     mutationFn: (boardId: number) =>
       api.boards.subscribe({ board_id: boardId }),
@@ -76,6 +77,27 @@ export function useBoardActions() {
   const handleReport = () => {
     setReportDialogOpen(true);
   };
+  
+  // 加入看板（需要回答问题）
+  const { mutate: subscribeWithAnswer, isPending: isSubscribing } = useMutation({
+    mutationFn: ({ boardId, answer }: { boardId: number; answer: string }) =>
+      api.boards.subscribe({
+        board_id: boardId,
+        answer: answer.trim(),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["boards"] });
+      queryClient.invalidateQueries({ queryKey: ["board_detail"] });
+      queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "错误",
+        description: error instanceof Error ? error.message : "加入看板失败",
+        variant: "destructive",
+      });
+    },
+  });
 
   return {
     reportDialogOpen,
@@ -84,5 +106,7 @@ export function useBoardActions() {
     handleBlock,
     handleUnsubscribe,
     handleReport,
+    subscribeWithAnswer,
+    isSubscribing,
   };
 }

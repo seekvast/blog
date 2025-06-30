@@ -16,13 +16,11 @@ import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { BoardActionButton } from "@/components/board/board-action-button";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useBoardActions } from "@/hooks/use-board-actions";
-import { BoardApprovalMode } from "@/constants/board-approval-mode";
 import { useQuery } from "@tanstack/react-query";
 import { DiscussionControls } from "@/components/discussion/discussion-controls";
 import { SortBy } from "@/types/display-preferences";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
-import { SubscribeBoardDialog } from "@/components/board/subscribe-board-dialog";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -49,8 +47,6 @@ function BoardContent() {
   const queryClient = useQueryClient();
   const params = useParams();
   const searchParams = useSearchParams();
-  const [loading, setLoading] = useState(true);
-  const [board, setBoard] = useState<Board | null>(null);
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [discussionsLoading, setDiscussionsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,7 +56,9 @@ function BoardContent() {
   const [error, setError] = useState<string | null>(null);
   const observerRef = useRef<IntersectionObserver>();
   const [hasMore, setHasMore] = useState(true);
-  const displayMode = useDiscussionDisplayStore((state) => state.getDisplayMode());
+  const displayMode = useDiscussionDisplayStore((state) =>
+    state.getDisplayMode()
+  );
   const sortBy = useDiscussionDisplayStore((state) => state.getSortBy());
   const [activeTab, setActiveTab] = useState<"posts" | "rules" | "children">(
     "posts"
@@ -70,12 +68,7 @@ function BoardContent() {
   const { requireAuth } = useRequireAuth();
   const { handleSubscribe } = useBoardActions();
 
-  const { mutate: blockBoard } = useMutation({
-    mutationFn: (boardId: number) => api.boards.block({ board_id: boardId }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["boards"] });
-    },
-  });
+  // 已移除重复的 blockBoard mutation，改用 useBoardActions 中的 handleBlock
 
   const handleLoadMore = useCallback(() => {
     if (!discussionsLoading && hasMore) {
@@ -90,12 +83,16 @@ function BoardContent() {
     fetchDiscussions();
   };
 
-  const fetchBoardDetail = async () => {
-    try {
-      setLoading(true);
+  const {
+    data: board,
+    isLoading: loading,
+    error: boardError,
+  } = useQuery({
+    queryKey: ["board_detail", params?.slug],
+    queryFn: async () => {
       const data = await api.boards.get({ slug: params?.slug });
-      setBoard(data);
 
+      // 处理 URL 参数逻辑
       const urlParams = new URLSearchParams(window.location.search);
       if (!urlParams.has("bid")) {
         urlParams.set("bid", data.id.toString());
@@ -106,10 +103,12 @@ function BoardContent() {
         const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
         window.history.replaceState({}, "", newUrl);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+
+      return data;
+    },
+    enabled: !!params?.slug,
+    staleTime: 5 * 60 * 1000, // 数据保鲜时间，5分钟
+  });
 
   const fetchBoardChildren = async () => {
     try {
@@ -151,11 +150,12 @@ function BoardContent() {
     }
   };
 
+  // 如果有 boardError，设置错误信息
   useEffect(() => {
-    if (params?.slug) {
-      fetchBoardDetail();
+    if (boardError) {
+      console.error("获取看板信息失败:", boardError);
     }
-  }, [params?.slug]);
+  }, [boardError]);
 
   useEffect(() => {
     if (board?.id) {
@@ -260,8 +260,8 @@ function BoardContent() {
     queryClient.invalidateQueries({ queryKey: ["boards"] });
   };
 
-  const handleBlockBoard = (boardId: number) => {
-    blockBoard(boardId);
+  // 拉黑看板成功后的回调
+  const handleBlockSuccess = () => {
     router.back();
   };
   return (
@@ -290,44 +290,10 @@ function BoardContent() {
                 <div className="flex items-center space-x-4">
                   <BoardActionButton
                     board={board}
-                    onBlock={handleBlockBoard}
                     setReportToKaterOpen={setReportToKaterOpen}
                     onSubscribeSuccess={handleSubscribeSuccess}
+                    onBlockSuccess={handleBlockSuccess}
                   />
-                  {/* 如果是创建者或管理员，则显示设置按钮 */}
-                  {/* {board.board_user &&
-                    (board.board_user?.user_role === BoardUserRole.CREATOR ||
-                      board.board_user?.user_role ===
-                        BoardUserRole.MODERATOR) && (
-                      <>
-                        <Link href={`/b/${board.slug}/settings`}>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="space-x-1 text-primary rounded-full"
-                          >
-                            设定
-                          </Button>
-                        </Link>
-                      </>
-                    )}
-                  {board.board_user ? (
-                    <Button
-                      size="sm"
-                      className="space-x-1 rounded-full"
-                      variant="outline"
-                    >
-                      已加入
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      className="space-x-1 rounded-full"
-                      onClick={handleJoinBoard}
-                    >
-                      加入
-                    </Button>
-                  )} */}
                 </div>
               </div>
               <div className="mt-1 text-sm text-muted-foreground">
@@ -552,19 +518,6 @@ function BoardContent() {
           </div>
         </div>
       </div>
-
-      {/* 加入看板对话框 */}
-      {board && (
-        <SubscribeBoardDialog
-          open={subscribeBoardOpen}
-          onOpenChange={setSubscribeBoardOpen}
-          boardId={board.id}
-          question={board.question}
-          onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
-          }}
-        />
-      )}
     </div>
   );
 }

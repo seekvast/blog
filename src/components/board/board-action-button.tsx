@@ -30,16 +30,16 @@ import { BoardApprovalMode } from "@/constants/board-approval-mode";
 
 interface BoardActionButtonProps {
   board: Board;
-  onBlock?: (boardId: number) => void;
   setReportToKaterOpen?: (open: boolean) => void;
   onSubscribeSuccess?: () => void;
+  onBlockSuccess?: () => void;
 }
 
 export function BoardActionButton({
   board,
-  onBlock,
   setReportToKaterOpen,
   onSubscribeSuccess,
+  onBlockSuccess,
 }: BoardActionButtonProps) {
   const { requireAuth } = useRequireAuth();
   const { handleBlock, handleUnsubscribe, handleReport, setReportDialogOpen } =
@@ -92,11 +92,8 @@ export function BoardActionButton({
 
   const handleBlockBoard = () => {
     requireAuth(() => {
-      if (onBlock) {
-        onBlock(board.id);
-      } else {
-        handleBlock(board.id);
-      }
+      handleBlock(board.id);
+      onBlockSuccess?.();
     });
   };
 
@@ -236,7 +233,7 @@ interface SubscribeBoardDialogProps {
   onSuccess?: () => void;
 }
 
-function SubscribeBoardDialog({
+export function SubscribeBoardDialog({
   open,
   onOpenChange,
   boardId,
@@ -244,8 +241,8 @@ function SubscribeBoardDialog({
   onSuccess,
 }: SubscribeBoardDialogProps) {
   const [answer, setAnswer] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { subscribeWithAnswer, isSubscribing } = useBoardActions();
 
   const handleSubmit = async () => {
     if (!answer.trim()) {
@@ -256,24 +253,15 @@ function SubscribeBoardDialog({
       return;
     }
 
-    try {
-      setIsLoading(true);
-      await api.boards.subscribe({
-        board_id: boardId,
-        answer: answer.trim(),
-      });
-      onOpenChange(false);
-      onSuccess?.();
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "加入失败",
-        description:
-          error instanceof Error ? error.message : "加入失败，请重试",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    subscribeWithAnswer(
+      { boardId, answer: answer.trim() },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          onSuccess?.();
+        }
+      }
+    );
   };
 
   return (
@@ -292,7 +280,7 @@ function SubscribeBoardDialog({
           <Button
             className="w-full"
             onClick={handleSubmit}
-            disabled={isLoading}
+            disabled={isSubscribing}
           >
             提交
           </Button>

@@ -89,26 +89,16 @@ export default function BoardsPage() {
     }
   };
 
-  // 订阅成功后刷新数据
-  const handleSubscribeSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ["boards"] });
-  };
-
-  const { mutate: blockBoard } = useMutation({
-    mutationFn: (boardId: number) => api.boards.block({ board_id: boardId }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["boards"] });
-    },
-  });
+  // 使用 useBoardActions 中的 handleBlock 方法替代原来的 blockBoard
+  const { handleBlock } = useBoardActions();
 
   const debouncedBlockBoard = useMemo(
     () =>
       debounce((boardId: number) => {
-        blockBoard(boardId);
+        handleBlock(boardId);
       }, 300),
-    [blockBoard]
+    [handleBlock]
   );
-
 
   const handleTabChange = useCallback(
     (tabKey: "recommended" | "subscribed") => {
@@ -234,11 +224,7 @@ export default function BoardsPage() {
           >
             {boards.map((board) => (
               <div className="lg:px-6" key={board.id}>
-                <BoardItem
-                  board={board}
-                  onBlock={handleBlockBoard}
-                  onSubscribeSuccess={handleSubscribeSuccess}
-                />
+                <BoardItem board={board} />
               </div>
             ))}
           </InfiniteScroll>
