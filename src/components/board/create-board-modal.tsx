@@ -244,10 +244,8 @@ export function CreateBoardModal({
                 <FormItem className="space-y-2">
                   <FormLabel>看板简介</FormLabel>
                   <FormControl>
-                    <Textarea
+                    <Input
                       placeholder="请输入看板简介（最多500个字符）"
-                      className="resize-none"
-                      rows={4}
                       {...field}
                       value={field.value || ""}
                     />
