@@ -41,11 +41,6 @@ export default function EmailConfirmPage() {
       if (!token) {
         setStatus("error");
         setErrorMessage("无效的验证链接");
-        toast({
-          variant: "destructive",
-          title: "验证失败",
-          description: "无效的验证链接",
-        });
         throw new Error("无效的验证链接");
       }
 
@@ -61,10 +56,6 @@ export default function EmailConfirmPage() {
         }
 
         setStatus("success");
-        toast({
-          title: "验证成功",
-          description: "您的邮箱已成功验证",
-        });
 
         if (session?.user) {
           setTimeout(() => {
@@ -76,11 +67,6 @@ export default function EmailConfirmPage() {
       } catch (error) {
         setStatus("error");
         setErrorMessage("此验证链接已失效，可能已被使用或超过 24 小时有效期。");
-        toast({
-          variant: "destructive",
-          title: "验证失败",
-          description: "验证链接已失效",
-        });
         throw error;
       }
     },

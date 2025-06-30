@@ -26,7 +26,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useMutation } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
-import { SubscribeBoardDialog } from "@/components/board/subscribe-board-dialog";
+import { BoardActionButton } from "@/components/board/board-action-button";
 import { BoardApprovalMode } from "@/constants/board-approval-mode";
 import { Board } from "@/types/board";
 import { useRequireAuth } from "@/hooks/use-require-auth";
@@ -139,13 +139,9 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
     });
   };
 
-  const handleSubscribeBoard = (board: Board) => {
-    if (board.approval_mode === BoardApprovalMode.APPROVAL) {
-      setSelectedBoard(board);
-      setSubscribeBoardOpen(true);
-    } else {
-      handleSubscribe(board.id);
-    }   
+  const handleSubscribeSuccess = () => {
+    // 订阅成功后刷新数据
+    queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
   };
 
   return (
@@ -252,33 +248,18 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                     </div>
                   </div>
                 </div>
-                <Button
-                  size="sm"
-                  className="rounded-full h-6"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    requireAuth(() => handleSubscribeBoard(board));
-                  }}
-                >
-                  加入
-                </Button>
+                <div onClick={(e) => e.preventDefault()}>
+                  <BoardActionButton 
+                    board={board}
+                    onSubscribeSuccess={handleSubscribeSuccess}
+                  />
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* 加入看板对话框 */}
-        {selectedBoard && (
-          <SubscribeBoardDialog
-            open={subscribeBoardOpen}
-            onOpenChange={setSubscribeBoardOpen}
-            boardId={selectedBoard.id}
-            question={selectedBoard.question}
-            onSuccess={() => {
-              queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
-            }}
-          />
-        )}
+        {/* 加入看板对话框已移至 BoardActionButton 组件内部 */}
 
         {/* 页脚链接 */}
         <div className="mt-auto space-y-4">

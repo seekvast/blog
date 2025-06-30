@@ -255,13 +255,9 @@ function BoardContent() {
     notFoundError.name = "NotFoundError";
     throw notFoundError;
   }
-  const handleSubscribeBoard = (boardId: number) => {
-    if (board.history) return;
-    if (board.approval_mode === BoardApprovalMode.APPROVAL) {
-      setSubscribeBoardOpen(true);
-    } else {
-      handleSubscribe(boardId);
-    }
+  const handleSubscribeSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ["board", params?.slug] });
+    queryClient.invalidateQueries({ queryKey: ["boards"] });
   };
 
   const handleBlockBoard = (boardId: number) => {
@@ -294,9 +290,9 @@ function BoardContent() {
                 <div className="flex items-center space-x-4">
                   <BoardActionButton
                     board={board}
-                    onSubscribe={handleSubscribeBoard}
                     onBlock={handleBlockBoard}
                     setReportToKaterOpen={setReportToKaterOpen}
+                    onSubscribeSuccess={handleSubscribeSuccess}
                   />
                   {/* 如果是创建者或管理员，则显示设置按钮 */}
                   {/* {board.board_user &&

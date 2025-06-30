@@ -126,7 +126,7 @@ export function InterestSelection({
               className={`
                 relative py-2 px-3 rounded-full cursor-pointer transition-all flex items-center
                 ${
-                  category.selected ? "bg-primary text-white" : "bg-neutral-100"
+                  category.selected ? "bg-primary text-white" : "bg-subtle"
                 }
               `}
             >

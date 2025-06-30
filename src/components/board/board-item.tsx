@@ -12,11 +12,11 @@ import { ReportTarget } from "@/constants/report-target";
 
 interface BoardItemProps {
   board: Board;
-  onSubscribe?: (boardId: number) => void;
   onBlock?: (boardId: number) => void;
+  onSubscribeSuccess?: () => void;
 }
 
-export function BoardItem({ board, onSubscribe, onBlock }: BoardItemProps) {
+export function BoardItem({ board, onBlock, onSubscribeSuccess }: BoardItemProps) {
   const { reportDialogOpen, setReportDialogOpen } = useBoardActions();
 
   return (
@@ -59,9 +59,9 @@ export function BoardItem({ board, onSubscribe, onBlock }: BoardItemProps) {
       <div>
         <BoardActionButton
           board={board}
-          onSubscribe={onSubscribe}
           onBlock={onBlock}
           setReportToKaterOpen={setReportDialogOpen}
+          onSubscribeSuccess={onSubscribeSuccess}
         />
       </div>
 

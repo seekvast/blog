@@ -16,35 +16,76 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useBoardActions } from "@/hooks/use-board-actions";
 import { useRequireAuth } from "@/hooks/use-require-auth";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { api } from "@/lib/api";
+import { useToast } from "@/components/ui/use-toast";
+import { BoardApprovalMode } from "@/constants/board-approval-mode";
 
 interface BoardActionButtonProps {
   board: Board;
-  onSubscribe?: (boardId: number) => void;
   onBlock?: (boardId: number) => void;
   setReportToKaterOpen?: (open: boolean) => void;
+  onSubscribeSuccess?: () => void;
 }
 
 export function BoardActionButton({
   board,
-  onSubscribe,
   onBlock,
   setReportToKaterOpen,
+  onSubscribeSuccess,
 }: BoardActionButtonProps) {
   const { requireAuth } = useRequireAuth();
-  const {
-    handleSubscribe,
-    handleBlock,
-    handleUnsubscribe,
-    handleReport,
-    setReportDialogOpen,
-  } = useBoardActions();
+  const { handleBlock, handleUnsubscribe, handleReport, setReportDialogOpen } =
+    useBoardActions();
+
+  const [subscribeBoardOpen, setSubscribeBoardOpen] = useState(false);
+  const { toast } = useToast();
+
+  // 渲染对话框
+  const renderSubscribeDialog = () => {
+    return (
+      <SubscribeBoardDialog
+        open={subscribeBoardOpen}
+        onOpenChange={setSubscribeBoardOpen}
+        boardId={board.id}
+        question={board.question || ""}
+        onSuccess={onSubscribeSuccess}
+      />
+    );
+  };
 
   const handleSubscribeBoard = () => {
     requireAuth(() => {
-      if (onSubscribe) {
-        onSubscribe(board.id);
+      if (board.history) return;
+      if (
+        board.approval_mode === BoardApprovalMode.APPROVAL ||
+        board.approval_mode === BoardApprovalMode.AUTO
+      ) {
+        setSubscribeBoardOpen(true);
       } else {
-        handleSubscribe(board.id);
+        api.boards
+          .subscribe({
+            board_id: board.id,
+            answer: "",
+          })
+          .then(() => {
+            onSubscribeSuccess?.();
+          })
+          .catch((error) => {
+            toast({
+              variant: "destructive",
+              title: "加入失败",
+              description:
+                error instanceof Error ? error.message : "加入失败，请重试",
+            });
+          });
       }
     });
   };
@@ -74,7 +115,7 @@ export function BoardActionButton({
     !board.board_user ||
     board.board_user.status === BoardUserStatus.KICK_OUT
   ) {
-    return board.history ? (
+    const content = board.history ? (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -133,10 +174,15 @@ export function BoardActionButton({
         </DropdownMenuContent>
       </DropdownMenu>
     );
+    return (
+      <>
+        {content}
+        {renderSubscribeDialog()}
+      </>
+    );
   }
 
   const { status, user_role } = board.board_user;
-  // 已通过审核且是管理员
   if ((board.is_joined || status === 1) && [1, 2].includes(user_role)) {
     return (
       <Button variant="outline" size="sm" className="rounded-full">
@@ -145,7 +191,6 @@ export function BoardActionButton({
     );
   }
 
-  // 已加入状态（通过审核但不是管理员）
   if (status === 1) {
     return (
       <DropdownMenu>
@@ -180,5 +225,79 @@ export function BoardActionButton({
       {BoardUserStatusMapping[status as keyof typeof BoardUserStatusMapping] ||
         ""}
     </Button>
+  );
+}
+
+interface SubscribeBoardDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  boardId: number;
+  question: string;
+  onSuccess?: () => void;
+}
+
+function SubscribeBoardDialog({
+  open,
+  onOpenChange,
+  boardId,
+  question,
+  onSuccess,
+}: SubscribeBoardDialogProps) {
+  const [answer, setAnswer] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubmit = async () => {
+    if (!answer.trim()) {
+      toast({
+        variant: "destructive",
+        title: "请输入答案",
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await api.boards.subscribe({
+        board_id: boardId,
+        answer: answer.trim(),
+      });
+      onOpenChange(false);
+      onSuccess?.();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "加入失败",
+        description:
+          error instanceof Error ? error.message : "加入失败，请重试",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>回答加入看板问题</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="text-sm">{question}？</div>
+          <Input
+            placeholder="请输入答案"
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+          />
+          <Button
+            className="w-full"
+            onClick={handleSubmit}
+            disabled={isLoading}
+          >
+            提交
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

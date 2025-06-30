@@ -22,7 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SubscribeBoardDialog } from "@/components/board/subscribe-board-dialog";
+// SubscribeBoardDialog 已移入 BoardActionButton 组件内部
 import { BoardApprovalMode } from "@/constants/board-approval-mode";
 import { BoardItem } from "@/components/board/board-item";
 import { useRequireAuth } from "@/hooks/use-require-auth";
@@ -37,8 +37,6 @@ export default function BoardsPage() {
   const { requireAuth } = useRequireAuth();
   const queryClient = useQueryClient();
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
-  const [subscribeBoardOpen, setSubscribeBoardOpen] = useState(false);
-  const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
   const { handleSubscribe } = useBoardActions();
 
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
@@ -91,16 +89,9 @@ export default function BoardsPage() {
     }
   };
 
-  const handleSubscribeBoard = (boardId: number) => {
-    const board = boards.find((b) => b.id === boardId);
-    if (!board) return;
-    if (board.history) return;
-    if (board.approval_mode === BoardApprovalMode.NONE) {
-      handleSubscribe(board.id);
-    } else {
-      setSelectedBoard(board);
-      setSubscribeBoardOpen(true);
-    }
+  // 订阅成功后刷新数据
+  const handleSubscribeSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ["boards"] });
   };
 
   const { mutate: blockBoard } = useMutation({
@@ -245,26 +236,14 @@ export default function BoardsPage() {
               <div className="lg:px-6" key={board.id}>
                 <BoardItem
                   board={board}
-                  onSubscribe={handleSubscribeBoard}
                   onBlock={handleBlockBoard}
+                  onSubscribeSuccess={handleSubscribeSuccess}
                 />
               </div>
             ))}
           </InfiniteScroll>
         )}
       </div>
-      {/* 加入看板对话框 */}
-      {selectedBoard && (
-        <SubscribeBoardDialog
-          open={subscribeBoardOpen}
-          onOpenChange={setSubscribeBoardOpen}
-          boardId={selectedBoard.id}
-          question={selectedBoard.question}
-          onSuccess={() =>
-            queryClient.invalidateQueries({ queryKey: ["boards"] })
-          }
-        />
-      )}
     </div>
   );
 }
