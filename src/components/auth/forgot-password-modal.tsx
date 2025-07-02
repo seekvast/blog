@@ -51,14 +51,15 @@ export function ForgotPasswordModal({
     setIsLoading(true);
 
     try {
-      // 调用忘记密码API
       await api.auth.forgot({
         email,
         turnstile_token: turnstileToken
       });
 
-      // 设置成功状态，显示成功界面
       setIsSuccess(true);
+      setEmail("");
+      setTurnstileToken(null);
+      setIsValid(false);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -75,12 +76,27 @@ export function ForgotPasswordModal({
     }
   };
 
+  const resetFormData = () => {
+    setEmail("");
+    setTurnstileToken(null);
+    setIsValid(false);
+    setIsSuccess(false);
+  };
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    if (!open) {
+      timeoutId = setTimeout(() => {
+        resetFormData();
+      }, 300);
+    }
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [open]);
+
   return (
     <Dialog open={open} onOpenChange={(value) => {
-      if (!value) {
-        // 关闭对话框时重置状态
-        setIsSuccess(false);
-      }
       onOpenChange(value);
     }}>
       <DialogContent className="max-w-[480px] p-8">
@@ -193,7 +209,10 @@ export function ForgotPasswordModal({
             <Button
               type="button"
               className="w-full h-12"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                onOpenChange(false);
+                resetFormData();
+              }}
             >
               完成
             </Button>

@@ -21,6 +21,7 @@ import { useDraftStore } from "@/store/draft";
 import { api } from "@/lib/api";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { ForgotPasswordModal } from "./forgot-password-modal";
+import { useCountdown } from "@/store/countdown-store";
 
 const TURNSTILE_SITE_KEY =
   process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY ||
@@ -48,6 +49,7 @@ export function LoginModal({
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const { remainingSeconds, isActive, startCountdown } = useCountdown("forgot-password-btn");
 
   useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -203,10 +205,16 @@ export function LoginModal({
               </div>
               <button 
                 type="button"
-                className="text-sm font-medium text-neutral-500 hover:text-neutral-700"
-                onClick={() => setIsForgotPasswordOpen(true)}
+                className={`text-sm font-medium ${isActive ? 'text-neutral-400 cursor-not-allowed' : 'text-neutral-500 hover:text-neutral-700'}`}
+                onClick={() => {
+                  if (!isActive) {
+                    setIsForgotPasswordOpen(true);
+                    startCountdown(60); // 60秒倒計時
+                  }
+                }}
+                disabled={isActive}
               >
-                忘记密码？
+                {isActive ? `忘记密码？(${remainingSeconds}秒)` : '忘记密码？'}
               </button>
             </div>
             <div className="space-y-4">
