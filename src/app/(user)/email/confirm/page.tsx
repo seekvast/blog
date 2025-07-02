@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCountdown } from "@/store/countdown-store";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -18,10 +18,22 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 export default function EmailConfirmPage() {
   const { data: session, update } = useSession();
   const router = useRouter();
-  if (session?.user && session.user.is_email_confirmed === 1) {
-    router.push("/");
-    return;
-  }
+  const [redirecting, setRedirecting] = useState(false);
+  const [redirectTimer, setRedirectTimer] = useState<NodeJS.Timeout | null>(null);
+  
+  useEffect(() => {
+    if (session?.user && session.user.is_email_confirmed === 1) {
+      setRedirecting(true);
+      router.push("/");
+    }
+    
+    return () => {
+      if (redirectTimer) {
+        clearTimeout(redirectTimer);
+      }
+    };
+  }, [session, router, redirectTimer]);
+
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const { openLogin } = useAuthModal();
@@ -58,9 +70,11 @@ export default function EmailConfirmPage() {
         setStatus("success");
 
         if (session?.user) {
-          setTimeout(() => {
+          setRedirecting(true);
+          const timer = setTimeout(() => {
             router.push("/");
           }, 3000);
+          setRedirectTimer(timer);
         }
 
         return result;

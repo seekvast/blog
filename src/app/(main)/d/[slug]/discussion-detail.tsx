@@ -234,7 +234,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         action,
       }),
     onMutate: (action) => {
-      setFollowStatus(action);
+        setFollowStatus(action);
     },
     onError: (error, action, context) => {
       // 恢复之前的状态
@@ -245,21 +245,17 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         variant: "destructive",
       });
     },
-    onSuccess: () => {
-      //   toast({
-      //     title:
-      //       followStatus === "follow"
-      //         ? "已关注"
-      //         : followStatus === "ignore"
-      //         ? "已忽视"
-      //         : "已取消关注",
-      //     description:
-      //       followStatus === "follow"
-      //         ? "将接收此讨论的更新"
-      //         : followStatus === "ignore"
-      //         ? "将不再接收此讨论的更新"
-      //         : "已取消关注此讨论",
-      //   });
+    onSuccess: (data) => {
+      if (currentDiscussion) {
+        const updatedDiscussion = {
+          ...currentDiscussion,
+          discussion_user: {
+            ...currentDiscussion.discussion_user,
+            subscription: followStatus || ''
+          }
+        };
+        setDiscussion(updatedDiscussion as Discussion);
+      }
     },
   });
 
