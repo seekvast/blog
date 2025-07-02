@@ -30,9 +30,20 @@ const getNormalizedPath = (path: string): string => {
   return path.replace(/\/[^\/]+(\/.+)/, '$1').replace(/\/$/, '') || '/';
 };
 
+const getPageType = (path: string): string => {
+  if (path.startsWith('/b/')) {
+    return 'board_pages';
+  }
+  if (path.startsWith('/d/')) {
+    return 'discussion_pages';
+  }
+  return path;
+};
+
 const getCurrentPageId = (): string => {
   if (typeof window === "undefined") return "/";
-  return getNormalizedPath(window.location.pathname);
+  const path = window.location.pathname;
+  return getPageType(path);
 };
 
 export const useDiscussionDisplayStore = create<DiscussionDisplayState>()(

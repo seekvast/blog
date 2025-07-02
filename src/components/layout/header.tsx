@@ -86,7 +86,7 @@ export function Header({ className }: HeaderProps) {
               className="flex items-center gap-2"
               onClick={handleLogoClick}
             >
-              <img src="/logo-g.png" alt="Kater" className="h-8 w-auto" />
+              <img src="/logo.svg" alt="Kater" className="h-8 w-auto" />
             </Link>
           </div>
 

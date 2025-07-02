@@ -57,18 +57,13 @@ function BoardContent() {
   const observerRef = useRef<IntersectionObserver>();
   const [hasMore, setHasMore] = useState(true);
   const displayMode = useDiscussionDisplayStore((state) =>
-    state.getDisplayMode()
+    state.getDisplayMode("board_detail")
   );
   const sortBy = useDiscussionDisplayStore((state) => state.getSortBy());
   const [activeTab, setActiveTab] = useState<"posts" | "rules" | "children">(
     "posts"
   );
-  const [subscribeBoardOpen, setSubscribeBoardOpen] = useState(false);
   const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
-  const { requireAuth } = useRequireAuth();
-  const { handleSubscribe } = useBoardActions();
-
-  // 已移除重复的 blockBoard mutation，改用 useBoardActions 中的 handleBlock
 
   const handleLoadMore = useCallback(() => {
     if (!discussionsLoading && hasMore) {
@@ -150,7 +145,6 @@ function BoardContent() {
     }
   };
 
-  // 如果有 boardError，设置错误信息
   useEffect(() => {
     if (boardError) {
       console.error("获取看板信息失败:", boardError);
