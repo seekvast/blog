@@ -264,6 +264,10 @@ export function createApi(options: ApiOptions = {}) {
       register: (data: any) => http.post<User>(`${prefix}/user`, data),
       verifyTurnstile: (token: string) => 
         http.post<{success: boolean}>(`/api/auth/verify-turnstile`, { token }),
+      forgot: (data: { email: string, turnstile_token: string }) => 
+            http.post<{ success: boolean }>(`${prefix}/user/forgot`, data),
+      reset: (data: { token: string, password: string, confirm_password: string }) => 
+            http.post<{ success: boolean }>(`${prefix}/user/reset-password`, data),
     },
   };
 }

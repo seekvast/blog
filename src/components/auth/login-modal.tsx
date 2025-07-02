@@ -20,6 +20,7 @@ import { useAuthModal } from "./auth-modal-store";
 import { useDraftStore } from "@/store/draft";
 import { api } from "@/lib/api";
 import { Turnstile } from "@marsidev/react-turnstile";
+import { ForgotPasswordModal } from "./forgot-password-modal";
 
 const TURNSTILE_SITE_KEY =
   process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY ||
@@ -46,6 +47,7 @@ export function LoginModal({
   const [isValid, setIsValid] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -199,6 +201,13 @@ export function LoginModal({
                   )}
                 </button>
               </div>
+              <button 
+                type="button"
+                className="text-sm font-medium text-neutral-500 hover:text-neutral-700"
+                onClick={() => setIsForgotPasswordOpen(true)}
+              >
+                忘记密码？
+              </button>
             </div>
             <div className="space-y-4">
               <div className="cf-turnstile flex justify-center">
@@ -256,6 +265,11 @@ export function LoginModal({
           </form>
         </DialogContent>
       </Dialog>
+      <ForgotPasswordModal 
+        open={isForgotPasswordOpen} 
+        onOpenChange={setIsForgotPasswordOpen} 
+        onBack={() => setIsForgotPasswordOpen(false)}
+      />
     </>
   );
 }
