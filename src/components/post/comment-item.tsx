@@ -8,10 +8,8 @@ import {
   ChevronUp,
   MoreHorizontal,
   Reply,
-  ThumbsDown,
-  ThumbsUp,
-  UserRound,
   MinusCircle,
+  UserRound,
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { PostContent } from "@/components/post/post-content";
@@ -31,37 +29,34 @@ import {
 } from "@/components/ui/popover";
 import { CommentButton } from "@/components/post/comment-button";
 import type { Discussion } from "@/types/discussion";
-import { VotersList } from "@/components/post/voters-list";
-import { useCompactNumberFormat } from "@/lib/utils/format";
+import { VoteButtons } from "@/components/common/vote-buttons";
 
 interface CommentItemProps {
   discussion: Discussion;
   comment: Post;
   onReply: (comment: Post) => void;
-  onVote: (postId: number, vote: "up" | "down") => void;
   onSubmitReply?: (replyForm: PostForm) => void;
   onEditComment?: (data: { id: number; content: string }) => void;
   onEdit?: (comment: Post) => void;
-  level?: number;
   isLocked?: boolean;
+  queryKey?: string | string[];
+  level?: number;
 }
 
 export const CommentItem = ({
   discussion,
   comment,
   onReply,
-  onVote,
   onSubmitReply,
   onEditComment,
   onEdit,
-  level = 0,
   isLocked = false,
+  queryKey,
+  level = 0,
 }: CommentItemProps) => {
-  const formatCompactNumber = useCompactNumberFormat();
 
   const [isEditing, setIsEditing] = React.useState(false);
   const [isReplying, setIsReplying] = React.useState(false);
-  const [votersPopoverOpen, setVotersPopoverOpen] = React.useState(false);
 
   const hasManuallyCollapsed = React.useRef(false);
   const [showChildren, setShowChildren] = React.useState(true);
@@ -108,16 +103,6 @@ export const CommentItem = ({
     onReply(comment);
   };
 
-  const handleCancelReply = () => {
-    // 不再需要本地的回复编辑器状态
-  };
-
-  const handleSubmitReply = (replyForm: PostForm) => {
-    if (onSubmitReply) {
-      onSubmitReply(replyForm);
-    }
-  };
-
   const handleEdit = (comment: Post) => {
     if (onEdit) {
       onEdit(comment);
@@ -125,7 +110,6 @@ export const CommentItem = ({
       setIsEditing(true);
       setEditContent(comment.raw_content);
 
-      // 使用setTimeout确保DOM已更新后再滚动
       setTimeout(() => {
         if (editRef.current) {
           editRef.current.scrollIntoView({
@@ -248,50 +232,17 @@ export const CommentItem = ({
 
           {!isEditing && (
             <div className="mt-3 flex justify-between items-center space-x-4 text-sm md:text-base text-muted-foreground">
-              <div className="flex items-center gap-2 space-x-3 md:space-x-6">
-                <div className="flex items-center space-x-2 cursor-pointer">
-                  <ThumbsUp
-                    className={cn(
-                      "h-4 w-4",
-                      comment.user_voted?.vote === "up" &&
-                        "text-primary fill-primary"
-                    )}
-                    onClick={() => onVote(comment.id, "up")}
-                  />
-                  {comment.up_votes_count > 0 && (
-                    <Popover
-                      open={votersPopoverOpen}
-                      onOpenChange={setVotersPopoverOpen}
-                    >
-                      <PopoverTrigger asChild>
-                        <button className="text-xs md:text-sm hover:text-primary">
-                          {formatCompactNumber(comment.up_votes_count)}
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-80 p-0" align="start">
-                        <VotersList postId={comment.id} />
-                      </PopoverContent>
-                    </Popover>
-                  )}
-                </div>
-                <div
-                  className="flex items-center space-x-1 cursor-pointer"
-                  onClick={() => onVote(comment.id, "down")}
-                >
-                  <ThumbsDown
-                    className={cn(
-                      "h-4 w-4",
-                      comment.user_voted?.vote === "down" &&
-                        "text-destructive fill-destructive"
-                    )}
-                  />
-                  {comment.down_votes_count > 5 && (
-                    <span className="text-xs md:text-sm">
-                      {formatCompactNumber(comment.down_votes_count)}
-                    </span>
-                  )}
-                </div>
-              </div>
+              <VoteButtons
+                postId={comment.id}
+                upVotesCount={comment.up_votes_count}
+                downVotesCount={comment.down_votes_count}
+                userVote={comment.user_voted}
+                onVoteSuccess={(postId, vote, response) => {
+                  if (queryKey) {
+                    queryClient.invalidateQueries({ queryKey });
+                  }
+                }}
+              />
 
               <div className="flex items-center space-x-3">
                 <AuthGuard>
@@ -334,12 +285,12 @@ export const CommentItem = ({
                         discussion={discussion}
                         comment={childComment}
                         onReply={onReply}
-                        onVote={onVote}
                         onSubmitReply={onSubmitReply}
                         onEditComment={onEditComment}
                         onEdit={onEdit}
                         level={level + 1}
                         isLocked={isLocked}
+                        queryKey={queryKey}
                       />
                     ))}
 

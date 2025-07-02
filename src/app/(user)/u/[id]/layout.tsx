@@ -140,12 +140,10 @@ export default function UserLayout({
     blockMutation.mutate(block_user_hashid);
   };
 
-  // 如果API请求完成但未获取到用户数据，显示404页面
   if (notFound) {
     return <NotFound />;
   }
   
-  // 如果API请求中，显示加载状态
   if (!userData) {
     return (
       <div className="flex items-center justify-center p-8">

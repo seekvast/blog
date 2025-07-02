@@ -79,10 +79,12 @@ export function CommentActions({ comment, onEdit }: CommentActionsProps) {
         <DropdownMenuContent align="end" className="w-48">
           {isAuthor ? (
             <>
-              <DropdownMenuItem className="cursor-pointer" onClick={handleEdit}>
-                <Edit className="mr-2 h-4 w-4" />
-                <span>編輯</span>
-              </DropdownMenuItem>
+              {onEdit && (
+                <DropdownMenuItem className="cursor-pointer" onClick={handleEdit}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  <span>編輯</span>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 className="cursor-pointer text-destructive"
                 onClick={handleDelete}

@@ -136,12 +136,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     isFetchingNextPage,
     refetch,
   } = useInfiniteQuery({
-    queryKey: [
-      "discussion-posts",
-      slug,
-      initialDiscussion?.board_id,
-      queryParams,
-    ],
+    queryKey: ["discussion-posts", slug],
     queryFn: async ({ pageParam = 1 }) => {
       try {
         return await api.discussions.posts({
@@ -824,10 +819,10 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   isLoading={isLoading}
                   onReply={handleReplyClick}
                   onEdit={handleEditClick}
-                  onVote={handleVote}
                   onSubmitReply={handleSubmitComment}
                   onEditComment={handleEditComment}
                   isLocked={currentDiscussion?.is_locked === 1}
+                  queryKey={["discussion-posts", slug]}
                 />
               </InfiniteScroll>
               {!currentDiscussion?.is_locked && (

@@ -12,11 +12,11 @@ interface CommentListProps {
   comments: Post[];
   isLoading: boolean;
   onReply: (comment: Post) => void;
-  onVote: (postId: number, vote: "up" | "down") => void;
   onSubmitReply?: (replyForm: PostForm) => void;
   onEditComment?: (data: { id: number; content: string }) => void;
   onEdit?: (comment: Post) => void;
   isLocked?: boolean;
+  queryKey?: string | string[];
 }
 
 export const CommentList = React.memo(
@@ -25,11 +25,11 @@ export const CommentList = React.memo(
     comments,
     isLoading,
     onReply,
-    onVote,
     onSubmitReply,
     onEditComment,
     onEdit,
     isLocked,
+    queryKey,
   }: CommentListProps) => {
     if (!comments.length && isLoading) {
       return (
@@ -58,7 +58,7 @@ export const CommentList = React.memo(
               discussion={discussion}
               comment={comment}
               onReply={onReply}
-              onVote={onVote}
+              queryKey={queryKey}
               onSubmitReply={onSubmitReply}
               onEditComment={onEditComment}
               onEdit={onEdit}

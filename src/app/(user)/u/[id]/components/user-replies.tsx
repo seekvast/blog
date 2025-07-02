@@ -3,15 +3,23 @@
 import React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { ThumbsUp, ThumbsDown, Reply } from "lucide-react";
+import { Reply, MoreHorizontal } from "lucide-react";
+import { VoteButtons } from "@/components/common/vote-buttons";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { useInfiniteQuery, InfiniteData } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  InfiniteData,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { PostContent } from "@/components/post/post-content";
 import type { Post } from "@/types/discussion";
 import { Pagination } from "@/types";
+import { fromNow } from "@/lib/dayjs";
+import { CommentActions } from "@/components/post/comment-actions";
 
 interface UserRepliesProps {
   replies?: Post[];
@@ -19,6 +27,7 @@ interface UserRepliesProps {
 }
 
 export function UserReplies({ hashid }: UserRepliesProps) {
+  const queryClient = useQueryClient();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery<
       Pagination<Post>,
@@ -29,7 +38,11 @@ export function UserReplies({ hashid }: UserRepliesProps) {
     >({
       queryKey: ["user-replies"],
       queryFn: ({ pageParam = 1 }) =>
-        api.users.getPosts({ hashid: hashid || undefined, page: pageParam, per_page: 10 }),
+        api.users.getPosts({
+          hashid: hashid || undefined,
+          page: pageParam,
+          per_page: 10,
+        }),
       getNextPageParam: (lastPage) => {
         if (lastPage.current_page < lastPage.last_page) {
           return lastPage.current_page + 1;
@@ -81,7 +94,9 @@ export function UserReplies({ hashid }: UserRepliesProps) {
                     src={reply.user.avatar_url}
                     alt={reply.user.username}
                   />
-                  <AvatarFallback>{reply.user.username[0].toUpperCase()}</AvatarFallback>
+                  <AvatarFallback>
+                    {reply.user.username[0].toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
               </div>
 
@@ -115,16 +130,23 @@ export function UserReplies({ hashid }: UserRepliesProps) {
                 </div>
 
                 {/* 底部操作栏 */}
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <button className="hover:text-gray-900 p-1">
-                      <ThumbsUp className="w-4 h-4" />
-                    </button>
-                    <button className="hover:text-gray-900 p-1">
-                      <ThumbsDown className="w-4 h-4" />
-                    </button>
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <div className="flex items-center gap-4">
+                    <VoteButtons
+                      postId={reply.id}
+                      upVotesCount={reply.up_votes_count}
+                      downVotesCount={reply.down_votes_count}
+                      userVote={reply.user_voted}
+                      onVoteSuccess={() =>
+                        queryClient.invalidateQueries({
+                          queryKey: ["user-replies"],
+                        })
+                      }
+                    />
+                    <span>{fromNow(reply.created_at)}</span>
                   </div>
-                  <span>{reply.created_at}</span>
+
+                  <CommentActions comment={reply} />
                 </div>
               </div>
             </div>
