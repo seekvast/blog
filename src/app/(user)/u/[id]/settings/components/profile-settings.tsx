@@ -59,9 +59,9 @@ const formSchema = z.object({
     .regex(/^[a-zA-Z0-9_]+$/, "用户名只能包含字母、数字和下划线"),
   nickname: z
     .string()
-    .min(1, "昵称不能为空")
+    .min(2, "昵称至少需要2个字符")
     .max(16, "昵称最多16个字符")
-    .regex(/^[^\s]+$/, "昵称不能包含空格"),
+    .regex(/^[a-zA-Z0-9_]+$/, "昵称只能包含字母、数字和下划线"),
   avatar_url: z.string().max(500, "头像URL最多500个字符").optional(),
   cover: z.string().max(500, "头像URL最多500个字符").optional(),
   gender: z.number().optional(),
@@ -218,7 +218,7 @@ export default function ProfileSettings({ user }: { user: User | null }) {
                 <div className="relative">
                   <AvatarUpload
                     url={user.avatar_url ?? null}
-                    name={user.username}
+                    name={user.username || user.nickname}
                     attachmentType={AttachmentType.USER_AVATAR}
                     onUploadSuccess={(url) => {
                       setAvatar(url);
@@ -239,7 +239,7 @@ export default function ProfileSettings({ user }: { user: User | null }) {
                     {user.nickname || user.username}
                   </h2>
                   <div className="text-xs sm:text-sm opacity-80">
-                    {user.nickname && <span>@{user.nickname}</span>} 加入于{" "}
+                    {user.username && <span>@{user.username}</span>} 加入于{" "}
                     {user.created_at
                       ? new Date(user.created_at).toLocaleDateString("zh-CN", {
                           year: "numeric",
@@ -372,10 +372,7 @@ export default function ProfileSettings({ user }: { user: User | null }) {
                 <Button
                   type="button"
                   disabled={isSubmitting}
-                  onClick={() => {
-                    const values = form.getValues();
-                    onSubmit(values);
-                  }}
+                  onClick={form.handleSubmit(onSubmit)}
                 >
                   {isSubmitting ? "保存中..." : "保存"}
                 </Button>

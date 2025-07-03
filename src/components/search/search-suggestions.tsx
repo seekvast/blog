@@ -34,47 +34,49 @@ export function SearchSuggestions({
   return (
     <>
       {/* 最近搜索 */}
-      <div className={isMobile ? "mb-6" : "mb-4"}>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className={`${isMobile ? "text-base" : "text-sm"} font-medium`}>
-            最近搜索
-          </h3>
+      {histories.length > 0 && (
+        <div className={isMobile ? "mb-6" : "mb-4"}>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className={`${isMobile ? "text-base" : "text-sm"} font-medium`}>
+              最近搜索
+            </h3>
+            {histories.length > 0 && (
+              <button
+                type="button"
+                onClick={onClearHistories}
+                className={`${
+                  isMobile ? "text-sm" : "text-xs"
+                } text-muted-foreground hover:text-foreground`}
+              >
+                清除
+              </button>
+            )}
+          </div>
           {histories.length > 0 && (
-            <button
-              type="button"
-              onClick={onClearHistories}
-              className={`${
-                isMobile ? "text-sm" : "text-xs"
-              } text-muted-foreground hover:text-foreground`}
-            >
-              清除
-            </button>
+            <div className="flex flex-wrap gap-3">
+              {histories.map((search, index) => (
+                <Badge
+                  key={index}
+                  variant="secondary"
+                  className="flex justify-center py-2 cursor-pointer hover:bg-secondary/80"
+                  style={{
+                    width: "fit-content",
+                    maxWidth: "180px",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    display: "inline-block",
+                  }}
+                  title={search}
+                  onClick={() => onSearchItemClick(search)}
+                >
+                  {search}
+                </Badge>
+              ))}
+            </div>
           )}
         </div>
-        {histories.length > 0 && (
-          <div className="flex flex-wrap gap-3">
-            {histories.map((search, index) => (
-              <Badge
-                key={index}
-                variant="secondary"
-                className="flex justify-center py-2 cursor-pointer hover:bg-secondary/80"
-                style={{
-                  width: "fit-content",
-                  maxWidth: "180px",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  display: "inline-block",
-                }}
-                title={search}
-                onClick={() => onSearchItemClick(search)}
-              >
-                {search}
-              </Badge>
-            ))}
-          </div>
-        )}
-      </div>
+      )}
 
       {/* 热门看板 */}
       {hotBoards && hotBoards.length > 0 && (
@@ -98,7 +100,9 @@ export function SearchSuggestions({
                   >
                     <Avatar className="h-16 w-16 flex-shrink-0">
                       <AvatarImage src={board.avatar} alt={board.name} />
-                      <AvatarFallback>{board.name[0].toUpperCase()}</AvatarFallback>
+                      <AvatarFallback>
+                        {board.name[0].toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
                   </Link>
                   <div className="text-center">
