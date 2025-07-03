@@ -38,6 +38,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { usePostEditorStore } from "@/store/post-editor";
 import { useLoginModal } from "@/components/providers/login-modal-provider";
+import { usePermission } from "@/hooks/use-permission";
+import { BoardPermission } from "@/constants/board-permissions";
 interface DiscussionActionsProps {
   discussion: Discussion;
   onChange?: (deletedSlug: string) => void;
@@ -61,7 +63,7 @@ export function DiscussionActions({
     "delete" | "setBoardStickied" | "closeReply" | null
   >(null);
   const { user } = useAuth();
-  const isAuthor = user?.hashid === discussion.user.hashid;
+  const { hasPermission, isAuthor } = usePermission(discussion.board, discussion);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -180,8 +182,8 @@ export function DiscussionActions({
             <MoreHorizontal className="flex-shrink-0 h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-          {isAuthor && (
-            <>
+            {/* 作者操作 */}
+            {isAuthor && (
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() => {
@@ -195,6 +197,9 @@ export function DiscussionActions({
                 <Edit className="mr-2 h-4 w-4" />
                 <span>編輯</span>
               </DropdownMenuItem>
+            )}
+            
+            {isAuthor || hasPermission(BoardPermission.DELETE_OWN_DISCUSSION) && (
               <DropdownMenuItem
                 className="cursor-pointer text-destructive"
                 onClick={() => {
@@ -205,29 +210,30 @@ export function DiscussionActions({
                 <Trash2 className="mr-2 h-4 w-4" />
                 <span>刪除</span>
               </DropdownMenuItem>
-            </>
-          )}
-          {!isAuthor && (
-            <>
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => setReportToAdminOpen(true)}
-              >
-                <Flag className="mr-2 h-4 w-4" />
-                <span>向管理員檢舉</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => setReportToKaterOpen(true)}
-              >
-                <AlertTriangle className="mr-2 h-4 w-4" />
-                <span>向Kater檢舉</span>
-              </DropdownMenuItem>
-            </>
-          )}
-
-          {discussion.board?.manager && (
-            <>
+            )}
+            
+            {/* 非作者操作 */}
+            {!isAuthor && (
+              <>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => setReportToAdminOpen(true)}
+                >
+                  <Flag className="mr-2 h-4 w-4" />
+                  <span>向管理員檢舉</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => setReportToKaterOpen(true)}
+                >
+                  <AlertTriangle className="mr-2 h-4 w-4" />
+                  <span>向Kater檢舉</span>
+                </DropdownMenuItem>
+              </>
+            )}
+            
+            {/* 管理员操作 */}
+            {hasPermission(BoardPermission.PIN_DISCUSSION) && (
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() => {
@@ -238,6 +244,9 @@ export function DiscussionActions({
                 <PinIcon className="mr-2 h-4 w-4" />
                 <span>設為看板公告</span>
               </DropdownMenuItem>
+            )}
+            
+            {hasPermission(BoardPermission.MOVE_DISCUSSION) && (
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() => {
@@ -247,6 +256,9 @@ export function DiscussionActions({
                 <FolderEdit className="mr-2 h-4 w-4" />
                 <span>更改子版</span>
               </DropdownMenuItem>
+            )}
+            
+            {hasPermission(BoardPermission.CLOSE_REPLY) && (
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() => {
@@ -263,8 +275,7 @@ export function DiscussionActions({
                   {discussion.is_locked === 0 ? "關閉回覆功能" : "開啟回覆功能"}
                 </span>
               </DropdownMenuItem>
-            </>
-          )}
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (

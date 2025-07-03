@@ -7,6 +7,8 @@ import { BoardUserRole } from "@/constants/board-user-role";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { ROLE_PERMISSIONS } from "@/constants/board-permissions";
+import { BoardPermission } from "@/constants/board-permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -28,22 +30,15 @@ export default async function BoardSettingsPage({ params }: PageProps) {
   if (!board) {
     notFound();
   }
-
-  const acceptRole = [BoardUserRole.CREATOR, BoardUserRole.MODERATOR];
-  if (
-    !board.board_user ||
-    !acceptRole.includes(
-      board.board_user.user_role as (typeof acceptRole)[number]
-    )
-  ) {
+  const userRole = board.board_user?.user_role;
+  if (!userRole || !ROLE_PERMISSIONS[userRole as keyof typeof ROLE_PERMISSIONS]) {
+    notFound();
+  }
+  const hasSettingsPermission = ROLE_PERMISSIONS[userRole as keyof typeof ROLE_PERMISSIONS].includes(BoardPermission.VISIT_SETTINGS);
+  if (!hasSettingsPermission) {
     notFound();
   }
 
-  const boardTypeMap: { [key: string]: string } = {
-    public: "公开",
-    private: "私密",
-    restricted: "半公开",
-  };
 
   return (
     <div className="pt-2">

@@ -5,6 +5,8 @@ import { Settings, Users2, ChevronRight } from "lucide-react";
 import { useDevice } from "@/hooks/use-device";
 import { MembersSettings } from "./members-settings";
 import { ReportsSettings } from "./reports-settings";
+import { usePermission } from "@/hooks/use-permission";
+import { BoardPermission } from "@/constants/board-permissions";
 
 export type SettingTab =
   | "general"
@@ -29,6 +31,7 @@ interface MenuItem {
   label: string;
   description?: string;
   group: "global" | "board";
+  requiredPermission?: BoardPermission;
 }
 
 const menuItems: MenuItem[] = [
@@ -37,36 +40,42 @@ const menuItems: MenuItem[] = [
     label: "一般設定",
     description: "在此設定你的看板名稱、網址、簡介、類型以及相關管理選項。",
     group: "global",
+    requiredPermission: BoardPermission.BOARD_SETTINGS,
   },
   {
     id: "child-boards",
     label: "子版設定",
     description: "創建新的子版以細分討論領域，或刪除不再需要的子版。",
     group: "board",
+    requiredPermission: BoardPermission.BOARD_SETTINGS,
   },
   {
     id: "rules",
     label: "規則設置",
     description: "新增或刪除看板規則，設置違規的行為準則以維護社群秩序。",
     group: "board",
+    requiredPermission: BoardPermission.BOARD_SETTINGS,
   },
   {
     id: "approval",
     label: "成員審核",
     description: "判斷用戶是否符合網帳號或特定人員，決定是否允許其加入看板。",
     group: "board",
+    requiredPermission: BoardPermission.BOARD_SETTINGS,
   },
   {
     id: "members",
     label: "成員管理",
     description: "管理看板成員的權限，包含加入、移除或變更身份組。",
     group: "board",
+    requiredPermission: BoardPermission.MEMBERS_SETTINGS,
   },
   {
     id: "reports",
     label: "檢舉內容",
     description: "查看並處理尚未解決的檢舉，確保不當內容得到及時處理。",
     group: "board",
+    requiredPermission: BoardPermission.REPORTS_SETTINGS,
   },
   {
     id: "records",
@@ -74,12 +83,14 @@ const menuItems: MenuItem[] = [
     description:
       "查看看板管理員與版主的操作日誌，了解權限變更與內容管理活動的詳細記錄。",
     group: "board",
+    requiredPermission: BoardPermission.BOARD_SETTINGS,
   },
   {
     id: "blocklist",
     label: "封鎖名單",
     description: "管理封鎖名單，限制特定用戶或 IP 地址存取看板的功能。",
     group: "board",
+    requiredPermission: BoardPermission.BOARD_SETTINGS,
   },
 ];
 
@@ -90,6 +101,7 @@ export function SettingMenus({
   className,
 }: SettingMenusProps) {
   const { isMobile } = useDevice();
+  const { hasPermission } = usePermission(board);
 
   const handleTabClick = (
     e: React.MouseEvent<HTMLElement>,
@@ -99,11 +111,16 @@ export function SettingMenus({
     onTabChange?.(tab);
   };
 
+  // 过滤出用户有权限查看的菜单项
+  const filteredMenuItems = menuItems.filter(
+    (item) => !item.requiredPermission || hasPermission(item.requiredPermission)
+  );
+
   // 移动端菜单
   if (isMobile) {
     return (
       <div className={cn("space-y-4", className)}>
-        {menuItems.map((item) => (
+        {filteredMenuItems.map((item) => (
           <a
             key={item.id}
             href="#"
@@ -129,14 +146,14 @@ export function SettingMenus({
   return (
     <div className={cn("space-y-4 rounded-lg", className)}>
       {/* 全域设定组 */}
-      <div>
-        <div className="flex items-center gap-2 pb-4">
-          <Settings className="w-4 h-4" />
-          <h3 className="text-lg font-bold">全域設定</h3>
-          {/* <span className="text-sm font-medium">全域設定</span> */}
-        </div>
-        <nav className="space-y-1">
-          {menuItems
+      {hasPermission(BoardPermission.BOARD_BASE) && (
+        <div>
+          <div className="flex items-center gap-2 pb-4">
+            <Settings className="w-4 h-4" />
+            <h3 className="text-lg font-bold">全域設定</h3>
+          </div>
+          <nav className="space-y-1">
+          {filteredMenuItems
             .filter((item) => item.group === "global")
             .map((item) => (
               <a
@@ -153,19 +170,19 @@ export function SettingMenus({
                 {item.label}
               </a>
             ))}
-        </nav>
-      </div>
+          </nav>
+        </div>
+      )}
 
       {/* 看板管理组 */}
-      <div>
-        <div className="flex items-center gap-2 pb-4">
-          <Users2 className="w-4 h-4" />
-          <h3 className="text-lg font-bold">看板管理</h3>
-
-          {/* <span className="text-sm font-medium">看板管理</span> */}
-        </div>
+      {hasPermission(BoardPermission.BOARD_MANAGE) && (
+        <div>
+          <div className="flex items-center gap-2 pb-4">
+            <Users2 className="w-4 h-4" />
+            <h3 className="text-lg font-bold">看板管理</h3>
+          </div>
         <nav className="space-y-1">
-          {menuItems
+          {filteredMenuItems
             .filter((item) => item.group === "board")
             .map((item) => (
               <a
@@ -184,6 +201,7 @@ export function SettingMenus({
             ))}
         </nav>
       </div>
+      )}
     </div>
   );
 }

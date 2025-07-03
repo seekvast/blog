@@ -20,6 +20,8 @@ import { ModerationProcessSchema } from "@/validations/moderation";
 import { BoardUserRole } from "@/constants/board-user-role";
 import { UserRoleBadge } from "@/components/board/user-role-badge";
 import { useAuth } from "@/components/providers/auth-provider";
+import { usePermission } from "@/hooks/use-permission";
+import { BoardPermission } from "@/constants/board-permissions";
 
 interface SettingsProps {
   board: Board;
@@ -27,6 +29,7 @@ interface SettingsProps {
 
 export function MembersSettings({ board }: SettingsProps) {
   const { user } = useAuth();
+  const { hasPermission } = usePermission(board);
 
   const { toast } = useToast();
   const [members, setMembers] = React.useState<Pagination<User>>();
@@ -211,13 +214,16 @@ export function MembersSettings({ board }: SettingsProps) {
                     >
                       查看个人主页
                     </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    onClick={() => handleChangeRole(member)}
-                  >
-                    变更身份组
-                  </DropdownMenuItem>
+                            </DropdownMenuItem>
+                            
+                  {hasPermission(BoardPermission.APPOINT_MODERATOR) && (
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => handleChangeRole(member)}
+                    >
+                      变更身份组
+                    </DropdownMenuItem>
+                  )}
                   {user && member.hashid !== user.hashid && (
                     <DropdownMenuItem
                       className="cursor-pointer text-destructive"
