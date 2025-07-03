@@ -63,7 +63,10 @@ export function DiscussionActions({
     "delete" | "setBoardStickied" | "closeReply" | null
   >(null);
   const { user } = useAuth();
-  const { hasPermission, isAuthor } = usePermission(discussion.board, discussion);
+  const { hasPermission, isAuthor } = usePermission(
+    discussion.board,
+    discussion
+  );
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -115,9 +118,9 @@ export function DiscussionActions({
         action: "board_child",
       }),
     onSuccess: () => {
-      clearQueryCache();
       setShowDialog(false);
       setSelectedBoardChildId(discussion.board_child_id);
+      clearQueryCache();
     },
     onError: (error) => {
       toast({
@@ -136,7 +139,6 @@ export function DiscussionActions({
       return;
     }
     changeBoardMutation.mutate();
-    clearQueryCache();
   };
 
   // 更改帖子类型
@@ -198,8 +200,8 @@ export function DiscussionActions({
                 <span>編輯</span>
               </DropdownMenuItem>
             )}
-            
-            {isAuthor || hasPermission(BoardPermission.DELETE_OWN_DISCUSSION) && (
+
+            {(isAuthor || hasPermission(BoardPermission.DELETE_DISCUSSION)) && (
               <DropdownMenuItem
                 className="cursor-pointer text-destructive"
                 onClick={() => {
@@ -211,7 +213,7 @@ export function DiscussionActions({
                 <span>刪除</span>
               </DropdownMenuItem>
             )}
-            
+
             {/* 非作者操作 */}
             {!isAuthor && (
               <>
@@ -231,9 +233,9 @@ export function DiscussionActions({
                 </DropdownMenuItem>
               </>
             )}
-            
+
             {/* 管理员操作 */}
-            {hasPermission(BoardPermission.PIN_DISCUSSION) && (
+            {hasPermission(BoardPermission.STICKIED_DISCUSSION) && (
               <DropdownMenuItem
                 className="cursor-pointer"
                 onClick={() => {
@@ -245,7 +247,7 @@ export function DiscussionActions({
                 <span>設為看板公告</span>
               </DropdownMenuItem>
             )}
-            
+
             {hasPermission(BoardPermission.MOVE_DISCUSSION) && (
               <DropdownMenuItem
                 className="cursor-pointer"
@@ -257,7 +259,7 @@ export function DiscussionActions({
                 <span>更改子版</span>
               </DropdownMenuItem>
             )}
-            
+
             {hasPermission(BoardPermission.CLOSE_REPLY) && (
               <DropdownMenuItem
                 className="cursor-pointer"
@@ -279,8 +281,8 @@ export function DiscussionActions({
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        <MoreHorizontal 
-          className="flex-shrink-0 h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground" 
+        <MoreHorizontal
+          className="flex-shrink-0 h-4 w-4 cursor-pointer text-muted-foreground hover:text-foreground"
           onClick={() => openLoginModal()}
         />
       )}

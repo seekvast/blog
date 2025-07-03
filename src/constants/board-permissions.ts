@@ -12,7 +12,7 @@ export enum BoardPermission {
   EDIT_OWN_DISCUSSION = "edit_own_discussion", // 编辑自己的贴文
   DELETE_OWN_DISCUSSION = "delete_own_discussion", // 删除自己的贴文
   MOVE_DISCUSSION = "move_discussion", // 移动贴文到其他子版
-  PIN_DISCUSSION = "pin_discussion", // 置顶贴文
+  STICKIED_DISCUSSION = "stickied_discussion", // 置顶贴文
   DELETE_DISCUSSION = "delete_discussion", // 删除贴文
   CLOSE_REPLY = "close_reply", // 关闭/开启回复功能
 
@@ -45,7 +45,7 @@ export const ROLE_PERMISSIONS = {
     BoardPermission.EDIT_OWN_DISCUSSION,
     BoardPermission.DELETE_OWN_DISCUSSION,
     BoardPermission.MOVE_DISCUSSION,
-    BoardPermission.PIN_DISCUSSION,
+    BoardPermission.STICKIED_DISCUSSION,
     BoardPermission.DELETE_DISCUSSION,
     BoardPermission.CLOSE_REPLY,
     BoardPermission.KICK_USER,
@@ -58,7 +58,7 @@ export const ROLE_PERMISSIONS = {
     // 管理员(版主)权限
     BoardPermission.VISIT_SETTINGS,
     BoardPermission.MOVE_DISCUSSION,
-    BoardPermission.PIN_DISCUSSION,
+    BoardPermission.STICKIED_DISCUSSION,
     BoardPermission.DELETE_DISCUSSION,
     BoardPermission.MEMBERS_SETTINGS,
     BoardPermission.CLOSE_REPLY,
