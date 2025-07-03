@@ -77,6 +77,7 @@ export const useDiscussionDisplayStore = create<DiscussionDisplayState>()(
       },
       
       setSortBy: (sort, pageId) => {
+        // 否则获取当前页面的类型作为 pageId
         const currentPageId = pageId || getCurrentPageId();
         set((state) => ({
           preferences: {

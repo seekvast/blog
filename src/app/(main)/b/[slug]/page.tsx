@@ -479,7 +479,10 @@ function BoardContent() {
                           className="text-xs px-2 py-1 rounded-full bg-gray-100"
                           onClick={() => handleHide(child)}
                         >
-                          {child.user_hidden === 1 ? "取消隐藏" : "隐藏"}
+                          {child.user_hidden ? 
+                            (child.user_hidden.status === 1 ? "取消隐藏" : "隐藏") : 
+                            (child.is_hidden === 1 ? "取消隐藏" : "隐藏")
+                          }
                         </button>
                       </div>
                       <span className="text-sm text-muted-foreground">

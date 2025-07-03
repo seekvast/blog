@@ -39,6 +39,13 @@ export interface Board {
   };
 }
 
+export interface UserHidden {
+    board_id: number;
+    user_hashid: string;
+    status: number;
+    child_id: number;
+}
+
 export interface BoardChild {
   board_id: number;
   name: string;
@@ -47,7 +54,7 @@ export interface BoardChild {
   sort: number;
   id: number;
   is_hidden: number;
-  user_hidden: number;
+  user_hidden: UserHidden;
   moderator_only: number;
 }
 
