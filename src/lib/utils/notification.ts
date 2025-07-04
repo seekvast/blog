@@ -4,6 +4,7 @@ export interface NotificationAvatarInfo {
   href: string;
   avatarUrl: string;
   username: string;
+  nickname: string;
   hashid: string;
 }
 
@@ -16,6 +17,7 @@ export function getNotificationAvatar(
     href: `/u/${from_user.username}?hashid=${from_user.hashid}`,
     avatarUrl: from_user.avatar_url || "",
     username: from_user.username,
+    nickname: from_user.nickname,
     hashid: from_user.hashid,
   };
 
@@ -26,6 +28,7 @@ export function getNotificationAvatar(
         href: `/b/${notification.subject_slug}?bid=${data.board_id || ""}`,
         avatarUrl: notification.subject.avatar || "",
         username: notification.subject.name || "board",
+        nickname: "board",
         hashid: data.slug || "",
       };
     case "account":
@@ -34,6 +37,7 @@ export function getNotificationAvatar(
         href: "/notifications",
         avatarUrl: "/logo.png",
         username: "system",
+        nickname: "system",
         hashid: "",
       };
     default:

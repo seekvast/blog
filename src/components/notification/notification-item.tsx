@@ -55,10 +55,10 @@ export function NotificationItem({
             <Avatar className="h-10 w-10 shrink-0">
               <AvatarImage
                 src={avatarInfo.avatarUrl}
-                alt={avatarInfo.username}
+                alt={avatarInfo.nickname}
               />
               <AvatarFallback>
-                {avatarInfo.username.slice(0, 1).toUpperCase()}
+                {avatarInfo.nickname.slice(0, 1).toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </Link>

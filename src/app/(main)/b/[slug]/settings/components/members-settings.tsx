@@ -174,11 +174,11 @@ export function MembersSettings({ board }: SettingsProps) {
             <div className="flex items-start gap-3">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={member.avatar_url} />
-                <AvatarFallback>{member.username[0].toUpperCase()}</AvatarFallback>
+                <AvatarFallback>{member.nickname[0].toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-1 font-medium">
-                  {member.username}
+                  {member.nickname}
                   {/* 身份组徽章 */}
                   <UserRoleBadge 
                     boardUser={{ user_role: member.user_role } as any} 
@@ -186,7 +186,7 @@ export function MembersSettings({ board }: SettingsProps) {
                   />
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  @{member.nickname}
+                  @{member.username}
                 </div>
                 {/* 调整统计顺序和间距 */}
                 <div className="flex gap-4 text-sm text-muted-foreground mt-1">

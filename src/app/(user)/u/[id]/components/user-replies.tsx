@@ -92,10 +92,10 @@ export function UserReplies({ hashid }: UserRepliesProps) {
                 <Avatar className="h-12 w-12 lg:h-16 lg:w-16">
                   <AvatarImage
                     src={reply.user.avatar_url}
-                    alt={reply.user.username}
+                    alt={reply.user.nickname}
                   />
                   <AvatarFallback>
-                    {reply.user.username[0].toUpperCase()}
+                    {reply.user.nickname[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </div>

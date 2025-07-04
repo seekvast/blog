@@ -123,7 +123,7 @@ export function Header({ className }: HeaderProps) {
                     <Avatar className="h-8 w-8 cursor-pointer ring-offset-background transition-opacity hover:opacity-80">
                       <AvatarImage src={user.avatar_url || ""} />
                       <AvatarFallback>
-                        {user.username?.[0].toUpperCase() || "U"}
+                        {user.nickname?.[0].toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
                   </DropdownMenuTrigger>

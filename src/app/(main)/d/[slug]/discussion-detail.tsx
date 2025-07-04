@@ -583,10 +583,10 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 <Avatar className="h-12 w-12 md:h-14 md:w-14 flex-shrink-0">
                   <AvatarImage
                     src={currentDiscussion.user.avatar_url}
-                    alt={currentDiscussion.user.username}
+                    alt={currentDiscussion.user.nickname}
                   />
                   <AvatarFallback>
-                    {currentDiscussion.user.username[0].toUpperCase()}
+                    {currentDiscussion.user.nickname[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </Link>
@@ -598,11 +598,11 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                       href={`/u/${currentDiscussion.user.username}?hashid=${currentDiscussion.user.hashid}`}
                     >
                       <span className="text-base md:text-lg font-medium truncate">
-                        {currentDiscussion.user.username}
+                        {currentDiscussion.user.nickname}
                       </span>
                     </Link>
                     <div className="flex items-center space-x-2 min-w-0 text-muted-foreground">
-                      <span>@{currentDiscussion.user.nickname}</span>
+                      <span>@{currentDiscussion.user.username}</span>
                       <UserRoleBadge 
                         boardUser={currentDiscussion.board_user} 
                         board={currentDiscussion.board} 

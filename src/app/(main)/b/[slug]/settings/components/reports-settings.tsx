@@ -285,7 +285,7 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
                   {report.reason_text}
                 </p>
                 <div className="mt-2 text-sm text-muted-foreground">
-                  <div>检举人：{report.reporter?.username || "未知用户"}</div>
+                  <div>检举人：{report.reporter?.nickname || "未知用户"}</div>
                   <div>检举时间：{formatDate(report.created_at)}</div>
                   <div>
                     状态：

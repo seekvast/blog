@@ -107,10 +107,10 @@ export const DiscussionItem = React.forwardRef<
           <Avatar className="h-10 w-10 flex-shrink-0">
             <AvatarImage
               src={discussion.user.avatar_url}
-              alt={discussion.user.username}
+              alt={discussion.user.nickname}
             />
             <AvatarFallback>
-              {discussion.user.username[0].toUpperCase()}
+              {discussion.user.nickname[0].toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </Link>
