@@ -1,5 +1,5 @@
 import { createMetadata } from './factory';
-import { getFallbackImage } from './utils';
+import { getFallbackImage, stripHtml } from './utils';
 
 type Post = {
   title: string;
@@ -16,12 +16,12 @@ export const getPostMetadata = (post: Post, board?: Board, locale?: string) => {
   const image = getFallbackImage([
     post.cover_image,
     board?.avatar,
-    '/logo-square.jpg'
+    '/logo.svg'
   ]);
 
   return createMetadata({
     title: post.title,
-    description: post.content.substring(0, 160),
+    description: stripHtml(post.content).substring(0, 300),
     image: image,
     type: 'article',
     locale,

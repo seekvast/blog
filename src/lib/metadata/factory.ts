@@ -17,7 +17,7 @@ export const createMetadata = (params: MetadataParams = {}): Metadata => {
   const separator = getSeparator();
   const defaultTitle = siteConfig.name;
   const defaultDescription = "Kater";
-  const defaultImage = "/logo-square.jpg";
+  const defaultImage = "/logo.svg";
 
   const title = params.title
     ? `${params.title}${separator}${defaultTitle}`
