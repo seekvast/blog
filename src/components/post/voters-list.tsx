@@ -67,8 +67,8 @@ export const VotersList = ({ postId }: VotersListProps) => {
   const totalVoters = data.pages[0]?.total || 0;
 
   return (
-    <div className="py-2">
-      <ScrollArea className="max-h-[300px]">
+    <div>
+      <ScrollArea className="h-[400px]">
         <InfiniteScroll
           loading={isFetchingNextPage}
           hasMore={!!hasNextPage}
@@ -78,19 +78,33 @@ export const VotersList = ({ postId }: VotersListProps) => {
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
             </div>
           }
-          endMessage={""}
+          endMessage={
+            allVoters.length > 10 && (
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                没有更多了
+              </p>
+            )
+          }
         >
-          <div className="flex flex-wrap">
+          <div className="flex flex-col p-1">
             {allVoters.map((voter: PostVoter) => (
               <Link
                 key={voter.id}
-                className="flex items-center p-2"
+                className="flex items-center p-2 rounded-md transition-colors hover:bg-muted"
                 href={`/u/${voter.user.username}?hashid=${voter.user.hashid}`}
               >
-                <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
+                <Avatar className="h-12 w-12 md:h-14 md:w-14 flex-shrink-0">
                   <AvatarImage src={voter.user.avatar_url} />
-                  <AvatarFallback>{voter.user.nickname[0].toUpperCase()}</AvatarFallback>
+                  <AvatarFallback>
+                    {voter.user.nickname?.[0]?.toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
+                <div className="ml-3">
+                  <div className="font-semibold">{voter.user.nickname}</div>
+                  <div className="text-sm text-muted-foreground">
+                    @{voter.user.username}
+                  </div>
+                </div>
               </Link>
             ))}
           </div>
