@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
+import { useCountdown } from "@/store/countdown-store";
 import { Turnstile } from "@marsidev/react-turnstile";
 
 const TURNSTILE_SITE_KEY =
@@ -37,6 +38,7 @@ export function ForgotPasswordModal({
   const [isValid, setIsValid] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const { startCountdown } = useCountdown("forgot-password");
 
   useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -53,13 +55,14 @@ export function ForgotPasswordModal({
     try {
       await api.auth.forgot({
         email,
-        turnstile_token: turnstileToken
+        turnstile_token: turnstileToken,
       });
 
       setIsSuccess(true);
       setEmail("");
       setTurnstileToken(null);
       setIsValid(false);
+      startCountdown(60);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -96,14 +99,19 @@ export function ForgotPasswordModal({
   }, [open]);
 
   return (
-    <Dialog open={open} onOpenChange={(value) => {
-      onOpenChange(value);
-    }}>
+    <Dialog
+      open={open}
+      onOpenChange={(value) => {
+        onOpenChange(value);
+      }}
+    >
       <DialogContent className="max-w-[480px] p-8">
         {!isSuccess ? (
           <>
             <DialogHeader className="mb-6">
-              <DialogTitle className="text-3xl font-medium">忘记密码</DialogTitle>
+              <DialogTitle className="text-3xl font-medium">
+                忘记密码
+              </DialogTitle>
               <div className="text-sm text-muted-foreground">
                 请输入忘记密码的邮箱
               </div>
@@ -192,20 +200,20 @@ export function ForgotPasswordModal({
             </form>
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center py-6">
-            <div className="mb-6">
-              <Image 
-                src="/forgot-password.svg" 
-                alt="邮件已发送" 
-                width={180} 
-                height={180} 
+          <div className="flex flex-col items-center justify-center py-4">
+            <div className="flex flex-col items-center justify-center">
+              <Image
+                src="/forgot-password.svg"
+                alt="邮件已发送"
+                width={180}
+                height={180}
+                className="mb-4"
               />
+              <h2 className="text-2xl font-medium mb-4">邮件已发送</h2>
+              <p className="text-center text-muted-foreground mb-8">
+                若該信箱已註冊，我們會寄出密碼重設確認信。請檢查收件匣並依照指示完成更改。
+              </p>
             </div>
-            <h2 className="text-2xl font-medium mb-2">邮件已发送</h2>
-            <p className="text-center text-muted-foreground mb-8">
-              请检查您的邮箱 <span className="font-medium">{email}</span>，<br />
-              按照邮件中的指引重置密码
-            </p>
             <Button
               type="button"
               className="w-full h-12"

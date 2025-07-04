@@ -62,8 +62,8 @@ const formSchema = z.object({
     .min(2, "昵称至少需要2个字符")
     .max(16, "昵称最多16个字符")
     .regex(/^[a-zA-Z0-9_]+$/, "昵称只能包含字母、数字和下划线"),
-  avatar_url: z.string().max(500, "头像URL最多500个字符").optional(),
-  cover: z.string().max(500, "头像URL最多500个字符").optional(),
+  avatar_url: z.string().max(500, "头像URL最多500个字符").nullable().optional(),
+  cover: z.string().max(500, "头像URL最多500个字符").nullable().optional(),
   gender: z.number().optional(),
   //   birthday: z.string().optional(),
 });

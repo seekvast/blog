@@ -49,7 +49,7 @@ export function LoginModal({
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
-  const { remainingSeconds, isActive, startCountdown } = useCountdown("forgot-password-btn");
+  const { remainingSeconds, isActive, startCountdown } = useCountdown("forgot-password");
 
   useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -209,7 +209,6 @@ export function LoginModal({
                 onClick={() => {
                   if (!isActive) {
                     setIsForgotPasswordOpen(true);
-                    startCountdown(60); // 60秒倒計時
                   }
                 }}
                 disabled={isActive}
