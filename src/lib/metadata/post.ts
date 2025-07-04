@@ -16,7 +16,7 @@ export const getPostMetadata = (post: Post, board?: Board, locale?: string) => {
   const image = getFallbackImage([
     post.cover_image,
     board?.avatar,
-    '/logo.svg'
+    '/logo-square.jpg'
   ]);
 
   return createMetadata({
