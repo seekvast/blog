@@ -264,32 +264,109 @@
     }
   },
   "operationLogs": {
-    "discussion.delete": "{{operator_name}} 已刪除 {{username}} 所發表的 {{title}}",
-    "post.delete": "{{operator_name}} 已刪除 {{username}} 在 {{title}}",
-    "user.approve": "{{operator_name}} {{status}}了 {{username}}",
-    "user.mute": "{{operator_name}} 禁言 {{username}} {{days}} 天",
-    "board_child.create": "{{operator_name}} 新增 {{name}}",
-    "board_child.delete": "{{operator_name}} 刪除 {{name}}",
-    "user.role": "{{operator_name}} 將 {{username}} 的身份組從{{old_value}}變更為 {{new_value}}",
-    "user.kick": "{{operator_name}} 踢出 {{username}}",
-    "user.ban": "{{operator_name}} 封鎖 {{username}}",
-    "user.unban": "{{operator_name}} 撤銷封鎖 {{username}}",
-    "user.unmute": "{{operator_name}} 撤銷禁言 {{username}}",
-    
-    "board.create": "{{operator_name}} 建立了看板 {{name}}",
-    "board.delete": "{{operator_name}} 刪除了看板 {{name}}",
-    "board.request_delete": "{{operator_name}} 請求刪除看板 {{name}}",
-    "board.cancel_delete": "{{operator_name}} 取消刪除看板 {{name}}",
-    "board.restore": "{{operator_name}} 恢復了看板 {{name}}",
-    "board_rule.create": "{{operator_name}} 新增了 {{title}}",
-    "board_rule.delete": "{{operator_name}} 刪除了 {{title}}",
-    "board_rule.update": "{{operator_name}} 對 {{title}} 的標題或內容進行變更",
-    "board_child.update_default": "{{operator_name}} 將 {{name}} 設定為 默认子版",
-    "board_child.update_hidden": "{{operator_name}} 將 {{name}} 設定為 隐藏子版",
-    "board_child.update_moderator_only": "{{operator_name}} 將 {{name}} 設定為 管理人員才可發表",
-    "board_child.unset_default": "{{operator_name}} 將 {{name}} 設定為 非默认子版",
-    "board_child.unhide": "{{operator_name}} 將 {{name}} 子版取消隐藏",
-    "board_child.unset_moderator_only": "{{operator_name}} 將 {{name}} 設定為所有人可發表",
-    "default_log": "{{operator_name}} 執行了操作：{{action_code}}。詳情：{{details}}"
+    "discussion.delete": {
+      "title": "{{operator_name}} 已刪除 {{username}} 所發表的 {{title}}",
+      "content": "操作理由：{{reason}}"
+    },
+    "post.delete": {
+      "title": "{{operator_name}} 已刪除 {{username}} 在 {{title}}",
+      "content": "操作理由：{{reason}}"
+    },
+    "user.approve": {
+      "title": "{{operator_name}} {{status}} 了 {{username}} 的加入申请",
+      "content": ""
+    },
+    "user.mute": {
+      "title": "{{operator_name}} 禁言 {{username}} {{days}} 天",
+      "content": "操作理由：{{reason}}"
+    },
+    "board_child.create": {
+      "title": "{{operator_name}} 新增 {{name}}",
+      "content": ""
+    },
+    "board_child.delete": {
+      "title": "{{operator_name}} 刪除 {{name}}",
+      "content": ""
+    },
+    "user.role": {
+      "title": "{{operator_name}} 將 {{username}} 的身份組從{{old_value}}變更為 {{new_value}}",
+      "content": "操作理由：{{reason}}"
+    },
+    "user.kick": {
+      "title": "{{operator_name}} 踢出 {{username}}",
+      "content": "操作理由：{{reason}}"
+    },
+    "user.ban": {
+      "title": "{{operator_name}} 对 {{username}} 进行封禁",
+      "content": "操作理由：{{reason}}"
+    },
+    "user.unban": {
+      "title": "{{operator_name}} 撤銷封鎖 {{username}}",
+      "content": ""
+    },
+    "user.unmute": {
+      "title": "{{operator_name}} 撤銷禁言 {{username}}",
+      "content": ""
+    },
+    "board.create": {
+      "title": "{{operator_name}} 建立了看板 {{name}}",
+      "content": ""
+    },
+    "board.delete": {
+      "title": "{{operator_name}} 刪除了看板 {{name}}",
+      "content": ""
+    },
+    "board.request_delete": {
+      "title": "{{operator_name}} 請求刪除看板 {{name}}",
+      "content": ""
+    },
+    "board.cancel_delete": {
+      "title": "{{operator_name}} 取消刪除看板 {{name}}",
+      "content": ""
+    },
+    "board.restore": {
+      "title": "{{operator_name}} 恢復了看板 {{name}}",
+      "content": ""
+    },
+    "board_rule.create": {
+      "title": "{{operator_name}} 新增了 {{title}}",
+      "content": ""
+    },
+    "board_rule.delete": {
+      "title": "{{operator_name}} 刪除了 {{title}}",
+      "content": ""
+    },
+    "board_rule.update": {
+      "title": "{{operator_name}} 對 {{title}} 的標題或內容進行變更",
+      "content": ""
+    },
+    "board_child.update_default": {
+      "title": "{{operator_name}} 將 {{name}} 設定為 默认子版",
+      "content": ""
+    },
+    "board_child.update_hidden": {
+      "title": "{{operator_name}} 將 {{name}} 設定為 隐藏子版",
+      "content": ""
+    },
+    "board_child.update_moderator_only": {
+      "title": "{{operator_name}} 將 {{name}} 設定為 管理人員才可發表",
+      "content": ""
+    },
+    "board_child.unset_default": {
+      "title": "{{operator_name}} 將 {{name}} 設定為 非默认子版",
+      "content": ""
+    },
+    "board_child.unhide": {
+      "title": "{{operator_name}} 將 {{name}} 子版取消隐藏",
+      "content": ""
+    },
+    "board_child.unset_moderator_only": {
+      "title": "{{operator_name}} 將 {{name}} 設定為所有人可發表",
+      "content": ""
+    },
+    "default_log": {
+      "title": "{{operator_name}} 執行了操作：{{action_code}}。詳情：{{details}}",
+      "content": ""
+    }
   }
 }

@@ -37,7 +37,8 @@ export function OperationLogs({ board }: OperationLogsProps) {
   }>({});
   const [operatorOptions, setOperatorOptions] = useState<string[]>([]);
   const [actionOptions, setActionOptions] = useState<string[]>([]);
-  const { renderDescription, getOperationType } = useOperationLogRenderer();
+  const { renderDescription, getOperationType, renderTitle, renderContent } =
+    useOperationLogRenderer();
 
   const fetchOperationLogs = async (
     page: number = 1,
@@ -187,13 +188,17 @@ export function OperationLogs({ board }: OperationLogsProps) {
         ) : data && data.items.length > 0 ? (
           data.items.map((log) => {
             const operationType = getOperationType(log);
+            const hasContent = renderContent(log);
+
             return (
-              <div
-                key={log.id}
-                className="flex items-start justify-between py-4 px-4"
-              >
-                {/* 头像 */}
-                <div className="flex items-start gap-3">
+              <div key={log.id} className="flex items-start py-4 px-4">
+                {/* 左侧：头像和内容 */}
+                <div
+                  className={cn(
+                    "flex gap-3 flex-1",
+                    hasContent ? "items-start" : "items-center"
+                  )}
+                >
                   <Avatar className="h-10 w-10 mt-1">
                     <AvatarImage
                       src={log.operator_user?.avatar_url || ""}
@@ -203,34 +208,37 @@ export function OperationLogs({ board }: OperationLogsProps) {
                       {log.operator_user?.nickname?.[0]?.toUpperCase() || "?"}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex flex-col gap-1 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 min-w-0">
-                      {/* 昵称和分类标签 */}
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-blue-700 whitespace-nowrap">
-                          {log.operator_user?.nickname}
-                        </span>
-                        <Badge className={getTypeColor(operationType)}>
-                          {getTypeLabel(operationType)}
-                        </Badge>
-                      </div>
-                      {/* 操作内容 */}
-                      <span className="text-base truncate min-w-0">
-                        {renderDescription(log)}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-900">
+                        {renderTitle(log)}
                       </span>
+
+                      <Badge
+                        className={cn(
+                          getTypeColor(operationType),
+                          "text-xs px-2 py-0.5"
+                        )}
+                      >
+                        {getTypeLabel(operationType)}
+                      </Badge>
                     </div>
-                    {/* 详情/理由 */}
-                    {log.ext?.reason && (
-                      <div className="text-xs text-muted-foreground mt-1 truncate">
-                        操作理由: {log.ext.reason}
+
+                    {hasContent && (
+                      <div className="space-y-1">
+                        <div className="text-xs text-muted-foreground leading-relaxed">
+                          {renderContent(log)}
+                        </div>
                       </div>
                     )}
                   </div>
                 </div>
-                {/* 时间 */}
-                <span className="text-xs text-muted-foreground whitespace-nowrap ml-4 mt-1">
-                  {formatDate(log.created_at, "YYYY年MM月DD日 HH:mm")}
-                </span>
+
+                <div className={cn("ml-4", hasContent ? "mt-1" : "mt-0")}>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {formatDate(log.created_at)}
+                  </span>
+                </div>
               </div>
             );
           })
@@ -240,8 +248,6 @@ export function OperationLogs({ board }: OperationLogsProps) {
           </div>
         )}
       </div>
-      {/* 分页（如有需要可加） */}
-      {/* TODO: 分页控件 */}
     </div>
   );
 }
