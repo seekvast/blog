@@ -22,14 +22,15 @@ import {
   OPERATION_CATEGORY_MAPPING,
   OPERATION_ACTION_MAPPING,
 } from "@/constants/operation-log";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { InfiniteScroll } from "@/components/ui/infinite-scroll";
+import { useToast } from "@/components/ui/use-toast";
 
 interface OperationLogsProps {
   board: Board;
 }
 
 export function OperationLogs({ board }: OperationLogsProps) {
-  const [data, setData] = useState<Pagination<OperationLog> | null>(null);
-  const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState<{
     operator?: string;
     action?: string;
@@ -39,62 +40,83 @@ export function OperationLogs({ board }: OperationLogsProps) {
   const [actionOptions, setActionOptions] = useState<string[]>([]);
   const { renderDescription, getOperationType, renderTitle, renderContent } =
     useOperationLogRenderer();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  const fetchOperationLogs = async (
-    page: number = 1,
-    newFilters?: { operator?: string; action?: string; category?: string }
-  ) => {
-    setLoading(true);
-    try {
-      const response = await api.boards.operationLogs({
-        board_id: board.id,
-        page,
-        per_page: 20,
-        ...newFilters,
-      });
-      setData(response);
-      // 自动收集操作者和操作类型选项
-      if (response.items) {
-        setOperatorOptions([
-          ...new Set(
-            response.items
-              .map((item) => item.operator_user?.nickname)
-              .filter((nickname): nickname is string => Boolean(nickname))
-          ),
-        ]);
-        setActionOptions([
-          ...new Set(response.items.map((item) => item.action).filter(Boolean)),
-        ]);
+  // 使用 useInfiniteQuery 替代原来的 fetchOperationLogs
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ["operation-logs", board.id, filters],
+    queryFn: async ({ pageParam = 1 }) => {
+      try {
+        const response = await api.boards.operationLogs({
+          board_id: board.id,
+          page: pageParam,
+          per_page: 10,
+          ...filters,
+        });
+
+        // 更新操作者和操作类型选项（仅在第一页时）
+        if (pageParam === 1 && response.items) {
+          setOperatorOptions([
+            ...new Set(
+              response.items
+                .map((item) => item.operator_user?.nickname)
+                .filter((nickname): nickname is string => Boolean(nickname))
+            ),
+          ]);
+          setActionOptions([
+            ...new Set(
+              response.items
+                .map((item) => item.action)
+                .filter((action): action is string => Boolean(action))
+            ),
+          ]);
+        }
+
+        return response;
+      } catch (error) {
+        console.error("Error loading operation logs:", error);
+        toast({
+          variant: "destructive",
+          title: "加载失败",
+          description: "无法加载操作日志，请重试",
+        });
+        throw error;
       }
-    } catch (error) {
-      setData({
-        code: 200,
-        items: [],
-        total: 0,
-        per_page: 20,
-        current_page: page,
-        last_page: 1,
-        message: "success",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchOperationLogs(1, filters);
-    // eslint-disable-next-line
-  }, [board.id]);
-
-  const handlePageChange = (page: number) => {
-    fetchOperationLogs(page, filters);
-  };
+    },
+    getNextPageParam: (lastPage) => {
+      if (lastPage.current_page < lastPage.last_page) {
+        return lastPage.current_page + 1;
+      }
+      return undefined;
+    },
+    initialPageParam: 1,
+  });
 
   const handleFilterChange = (key: string, value: string) => {
     const newFilters = { ...filters, [key]: value || undefined };
     setFilters(newFilters);
-    fetchOperationLogs(1, newFilters);
   };
+
+  // 加载更多
+  const handleLoadMore = () => {
+    if (!isFetchingNextPage && hasNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  // 从分页数据中提取所有操作日志
+  const operationLogs = React.useMemo(() => {
+    if (!data) return [];
+    return data.pages.flatMap((page) => page.items);
+  }, [data]);
 
   // 获取操作分类的颜色
   const getTypeColor = (type: string) => {
@@ -141,16 +163,13 @@ export function OperationLogs({ board }: OperationLogsProps) {
         </div>
         <div className="flex gap-2 flex-wrap">
           <Select
-            value={filters.operator || "__all__"}
-            onValueChange={(v) =>
-              handleFilterChange("operator", v === "__all__" ? "" : v)
-            }
+            value={filters.operator || ""}
+            onValueChange={(v) => handleFilterChange("operator", v)}
           >
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="操作者" />
+              <SelectValue placeholder="全部操作者" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="__all__">全部操作者</SelectItem>
               {operatorOptions.map((op) => (
                 <SelectItem key={op} value={op}>
                   {op}
@@ -160,16 +179,13 @@ export function OperationLogs({ board }: OperationLogsProps) {
           </Select>
 
           <Select
-            value={filters.category || "__all__"}
-            onValueChange={(v) =>
-              handleFilterChange("category", v === "__all__" ? "" : v)
-            }
+            value={filters.category || ""}
+            onValueChange={(v) => handleFilterChange("category", v)}
           >
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="操作分类" />
+              <SelectValue placeholder="全部操作" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="__all__">全部操作</SelectItem>
               {categoryOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -179,14 +195,18 @@ export function OperationLogs({ board }: OperationLogsProps) {
           </Select>
         </div>
       </div>
-      {/* 日志列表 */}
-      <div className="space-y-0 divide-y bg-background rounded-lg">
-        {loading ? (
-          <div className="text-center text-muted-foreground py-8">
-            加载中...
-          </div>
-        ) : data && data.items.length > 0 ? (
-          data.items.map((log) => {
+
+      {/* 无限滚动的日志列表 */}
+      <InfiniteScroll
+        loading={isLoading || isFetchingNextPage}
+        hasMore={!!hasNextPage}
+        onLoadMore={handleLoadMore}
+        className="space-y-0 divide-y bg-background rounded-lg"
+      >
+        {operationLogs.length === 0 ? (
+          <div className="text-center text-muted-foreground py-8">暂无数据</div>
+        ) : (
+          operationLogs.map((log) => {
             const operationType = getOperationType(log);
             const hasContent = renderContent(log);
 
@@ -210,9 +230,7 @@ export function OperationLogs({ board }: OperationLogsProps) {
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-900">
-                        {renderTitle(log)}
-                      </span>
+                      <span className="text-gray-900">{renderTitle(log)}</span>
 
                       <Badge
                         className={cn(
@@ -242,12 +260,8 @@ export function OperationLogs({ board }: OperationLogsProps) {
               </div>
             );
           })
-        ) : (
-          <div className="text-center text-muted-foreground py-8">
-            暂无操作记录
-          </div>
         )}
-      </div>
+      </InfiniteScroll>
     </div>
   );
 }
