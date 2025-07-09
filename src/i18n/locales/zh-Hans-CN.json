@@ -262,5 +262,30 @@
       "title": "有 {{count}} 筆待處理的舉報內容{{name}}",
       "content": ""
     }
+  },
+  "operationLogs": {
+    "discussion.delete": "{{operator_name}} 已刪除 {{username}} 所發表的 {{title}}",
+    "post.delete": "{{operator_name}} 已刪除 {{username}} 在 {{title}}",
+    "user.approve": "{{operator_name}} {{status}}了 {{username}}",
+    "user.mute": "{{operator_name}} 禁言 {{username}} {{days}} 天",
+    "board_child.create": "{{operator_name}} 新增 {{name}}",
+    "board_child.delete": "{{operator_name}} 刪除 {{name}}",
+    "user.role": "{{operator_name}} 將 {{username}} 的身份組從{{old_value}}變更為 {{new_value}}",
+    "user.kick": "{{operator_name}} 踢出 {{username}}",
+    "user.ban": "{{operator_name}} 封鎖 {{username}}",
+    "user.unban": "{{operator_name}} 撤銷封鎖 {{username}}",
+    "user.unmute": "{{operator_name}} 撤銷禁言 {{username}}",
+    "board.create": "{{operator_name}} 建立了看板 {{name}}",
+    "board.delete": "{{operator_name}} 刪除了看板 {{name}}",
+    "board.request_delete": "{{operator_name}} 請求刪除看板 {{name}}",
+    "board.cancel_delete": "{{operator_name}} 取消刪除看板 {{name}}",
+    "board.restore": "{{operator_name}} 恢復了看板 {{name}}",
+    "board_rule.create": "{{operator_name}} 新增了 {{title}}",
+    "board_rule.delete": "{{operator_name}} 刪除了 {{title}}",
+    "board_rule.update": "{{operator_name}} 對 {{title}} 的標題或內容進行變更",
+    "board_child.update_default": "{{operator_name}} 將 {{name}} 設定為 {{is_default}}",
+    "board_child.update_hidden": "{{operator_name}} 將 {{name}} 設定為 {{is_hidden}}",
+    "board_child.update_moderator_only": "{{operator_name}} 將 {{name}} 設定為 {{moderator_only}}",
+    "default_log": "{{operator_name}} 執行了操作：{{action_code}}。詳情：{{details}}"
   }
 }

@@ -22,6 +22,7 @@ import type {
   Draft,
   Response,
   PostVoter,
+  OperationLog,
 } from "@/types";
 
 export interface ApiOptions {
@@ -59,7 +60,8 @@ export function createApi(options: ApiOptions = {}) {
         http.patch<User>(`${prefix}/user/birthday`, data),
       changePassword: (data: any) =>
         http.patch<void>(`${prefix}/user/password`, data),
-      subscribeBoard: (data: any) => http.post<any>(`${prefix}/user/board`, data),
+      subscribeBoard: (data: any) =>
+        http.post<any>(`${prefix}/user/board`, data),
       saveCategory: (data: any) =>
         http.post<any>(`${prefix}/user/category`, data),
       savePreferences: (data: any) =>
@@ -99,7 +101,8 @@ export function createApi(options: ApiOptions = {}) {
       create: (data: any) => http.post<Board>(`${prefix}/board`, data),
       update: (data: any) => http.post<Board>(`${prefix}/board`, data),
       delete: (id: number) => http.delete<void>(`${prefix}/board`, { id }),
-      revokeDelete: (id: number) => http.patch<void>(`${prefix}/board/revoke`, { id }),
+      revokeDelete: (id: number) =>
+        http.patch<void>(`${prefix}/board/revoke`, { id }),
       saveChild: (data: any) => http.post<Board>(`${prefix}/board/child`, data),
       updateChild: (slug: string, data: any) =>
         http.patch<Board>(`${prefix}/board/${slug}`, data),
@@ -123,15 +126,20 @@ export function createApi(options: ApiOptions = {}) {
       getManagers: (data: any) =>
         http.get<BoardUser[]>(`${prefix}/board/managers`, data),
       approve: (data: any) => http.post<any>(`${prefix}/board/approve`, data),
-      subscribe: (data: any) => http.post<any>(`${prefix}/board/subscribe`, data),
+      subscribe: (data: any) =>
+        http.post<any>(`${prefix}/board/subscribe`, data),
       recommend: (params?: QueryParams) =>
         http.get<Board[]>(`${prefix}/board/recommend`, params, { next }),
       hiddenChild: (data: any) =>
         http.post<any>(`${prefix}/board/hidden-child`, data),
       block: (data: any) =>
-            http.post<Response<any>>(`${prefix}/board/block`, data),
+        http.post<Response<any>>(`${prefix}/board/block`, data),
       unsubscribe: (data: any) =>
-            http.post<Response<any>>(`${prefix}/board/unsubscribe`, data),
+        http.post<Response<any>>(`${prefix}/board/unsubscribe`, data),
+      operationLogs: (data: any) =>
+        http.get<Pagination<OperationLog>>(`${prefix}/board/logs`, data, {
+          next,
+        }),
     },
 
     discussions: {
@@ -144,7 +152,8 @@ export function createApi(options: ApiOptions = {}) {
           }
         );
       },
-      getSticky: (data: any) => http.get<Discussion[]>(`${prefix}/discussion/sticky`, data),
+      getSticky: (data: any) =>
+        http.get<Discussion[]>(`${prefix}/discussion/sticky`, data),
 
       get: (slug: string) =>
         http.get<Discussion>(`${prefix}/discussion?slug=${slug}`, undefined, {
@@ -249,25 +258,31 @@ export function createApi(options: ApiOptions = {}) {
           next,
         }),
       read: (data: any) => http.get<any>(`${prefix}/notification/read`, data),
-      getTemplates: () => 
-        http.get<{templates: Record<string, any>, version: string, timestamp: number}>(
-          `${prefix}/notification/templates`,
-          undefined,
-          { next }
-        ),
+      getTemplates: () =>
+        http.get<{
+          templates: Record<string, any>;
+          version: string;
+          timestamp: number;
+        }>(`${prefix}/notification/templates`, undefined, { next }),
       readAll: () => http.get<any>(`${prefix}/notification/read-all`),
-        clear: () => http.get<any>(`${prefix}/notification/clear`),
+      clear: () => http.get<any>(`${prefix}/notification/clear`),
       unreadCount: () => http.get<any>(`${prefix}/notification/unread-count`),
     },
     auth: {
       login: (data: any) => http.post<User>(`${prefix}/login`, data),
       register: (data: any) => http.post<User>(`${prefix}/user`, data),
-      verifyTurnstile: (token: string) => 
-        http.post<{success: boolean}>(`/api/auth/verify-turnstile`, { token }),
-      forgot: (data: { email: string, turnstile_token: string }) => 
-            http.post<{ success: boolean }>(`${prefix}/user/forgot`, data),
-      reset: (data: { token: string, password: string, confirm_password: string }) => 
-            http.post<{ success: boolean }>(`${prefix}/user/reset-password`, data),
+      verifyTurnstile: (token: string) =>
+        http.post<{ success: boolean }>(`/api/auth/verify-turnstile`, {
+          token,
+        }),
+      forgot: (data: { email: string; turnstile_token: string }) =>
+        http.post<{ success: boolean }>(`${prefix}/user/forgot`, data),
+      reset: (data: {
+        token: string;
+        password: string;
+        confirm_password: string;
+      }) =>
+        http.post<{ success: boolean }>(`${prefix}/user/reset-password`, data),
     },
   };
 }

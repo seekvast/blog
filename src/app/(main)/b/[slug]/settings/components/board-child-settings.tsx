@@ -118,12 +118,6 @@ function SortableBoardChildItem({
       </div>
 
       <div className="flex gap-4 items-center text-gray-600">
-        <button
-          className="text-xs px-2 py-1 rounded-full bg-gray-100"
-          onClick={handleHide}
-        >
-          {child.is_hidden ? "取消隐藏" : "隐藏"}
-        </button>
         <button className="text-primary" onClick={handleEdit}>
           <Pencil className="h-4 w-4" />
         </button>

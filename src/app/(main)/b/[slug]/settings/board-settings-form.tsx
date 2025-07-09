@@ -8,6 +8,8 @@ import { BoardChildSettings } from "./components/board-child-settings";
 import { MembersSettings } from "./components/members-settings";
 import { ReportsSettings } from "./components/reports-settings";
 import { BlocklistSettings } from "./components/blocklist-settings";
+import { OperationLogs } from "./components/operation-logs";
+
 import { useDevice } from "@/hooks/use-device";
 
 import { Board as BoardType } from "@/types";
@@ -82,7 +84,9 @@ export function BoardSettingsForm({
       case "reports":
         return <ReportsSettings board={initBoard} />;
       case "blocklist":
-        return <BlocklistSettings board={initBoard} />;
+            return <BlocklistSettings board={initBoard} />;
+      case "records":
+        return <OperationLogs board={initBoard} />;
       default:
         return null;
     }

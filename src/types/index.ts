@@ -5,6 +5,7 @@ export * from "./user";
 export * from "./report";
 export * from "./notification";
 export * from "./draft";
+export * from "./operation-log";
 
 export interface CreateDiscussionDto {
   title: string;

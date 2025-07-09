@@ -91,7 +91,7 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
   // 处理申请
   const handleApplication = async (
     applicationId: number,
-    status: 1 | 2 | 3
+    status: 1 | 2 | 4
   ) => {
     await api.boards.approve({
       history_id: applicationId,
@@ -208,8 +208,6 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
           </SelectContent>
         </Select>
 
-
-
         <Button
           size="sm"
           variant="secondary"
@@ -322,7 +320,7 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
                         查看个人主页
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleApplication(application.id, 3)}
+                        onClick={() => handleApplication(application.id, 4)}
                         className="cursor-pointer text-destructive focus:text-destructive"
                       >
                         <Ban className="mr-2 h-4 w-4" />
