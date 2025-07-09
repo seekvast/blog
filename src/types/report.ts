@@ -7,6 +7,7 @@ export interface Report {
   user_hashid: string;
   target_id: number;
   target_type: string;
+  target: number;
   reason: string;
   reason_text: string;
   status: number;

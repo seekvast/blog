@@ -138,6 +138,7 @@ export function CommentActions({ comment, onEdit }: CommentActionsProps) {
         title="向看板管理員檢舉"
         form={{
           user_hashid: comment.user.hashid,
+          discussion_slug: comment.discussion_slug,
           board_id: comment.board_id,
           post_id: comment.id,
           target: ReportTarget.POST,
@@ -152,6 +153,7 @@ export function CommentActions({ comment, onEdit }: CommentActionsProps) {
         title="向Kater檢舉"
         form={{
           user_hashid: comment.user.hashid,
+          discussion_slug: comment.discussion_slug,
           board_id: comment.board_id,
           post_id: comment.id,
           target: ReportTarget.POST,

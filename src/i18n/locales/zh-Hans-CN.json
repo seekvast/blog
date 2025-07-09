@@ -269,7 +269,7 @@
       "content": "操作理由：{{reason}}"
     },
     "post.delete": {
-      "title": "{{operator_name}} 已刪除 {{username}} 在 {{title}}",
+      "title": "{{operator_name}} 已刪除 {{username}} 在 {{title}} 中的回复",
       "content": "操作理由：{{reason}}"
     },
     "user.approve": {
@@ -277,7 +277,7 @@
       "content": ""
     },
     "user.mute": {
-      "title": "{{operator_name}} 禁言 {{username}} {{days}} 天",
+      "title": "{{operator_name}} 禁言 {{username}} 「{{days}}」天",
       "content": "操作理由：{{reason}}"
     },
     "board_child.create": {

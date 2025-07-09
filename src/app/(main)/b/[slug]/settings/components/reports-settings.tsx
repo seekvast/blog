@@ -279,7 +279,15 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
               </Avatar>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h4 className="font-medium">{report.discussion.title}</h4>
+                  <h4 className="font-medium">
+                    {report.target === 1 || report.target === 2
+                      ? report.discussion.title
+                      : report.target === 3
+                      ? report.board.name
+                      : report.target === 5
+                      ? report.user.nickname
+                      : report.discussion.title}
+                  </h4>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
                   {report.reason_text}
