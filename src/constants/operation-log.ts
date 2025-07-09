@@ -35,17 +35,15 @@ export const OPERATION_ACTIONS = {
   RENAME: "rename",
 } as const;
 
-// 操作分类映射
 export const OPERATION_CATEGORY_MAPPING = {
   [OPERATION_CATEGORIES.USER]: "用户",
   [OPERATION_CATEGORIES.BOARD]: "看板",
   [OPERATION_CATEGORIES.BOARD_RULE]: "看板规则",
-  [OPERATION_CATEGORIES.BOARD_CHILD]: "子看板",
+  [OPERATION_CATEGORIES.BOARD_CHILD]: "子板",
   [OPERATION_CATEGORIES.DISCUSSION]: "文章",
   [OPERATION_CATEGORIES.POST]: "评论",
 } as const;
 
-// 操作行为映射
 export const OPERATION_ACTION_MAPPING = {
   [OPERATION_ACTIONS.DELETE]: "删除",
   [OPERATION_ACTIONS.UPDATE]: "修改",
@@ -72,45 +70,6 @@ export const OPERATION_ACTION_MAPPING = {
   [OPERATION_ACTIONS.RENAME]: "重命名",
 } as const;
 
-// 操作类型分类
-export const OPERATION_TYPE_CATEGORIES = {
-  USER_MANAGEMENT: "user_management",
-  BOARD_MANAGEMENT: "board_management",
-  BOARD_CHILD_MANAGEMENT: "board_child_management",
-  RULE_MANAGEMENT: "rule_management",
-  CONTENT_MODERATION: "content_moderation",
-  OTHER: "other",
-} as const;
-
-// 操作类型分类映射
-export const OPERATION_TYPE_MAPPING = {
-  [OPERATION_TYPE_CATEGORIES.USER_MANAGEMENT]: "用户管理",
-  [OPERATION_TYPE_CATEGORIES.BOARD_MANAGEMENT]: "看板管理",
-  [OPERATION_TYPE_CATEGORIES.BOARD_CHILD_MANAGEMENT]: "子版管理",
-  [OPERATION_TYPE_CATEGORIES.RULE_MANAGEMENT]: "规则管理",
-  [OPERATION_TYPE_CATEGORIES.CONTENT_MODERATION]: "内容审核",
-  [OPERATION_TYPE_CATEGORIES.OTHER]: "其他操作",
-} as const;
-
-// 获取操作类型分类
-export function getOperationTypeCategory(category: string): string {
-  switch (category) {
-    case OPERATION_CATEGORIES.USER:
-      return OPERATION_TYPE_CATEGORIES.USER_MANAGEMENT;
-    case OPERATION_CATEGORIES.BOARD:
-      return OPERATION_TYPE_CATEGORIES.BOARD_MANAGEMENT;
-    case OPERATION_CATEGORIES.BOARD_CHILD:
-      return OPERATION_TYPE_CATEGORIES.BOARD_CHILD_MANAGEMENT;
-    case OPERATION_CATEGORIES.BOARD_RULE:
-      return OPERATION_TYPE_CATEGORIES.RULE_MANAGEMENT;
-    case OPERATION_CATEGORIES.DISCUSSION:
-    case OPERATION_CATEGORIES.POST:
-      return OPERATION_TYPE_CATEGORIES.CONTENT_MODERATION;
-    default:
-      return OPERATION_TYPE_CATEGORIES.OTHER;
-  }
-}
-
 // 生成翻译键
 export function getOperationLogTranslationKey(
   category: string,
@@ -124,5 +83,3 @@ export type OperationCategory =
   (typeof OPERATION_CATEGORIES)[keyof typeof OPERATION_CATEGORIES];
 export type OperationAction =
   (typeof OPERATION_ACTIONS)[keyof typeof OPERATION_ACTIONS];
-export type OperationTypeCategory =
-  (typeof OPERATION_TYPE_CATEGORIES)[keyof typeof OPERATION_TYPE_CATEGORIES];

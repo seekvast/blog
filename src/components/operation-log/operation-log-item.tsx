@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
+import { OPERATION_CATEGORY_MAPPING } from "@/constants/operation-log";
 import {
   Trash2,
   UserX,
@@ -59,17 +60,16 @@ export function OperationLogItem({
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case "content_moderation":
+      case "discussion":
+      case "post":
         return "bg-red-100 text-red-800";
-      case "user_management":
+      case "user":
         return "bg-orange-100 text-orange-800";
-      case "role_management":
-        return "bg-blue-100 text-blue-800";
-      case "board_management":
+      case "board":
         return "bg-green-100 text-green-800";
-      case "board_child_management":
+      case "board_child":
         return "bg-purple-100 text-purple-800";
-      case "rule_management":
+      case "board_rule":
         return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -77,22 +77,7 @@ export function OperationLogItem({
   };
 
   const getTypeLabel = (type: string) => {
-    switch (type) {
-      case "content_moderation":
-        return "内容审核";
-      case "user_management":
-        return "用户管理";
-      case "role_management":
-        return "角色管理";
-      case "board_management":
-        return "看板管理";
-      case "board_child_management":
-        return "子版管理";
-      case "rule_management":
-        return "规则管理";
-      default:
-        return "其他操作";
-    }
+    return OPERATION_CATEGORY_MAPPING[type as keyof typeof OPERATION_CATEGORY_MAPPING] || "其他操作";
   };
 
   return (

@@ -256,7 +256,7 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
         className="space-y-4"
         endMessage={
           <div className="text-center py-4 text-sm text-muted-foreground">
-            没有更多检举记录
+            暂无数据
           </div>
         }
       >

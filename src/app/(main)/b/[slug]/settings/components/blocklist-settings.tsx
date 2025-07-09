@@ -51,7 +51,14 @@ export function BlocklistSettings({ board }: BlocklistSettingsProps) {
 
   // 获取封锁列表数据
   const { data, isLoading, refetch } = useQuery<Pagination<BoardBlacklist>>({
-    queryKey: ["board-blacklist", board.id, page, adminFilter, timeFilter, searchQuery],
+    queryKey: [
+      "board-blacklist",
+      board.id,
+      page,
+      adminFilter,
+      timeFilter,
+      searchQuery,
+    ],
     queryFn: async () => {
       // 构建查询参数
       const queryParams: BlacklistParams = {
@@ -167,10 +174,9 @@ export function BlocklistSettings({ board }: BlocklistSettingsProps) {
         loading={isLoading}
         hasMore={hasMore}
         onLoadMore={loadMore}
-
         endMessage={
           <div className="text-center py-4 text-sm text-muted-foreground">
-            没有更多封锁用户
+            暂无数据
           </div>
         }
       >

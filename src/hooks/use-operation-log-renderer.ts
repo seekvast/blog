@@ -2,10 +2,7 @@
 
 import { useTranslation } from "react-i18next";
 import { OperationLog, OperationLogData } from "@/types/operation-log";
-import {
-  getOperationTypeCategory,
-  getOperationLogTranslationKey,
-} from "@/constants/operation-log";
+import { getOperationLogTranslationKey } from "@/constants/operation-log";
 
 export function useOperationLogRenderer() {
   const { t } = useTranslation();
@@ -49,7 +46,6 @@ export function useOperationLogRenderer() {
   const renderSimpleDescription = (operationLog: OperationLog): string => {
     const { action, category, data, operator_user, user } = operationLog;
 
-    // 对于简单描述，我们可以使用更简洁的格式
     const safeData = data || {};
     const placeholders: OperationLogData = {
       operator_name:
@@ -114,13 +110,12 @@ export function useOperationLogRenderer() {
 
   const getOperationType = (operationLog: OperationLog): string => {
     const { category } = operationLog;
-    return getOperationTypeCategory(category);
+    return category;
   };
 
   const getOperationIcon = (operationLog: OperationLog): string => {
     const { action, category } = operationLog;
 
-    // 根据操作类型和分类返回图标类名
     switch (action) {
       case "delete":
         if (category === "post" || category === "discussion") {

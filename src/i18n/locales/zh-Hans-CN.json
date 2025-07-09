@@ -275,6 +275,7 @@
     "user.ban": "{{operator_name}} 封鎖 {{username}}",
     "user.unban": "{{operator_name}} 撤銷封鎖 {{username}}",
     "user.unmute": "{{operator_name}} 撤銷禁言 {{username}}",
+    
     "board.create": "{{operator_name}} 建立了看板 {{name}}",
     "board.delete": "{{operator_name}} 刪除了看板 {{name}}",
     "board.request_delete": "{{operator_name}} 請求刪除看板 {{name}}",
@@ -283,9 +284,12 @@
     "board_rule.create": "{{operator_name}} 新增了 {{title}}",
     "board_rule.delete": "{{operator_name}} 刪除了 {{title}}",
     "board_rule.update": "{{operator_name}} 對 {{title}} 的標題或內容進行變更",
-    "board_child.update_default": "{{operator_name}} 將 {{name}} 設定為 {{is_default}}",
-    "board_child.update_hidden": "{{operator_name}} 將 {{name}} 設定為 {{is_hidden}}",
-    "board_child.update_moderator_only": "{{operator_name}} 將 {{name}} 設定為 {{moderator_only}}",
+    "board_child.update_default": "{{operator_name}} 將 {{name}} 設定為 默认子版",
+    "board_child.update_hidden": "{{operator_name}} 將 {{name}} 設定為 隐藏子版",
+    "board_child.update_moderator_only": "{{operator_name}} 將 {{name}} 設定為 管理人員才可發表",
+    "board_child.unset_default": "{{operator_name}} 將 {{name}} 設定為 非默认子版",
+    "board_child.unhide": "{{operator_name}} 將 {{name}} 子版取消隐藏",
+    "board_child.unset_moderator_only": "{{operator_name}} 將 {{name}} 設定為所有人可發表",
     "default_log": "{{operator_name}} 執行了操作：{{action_code}}。詳情：{{details}}"
   }
 }
