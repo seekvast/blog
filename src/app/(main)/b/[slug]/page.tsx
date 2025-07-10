@@ -139,7 +139,7 @@ function BoardContent() {
       setHasMore(currentPage < data.last_page);
     } catch (error) {
       console.error("Failed to fetch discussions:", error);
-      setError("获取讨论列表失败");
+      setError("获取数据失败");
     } finally {
       setDiscussionsLoading(false);
     }

@@ -205,7 +205,7 @@ export function DiscussionsList({
       {/* 错误状态 */}
       {error && (
         <div className="flex flex-col items-center justify-center py-8 text-center">
-          <p className="text-destructive mb-4">获取讨论列表失败</p>
+          <p className="text-destructive mb-4">获取数据失败</p>
           <button
             onClick={() => refetch()}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
