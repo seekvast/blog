@@ -40,6 +40,8 @@ import { usePostEditorStore } from "@/store/post-editor";
 import { useLoginModal } from "@/components/providers/login-modal-provider";
 import { usePermission } from "@/hooks/use-permission";
 import { BoardPermission } from "@/constants/board-permissions";
+import { useEmailVerificationGuard } from "@/hooks/use-email-verification-guard";
+import { EmailVerificationRequiredFeature } from "@/config/email-verification";
 interface DiscussionActionsProps {
   discussion: Discussion;
   onChange?: (deletedSlug: string) => void;
@@ -69,6 +71,7 @@ export function DiscussionActions({
   );
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { requireEmailVerification } = useEmailVerificationGuard();
 
   const clearQueryCache = () => {
     // 更新所有相关的查询缓存
@@ -219,14 +222,22 @@ export function DiscussionActions({
               <>
                 <DropdownMenuItem
                   className="cursor-pointer"
-                  onClick={() => setReportToAdminOpen(true)}
+                  onClick={() => {
+                    requireEmailVerification(() => {
+                      setReportToAdminOpen(true);
+                    }, EmailVerificationRequiredFeature.REPORT);
+                  }}
                 >
                   <Flag className="mr-2 h-4 w-4" />
                   <span>向管理員檢舉</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="cursor-pointer"
-                  onClick={() => setReportToKaterOpen(true)}
+                  onClick={() => {
+                    requireEmailVerification(() => {
+                      setReportToKaterOpen(true);
+                    }, EmailVerificationRequiredFeature.REPORT);
+                  }}
                 >
                   <AlertTriangle className="mr-2 h-4 w-4" />
                   <span>向Kater檢舉</span>

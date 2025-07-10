@@ -11,6 +11,8 @@ import { api } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import type { Discussion } from "@/types";
+import { useEmailVerificationGuard } from "@/hooks/use-email-verification-guard";
+import { EmailVerificationRequiredFeature } from "@/config/email-verification";
 
 interface PollContentProps {
   discussion: Discussion;
@@ -55,33 +57,36 @@ export function PollContent({ discussion }: PollContentProps) {
 
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { requireEmailVerification } = useEmailVerificationGuard();
 
   const handleSubmitVote = async () => {
     if (selectedOptions.length > 0) {
-      try {
-        const response = await api.discussions.votePoll({
-          slug: poll.discussion_slug,
-          poll_id: poll.id,
-          options: selectedOptions,
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["discussion", poll.discussion_slug],
-        });
-        toast({
-          title: "投票成功",
-          variant: "default",
-        });
-        if (response) {
-          setPoll(response);
-          setIsVoted(true);
+      requireEmailVerification(async () => {
+        try {
+          const response = await api.discussions.votePoll({
+            slug: poll.discussion_slug,
+            poll_id: poll.id,
+            options: selectedOptions,
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["discussion", poll.discussion_slug],
+          });
+          toast({
+            title: "投票成功",
+            variant: "default",
+          });
+          if (response) {
+            setPoll(response);
+            setIsVoted(true);
+          }
+        } catch (error) {
+          toast({
+            title: "投票失败",
+            description: "请稍后重试",
+            variant: "destructive",
+          });
         }
-      } catch (error) {
-        toast({
-          title: "投票失败",
-          description: "请稍后重试",
-          variant: "destructive",
-        });
-      }
+      }, EmailVerificationRequiredFeature.VOTE);
     }
   };
 

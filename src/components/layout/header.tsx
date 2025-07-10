@@ -25,6 +25,8 @@ import { SearchPopover } from "@/components/search/search-popover";
 import { SearchMobile } from "@/components/search/search-mobile";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { NotificationPopover } from "@/components/notification/notification-popover";
+import { useEmailVerificationGuard } from "@/hooks/use-email-verification-guard";
+import { EmailVerificationRequiredFeature } from "@/config/email-verification";
 
 interface HeaderProps {
   className?: string;
@@ -38,6 +40,7 @@ export function Header({ className }: HeaderProps) {
   const { hasUnsavedContent, isVisible, onClose, setIsVisible, setOpenFrom } =
     usePostEditorStore();
   const { hasDraft } = useDraftStore();
+  const { requireEmailVerification } = useEmailVerificationGuard();
 
   const handleLogoClick = React.useCallback(
     (e: React.MouseEvent) => {
@@ -66,9 +69,11 @@ export function Header({ className }: HeaderProps) {
 
   const handleCreatePost = React.useCallback(() => {
     if (!hasDraft) return;
-    setIsVisible(true);
-    setOpenFrom("draft");
-  }, [setIsVisible, setOpenFrom]);
+    requireEmailVerification(() => {
+      setIsVisible(true);
+      setOpenFrom("draft");
+    }, EmailVerificationRequiredFeature.CREATE_POST);
+  }, [setIsVisible, setOpenFrom, requireEmailVerification, hasDraft]);
 
   return (
     <header

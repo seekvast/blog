@@ -9,6 +9,8 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import type { Post } from "@/types/discussion";
 import type { Attachment } from "@/types";
 import { PostForm } from "@/validations/post";
+import { useEmailVerificationGuard } from "@/hooks/use-email-verification-guard";
+import { EmailVerificationRequiredFeature } from "@/config/email-verification";
 
 interface ReplyEditorProps {
   comment: Post;
@@ -30,6 +32,7 @@ export const ReplyEditor = ({
     attachments: [],
   });
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const { requireEmailVerification } = useEmailVerificationGuard();
 
   const [imageUrl, setImageUrl] = React.useState<string | undefined>(undefined);
 
@@ -43,32 +46,34 @@ export const ReplyEditor = ({
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      let finalContent = replyForm.content;
-      if (imageUrl) {
-        finalContent = replyForm.content
-          ? `${replyForm.content}\n\n![图片](${imageUrl})`
-          : `![图片](${imageUrl})`;
+    requireEmailVerification(() => {
+      setIsSubmitting(true);
+      try {
+        let finalContent = replyForm.content;
+        if (imageUrl) {
+          finalContent = replyForm.content
+            ? `${replyForm.content}\n\n![图片](${imageUrl})`
+            : `![图片](${imageUrl})`;
+        }
+        onSubmit({
+          ...replyForm,
+          content: finalContent,
+        });
+        setReplyForm({
+          slug: comment.discussion_slug,
+          content: "",
+          attachments: [],
+        });
+      } catch (error) {
+        toast({
+          title: "回复失败",
+          description: "请稍后重试",
+          variant: "destructive",
+        });
+      } finally {
+        setIsSubmitting(false);
       }
-      onSubmit({
-        ...replyForm,
-        content: finalContent,
-      });
-      setReplyForm({
-        slug: comment.discussion_slug,
-        content: "",
-        attachments: [],
-      });
-    } catch (error) {
-      toast({
-        title: "回复失败",
-        description: "请稍后重试",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, EmailVerificationRequiredFeature.REPLY);
   };
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

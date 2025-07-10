@@ -5,6 +5,8 @@ import type { Post } from "@/types/discussion";
 import type { User } from "@/types/user";
 import type { Attachment } from "@/types";
 import { PostForm } from "@/validations/post";
+import { useEmailVerificationGuard } from "@/hooks/use-email-verification-guard";
+import { EmailVerificationRequiredFeature } from "@/config/email-verification";
 
 interface CommentEditorProps {
   user: User | null;
@@ -30,10 +32,14 @@ export const CommentEditor = React.memo(
     editorRef,
     openLoginModal,
   }: CommentEditorProps) => {
+    const { requireEmailVerification } = useEmailVerificationGuard();
+    
     const handleSubmit = React.useCallback(() => {
       if (!postForm.content.trim() || isSubmitting) return;
-      onSubmit(postForm);
-    }, [isSubmitting, onSubmit, postForm]);
+      requireEmailVerification(() => {
+        onSubmit(postForm);
+      }, EmailVerificationRequiredFeature.COMMENT);
+    }, [isSubmitting, onSubmit, postForm, requireEmailVerification]);
 
     const handleContentChange = React.useCallback(
       (content: string) => {

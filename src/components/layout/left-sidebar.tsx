@@ -32,6 +32,8 @@ import { Board } from "@/types/board";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useBoardActions } from "@/hooks/use-board-actions";
 import { useLanguageName } from "@/hooks/use-language-name";
+import { useEmailVerificationGuard } from "@/hooks/use-email-verification-guard";
+import { EmailVerificationRequiredFeature } from "@/config/email-verification";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -79,8 +81,9 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { t, i18n } = useTranslation();
-  const { requireAuth } = useRequireAuth();
+  const { requireAuth, requireAuthAndEmailVerification } = useRequireAuth();
   const { handleSubscribe } = useBoardActions();
+  const { requireEmailVerification } = useEmailVerificationGuard();
   const {
     getCurrentLanguageName,
     getCurrentLanguageCode,
@@ -106,13 +109,13 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   });
 
   const handlePublishClick = () => {
-    requireAuth(() => {
-      // 在看板列表页面，显示创建看板的模态框
-      if (pathname === "/b") {
-        setCreateBoardOpen(true);
-      }
-      // 在其他页面，显示发布文章的模态框
-      else {
+    // 在看板列表页面，显示创建看板的模态框
+    if (pathname === "/b") {
+      requireAuthAndEmailVerification(() => setCreateBoardOpen(true));
+    }
+    // 在其他页面，显示发布文章的模态框
+    else {
+      requireAuthAndEmailVerification(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const boardIdParam = urlParams.get("bid");
         const childParam = urlParams.get("child");
@@ -135,8 +138,8 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
         }
         setIsVisible(true);
         setOpenFrom("create");
-      }
-    });
+      });
+    }
   };
 
   const handleSubscribeSuccess = () => {

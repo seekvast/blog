@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useBoardActions } from "@/hooks/use-board-actions";
 import { useRequireAuth } from "@/hooks/use-require-auth";
+import { useEmailVerificationGuard } from "@/hooks/use-email-verification-guard";
+import { EmailVerificationRequiredFeature } from "@/config/email-verification";
 import {
   Dialog,
   DialogContent,
@@ -41,13 +43,9 @@ export function BoardActionButton({
   onSubscribeSuccess,
   onBlockSuccess,
 }: BoardActionButtonProps) {
-  const { requireAuth } = useRequireAuth();
-  const { 
-    handleBlock, 
-    handleUnsubscribe, 
-    handleReport, 
-    handleSubscribe,
-  } = useBoardActions();
+  const { requireAuth, requireAuthAndEmailVerification } = useRequireAuth();
+  const { handleBlock, handleUnsubscribe, handleReport, handleSubscribe } =
+    useBoardActions();
 
   const [subscribeBoardOpen, setSubscribeBoardOpen] = useState(false);
 
@@ -65,7 +63,7 @@ export function BoardActionButton({
   };
 
   const handleSubscribeBoard = () => {
-    requireAuth(() => {
+    requireAuthAndEmailVerification(() => {
       if (board.history) return;
       if (
         board.approval_mode === BoardApprovalMode.APPROVAL ||
@@ -76,24 +74,24 @@ export function BoardActionButton({
         handleSubscribe(board.id);
         onSubscribeSuccess?.();
       }
-    });
+    }, EmailVerificationRequiredFeature.FOLLOW_BOARD);
   };
 
   const handleBlockBoard = () => {
-    requireAuth(() => {
+    requireAuthAndEmailVerification(() => {
       handleBlock(board.id);
       onBlockSuccess?.();
-    });
+    }, EmailVerificationRequiredFeature.BLOCK);
   };
 
   const handleReportBoard = () => {
-    requireAuth(() => {
+    requireAuthAndEmailVerification(() => {
       if (setReportToKaterOpen) {
         setReportToKaterOpen(true);
       } else {
         handleReport();
       }
-    });
+    }, EmailVerificationRequiredFeature.REPORT);
   };
 
   // 未加入
@@ -248,31 +246,45 @@ export function SubscribeBoardDialog({
         onSuccess: () => {
           onOpenChange(false);
           onSuccess?.();
-        }
+        },
       }
     );
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>回答加入看板问题</DialogTitle>
+          <DialogTitle>加入看板</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <div className="text-sm">{question}？</div>
-          <Input
-            placeholder="请输入答案"
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value)}
-          />
-          <Button
-            className="w-full"
-            onClick={handleSubmit}
-            disabled={isSubscribing}
-          >
-            提交
-          </Button>
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">
+              请回答以下问题：
+            </p>
+            <p className="text-sm font-medium mb-3">{question}</p>
+            <Input
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              placeholder="请输入您的答案..."
+              className="w-full"
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubscribing}
+            >
+              取消
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubscribing || !answer.trim()}
+            >
+              {isSubscribing ? "提交中..." : "提交"}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

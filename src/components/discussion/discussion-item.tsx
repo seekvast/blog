@@ -25,6 +25,8 @@ import { cn } from "@/lib/utils";
 import { debounce } from "@/lib/utils";
 import { useCompactNumberFormat } from "@/lib/utils/format";
 import { DiscussionActions } from "@/components/post/discussion-actions";
+import { useEmailVerificationGuard } from "@/hooks/use-email-verification-guard";
+import { EmailVerificationRequiredFeature } from "@/config/email-verification";
 import {
   Popover,
   PopoverContent,
@@ -42,7 +44,7 @@ export const DiscussionItem = React.forwardRef<
   HTMLElement,
   DiscussionItemProps
 >(({ discussion, displayMode, isLastItem, onChange }, ref) => {
-  const { requireAuth } = useRequireAuth();
+  const { requireAuth, requireAuthAndEmailVerification } = useRequireAuth();
   const [isVoted, setIsVoted] = useState(discussion.user_voted?.vote === "up");
   const [isVoting, setIsVoting] = useState(false);
   const { toast } = useToast();
@@ -73,14 +75,14 @@ export const DiscussionItem = React.forwardRef<
   // 使用 useCallback 和 debounce 创建防抖的点赞处理函数
   const debouncedVote = useCallback(
     debounce(() => {
-      requireAuth(() => {
-        if (!isVoting) {
-          setIsVoting(true);
-          voteMutation.mutate();
-        }
-      });
-    }, 500),
-    [voteMutation]
+      requireAuthAndEmailVerification(() => {
+          if (!isVoting) {
+            setIsVoting(true);
+            voteMutation.mutate();
+          }
+        });
+      }, 500),
+    [voteMutation, requireAuthAndEmailVerification]
   );
 
   // 处理点赞点击

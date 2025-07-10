@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ReportTarget } from "@/constants/report-target";
 import { fromNow } from "@/lib/dayjs";
+import { EmailVerificationRequiredFeature } from "@/config/email-verification";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 
 export default function UserLayout({
   children,
@@ -36,6 +38,7 @@ export default function UserLayout({
   const { data: session } = useSession();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { requireAuth, requireAuthAndEmailVerification } = useRequireAuth();
 
   const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
@@ -43,14 +46,20 @@ export default function UserLayout({
     useState<string>("rgba(0, 0, 0, 0)");
 
   // 获取用户详细信息
-  const { data: userData, isError, error, status } = useQuery({
+  const {
+    data: userData,
+    isError,
+    error,
+    status,
+  } = useQuery({
     queryKey: ["user", hashid],
     queryFn: () => api.users.get({ hashid: hashid }),
     enabled: !!hashid,
   });
-  
+
   // 判断是否显示404页面
-  const notFound = (status === 'error' || (status === 'success' && !userData)) && !!hashid;
+  const notFound =
+    (status === "error" || (status === "success" && !userData)) && !!hashid;
   const isCurrentUser = session?.user?.hashid === userData?.hashid;
   // 使用 useEffect 处理 blocked 状态
   useEffect(() => {
@@ -136,14 +145,16 @@ export default function UserLayout({
     },
   });
 
-  const handleBlock = (block_user_hashid: string) => {
-    blockMutation.mutate(block_user_hashid);
+    const handleBlock = (block_user_hashid: string) => {
+    requireAuthAndEmailVerification(() => {
+      blockMutation.mutate(block_user_hashid);
+    });
   };
 
   if (notFound) {
     return <NotFound />;
   }
-  
+
   if (!userData) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -233,37 +244,41 @@ export default function UserLayout({
                     </Link>
                   </Button>
                 ) : (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="rounded-full px-4 py-2 bg-gray-500">
-                        <ChevronDown className="h-4 w-4 text-white" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() => {
-                          setReportToKaterOpen(true);
-                        }}
-                      >
-                        <AlertTriangle className="mr-2 h-4 w-4" />
-                        <span>向Kater檢舉</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="cursor-pointer"
-                        onClick={() => {
-                          handleBlock(userData.hashid);
-                        }}
-                      >
-                        {isBlocked ? (
-                          <Unlock className="mr-2 h-4 w-4" />
-                        ) : (
-                          <Ban className="mr-2 h-4 w-4" />
-                        )}
-                        <span>{isBlocked ? "取消拉黑" : "拉黑"}</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <div className="flex items-center space-x-2">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="rounded-full px-4 py-2 bg-gray-500">
+                          <ChevronDown className="h-4 w-4 text-white" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => {
+                            requireAuthAndEmailVerification(() => {
+                              setReportToKaterOpen(true);
+                            });
+                          }}
+                        >
+                          <AlertTriangle className="mr-2 h-4 w-4" />
+                          <span>向Kater檢舉</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="cursor-pointer"
+                          onClick={() => {
+                            handleBlock(userData.hashid);
+                          }}
+                        >
+                          {isBlocked ? (
+                            <Unlock className="mr-2 h-4 w-4" />
+                          ) : (
+                            <Ban className="mr-2 h-4 w-4" />
+                          )}
+                          <span>{isBlocked ? "取消拉黑" : "拉黑"}</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 )}
               </div>
             </div>

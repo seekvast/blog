@@ -71,6 +71,7 @@ import { CommentButton } from "@/components/post/comment-button";
 import { DiscussionActions } from "@/components/post/discussion-actions";
 import { useCompactNumberFormat } from "@/lib/utils/format";
 
+
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
 }
@@ -99,7 +100,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   const [postForm, setPostForm] = React.useState(initPostForm);
 
   const { user } = useAuth();
-  const { requireAuth } = useRequireAuth();
+  const { requireAuth, requireAuthAndEmailVerification } = useRequireAuth();
   const { openLoginModal } = useLoginModal();
   const { currentDiscussion, setDiscussion } = useDiscussionStore();
 
@@ -540,7 +541,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
 
   const handleReplyClick = React.useCallback(
     (comment: Post) => {
-      requireAuth(() => {
+        requireAuthAndEmailVerification(() => {
         setReplyTo(comment);
         setPostForm((prev) => ({
           ...prev,
@@ -549,12 +550,12 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         setShowCommentEditor(true);
       });
     },
-    [requireAuth, setShowCommentEditor]
+    [requireAuthAndEmailVerification, setShowCommentEditor]
   );
 
   const handleEditClick = React.useCallback(
     (comment: Post) => {
-      requireAuth(() => {
+        requireAuthAndEmailVerification(() => {
         setEditingPost(comment);
         setPostForm((prev) => ({
           ...prev,
@@ -564,35 +565,35 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         setShowCommentEditor(true);
       });
     },
-    [requireAuth, setShowCommentEditor]
+    [requireAuthAndEmailVerification, setShowCommentEditor]
   );
 
   const handleVote = React.useCallback(
     debounce(
       (postId: number, vote: "up" | "down", isMainPost: boolean = false) => {
         if (voteMutation.isPending) return;
-        requireAuth(() => {
+        requireAuthAndEmailVerification(() => {
           voteMutation.mutate({ postId, vote, isMainPost });
         });
       },
       500
     ),
-    [voteMutation, requireAuth]
+    [voteMutation, requireAuthAndEmailVerification]
   );
 
   const handleBookmark = React.useCallback(() => {
-    requireAuth(() => {
+    requireAuthAndEmailVerification(() => {
       bookmarkMutation.mutate();
     });
-  }, [requireAuth, bookmarkMutation]);
+  }, [requireAuthAndEmailVerification, bookmarkMutation]);
 
   const handleFollow = React.useCallback(
     (action: string | null = null) => {
-      requireAuth(() => {
+        requireAuthAndEmailVerification(() => {
         followMutation.mutate(action);
       });
     },
-    [requireAuth, followMutation]
+    [requireAuthAndEmailVerification, followMutation]
   );
 
   React.useEffect(() => {
