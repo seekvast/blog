@@ -14,7 +14,7 @@ import { AlertTriangle } from "lucide-react";
 import { AttachmentType } from "@/constants/attachment-type";
 import { usePostEditorStore } from "@/store/post-editor";
 import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { useDraftStore } from "@/store/draft";
 
@@ -89,6 +89,7 @@ export default function CreatePostModal() {
   const [discussionForm, setDiscussionForm] =
     React.useState(initDiscussionForm);
   const [selectedBoard, setSelectedBoard] = React.useState<Board | null>(null);
+  const [forceUpdateKey, setForceUpdateKey] = React.useState(0);
   const {
     content,
     setContent,
@@ -131,6 +132,15 @@ export default function CreatePostModal() {
     }
   }, [isVisible, hasDraft, draft]);
 
+  // 预设看板查询
+  const { data: preselectedBoard } = useQuery({
+    queryKey: ["board", boardPreselect?.boardId],
+    queryFn: () => api.boards.get({ id: boardPreselect!.boardId }),
+    enabled: !!(isVisible && openFrom === "create" && boardPreselect),
+    staleTime: 0,
+    gcTime: 0,
+  });
+
   // 从预设的看板信息加载
   React.useEffect(() => {
     if (isVisible && openFrom === "create" && boardPreselect) {
@@ -144,12 +154,61 @@ export default function CreatePostModal() {
     }
   }, [isVisible, openFrom, boardPreselect, setBoardPreselect]);
 
+  // 设置预选看板数据
+  React.useEffect(() => {
+    if (preselectedBoard) {
+      setSelectedBoard(preselectedBoard);
+      setForceUpdateKey((prev) => prev + 1);
+    }
+  }, [preselectedBoard]);
+
   // 当 board_id 为 0 或未定义时，重置 selectedBoard
   React.useEffect(() => {
     if (!discussionForm.board_id) {
       setSelectedBoard(null);
     }
   }, [discussionForm.board_id]);
+
+  React.useEffect(() => {
+    if (discussionForm.board_id && !selectedBoard) {
+      const fetchBoardDetail = async () => {
+        try {
+          const boardData = await api.boards.get({
+            id: discussionForm.board_id,
+          });
+          setSelectedBoard(boardData);
+        } catch (error) {
+          console.error("Failed to fetch board detail:", error);
+        }
+      };
+      fetchBoardDetail();
+    }
+  }, [discussionForm.board_id, selectedBoard]);
+
+  const updateSelectedBoard = React.useCallback(
+    (boardId: number, board?: Board) => {
+      if (board) {
+        setSelectedBoard(board);
+        setForceUpdateKey((prev) => prev + 1);
+      } else if (boardId) {
+        // 异步获取看板详情
+        api.boards
+          .get({ id: boardId })
+          .then((boardData) => {
+            setSelectedBoard(boardData);
+            setForceUpdateKey((prev) => prev + 1);
+          })
+          .catch(console.error);
+      }
+    },
+    []
+  );
+
+  React.useEffect(() => {
+    if (discussionForm.board_id && !selectedBoard) {
+      updateSelectedBoard(discussionForm.board_id);
+    }
+  }, [discussionForm.board_id, selectedBoard, updateSelectedBoard]);
 
   React.useEffect(() => {
     if (isVisible && openFrom === "edit" && discussion) {
@@ -323,6 +382,17 @@ export default function CreatePostModal() {
     () => debounce(handlePublish, 300), // 300ms 的防抖时间
     [handlePublish]
   );
+
+  // 计算投票按钮的禁用状态
+  const isPollButtonDisabled = React.useMemo(() => {
+    if (!!pollState.data || pollState.isEditing) return true;
+    if (!selectedBoard) return true;
+    if (!selectedBoard.board_user) return true;
+    if (!selectedBoard.poll_role) return true;
+    return !selectedBoard.poll_role.includes(
+      selectedBoard.board_user.user_role
+    );
+  }, [pollState.data, pollState.isEditing, selectedBoard, forceUpdateKey]);
 
   function modalReducer(
     state: ModalState,
@@ -555,9 +625,7 @@ export default function CreatePostModal() {
                         ...prev,
                         board_id: value,
                       }));
-                      if (board) {
-                        setSelectedBoard(board);
-                      }
+                      updateSelectedBoard(value, board);
                     }}
                   />
                 </div>
@@ -580,15 +648,10 @@ export default function CreatePostModal() {
                       dispatchPoll({ type: "EDIT" });
                     }
                   }}
-                  disabled={
-                    !!pollState.data || 
-                    pollState.isEditing || 
-                    !selectedBoard || 
-                    !selectedBoard.board_user || 
-                    !selectedBoard.poll_role || 
-                    !selectedBoard.poll_role.includes(selectedBoard.board_user.user_role)
+                  disabled={isPollButtonDisabled}
+                  title={
+                    isPollButtonDisabled ? "您没有在当前看板发起投票的权限" : ""
                   }
-                  title={!selectedBoard || !selectedBoard.board_user || !selectedBoard.poll_role || !selectedBoard.poll_role.includes(selectedBoard.board_user.user_role) ? "您没有在当前看板发起投票的权限" : ""}
                 >
                   投票
                 </Button>

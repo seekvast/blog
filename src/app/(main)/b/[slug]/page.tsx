@@ -65,6 +65,28 @@ function BoardContent() {
   );
   const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
 
+  const updateUrlParams = useCallback(
+    (boardId?: number, childId?: number | null) => {
+      const urlParams = new URLSearchParams(window.location.search);
+
+      if (boardId && !urlParams.has("bid")) {
+        urlParams.set("bid", boardId.toString());
+      }
+
+      if (childId !== undefined) {
+        if (childId) {
+          urlParams.set("child", childId.toString());
+        } else {
+          urlParams.delete("child");
+        }
+      }
+
+      const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+      window.history.replaceState({}, "", newUrl);
+    },
+    []
+  );
+
   const handleLoadMore = useCallback(() => {
     if (!discussionsLoading && hasMore) {
       setCurrentPage((prev) => prev + 1);
@@ -83,26 +105,13 @@ function BoardContent() {
     isLoading: loading,
     error: boardError,
   } = useQuery({
-    queryKey: ["board_detail", params?.slug],
+    queryKey: ["board", params?.slug],
     queryFn: async () => {
       const data = await api.boards.get({ slug: params?.slug });
-
-      // 处理 URL 参数逻辑
-      const urlParams = new URLSearchParams(window.location.search);
-      if (!urlParams.has("bid")) {
-        urlParams.set("bid", data.id.toString());
-        const childParam = searchParams?.get("child");
-        if (childParam) {
-          urlParams.set("child", childParam);
-        }
-        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
-        window.history.replaceState({}, "", newUrl);
-      }
-
       return data;
     },
     enabled: !!params?.slug,
-    staleTime: 5 * 60 * 1000, // 数据保鲜时间，5分钟
+    staleTime: 1 * 60 * 1000,
   });
 
   const fetchBoardChildren = async () => {
@@ -151,8 +160,13 @@ function BoardContent() {
     }
   }, [boardError]);
 
+  // 处理 board 数据加载完成后的初始化
   useEffect(() => {
     if (board?.id) {
+      // 更新URL参数中的bid
+      updateUrlParams(board.id);
+
+      // 获取子板块数据
       fetchBoardChildren().then(() => {
         const childParam = searchParams?.get("child");
         if (childParam) {
@@ -163,21 +177,18 @@ function BoardContent() {
         }
       });
     }
-  }, [board?.id, searchParams]);
+  }, [board?.id, searchParams, updateUrlParams]);
 
+  // 处理 selectedChildId 变化
   useEffect(() => {
     if (board?.id) {
       setCurrentPage(1);
       setDiscussions([]);
       fetchDiscussions();
+
+      updateUrlParams(undefined, selectedChildId);
     }
-    const urlParams = new URLSearchParams(window.location.search);
-    if (selectedChildId) {
-      urlParams.set("child", selectedChildId.toString());
-    }
-    const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
-    window.history.replaceState({}, "", newUrl);
-  }, [board?.id, selectedChildId]);
+  }, [board?.id, selectedChildId, updateUrlParams]);
 
   useEffect(() => {
     if (board?.id && currentPage > 1) {

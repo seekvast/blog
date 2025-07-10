@@ -75,11 +75,11 @@ export async function handleApiError(error: unknown): Promise<void> {
           (notFoundError as any).status = 404;
           
           // 显示一个 toast 提示
-          toast({
-            title: "资源不存在",
-            description: "请求的资源不存在或已被删除",
-            variant: "destructive",
-          });
+        //   toast({
+        //     title: "资源不存在",
+        //     description: "请求的资源不存在或已被删除",
+        //     variant: "destructive",
+        //   });
           
           // 抛出错误，让 ErrorBoundary 捕获
           throw notFoundError;
