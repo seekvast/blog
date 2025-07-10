@@ -1,8 +1,9 @@
 import { DiscussionsList } from "@/components/discussion/discussions-list";
 import { api } from "@/lib/api";
 import { getHomeMetadata } from "@/lib/metadata";
-import type { Pagination } from "@/types/common";
-import type { Discussion } from "@/types/discussion";
+import { getDiscussionPreferencesFromCookie } from "@/lib/discussion-preferences-server";
+import { DEFAULT_DISCUSSION_SORT } from "@/lib/discussion-preferences";
+import { SortBy } from "@/types/display-preferences";
 
 export const generateMetadata = () => {
   return getHomeMetadata();
@@ -11,14 +12,15 @@ export const generateMetadata = () => {
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-async function getHomePageData() {
+async function getHomePageData(sort: SortBy = DEFAULT_DISCUSSION_SORT) {
   try {
     const [discussionsResponse, stickyResponse] = await Promise.all([
       api.discussions.list({
         page: 1,
         per_page: 10,
+        sort, // 使用用户偏好
       }),
-      api.discussions.getSticky({})
+      api.discussions.getSticky({}),
     ]);
 
     return {
@@ -44,13 +46,17 @@ async function getHomePageData() {
 }
 
 export default async function HomePage() {
-  const { discussions, sticky } = await getHomePageData();
-  
+  // 读取用户偏好
+  const { sort, display } = getDiscussionPreferencesFromCookie();
+
+  // 使用用户偏好获取数据
+  const { discussions, sticky } = await getHomePageData(sort);
+
   return (
-    <DiscussionsList 
-      initialDiscussions={discussions} 
+    <DiscussionsList
+      initialDiscussions={discussions}
+      from="index"
       sticky={sticky}
-      from="index" 
     />
   );
 }

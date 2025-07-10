@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 import { DisplayMode, SortBy } from "@/types/display-preferences";
+import { syncDiscussionPreferencesToCookie } from "@/lib/discussion-preferences";
 
 interface DiscussionControlsProps {
   sortBy?: SortBy;
@@ -33,9 +34,23 @@ export function DiscussionControls({
   } = useDiscussionDisplayStore();
 
   const displayMode = getDisplayMode(pageId);
-  
+
   const sortBy = externalSortBy ?? getSortBy(pageId);
-  const setSortBy = externalSetSortBy ?? ((sort: SortBy) => storeSetSortBy(sort, pageId));
+  
+  // 检查是否是讨论页面（需要同步Cookie）
+  const isDiscussionPage = React.useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    const path = window.location.pathname;
+    return path === '/' || path === '/following' || path === '/bookmarked';
+  }, []);
+  
+  const setSortBy = externalSetSortBy ?? ((sort: SortBy) => {
+    storeSetSortBy(sort, pageId);
+    // 如果是讨论页面，同步到Cookie
+    if (isDiscussionPage) {
+      syncDiscussionPreferencesToCookie({ sort });
+    }
+  });
 
   const sortOptions = {
     hot: "热门",
@@ -56,10 +71,7 @@ export function DiscussionControls({
           {Object.entries(sortOptions).map(([key, label]) => (
             <DropdownMenuItem
               key={key}
-              className={cn(
-                sortBy === key && "bg-accent",
-                "cursor-pointer"
-              )}
+              className={cn(sortBy === key && "bg-accent", "cursor-pointer")}
               onClick={() => setSortBy(key as SortBy)}
             >
               {label}
@@ -70,9 +82,14 @@ export function DiscussionControls({
       <button
         type="button"
         className="inline-flex h-8 items-center justify-center font-medium text-muted-foreground"
-        onClick={() =>
-          setDisplayMode(displayMode === "grid" ? "list" : "grid", pageId)
-        }
+        onClick={() => {
+          const newDisplayMode = displayMode === "grid" ? "list" : "grid";
+          setDisplayMode(newDisplayMode, pageId);
+          // 如果是讨论页面，同步到Cookie
+          if (isDiscussionPage) {
+            syncDiscussionPreferencesToCookie({ display: newDisplayMode });
+          }
+        }}
       >
         {displayMode === "grid" ? (
           <LayoutGrid className="h-5 w-5" />

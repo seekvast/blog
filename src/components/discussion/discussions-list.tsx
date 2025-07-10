@@ -44,6 +44,31 @@ export function DiscussionsList({
   const displayMode = getDisplayMode();
   const sortBy = getSortBy();
 
+  // 用于跟踪是否是初始化状态
+  const isInitializedRef = useRef(false);
+  const initialSortByRef = useRef(sortBy);
+  const initialActiveTabRef = useRef(activeTab);
+
+  // 检查是否需要重新获取数据
+  const shouldFetchData = useCallback(
+    (newActiveTab: "recommend" | "trace", newSortBy: SortBy) => {
+      // 如果还没有初始化，记录初始值并跳过
+      if (!isInitializedRef.current) {
+        initialSortByRef.current = newSortBy;
+        initialActiveTabRef.current = newActiveTab;
+        isInitializedRef.current = true;
+        return false;
+      }
+
+      // 如果 activeTab 或 sortBy 发生了变化，需要重新获取
+      return (
+        newActiveTab !== initialActiveTabRef.current ||
+        newSortBy !== initialSortByRef.current
+      );
+    },
+    []
+  );
+
   const handleDeleteDiscussion = useCallback(
     (deletedSlug: string) => {
       fetchDiscussions(activeTab, discussions.current_page, sortBy);
@@ -54,7 +79,7 @@ export function DiscussionsList({
   const fetchDiscussions = async (
     tab: "recommend" | "trace",
     pageNum: number = 1,
-    sort: SortBy = getSortBy("discussion-list")
+    sort: SortBy = sortBy
   ) => {
     setLoading(true);
     try {
@@ -103,8 +128,14 @@ export function DiscussionsList({
     // 重置滚动位置
     window.scrollTo(0, 0);
 
-    fetchDiscussions(activeTab, 1, sortBy);
-  }, [activeTab, sortBy]);
+    // 检查是否需要重新获取数据
+    if (shouldFetchData(activeTab, sortBy)) {
+      fetchDiscussions(activeTab, 1, sortBy);
+      // 更新初始值
+      initialSortByRef.current = sortBy;
+      initialActiveTabRef.current = activeTab;
+    }
+  }, [activeTab, sortBy, shouldFetchData]);
 
   return (
     <div className="flex flex-col">
@@ -124,7 +155,6 @@ export function DiscussionsList({
                   )}
                   onClick={() => {
                     setActiveTab("recommend");
-                    fetchDiscussions("recommend", 1);
                   }}
                 >
                   推荐
@@ -146,7 +176,6 @@ export function DiscussionsList({
                   onClick={() => {
                     requireAuth(() => {
                       setActiveTab("trace");
-                      fetchDiscussions("trace", 1);
                     });
                   }}
                 >

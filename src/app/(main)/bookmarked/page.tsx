@@ -4,17 +4,19 @@ import { getBookmarksMetadata } from "@/lib/metadata";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { LoginPrompt } from "@/components/auth/login-prompt";
+import { getDiscussionPreferencesFromCookie } from "@/lib/discussion-preferences-server";
 
 export const generateMetadata = () => {
   return getBookmarksMetadata();
 };
 
-async function getDiscussions() {
+async function getDiscussions(sort?: string) {
   try {
     const response = await api.discussions.list({
       page: 1,
       per_page: 10,
       from: "bookmarked",
+      sort,
     });
     return response;
   } catch (error) {
@@ -38,7 +40,11 @@ export default async function HomePage() {
   if (!session?.user) {
     return <LoginPrompt message="查看关注内容需要登录" />;
   }
-  const initialDiscussions = await getDiscussions();
+
+  // 读取用户偏好
+  const { sort, display } = getDiscussionPreferencesFromCookie();
+
+  const initialDiscussions = await getDiscussions(sort);
   return (
     <DiscussionsList
       initialDiscussions={initialDiscussions}
