@@ -20,9 +20,9 @@ export const UserRoleBadge: React.FC<UserRoleBadgeProps> = React.memo(
       board.badge_visible.includes(boardUser.user_role);
 
     if (!shouldShowBadge) return null;
-    
+
     const badgeClassName = cn(
-      "ml-1",
+      "text-xs whitespace-nowrap",
       boardUser.user_role === 1 && "bg-blue-500/10 text-blue-600",
       boardUser.user_role === 2 && "bg-amber-400/20 text-amber-600",
       boardUser.user_role === 3 && "text-primary",

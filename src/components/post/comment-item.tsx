@@ -3,14 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { formatDate, fromNow } from "@/lib/dayjs";
-import {
-  ChevronDown,
-  ChevronUp,
-  MoreHorizontal,
-  Reply,
-  MinusCircle,
-  UserRound,
-} from "lucide-react";
+import { MinusCircle, UserRound } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { PostContent } from "@/components/post/post-content";
 import { cn } from "@/lib/utils";
@@ -30,6 +23,7 @@ import {
 import { CommentButton } from "@/components/post/comment-button";
 import type { Discussion } from "@/types/discussion";
 import { VoteButtons } from "@/components/common/vote-buttons";
+import { UserRoleBadge } from "@/components/board/user-role-badge";
 
 interface CommentItemProps {
   discussion: Discussion;
@@ -54,7 +48,6 @@ export const CommentItem = ({
   queryKey,
   level = 0,
 }: CommentItemProps) => {
-
   const [isEditing, setIsEditing] = React.useState(false);
   const [isReplying, setIsReplying] = React.useState(false);
 
@@ -166,51 +159,63 @@ export const CommentItem = ({
           </Avatar>
         </Link>
         <div className="flex-1 min-w-0 overflow-hidden">
-          <div className="flex justify-between w-full items-center">
-            <div className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+          <div className="flex justify-between w-full items-start">
+            <div className="flex items-start gap-2 text-xs md:text-sm text-muted-foreground min-w-0 flex-1 flex-wrap">
               <Link
                 href={`/u/${comment.user.username}?hashid=${comment.user.hashid}`}
+                className="flex-shrink-0"
               >
                 <span className="font-medium text-base truncate">
                   {comment.user.nickname || comment.user.username}
                 </span>
               </Link>
-              {comment.parent_post && (
-                <Link
-                  href={`#comment-${comment.parent_post.id}`}
-                  className="text-primary"
-                >
-                  @{comment.parent_post.user.username}{" "}
-                </Link>
-              )}
-              <span className="text-gray-300">·</span>
-              <span>{fromNow(comment.created_at)}</span>
-              {comment.editor && (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button className="hover:text-primary">已编辑</button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="p-3 w-full"
-                    side="top"
-                    align="center"
-                    sideOffset={5}
+              <div className="flex items-center gap-2 flex-wrap">
+                <UserRoleBadge
+                  boardUser={comment.board_user}
+                  board={comment.board}
+                  className="flex-shrink-0"
+                />
+                {comment.parent_post && (
+                  <Link
+                    href={`#comment-${comment.parent_post.id}`}
+                    className="text-primary flex-shrink-0"
                   >
-                    <div className="space-y-2 text-muted-foreground">
-                      <div className="text-xs space-y-1">
-                        {comment.editor.nickname || comment.editor.username}{" "}
-                        编辑于{" "}
-                        {comment.edited_at
-                          ? formatDate(comment.edited_at, "YYYY年M月D日")
-                          : "未知"}
+                    @{comment.parent_post.user.username}
+                  </Link>
+                )}
+                <span className="flex-shrink-0">
+                  {fromNow(comment.created_at)}
+                </span>
+                {comment.editor && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="hover:text-primary flex-shrink-0">
+                        已编辑
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="p-3 w-full"
+                      side="top"
+                      align="center"
+                      sideOffset={5}
+                    >
+                      <div className="space-y-2 text-muted-foreground">
+                        <div className="text-xs space-y-1">
+                          {comment.editor.nickname || comment.editor.username}{" "}
+                          编辑于{" "}
+                          {comment.edited_at
+                            ? formatDate(comment.edited_at, "YYYY年M月D日")
+                            : "未知"}
+                        </div>
                       </div>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              )}
+                    </PopoverContent>
+                  </Popover>
+                )}
+              </div>
             </div>
+
             {comment.parent_id <= 0 && (
-              <span className="text-xs md:text-sm text-muted-foreground">
+              <span className="text-xs md:text-sm text-muted-foreground flex-shrink-0 ml-2">
                 #{comment.number}
               </span>
             )}

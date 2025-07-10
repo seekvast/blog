@@ -139,6 +139,8 @@ export interface Post {
   children: Post[];
   editor: User;
   editor_hashid: string;
+  board_user: BoardUser;
+  board: Board;
 }
 
 export type DiscussionResponse = Response<Pagination<Discussion>>;
