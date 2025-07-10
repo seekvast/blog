@@ -305,7 +305,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       });
     },
     onSuccess: () => {
-      // 确保相关缓存同步
       queryClient.invalidateQueries({
         queryKey: ["discussions"],
       });
@@ -461,12 +460,10 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       setReplyTo(null);
       editorRef.current?.reset?.();
       queryClient.invalidateQueries({
-        queryKey: [
-          "discussion-posts",
-          slug,
-          initialDiscussion.board_id,
-          queryParams,
-        ],
+        queryKey: ["discussion-posts", slug],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["discussion", slug],
       });
     },
     onError: (error) => {
@@ -496,12 +493,10 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       setEditingPost(null);
       editorRef.current?.reset?.();
       queryClient.invalidateQueries({
-        queryKey: [
-          "discussion-posts",
-          slug,
-          initialDiscussion.board_id,
-          queryParams,
-        ],
+        queryKey: ["discussion-posts", slug],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["discussion", slug],
       });
     },
     onError: (error) => {
@@ -527,7 +522,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       commentMutation.mutate(postForm);
       setReplyTo(null);
     },
-    [isSubmitting, commentMutation, postForm.content]
+    [isSubmitting, commentMutation, currentDiscussion?.is_locked]
   );
 
   const handleEditComment = React.useCallback(
@@ -661,7 +656,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                       </span>
                     </Link>
                     <div className="flex items-center space-x-2 min-w-0 text-muted-foreground">
-                      <span>@{discussion.user.username}</span>
+                      <span>@{discussion.user.nickname}</span>
                       <UserRoleBadge
                         boardUser={discussion.board_user}
                         board={discussion.board}
@@ -852,7 +847,9 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           <div className="flex items-center justify-between px-2 md:px-4 border-b text-sm  text-muted-foreground">
             <div className="flex items-center pb-2 font-bold">
               <span>回复</span>
-              <span className="pl-1 text-primary">{totalPosts}</span>
+              <span className="pl-1 text-primary">
+                {discussion.comment_count - 1}
+              </span>
             </div>
           </div>
 

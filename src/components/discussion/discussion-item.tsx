@@ -195,7 +195,7 @@ export const DiscussionItem = React.forwardRef<
               className="flex items-center space-x-1 text-muted-foreground"
             >
               <MessageSquare className="h-4 w-4 text-sm cursor-pointer" />
-              <span>{formatCompactNumber(discussion.comment_count)}</span>
+              <span>{formatCompactNumber(discussion.comment_count - 1)}</span>
             </Link>
 
             <div className="flex items-center space-x-1 text-muted-foreground">
