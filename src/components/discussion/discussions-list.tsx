@@ -14,6 +14,7 @@ import { DiscussionControls } from "@/components/discussion/discussion-controls"
 import { SortBy } from "@/types/display-preferences";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 import { useRequireAuth } from "@/hooks/use-require-auth";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 interface DiscussionsListProps {
   initialDiscussions: Pagination<Discussion>;
@@ -31,12 +32,6 @@ export function DiscussionsList({
 }: DiscussionsListProps) {
   const { requireAuth } = useRequireAuth();
 
-  const [discussions, setDiscussions] = React.useState(initialDiscussions);
-  const [page, setPage] = React.useState(2);
-  const [loading, setLoading] = React.useState(false);
-  const [hasMore, setHasMore] = React.useState(
-    initialDiscussions.last_page > 1
-  );
   const [activeTab, setActiveTab] = React.useState<"recommend" | "trace">(
     "recommend"
   );
@@ -69,73 +64,67 @@ export function DiscussionsList({
     []
   );
 
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    error,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ["discussions", activeTab, from, sortBy],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await api.discussions.list({
+        q: activeTab,
+        from,
+        page: pageParam,
+        sort: sortBy,
+      });
+      return response;
+    },
+    getNextPageParam: (lastPage) => {
+      return lastPage.current_page < lastPage.last_page
+        ? lastPage.current_page + 1
+        : undefined;
+    },
+    initialPageParam: 1,
+    // 使用初始数据
+    initialData: shouldFetchData(activeTab, sortBy)
+      ? undefined
+      : {
+          pages: [initialDiscussions],
+          pageParams: [1],
+        },
+    staleTime: 10 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  const discussions = data?.pages.flatMap((page) => page.items) || [];
+
   const handleDeleteDiscussion = useCallback(
     (deletedSlug: string) => {
-      fetchDiscussions(activeTab, discussions.current_page, sortBy);
+      refetch();
     },
-    [activeTab, discussions.current_page, sortBy]
+    [refetch]
   );
 
-  const fetchDiscussions = async (
-    tab: "recommend" | "trace",
-    pageNum: number = 1,
-    sort: SortBy = sortBy
-  ) => {
-    setLoading(true);
-    try {
-      const response = await api.discussions.list({
-        q: tab,
-        from,
-        page: pageNum,
-        sort,
-      });
-
-      if (pageNum === 1) {
-        // 首次加载或刷新
-        setDiscussions(response);
-        setPage(2);
-        setHasMore(response.last_page > 1);
-      } else {
-        // 加载更多数据
-        setDiscussions((prev) => ({
-          ...prev,
-          items: [...prev.items, ...response.items],
-          current_page: pageNum,
-          last_page: response.last_page,
-        }));
-
-        // 检查是否还有更多页
-        setHasMore(pageNum < response.last_page);
-
-        // 只有在还有更多页的情况下才增加页码
-        if (pageNum < response.last_page) {
-          setPage(pageNum + 1);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch discussions:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const loadMore = useCallback(() => {
-    if (loading || !hasMore) return;
-    fetchDiscussions(activeTab, page, sortBy);
-  }, [loading, hasMore, page, activeTab, sortBy]);
+    if (!isFetchingNextPage && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   useEffect(() => {
-    // 重置滚动位置
     window.scrollTo(0, 0);
 
-    // 检查是否需要重新获取数据
     if (shouldFetchData(activeTab, sortBy)) {
-      fetchDiscussions(activeTab, 1, sortBy);
+      refetch();
       // 更新初始值
       initialSortByRef.current = sortBy;
       initialActiveTabRef.current = activeTab;
     }
-  }, [activeTab, sortBy, shouldFetchData]);
+  }, [activeTab, sortBy, shouldFetchData, refetch]);
 
   return (
     <div className="flex flex-col">
@@ -213,30 +202,67 @@ export function DiscussionsList({
         </div>
       )}
 
+      {/* 错误状态 */}
+      {error && (
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <p className="text-destructive mb-4">获取讨论列表失败</p>
+          <button
+            onClick={() => refetch()}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            重新加载
+          </button>
+        </div>
+      )}
+
       {/* 普通帖子列表 */}
-      <div className="divide-y">
-        <InfiniteScroll
-          loading={loading}
-          hasMore={hasMore}
-          onLoadMore={loadMore}
-          className="divide-y"
-        >
-          {discussions.items.map((discussion, index) => {
-            const isLastItem = index === discussions.items.length - 1;
-            return (
-              <div className="lg:px-6" key={discussion.slug + index}>
-                <DiscussionItem
-                  key={discussion.slug + index}
-                  discussion={discussion}
-                  displayMode={displayMode}
-                  isLastItem={isLastItem}
-                  onChange={handleDeleteDiscussion}
-                />
-              </div>
-            );
-          })}
-        </InfiniteScroll>
-      </div>
+      {!error && (
+        <div className="divide-y">
+          <InfiniteScroll
+            loading={isFetchingNextPage}
+            hasMore={!!hasNextPage}
+            onLoadMore={loadMore}
+            className="divide-y"
+          >
+            {discussions.map((discussion, index) => {
+              const isLastItem = index === discussions.length - 1;
+              return (
+                <div className="lg:px-6" key={discussion.slug + index}>
+                  <DiscussionItem
+                    key={discussion.slug + index}
+                    discussion={discussion}
+                    displayMode={displayMode}
+                    isLastItem={isLastItem}
+                    onChange={handleDeleteDiscussion}
+                  />
+                </div>
+              );
+            })}
+          </InfiniteScroll>
+
+          {/* 初始加载状态 */}
+          {isLoading && discussions.length === 0 && (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin mr-2" />
+              <span className="text-muted-foreground">加载中...</span>
+            </div>
+          )}
+
+          {/* 没有更多数据时的提示 */}
+          {!hasNextPage && !isLoading && discussions.length > 0 && (
+            <div className="flex items-center justify-center py-4 text-muted-foreground">
+              <span>没有更多内容了</span>
+            </div>
+          )}
+
+          {/* 空状态 */}
+          {!isLoading && discussions.length === 0 && !error && (
+            <div className="flex items-center justify-center py-8 text-muted-foreground">
+              <span>暂无数据</span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

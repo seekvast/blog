@@ -43,6 +43,16 @@ const getPageType = (path: string): string => {
 const getCurrentPageId = (): string => {
   if (typeof window === "undefined") return "/";
   const path = window.location.pathname;
+  // 将所有讨论相关的页面统一使用 "/" 作为 pageId
+  // 这样首页、讨论详情页、关注页、书签页可以共享相同的显示偏好
+  if (
+    path === "/" ||
+    path === "/following" ||
+    path === "/bookmarked" ||
+    path.startsWith("/d/")
+  ) {
+    return "/";
+  }
   return getPageType(path);
 };
 
@@ -51,7 +61,13 @@ const isDiscussionPage = (pageId?: string): boolean => {
   if (typeof window === "undefined") return false;
   const currentPageId = pageId || getCurrentPageId();
   const path = window.location.pathname;
-  return path === "/" || path === "/following" || path === "/bookmarked";
+  // 统一判断讨论相关页面
+  return (
+    path === "/" ||
+    path === "/following" ||
+    path === "/bookmarked" ||
+    path.startsWith("/d/")
+  );
 };
 
 export const useDiscussionDisplayStore = create<DiscussionDisplayState>()(

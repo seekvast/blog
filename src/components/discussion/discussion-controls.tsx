@@ -36,21 +36,29 @@ export function DiscussionControls({
   const displayMode = getDisplayMode(pageId);
 
   const sortBy = externalSortBy ?? getSortBy(pageId);
-  
+
   // 检查是否是讨论页面（需要同步Cookie）
   const isDiscussionPage = React.useMemo(() => {
-    if (typeof window === 'undefined') return false;
+    if (typeof window === "undefined") return false;
     const path = window.location.pathname;
-    return path === '/' || path === '/following' || path === '/bookmarked';
+    // 统一判断讨论相关页面
+    return (
+      path === "/" ||
+      path === "/following" ||
+      path === "/bookmarked" ||
+      path.startsWith("/d/")
+    );
   }, []);
-  
-  const setSortBy = externalSetSortBy ?? ((sort: SortBy) => {
-    storeSetSortBy(sort, pageId);
-    // 如果是讨论页面，同步到Cookie
-    if (isDiscussionPage) {
-      syncDiscussionPreferencesToCookie({ sort });
-    }
-  });
+
+  const setSortBy =
+    externalSetSortBy ??
+    ((sort: SortBy) => {
+      storeSetSortBy(sort, pageId);
+      // 如果是讨论页面，同步到Cookie
+      if (isDiscussionPage) {
+        syncDiscussionPreferencesToCookie({ sort });
+      }
+    });
 
   const sortOptions = {
     hot: "热门",
