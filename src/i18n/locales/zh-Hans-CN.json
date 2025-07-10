@@ -340,6 +340,10 @@
       "title": "{{operator_name}} 對 {{title}} 的標題或內容進行變更",
       "content": ""
     },
+    "board_child.update": {
+      "title": "{{operator_name}} 對 {{name}} 名称進行變更",
+      "content": ""
+    },
     "board_child.update_default": {
       "title": "{{operator_name}} 將 {{name}} 設定為 默认子版",
       "content": ""

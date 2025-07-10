@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useDiscussionStore } from "@/store/discussion";
 import { useAuth } from "@/components/providers/auth-provider";
 import { formatDate, fromNow } from "@/lib/dayjs";
@@ -41,6 +41,7 @@ import {
   useMutation,
   useQueryClient,
   useInfiniteQuery,
+  useQuery,
   QueryClient,
 } from "@tanstack/react-query";
 import { cn, debounce } from "@/lib/utils";
@@ -102,15 +103,25 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   const { openLoginModal } = useLoginModal();
   const { currentDiscussion, setDiscussion } = useDiscussionStore();
 
+  const { data: discussionData, isLoading: discussionLoading } = useQuery({
+    queryKey: ["discussion", slug],
+    queryFn: () => api.discussions.get(slug),
+    initialData: initialDiscussion,
+    staleTime: 1 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  const discussion = discussionData || initialDiscussion;
+
   const [replyTo, setReplyTo] = React.useState<Post | null>(null);
   const [editingPost, setEditingPost] = React.useState<Post | null>(null);
   const editorRef = React.useRef<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(
-    initialDiscussion?.discussion_user?.is_bookmarked === "yes"
+    discussion?.discussion_user?.is_bookmarked === "yes"
   );
   const [followStatus, setFollowStatus] = useState<string | null>(
-    initialDiscussion?.discussion_user?.subscription || null
+    discussion?.discussion_user?.subscription || null
   );
   const [showCommentEditor, setShowCommentEditor] = useState(false);
   const queryClient = useQueryClient();
@@ -122,7 +133,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     per_page: 10,
   });
   const [totalPosts, setTotalPosts] = React.useState(
-    initialDiscussion?.comment_count > 0 ? initialDiscussion.comment_count : 1
+    discussion?.comment_count > 0 ? discussion.comment_count : 1
   );
   const {
     data: comments = {
@@ -141,7 +152,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       try {
         return await api.discussions.posts({
           slug,
-          board_id: initialDiscussion.board_id,
+          board_id: discussion.board_id,
           page: pageParam,
           per_page: queryParams.per_page,
         });
@@ -157,7 +168,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       }
       return undefined;
     },
-    enabled: !!currentDiscussion,
+    enabled: !!discussion,
     staleTime: 10 * 1000,
   });
 
@@ -210,13 +221,35 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   const bookmarkMutation = useMutation({
     mutationFn: () =>
       api.discussions.saveBookmark({
-        slug: currentDiscussion?.slug,
+        slug: discussion?.slug,
         is_bookmarked: isBookmarked ? "no" : "yes",
       }),
-    onMutate: () => {
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["discussion", slug] });
+
+      const previousDiscussion = queryClient.getQueryData(["discussion", slug]);
+
+      queryClient.setQueryData(["discussion", slug], (old: Discussion) => {
+        if (!old) return old;
+        return {
+          ...old,
+          discussion_user: {
+            ...old.discussion_user,
+            is_bookmarked: isBookmarked ? "no" : "yes",
+          },
+        };
+      });
+
       setIsBookmarked((prev) => !prev);
+      return { previousDiscussion };
     },
-    onError: (error) => {
+    onError: (error, variables, context) => {
+      if (context?.previousDiscussion) {
+        queryClient.setQueryData(
+          ["discussion", slug],
+          context.previousDiscussion
+        );
+      }
       setIsBookmarked((prev) => !prev);
       toast({
         title: "操作失败",
@@ -224,38 +257,61 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
         variant: "destructive",
       });
     },
-    onSuccess: () => {},
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["discussions"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["userDiscussions"],
+      });
+    },
   });
 
   const followMutation = useMutation({
     mutationFn: (action: string | null) =>
       api.discussions.saveFollow({
-        slug: currentDiscussion?.slug,
+        slug: discussion?.slug,
         action,
       }),
-    onMutate: (action) => {
-        setFollowStatus(action);
+    onMutate: async (action) => {
+      await queryClient.cancelQueries({ queryKey: ["discussion", slug] });
+      const previousDiscussion = queryClient.getQueryData(["discussion", slug]);
+      queryClient.setQueryData(["discussion", slug], (old: Discussion) => {
+        if (!old) return old;
+        return {
+          ...old,
+          discussion_user: {
+            ...old.discussion_user,
+            subscription: action || "",
+          },
+        };
+      });
+
+      setFollowStatus(action);
+      return { previousDiscussion };
     },
     onError: (error, action, context) => {
-      // 恢复之前的状态
-      setFollowStatus(initialDiscussion?.discussion_user?.subscription || null);
+      if (context?.previousDiscussion) {
+        queryClient.setQueryData(
+          ["discussion", slug],
+          context.previousDiscussion
+        );
+      }
+      setFollowStatus(discussion?.discussion_user?.subscription || null);
       toast({
         title: "操作失败",
         description: "关注操作失败，请稍后重试",
         variant: "destructive",
       });
     },
-    onSuccess: (data) => {
-      if (currentDiscussion) {
-        const updatedDiscussion = {
-          ...currentDiscussion,
-          discussion_user: {
-            ...currentDiscussion.discussion_user,
-            subscription: followStatus || ''
-          }
-        };
-        setDiscussion(updatedDiscussion as Discussion);
-      }
+    onSuccess: () => {
+      // 确保相关缓存同步
+      queryClient.invalidateQueries({
+        queryKey: ["discussions"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["userDiscussions"],
+      });
     },
   });
 
@@ -545,8 +601,8 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   );
 
   React.useEffect(() => {
-    setDiscussion(initialDiscussion);
-  }, [initialDiscussion, setDiscussion]);
+    setDiscussion(discussion);
+  }, [discussion, setDiscussion]);
 
   const handleAttachmentUpload = (attachment: Attachment) => {
     const formattedAttachment = {
@@ -561,9 +617,12 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     }));
   };
 
-  if (!currentDiscussion) {
+  if (!discussion) {
     return null;
   }
+
+  // 类型保护：确保 discussion 不为 null
+  const safeDiscussion = discussion as Discussion;
 
   return (
     <ErrorBoundary>
@@ -572,21 +631,21 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           <div className="border-b pb-4 flex-1 max-w-4xl">
             <div className="w-full">
               <h2 className="text-xl md:text-2xl font-bold overflow-hidden text-ellipsis whitespace-nowrap">
-                {currentDiscussion.title}
+                {safeDiscussion.title}
               </h2>
             </div>
 
             <div className="mt-2 flex items-center space-x-3">
               <Link
-                href={`/u/${currentDiscussion.user.username}?hashid=${currentDiscussion.user.hashid}`}
+                href={`/u/${discussion.user.username}?hashid=${discussion.user.hashid}`}
               >
                 <Avatar className="h-12 w-12 md:h-14 md:w-14 flex-shrink-0">
                   <AvatarImage
-                    src={currentDiscussion.user.avatar_url}
-                    alt={currentDiscussion.user.nickname}
+                    src={discussion.user.avatar_url}
+                    alt={discussion.user.nickname}
                   />
                   <AvatarFallback>
-                    {currentDiscussion.user.nickname[0].toUpperCase()}
+                    {discussion.user.nickname[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </Link>
@@ -595,33 +654,33 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center space-x-2 min-w-0 flex-1">
                     <Link
-                      href={`/u/${currentDiscussion.user.username}?hashid=${currentDiscussion.user.hashid}`}
+                      href={`/u/${discussion.user.username}?hashid=${discussion.user.hashid}`}
                     >
                       <span className="text-base md:text-lg font-medium truncate">
-                        {currentDiscussion.user.nickname}
+                        {discussion.user.nickname}
                       </span>
                     </Link>
                     <div className="flex items-center space-x-2 min-w-0 text-muted-foreground">
-                      <span>@{currentDiscussion.user.username}</span>
-                      <UserRoleBadge 
-                        boardUser={currentDiscussion.board_user} 
-                        board={currentDiscussion.board} 
+                      <span>@{discussion.user.username}</span>
+                      <UserRoleBadge
+                        boardUser={discussion.board_user}
+                        board={discussion.board}
                       />
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-2 cursor-pointer text-muted-foreground">
-                    {currentDiscussion.is_sticky === 1 && (
+                    {discussion.is_sticky === 1 && (
                       <Pin className="h-4 w-4 text-red-500" />
                     )}
-                    {currentDiscussion.is_locked === 1 && (
-                      <Lock className="h-4 w-4" />
+                    {discussion.is_locked === 1 && <Lock className="h-4 w-4" />}
+                    {discussion?.discussion_user?.subscription === "follow" && (
+                      <Heart className="h-4 w-4 text-primary" />
                     )}
-                    {currentDiscussion?.discussion_user?.subscription ===
-                      "follow" && <Heart className="h-4 w-4 text-primary" />}
-                    {currentDiscussion?.discussion_user?.is_bookmarked ===
-                      "yes" && <BookmarkCheck className="h-4 w-4" />}
-                    <DiscussionActions discussion={currentDiscussion} />
+                    {discussion?.discussion_user?.is_bookmarked === "yes" && (
+                      <BookmarkCheck className="h-4 w-4" />
+                    )}
+                    <DiscussionActions discussion={discussion} />
                   </div>
                 </div>
 
@@ -630,7 +689,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                     <Popover>
                       <PopoverTrigger asChild>
                         <button className="hover:text-primary">
-                          {fromNow(currentDiscussion.created_at)}
+                          {fromNow(discussion.created_at)}
                         </button>
                       </PopoverTrigger>
                       <PopoverContent
@@ -644,7 +703,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                           <div className="text-xs font-medium">
                             <span className="font-bold">发表 #1 </span>
                             {formatDate(
-                              currentDiscussion.created_at,
+                              discussion.created_at,
                               "YYYY年M月D日 dddd HH:mm:ss"
                             )}
                           </div>
@@ -653,7 +712,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                               <input
                                 type="text"
                                 readOnly
-                                value={`${window.location.origin}/d/${currentDiscussion.slug}`}
+                                value={`${window.location.origin}/d/${discussion.slug}`}
                                 className="w-full text-xs p-2 rounded bg-background pr-16"
                                 onClick={(e) => e.currentTarget.select()}
                               />
@@ -662,7 +721,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                         </div>
                       </PopoverContent>
                     </Popover>
-                    {currentDiscussion.main_post.editor && (
+                    {discussion.main_post.editor && (
                       <Popover>
                         <PopoverTrigger asChild>
                           <div>
@@ -682,13 +741,12 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                         >
                           <div className="space-y-2 text-muted-foreground">
                             <div className="text-xs space-y-1">
-                              {currentDiscussion.main_post.editor.nickname ||
-                                currentDiscussion.main_post.editor
-                                  .username}{" "}
+                              {discussion.main_post.editor.nickname ||
+                                discussion.main_post.editor.username}{" "}
                               编辑于{" "}
-                              {currentDiscussion.main_post.edited_at
+                              {discussion.main_post.edited_at
                                 ? formatDate(
-                                    currentDiscussion.main_post.edited_at,
+                                    discussion.main_post.edited_at,
                                     "YYYY年M月D日"
                                   )
                                 : "未知"}
@@ -702,18 +760,18 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                     <span>
                       来自{" "}
                       <Link
-                        href={`/b/${currentDiscussion.board.slug}`}
+                        href={`/b/${discussion.board.slug}`}
                         className="inline-block max-w-[8ch] lg:max-w-[20ch] truncate align-bottom hover:text-primary"
                       >
-                        {currentDiscussion.board.name}
+                        {discussion.board.name}
                       </Link>
                     </span>
                     <Link
-                      href={`/b/${currentDiscussion.board.slug}?child=${currentDiscussion.board_child.id}`}
+                      href={`/b/${discussion.board.slug}?child=${discussion.board_child.id}`}
                       className="inline-flex items-center hover:text-primary"
                     >
                       <Tag className="h-4 w-4 text-sm mr-1" />
-                      <span>{currentDiscussion.board_child.name}</span>
+                      <span>{discussion.board_child.name}</span>
                     </Link>
                   </div>
                 </div>
@@ -722,10 +780,8 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           </div>
 
           <div className="py-4 px-2 md:px-4 text-muted-foreground w-full text-base">
-            <PostContent post={currentDiscussion.main_post} />
-            {currentDiscussion.poll && (
-              <PollContent discussion={currentDiscussion} />
-            )}
+            <PostContent post={discussion.main_post} />
+            {discussion.poll && <PollContent discussion={discussion} />}
           </div>
           <div className="flex justify-between items-center mb-4 px-2 text-muted-foreground text-sm">
             <div className="flex items-center space-x-4 md:space-x-8 cursor-pointer">
@@ -733,54 +789,52 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 <ThumbsUp
                   className={cn(
                     "h-4 w-4",
-                    currentDiscussion.main_post.user_voted?.vote === "up" &&
+                    discussion.main_post.user_voted?.vote === "up" &&
                       "text-primary fill-primary"
                   )}
                   onClick={() =>
-                    handleVote(currentDiscussion.main_post.id, "up", true)
+                    handleVote(discussion.main_post.id, "up", true)
                   }
                 />
-                {currentDiscussion.main_post.up_votes_count > 0 && (
+                {discussion.main_post.up_votes_count > 0 && (
                   <Popover>
                     <PopoverTrigger asChild>
                       <button className="text-xs md:text-sm hover:text-primary">
                         {formatCompactNumber(
-                          currentDiscussion.main_post.up_votes_count
+                          discussion.main_post.up_votes_count
                         )}
                       </button>
                     </PopoverTrigger>
                     <PopoverContent className="w-80 p-0" align="start">
-                      <VotersList postId={currentDiscussion.main_post.id} />
+                      <VotersList postId={discussion.main_post.id} />
                     </PopoverContent>
                   </Popover>
                 )}
               </div>
               <button
                 onClick={() =>
-                  handleVote(currentDiscussion.main_post.id, "down", true)
+                  handleVote(discussion.main_post.id, "down", true)
                 }
                 className="flex items-center space-x-2"
               >
                 <ThumbsDown
                   className={cn(
                     "h-4 w-4",
-                    currentDiscussion.main_post.user_voted?.vote === "down" &&
+                    discussion.main_post.user_voted?.vote === "down" &&
                       "text-destructive fill-destructive"
                   )}
                 />
-                {currentDiscussion.main_post.down_votes_count > 5 && (
+                {discussion.main_post.down_votes_count > 5 && (
                   <span className="text-xs md:text-sm">
-                    {formatCompactNumber(
-                      currentDiscussion.main_post.down_votes_count
-                    )}
+                    {formatCompactNumber(discussion.main_post.down_votes_count)}
                   </span>
                 )}
               </button>
             </div>
             <AuthGuard>
               <CommentButton
-                discussion={currentDiscussion}
-                isLocked={currentDiscussion?.is_locked === 1}
+                discussion={discussion}
+                isLocked={discussion?.is_locked === 1}
                 isSubmitting={isSubmitting}
                 showEditor={showCommentEditor}
                 onClick={() => {
@@ -810,14 +864,14 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 onLoadMore={fetchNextPage}
               >
                 <CommentList
-                  discussion={currentDiscussion}
+                  discussion={discussion}
                   comments={allComments}
                   isLoading={isLoading}
                   onReply={handleReplyClick}
                   onEdit={handleEditClick}
                   onSubmitReply={handleSubmitComment}
                   onEditComment={handleEditComment}
-                  isLocked={currentDiscussion?.is_locked === 1}
+                  isLocked={discussion?.is_locked === 1}
                   queryKey={["discussion-posts", slug]}
                 />
               </InfiniteScroll>
@@ -939,8 +993,8 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               {!showCommentEditor && (
                 <div className="inline-flex rounded-md shadow-sm w-full">
                   <CommentButton
-                    discussion={currentDiscussion}
-                    isLocked={currentDiscussion?.is_locked === 1}
+                    discussion={discussion}
+                    isLocked={discussion?.is_locked === 1}
                     isSubmitting={isSubmitting}
                     showEditor={showCommentEditor}
                     isReply={true}
