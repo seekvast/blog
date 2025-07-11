@@ -20,8 +20,10 @@ import { User } from "@/types/user";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import { api } from "@/lib/api";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 
 export default function SettingsPage() {
+  const { requireAuthAndEmailVerification } = useRequireAuth();
   const queryClient = useQueryClient();
   const params = useSearchParams();
   const userId = params?.get("hashid");
@@ -50,34 +52,39 @@ export default function SettingsPage() {
     queryKey: ["user", userId],
     queryFn: () => api.users.get({ hashid: userId }),
     enabled: !!userId,
+    staleTime: 1 * 60 * 1000,
+    gcTime: 3 * 60 * 1000,
   });
 
   const handleUpdatePreference = (value: string) => {
-    api.users.savePreferences({
-      preferences: {
-        discloseOnline: value,
-      },
-      hashid: userId,
-    });
-    //更新user缓存
-    queryClient.setQueryData<User>(["user", userId], (user) => {
-      if (!user) return user;
-      return {
-        ...user,
+    requireAuthAndEmailVerification(() => {
+      api.users.savePreferences({
         preferences: {
-          ...user.preferences,
           discloseOnline: value,
-          nsfwVisible: user.preferences?.nsfwVisible || "no",
-          autoFollow: user.preferences?.autoFollow || "yes",
-          notify_voted: user.preferences?.notify_voted || "yes",
-          notify_reply: user.preferences?.notify_reply || "yes",
-          notify_newPost: user.preferences?.notify_newPost || "yes",
-          notify_userMentioned: user.preferences?.notify_userMentioned || "yes",
-          notify_discussionLocked:
-            user.preferences?.notify_discussionLocked || "yes",
-          notify_report: user.preferences?.notify_report || "yes",
         },
-      };
+        hashid: userId,
+      });
+      //更新user缓存
+      queryClient.setQueryData<User>(["user", userId], (user) => {
+        if (!user) return user;
+        return {
+          ...user,
+          preferences: {
+            ...user.preferences,
+            discloseOnline: value,
+            nsfwVisible: user.preferences?.nsfwVisible || "no",
+            autoFollow: user.preferences?.autoFollow || "yes",
+            notify_voted: user.preferences?.notify_voted || "yes",
+            notify_reply: user.preferences?.notify_reply || "yes",
+            notify_newPost: user.preferences?.notify_newPost || "yes",
+            notify_userMentioned:
+              user.preferences?.notify_userMentioned || "yes",
+            notify_discussionLocked:
+              user.preferences?.notify_discussionLocked || "yes",
+            notify_report: user.preferences?.notify_report || "yes",
+          },
+        };
+      });
     });
   };
 
@@ -205,8 +212,33 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-muted-foreground">加载用户信息中...</div>
+      <div className="px-4 lg:py-4 lg:px-0">
+        <div className="flex gap-8 relative">
+          {/* 左侧导航骨架 */}
+          <div className="hidden lg:block w-60 flex-shrink-0">
+            <div className="fixed w-60 space-y-2">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-12 bg-gray-200 rounded-lg animate-pulse"
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* 右侧内容骨架 */}
+          <div className="flex-1 space-y-6">
+            <div className="h-8 bg-gray-200 rounded animate-pulse" />
+            <div className="space-y-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="border-b pb-4">
+                  <div className="h-6 bg-gray-200 rounded animate-pulse mb-2" />
+                  <div className="h-4 bg-gray-100 rounded animate-pulse" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

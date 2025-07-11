@@ -15,6 +15,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { User } from "@/types/user";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 
 type NotifyPreferences = {
   discloseOnline: string;
@@ -29,6 +30,7 @@ type NotifyPreferences = {
 };
 
 export default function NotificationSettings({ user }: { user: User | null }) {
+  const { requireAuthAndEmailVerification } = useRequireAuth();
   const [settings, setSettings] = useState<NotifyPreferences | undefined>(
     user?.preferences
   );
@@ -83,13 +85,14 @@ export default function NotificationSettings({ user }: { user: User | null }) {
 
   const handleToggle = (key: keyof NotifyPreferences) => {
     if (!settings) return;
-
+    requireAuthAndEmailVerification(() => {
     const toggle = {
       ...settings,
       [key]: settings[key] === "yes" ? "no" : "yes",
     };
 
-    updatePreferencesMutation.mutate(toggle);
+      updatePreferencesMutation.mutate(toggle);
+    });
   };
 
   return (

@@ -55,6 +55,8 @@ export default function UserLayout({
     queryKey: ["user", hashid],
     queryFn: () => api.users.get({ hashid: hashid }),
     enabled: !!hashid,
+    staleTime: 1 * 60 * 1000,
+    gcTime: 3 * 60 * 1000,
   });
 
   // 判断是否显示404页面
@@ -145,7 +147,7 @@ export default function UserLayout({
     },
   });
 
-    const handleBlock = (block_user_hashid: string) => {
+  const handleBlock = (block_user_hashid: string) => {
     requireAuthAndEmailVerification(() => {
       blockMutation.mutate(block_user_hashid);
     });
@@ -247,7 +249,7 @@ export default function UserLayout({
                   <div className="flex items-center space-x-2">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="rounded-full px-4 py-2 bg-gray-500">
+                        <button className="rounded-full px-4 py-2 bg-black/15">
                           <ChevronDown className="h-4 w-4 text-white" />
                         </button>
                       </DropdownMenuTrigger>

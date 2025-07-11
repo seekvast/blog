@@ -7,7 +7,6 @@ import { useInterestSelection } from "@/components/providers/interest-selection-
 import { signOut } from "next-auth/react";
 import { PenSquare, LogOut, Settings, User2, Heart } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/components/ui/use-toast";
 import { useAuthModal } from "@/components/auth/auth-modal-store";
 import { useRouter } from "next/navigation";
 import {
@@ -23,7 +22,6 @@ import { useDraftStore } from "@/store/draft";
 import { Badge } from "@/components/ui/badge";
 import { SearchPopover } from "@/components/search/search-popover";
 import { SearchMobile } from "@/components/search/search-mobile";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { NotificationPopover } from "@/components/notification/notification-popover";
 import { useEmailVerificationGuard } from "@/hooks/use-email-verification-guard";
 import { EmailVerificationRequiredFeature } from "@/config/email-verification";

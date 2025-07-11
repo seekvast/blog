@@ -53,9 +53,12 @@ const stepTwoSchema = z.object({
     .regex(/^[a-zA-Z0-9_]+$/, "賬號只能包含英文、數字和下劃線"),
   nickname: z
     .string()
-    .min(2, "暱稱至少需要2個字符")
+    .min(1, "暱稱至少需要1個字符")
     .max(16, "暱稱最多16個字符")
-    .regex(/^[a-zA-Z0-9_]+$/, "暱稱只能包含英文、數字和下劃線"),
+    .regex(
+      /^[^\s\u00A0\u2000-\u200B\u2028\u2029\u3000]+$/,
+      "暱稱不能包含空白字符"
+    ),
   gender: z.enum(["0", "1", "2", "3"], {
     required_error: "請選擇性別",
   }),

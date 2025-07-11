@@ -26,6 +26,7 @@ import { X } from "lucide-react";
 import Image from "next/image";
 import { AttachmentType } from "@/constants/attachment-type";
 import { useTranslation } from "react-i18next";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 
 const passwordSchema = z
   .object({
@@ -61,6 +62,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       </div>
     );
   }
+  const { requireAuthAndEmailVerification } = useRequireAuth();
   const { toast } = useToast();
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [emailModalOpen, setEmailModalOpen] = useState(false);
@@ -454,9 +456,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
                 value={passwordForm.password}
                 onChange={handlePasswordChange("password")}
               />
-              <p className="text-sm ">
-                {t('auth.password_prompt')}
-              </p>
+              <p className="text-sm ">{t("auth.password_prompt")}</p>
             </div>
 
             {/* 确认新密码 */}
@@ -619,7 +619,11 @@ export default function SecuritySettings({ user }: { user: User | null }) {
           </p>
           <div
             className="inline-flex items-center gap-2 cursor-pointer whitespace-nowrap"
-            onClick={() => setBirthdayModalOpen(true)}
+            onClick={() => {
+              requireAuthAndEmailVerification(() => {
+                setBirthdayModalOpen(true);
+              });
+            }}
           >
             <span className="text-sm">{birthday || "选择生日"}</span>
             <ChevronRight className="h-4 w-4 " />
@@ -670,7 +674,9 @@ export default function SecuritySettings({ user }: { user: User | null }) {
             className="flex items-center gap-2 cursor-pointer"
             onClick={() => {
               if (user.age_verified !== 1 && user.age_verified !== 2) {
-                handleAgeVerificationOpen();
+                requireAuthAndEmailVerification(() => {
+                  handleAgeVerificationOpen();
+                });
               }
             }}
           >
@@ -782,7 +788,9 @@ export default function SecuritySettings({ user }: { user: User | null }) {
             <Switch
               checked={nsfwVisible === "yes"}
               onCheckedChange={(checked) => {
-                handleToggle("nsfwVisible", checked);
+                requireAuthAndEmailVerification(() => {
+                  handleToggle("nsfwVisible", checked);
+                });
               }}
             />
           </div>

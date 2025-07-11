@@ -50,6 +50,7 @@ import {
 } from "@/components/ui/select";
 import { ImageIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useRequireAuth } from "@/hooks/use-require-auth";
 
 const formSchema = z.object({
   username: z
@@ -59,9 +60,12 @@ const formSchema = z.object({
     .regex(/^[a-zA-Z0-9_]+$/, "用户名只能包含字母、数字和下划线"),
   nickname: z
     .string()
-    .min(2, "昵称至少需要2个字符")
-    .max(16, "昵称最多16个字符")
-    .regex(/^[a-zA-Z0-9_]+$/, "昵称只能包含字母、数字和下划线"),
+    .min(1, "暱稱至少需要1個字符")
+    .max(16, "暱稱最多16個字符")
+    .regex(
+      /^[^\s\u00A0\u2000-\u200B\u2028\u2029\u3000]+$/,
+      "暱稱不能包含空白字符"
+    ),
   avatar_url: z.string().max(500, "头像URL最多500个字符").nullable().optional(),
   cover: z.string().max(500, "头像URL最多500个字符").nullable().optional(),
   gender: z.number().optional(),
@@ -76,6 +80,8 @@ export default function ProfileSettings({ user }: { user: User | null }) {
       </div>
     );
   }
+
+  const { requireAuthAndEmailVerification } = useRequireAuth();
 
   const { data: session, update } = useSession();
   const queryClient = useQueryClient();
@@ -169,7 +175,11 @@ export default function ProfileSettings({ user }: { user: User | null }) {
         </div>
         <div
           className="flex items-center justify-between gap-2"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            requireAuthAndEmailVerification(() => {
+              setOpen(true);
+            });
+          }}
         >
           <p className="text-sm my-1">
             更新你的個人資訊，讓其他使用者了解更多關於你的資料。
