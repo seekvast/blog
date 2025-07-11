@@ -976,6 +976,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                       onCancelReply={() => setReplyTo(null)}
                       editorRef={editorRef}
                       openLoginModal={openLoginModal}
+                      boardId={discussion?.board_id}
                     />
                   </div>
                 </div>

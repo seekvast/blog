@@ -22,6 +22,8 @@ interface EditorProps {
   onAttachmentUpload?: (attachment: Attachment) => void;
   onPublish?: () => void;
   publishLoading?: boolean;
+  boardId?: number;
+  discussionId?: number;
 }
 
 export const Editor = React.forwardRef<
@@ -42,6 +44,8 @@ export const Editor = React.forwardRef<
     onAttachmentUpload,
     onPublish,
     publishLoading,
+    boardId,
+    discussionId,
   }: EditorProps,
   ref
 ) {
@@ -417,6 +421,10 @@ export const Editor = React.forwardRef<
                     );
                     setSelection({ start: newPosition, end: newPosition });
                   });
+                }}
+                context={{
+                  boardId,
+                  discussionId,
                 }}
               />
             )}

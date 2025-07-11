@@ -18,6 +18,8 @@ interface CommentEditorProps {
   onCancelReply: () => void;
   editorRef: React.RefObject<any>;
   openLoginModal: () => void;
+  boardId?: number;
+  discussionId?: number;
 }
 
 export const CommentEditor = React.memo(
@@ -31,9 +33,11 @@ export const CommentEditor = React.memo(
     onCancelReply,
     editorRef,
     openLoginModal,
+    boardId,
+    discussionId,
   }: CommentEditorProps) => {
     const { requireEmailVerification } = useEmailVerificationGuard();
-    
+
     const handleSubmit = React.useCallback(() => {
       if (!postForm.content.trim() || isSubmitting) return;
       requireEmailVerification(() => {
@@ -96,6 +100,8 @@ export const CommentEditor = React.memo(
           onAttachmentUpload={handleAttachmentUpload}
           onPublish={handleSubmit}
           publishLoading={isSubmitting}
+          boardId={boardId}
+          discussionId={discussionId}
         />
         {/* <div className="mt-2 flex items-center justify-between">
           <div></div>

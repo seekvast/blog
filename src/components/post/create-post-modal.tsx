@@ -759,6 +759,7 @@ export default function CreatePostModal() {
                 onFullscreenChange={handleFullscreenChange}
                 onPublish={debouncedHandlePublish}
                 publishLoading={modalState.isSubmitting}
+                boardId={discussionForm.board_id || undefined}
                 onAttachmentUpload={(attachment) => {
                   // 将 Attachment 类型转换为 discussionForm.attachments 所需的格式
                   const formattedAttachment = {

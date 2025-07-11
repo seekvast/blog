@@ -4,6 +4,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { User } from "@/types";
 import { api } from "@/lib/api";
 
+interface MentionContext {
+  boardId?: number;
+  discussionId?: number;
+}
+
 interface MentionPickerProps {
   position: { top: number; left: number };
   query: string;
@@ -12,6 +17,7 @@ interface MentionPickerProps {
   content: string;
   cursorPosition: number;
   onMention: (newContent: string, newPosition: number) => void;
+  context?: MentionContext;
 }
 
 const SEARCH_THROTTLE = 250;
@@ -25,6 +31,7 @@ export function MentionPicker({
   content,
   cursorPosition,
   onMention,
+  context,
 }: MentionPickerProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,22 +40,37 @@ export function MentionPicker({
   const debouncedQuery = useDebounce(query, SEARCH_THROTTLE);
 
   // 获取用户建议
-  const fetchUsers = useCallback(async (searchTerm: string) => {
-    if (!searchTerm && searchTerm !== "") return;
+  const fetchUsers = useCallback(
+    async (searchTerm: string) => {
+      if (!searchTerm && searchTerm !== "") return;
 
-    setLoading(true);
-    try {
-      const { items } = await api.users.list({
-        keyword: searchTerm,
-        per_page: MAX_RESULTS,
-      });
-      setUsers(items);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      setLoading(true);
+      try {
+        // 构建查询参数
+        const queryParams: Record<string, any> = {
+          keyword: searchTerm,
+          per_page: MAX_RESULTS,
+        };
+
+        // 添加上下文参数
+        if (context?.boardId) {
+          queryParams.board_id = context.boardId;
+        }
+
+        if (context?.discussionId) {
+          queryParams.discussion_id = context.discussionId;
+        }
+
+        const { items } = await api.users.list(queryParams);
+        setUsers(items);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [context]
+  );
 
   // 监听搜索词变化
   useEffect(() => {
@@ -75,18 +97,18 @@ export function MentionPicker({
     (user: User) => {
       const textBeforeCursor = content.slice(0, cursorPosition);
       const atIndex = textBeforeCursor.lastIndexOf("@");
-      
+
       if (atIndex !== -1) {
         // 使用 Flarum 格式: @"username"#hashid
         const mentionText = `@"${user.username}"#${user.hashid}`;
-        const newContent = 
+        const newContent =
           content.slice(0, atIndex) +
           mentionText +
           content.slice(cursorPosition);
-        
+
         // 计算新的光标位置（在提及文本之后）
         const newPosition = atIndex + mentionText.length;
-        
+
         onMention(newContent, newPosition);
         onClose();
       }
