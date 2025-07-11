@@ -22,7 +22,7 @@ import { api } from "@/lib/api";
 
 interface BoardSettingsFormProps {
   board: BoardType;
-  onSuccess?: () => void;
+  onSuccess?: (board: BoardType) => void;
 }
 
 export function BoardSettingsForm({
@@ -32,28 +32,48 @@ export function BoardSettingsForm({
   const { isMobile } = useDevice();
   const router = useRouter();
   const searchParams = useSearchParams();
-  
-  const tabParam = searchParams ? searchParams.get("tab") as SettingTab | null : null;
-  const isValidTab = tabParam && [
-    "general", "rules", "child-boards", "approval", 
-    "members", "reports", "records", "blocklist"
-  ].includes(tabParam);
-  
+
+  const tabParam = searchParams
+    ? (searchParams.get("tab") as SettingTab | null)
+    : null;
+  const isValidTab =
+    tabParam &&
+    [
+      "general",
+      "rules",
+      "child-boards",
+      "approval",
+      "members",
+      "reports",
+      "records",
+      "blocklist",
+    ].includes(tabParam);
+
   const [activeTab, setActiveTab] = React.useState<SettingTab>(
-    isMobile ? "" : (isValidTab ? tabParam : "general")
+    isMobile ? "" : isValidTab ? tabParam : "general"
   );
   const [initBoard, setInitBoard] = React.useState<BoardType>(board);
 
-  const fetchBoard = async () => {
-    const board = await api.boards.get({ slug: initBoard.slug });
-    setInitBoard(board);
+  //   const fetchBoard = async () => {
+  //     const board = await api.boards.get({ slug: initBoard.slug });
+  //     setInitBoard(board);
+  //   };
+
+  const resetBoard = (board?: BoardType) => {
+    if (board) {
+      setInitBoard(board);
+      onSuccess?.(board);
+    } else {
+      // 如果没有传递 board，保持当前状态但仍然调用 onSuccess
+      onSuccess?.(initBoard);
+    }
   };
 
   useEffect(() => {
     const defaultTab = isMobile ? "" : "general";
     setActiveTab(isValidTab ? tabParam! : defaultTab);
   }, [isMobile, tabParam, isValidTab]);
-  
+
   const handleTabClick = (tab: SettingTab) => {
     const params = new URLSearchParams(searchParams?.toString() || "");
     if (tab) {
@@ -61,7 +81,7 @@ export function BoardSettingsForm({
     } else {
       params.delete("tab");
     }
-    
+
     router.replace(`?${params.toString()}`);
     setActiveTab(tab);
   };
@@ -70,9 +90,7 @@ export function BoardSettingsForm({
   const renderContent = () => {
     switch (activeTab) {
       case "general":
-        return (
-          <BaseSettings board={initBoard} onSuccess={() => fetchBoard()} />
-        );
+        return <BaseSettings board={initBoard} />;
       case "child-boards":
         return <BoardChildSettings board={initBoard} />;
       case "rules":
@@ -84,7 +102,7 @@ export function BoardSettingsForm({
       case "reports":
         return <ReportsSettings board={initBoard} />;
       case "blocklist":
-            return <BlocklistSettings board={initBoard} />;
+        return <BlocklistSettings board={initBoard} />;
       case "records":
         return <OperationLogs board={initBoard} />;
       default:

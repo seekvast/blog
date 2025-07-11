@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 interface BaseSettingsProps {
   board: Board;
-  onSuccess?: () => void;
+  onSuccess?: (data?: Board) => void;
 }
 
 export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
@@ -66,8 +66,7 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
       const updateData = { ...values, id: board.id };
       return api.boards.update(updateData);
     },
-    onSuccess: () => {
-      onSuccess?.();
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["board", board.slug] });
     },
     onError: () => {
@@ -89,6 +88,7 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
           router.push("/b");
         }, 2000);
       } else {
+        // 对于大型看板，重新获取最新状态
         queryClient.invalidateQueries({ queryKey: ["board", board.slug] });
         onSuccess?.();
       }
@@ -118,9 +118,17 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
   const { mutate: revokeDelete, isPending: isRevokeDeletePending } =
     useMutation({
       mutationFn: () => api.boards.revokeDelete(board.id),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["board", board.slug] });
-        onSuccess?.();
+      onSuccess: async () => {
+        // 重新获取最新的 board 数据
+        try {
+          const updatedBoard = await api.boards.get({ slug: board.slug });
+          queryClient.setQueryData(["board", board.slug], updatedBoard);
+          onSuccess?.(updatedBoard);
+        } catch (error) {
+          // 如果获取失败，则使用缓存失效的方式
+          queryClient.invalidateQueries({ queryKey: ["board", board.slug] });
+          onSuccess?.();
+        }
       },
       onError: () => {
         toast({
