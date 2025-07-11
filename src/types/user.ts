@@ -10,6 +10,7 @@ export interface UserProfile {
   avatar_url?: string;
   cover?: string;
   bio?: string;
+  board_count?: number;
   blocked?: {
     id: number;
     blocked_id: number;
@@ -29,8 +30,11 @@ export interface User {
   joined_at?: string;
   last_seen_at?: string;
   token?: string;
+  discussion_count?: number;
+  comment_count?: number;
   posts_count?: number;
   replies_count?: number;
+  board_count?: number;
   user_role?: number;
   status?: number;
   restrict_until?: string;

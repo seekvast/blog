@@ -255,6 +255,9 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
                       </span>
                     </div>
                     <div className="text-sm text-muted-foreground">
+                      加入了 {application.user?.board_count} 个看板
+                    </div>
+                    <div className="text-sm text-muted-foreground">
                       注册时间：
                       {application.user?.created_at
                         ? formatDate(application.user.created_at)
@@ -265,6 +268,7 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
                         ? formatDate(application.created_at)
                         : "-"}
                     </div>
+
                     <div className="mt-2 space-y-1 text-sm">
                       <div>
                         <span className="text-muted-foreground">

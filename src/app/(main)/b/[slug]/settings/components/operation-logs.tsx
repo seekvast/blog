@@ -158,8 +158,8 @@ export function OperationLogs({ board }: OperationLogsProps) {
     <div className="space-y-6">
       {/* 标题和筛选器 */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-        <div>
-          <h2 className="text-xl font-bold">审核记录</h2>
+              <div>
+        <h3 className="text-lg font-medium">审核记录</h3>
         </div>
         <div className="flex gap-2 flex-wrap">
           <Select
@@ -211,7 +211,7 @@ export function OperationLogs({ board }: OperationLogsProps) {
             const hasContent = renderContent(log);
 
             return (
-              <div key={log.id} className="flex items-start py-4 px-4">
+              <div key={log.id} className="flex items-start py-4 px-2">
                 {/* 左侧：头像和内容 */}
                 <div
                   className={cn(
