@@ -33,6 +33,7 @@ export interface User {
   replies_count?: number;
   user_role?: number;
   status?: number;
+  restrict_until?: string;
   username_history?: string[];
   is_board_moderator?: number;
   age_verified?: number;

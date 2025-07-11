@@ -8,7 +8,7 @@ export const BoardUserStatus = {
 } as const;
 
 export const BoardUserStatusMapping = {
-  [BoardUserStatus.PASS]: "已加入",
+  [BoardUserStatus.PASS]: "正常",
   [BoardUserStatus.REJECT]: "拒绝",
   [BoardUserStatus.PENDING]: "审核中",
   [BoardUserStatus.BAN]: "封锁",

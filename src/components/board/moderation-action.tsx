@@ -110,7 +110,7 @@ export function ModerationAction({
                       <input
                         type="number"
                         className="w-16 h-7 p-1 border rounded-md"
-                        min="0"
+                        min="1"
                         max="31"
                         onChange={(e) =>
                           form.setValue(

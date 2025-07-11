@@ -6,6 +6,7 @@ export enum BoardPermission {
   VISIT_SETTINGS = "visit_settings", // 访问看板设置
   TRANSFER_OWNERSHIP = "transfer_ownership", // 转让创建者权限
   APPOINT_MODERATOR = "appoint_moderator", // 指派其他人为管理员
+  UNMUTE_USER = "unmute_user", // 撤销禁言
   LEAVE_BOARD = "leave_board", // 退出看板
 
   // 贴文操作权限
@@ -39,6 +40,7 @@ export const ROLE_PERMISSIONS = {
     BoardPermission.VISIT_SETTINGS,
     BoardPermission.BOARD_SETTINGS,
     BoardPermission.MEMBERS_SETTINGS,
+    BoardPermission.UNMUTE_USER,
     BoardPermission.REPORTS_SETTINGS,
     BoardPermission.TRANSFER_OWNERSHIP,
     BoardPermission.APPOINT_MODERATOR,
@@ -57,6 +59,7 @@ export const ROLE_PERMISSIONS = {
   [BoardUserRole.MODERATOR]: [
     // 管理员(版主)权限
     BoardPermission.VISIT_SETTINGS,
+    BoardPermission.UNMUTE_USER,
     BoardPermission.MOVE_DISCUSSION,
     BoardPermission.STICKIED_DISCUSSION,
     BoardPermission.DELETE_DISCUSSION,
