@@ -24,6 +24,7 @@ import type {
   PostVoter,
   OperationLog,
 } from "@/types";
+import { BlacklistItem } from "@/types/common";
 
 export interface ApiOptions {
   prefix?: string;
@@ -71,6 +72,7 @@ export function createApi(options: ApiOptions = {}) {
       getCategory: (params?: QueryParams) =>
         http.get<any>(`${prefix}/user/category`, params, { next }),
       block: (data: any) => http.post<any>(`${prefix}/user/block`, data),
+      unblock: (data: any) => http.post<any>(`${prefix}/user/unblock`, data),
       getPosts: (data?: any) =>
         http.get<Pagination<Post>>(`${prefix}/user/posts`, data, { next }),
       verifyAge: (data: any) =>
@@ -79,7 +81,7 @@ export function createApi(options: ApiOptions = {}) {
         http.get<any>(`${prefix}/user/send-email`, data),
       updateEmail: (data: any) => http.patch<any>(`${prefix}/user/email`, data),
       getBlacklist: (params?: QueryParams) =>
-        http.get<Pagination<UserBlacklist>>(
+        http.get<Pagination<BlacklistItem>>(
           `${prefix}/user/blacklist`,
           params,
           { next }

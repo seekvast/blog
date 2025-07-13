@@ -57,7 +57,7 @@ export interface User {
   blocked?: {
     id: number;
     user_hashid: string;
-    blocked_hashid: string;
+    blockable_hashid: string;
   };
   age_verification?: {
     id: number;
@@ -72,7 +72,7 @@ export interface User {
 export interface UserBlacklist {
   id: number;
   user_hashid: string;
-  blocked_hashid: string;
+  blockable_hashid: string;
   blocked: User;
 }
 
@@ -80,9 +80,17 @@ export interface UserBlacklist {
 export interface BlacklistItem {
   id: number;
   user_hashid: string;
-  blocked_hashid: string;
-  blocked_type: "user" | "board";
-  blocked: User | Board;
+  blockable_hashid: string;
+  blockable_type: "App\\Models\\User" | "App\\Models\\Board";
+  blockable: User | Board;
+}
+
+export interface UserBlacklistType {
+  id: number;
+  user_hashid: string;
+  blockable_hashid: string;
+  blockable_type: "App\\Models\\User" | "App\\Models\\Board";
+  blockable: User | Board;
 }
 
 // 看板类型定义

@@ -80,3 +80,25 @@ export interface Attachment {
 }
 
 export type UploadResponse = Response<Attachment>;
+
+export interface Board {
+  id: number;
+  hashid: string;
+  name: string;
+  slug: string;
+  desc?: string;
+  avatar?: string;
+  visibility?: number;
+  poll_role?: number[];
+  badge_visible?: number[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface BlacklistItem {
+  id: number;
+  user_hashid: string;
+  blockable_hashid: string;
+  blockable_type?: "App\\Models\\User" | "App\\Models\\Board";
+  blockable: User | Board;
+}
