@@ -50,8 +50,12 @@ export function BoardItem({ board, onBlockSuccess, onSubscribeSuccess }: BoardIt
               <UserRound className="h-4" />
               <span>{board.users_count || 0}</span>
             </div>
-            <span>•</span>
-            <span>{board.category.name}</span>
+            {board.category && (
+              <>
+                <span>•</span>
+                <span>{board.category.name}</span>
+              </>
+            )}
           </div>
           <div className="text-sm text-muted-foreground">{board.desc}</div>
         </div>

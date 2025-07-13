@@ -180,7 +180,7 @@ export const CommentItem = ({
                     href={`#comment-${comment.parent_post.id}`}
                     className="text-primary flex-shrink-0"
                   >
-                    @{comment.parent_post.user.username}
+                    @{comment.parent_post.user.nickname}
                   </Link>
                 )}
                 <span className="flex-shrink-0">

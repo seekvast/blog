@@ -300,9 +300,14 @@ function BoardContent() {
               </div>
               <div className="mt-1 text-sm text-muted-foreground">
                 <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  {board.visibility >= 1 && (
+                  {board.visibility >= 1 ? (
                     <>
                       <span>私密</span>
+                      <span>•</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>公開</span>
                       <span>•</span>
                     </>
                   )}
@@ -311,8 +316,12 @@ function BoardContent() {
                     <UserRound className="h-4" />
                     <span>{board.users_count || 0}</span>
                   </div>
-                  <span>•</span>
-                  <span>{board.category.name}</span>
+                  {board.category && (
+                    <>
+                      <span>•</span>
+                      <span>{board.category.name}</span>
+                    </>
+                  )}
                 </div>
               </div>
               <div className="mt-1 text-sm text-muted-foreground">

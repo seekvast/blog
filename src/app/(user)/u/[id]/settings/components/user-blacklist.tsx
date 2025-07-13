@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { UserBlacklist as UserBlacklistType } from "@/types/user";
+import { UserBlacklist as UserBlacklistType, User, Board } from "@/types/user";
 import { Pagination } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // 看板黑名单数据接口
 interface BlacklistBoard {
@@ -28,11 +29,41 @@ interface BlacklistUser {
 // 看板黑名单列表组件
 function Boards({
   boards,
+  isLoading,
   onUnblock,
 }: {
   boards: BlacklistBoard[];
+  isLoading: boolean;
   onUnblock: (id: string) => void;
 }) {
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="flex items-center justify-between py-3 border-b"
+          >
+            <div className="flex items-center gap-3">
+              <Skeleton className="w-12 h-12 rounded-full" />
+              <div>
+                <Skeleton className="h-5 w-32 mb-1" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            </div>
+            <Skeleton className="h-8 w-20" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (boards.length === 0) {
+    return (
+      <div className="py-4 text-center text-muted-foreground">暂无数据</div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {boards.map((board) => (
@@ -137,43 +168,39 @@ function Users({
   );
 }
 
-// 模拟数据
-const mockBoards: BlacklistBoard[] = [
-  {
-    id: "1",
-    name: "看板名称",
-    avatar: "/avatar.jpg",
-    description: "私密・&99成员・音乐",
-  },
-  {
-    id: "2",
-    name: "看板名称",
-    avatar: "/avatar.jpg",
-    description: "私密・&99成员・音乐",
-  },
-];
-
 interface UserBlacklistProps {
-  type: "board" | "user";
-  onTypeChange: (type: "board" | "user") => void;
+  type?: "board" | "user";
+  onTypeChange?: (type: "board" | "user") => void;
 }
 
 // 主黑名单组件
 export default function UserBlacklist({
-  type,
+  type: externalType,
   onTypeChange,
 }: UserBlacklistProps) {
-  const [boards, setBoards] = React.useState<BlacklistBoard[]>(mockBoards);
+  // 内部状态管理，如果没有外部传入则使用内部状态
+  const [internalType, setInternalType] = React.useState<"board" | "user">(
+    "user"
+  );
+  const type = externalType || internalType;
 
-  // 使用 React Query 获取用户黑名单数据
+  const handleTypeChange = (newType: "board" | "user") => {
+    if (onTypeChange) {
+      onTypeChange(newType);
+    } else {
+      setInternalType(newType);
+    }
+  };
+
+  // 使用 React Query 获取黑名单数据，根据类型传递参数
   const { data, isLoading, isError, refetch } = useQuery<
     Pagination<UserBlacklistType>
   >({
-    queryKey: ["userBlacklist"],
-    queryFn: () => api.users.getBlacklist(),
+    queryKey: ["userBlacklist", type],
+    queryFn: () => api.users.getBlacklist({ blocked_type: type }),
   });
 
-  // 将 API 返回的数据转换为组件所需的格式
+  // 将 API 返回的数据转换为用户黑名单格式
   const users = React.useMemo(() => {
     if (!data?.items) return [];
 
@@ -185,16 +212,39 @@ export default function UserBlacklist({
     }));
   }, [data]);
 
-  const handleUnblockBoard = (boardId: string) => {
-    setBoards((prev) => prev.filter((board) => board.id !== boardId));
+  // 将 API 返回的数据转换为看板黑名单格式
+  // 注意：当前API只返回用户黑名单，看板黑名单暂时使用空数组
+  const boards = React.useMemo(() => {
+    if (!data?.items) return [];
+
+    // 如果API支持看板黑名单，这里会处理看板数据
+    // 目前API只返回用户黑名单，所以看板列表为空
+    return [];
+  }, [data]);
+
+  const handleUnblockBoard = async (boardId: string) => {
+    try {
+      await api.users.block({
+        block_user_hashid: boardId,
+        action: "unblock",
+        blocked_type: "board",
+      });
+      refetch();
+    } catch (error) {
+      console.error("解除看板黑名单失败", error);
+    }
   };
 
   const handleUnblockUser = async (userId: string) => {
     try {
-      await api.users.block({ block_user_hashid: userId, action: "unblock" });
+      await api.users.block({
+        block_user_hashid: userId,
+        action: "unblock",
+        blocked_type: "user",
+      });
       refetch();
     } catch (error) {
-      console.error("解除黑名单失败", error);
+      console.error("解除用户黑名单失败", error);
     }
   };
 
@@ -208,15 +258,29 @@ export default function UserBlacklist({
 
   return (
     <div className="space-y-4">
-      {type === "board" ? (
-        <Boards boards={boards} onUnblock={handleUnblockBoard} />
-      ) : (
-        <Users
-          users={users}
-          isLoading={isLoading}
-          onUnblock={handleUnblockUser}
-        />
-      )}
+      {/* 切换控件 */}
+      <Tabs value={type} onValueChange={handleTypeChange} className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="user">用户黑名单</TabsTrigger>
+          <TabsTrigger value="board">看板黑名单</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="user" className="mt-4">
+          <Users
+            users={users}
+            isLoading={isLoading}
+            onUnblock={handleUnblockUser}
+          />
+        </TabsContent>
+
+        <TabsContent value="board" className="mt-4">
+          <Boards
+            boards={boards}
+            isLoading={isLoading}
+            onUnblock={handleUnblockBoard}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

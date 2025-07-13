@@ -76,4 +76,24 @@ export interface UserBlacklist {
   blocked: User;
 }
 
+// 扩展黑名单类型，支持看板和用户
+export interface BlacklistItem {
+  id: number;
+  user_hashid: string;
+  blocked_hashid: string;
+  blocked_type: "user" | "board";
+  blocked: User | Board;
+}
+
+// 看板类型定义
+export interface Board {
+  hashid: string;
+  name: string;
+  slug: string;
+  desc?: string;
+  avatar?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export type LoginResponse = Response<User>;

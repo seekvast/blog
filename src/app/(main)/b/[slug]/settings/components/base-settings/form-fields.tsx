@@ -131,7 +131,11 @@ export function FormFields({
             <FormLabel>看板类型</FormLabel>
             <Select
               onValueChange={(value) => field.onChange(Number(value))}
-              defaultValue={String(field.value)}
+              defaultValue={
+                field.value === 0 || field.value === null
+                  ? ""
+                  : String(field.value)
+              }
             >
               <FormControl>
                 <SelectTrigger>

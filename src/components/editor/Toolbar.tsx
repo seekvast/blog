@@ -40,6 +40,10 @@ interface ToolbarProps {
   onContentChange: (content: string) => void;
   onSelectionChange: (selection: { start: number; end: number }) => void;
   onPreviewModeChange: (mode: boolean) => void;
+  showPublishButton?: boolean;
+  onPublish?: () => void;
+  publishLoading?: boolean;
+  publishText?: string;
 }
 
 function wordSelectionStart(text: string, i: number): number {
@@ -75,6 +79,10 @@ export function Toolbar({
   onContentChange,
   onSelectionChange,
   onPreviewModeChange,
+  showPublishButton = false,
+  onPublish,
+  publishLoading = false,
+  publishText = "Post Reply",
 }: ToolbarProps) {
   const wrapText = React.useCallback(
     (before: string, after: string) => {
@@ -227,11 +235,6 @@ export function Toolbar({
 
   const tools = [
     {
-      icon: Heading,
-      tooltip: "标题",
-      onClick: () => toggleLineFormat("### "),
-    },
-    {
       icon: Bold,
       tooltip: "粗体 (Ctrl+B)",
       onClick: () => wrapText("**", "**"),
@@ -242,9 +245,24 @@ export function Toolbar({
       onClick: () => wrapText("*", "*"),
     },
     {
+      icon: Heading,
+      tooltip: "标题",
+      onClick: () => toggleLineFormat("### "),
+    },
+    {
       icon: Strikethrough,
       tooltip: "删除线",
       onClick: () => wrapText("~~", "~~"),
+    },
+    {
+      icon: Quote,
+      tooltip: "引用",
+      onClick: () => toggleLineFormat("> "),
+    },
+    {
+      icon: Code,
+      tooltip: "代码块",
+      onClick: () => wrapText("```\n", "\n```"),
     },
     {
       icon: Link,
@@ -267,46 +285,26 @@ export function Toolbar({
       tooltip: "有序列表",
       onClick: () => toggleLineFormat("1. "),
     },
-    {
-      icon: Quote,
-      tooltip: "引用",
-      onClick: () => toggleLineFormat("> "),
-    },
-    {
-      icon: Code,
-      tooltip: "代码块",
-      onClick: () => wrapText("```\n", "\n```"),
-    },
   ];
 
   return (
-    <div className={cn("flex items-center gap-0.5 p-1", className)}>
-      {tools.map((tool, index) => (
-        <TooltipProvider key={index}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={tool.onClick}
-                disabled={tool.disabled}
-                className="h-8 w-8 p-0"
-              >
-                <tool.icon
-                  className={cn(
-                    "h-4 w-4",
-                    tool.icon === Loader2 && "animate-spin"
-                  )}
-                />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{tool.tooltip}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      ))}
-      {/* <div className="flex items-center gap-0.5">
+    <div
+      className={cn(
+        "flex items-center  gap-2 p-2 border-t bg-background",
+        className
+      )}
+    >
+      {showPublishButton && (
+        <Button
+          onClick={onPublish}
+          disabled={publishLoading}
+          className="bg-primary text-primary-foreground hover:bg-primary/90 font-medium"
+        >
+          {publishLoading ? "发布中..." : publishText}
+        </Button>
+      )}
+
+      <div className="flex items-center gap-0.5">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -314,7 +312,7 @@ export function Toolbar({
                 variant="ghost"
                 size="sm"
                 onClick={() => onPreviewModeChange(!previewMode)}
-                className="px-2"
+                className="h-8 w-8 p-0"
               >
                 {previewMode ? (
                   <EyeOff className="h-4 w-4" />
@@ -328,21 +326,41 @@ export function Toolbar({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      </div> */}
-      <div
-        className={cn(
-          "flex items-center gap-0.5 ml-auto",
-          isFullscreen && "pr-4"
-        )}
-      >
-        <TooltipProvider>
+
+        {tools.map((tool, index) => (
+          <TooltipProvider key={index}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={tool.onClick}
+                  disabled={tool.disabled}
+                  className="h-8 w-8 p-0"
+                >
+                  <tool.icon
+                    className={cn(
+                      "h-4 w-4",
+                      tool.icon === Loader2 && "animate-spin"
+                    )}
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{tool.tooltip}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ))}
+
+        {/* <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onToggleFullscreen}
-                className="px-2"
+                className="h-8 w-8 p-0"
               >
                 {isFullscreen ? (
                   <Minimize2 className="h-4 w-4" />
@@ -355,7 +373,7 @@ export function Toolbar({
               <p>{isFullscreen ? "退出全屏" : "全屏编辑"}</p>
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
+        </TooltipProvider> */}
       </div>
     </div>
   );

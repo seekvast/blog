@@ -249,11 +249,11 @@ export function DiscussionsList({
           )}
 
           {/* 没有更多数据时的提示 */}
-          {!hasNextPage && !isLoading && discussions.length > 0 && (
+          {/* {!hasNextPage && !isLoading && discussions.length > 0 && (
             <div className="flex items-center justify-center py-4 text-muted-foreground">
               <span>没有更多内容了</span>
             </div>
-          )}
+          )} */}
 
           {/* 空状态 */}
           {!isLoading && discussions.length === 0 && !error && (

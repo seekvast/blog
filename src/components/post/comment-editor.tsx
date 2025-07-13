@@ -7,6 +7,7 @@ import type { Attachment } from "@/types";
 import { PostForm } from "@/validations/post";
 import { useEmailVerificationGuard } from "@/hooks/use-email-verification-guard";
 import { EmailVerificationRequiredFeature } from "@/config/email-verification";
+import { Reply } from "lucide-react";
 
 interface CommentEditorProps {
   user: User | null;
@@ -20,6 +21,8 @@ interface CommentEditorProps {
   openLoginModal: () => void;
   boardId?: number;
   discussionId?: number;
+  discussionTitle?: string;
+  onClose?: () => void;
 }
 
 export const CommentEditor = React.memo(
@@ -35,6 +38,8 @@ export const CommentEditor = React.memo(
     openLoginModal,
     boardId,
     discussionId,
+    discussionTitle,
+    onClose,
   }: CommentEditorProps) => {
     const { requireEmailVerification } = useEmailVerificationGuard();
 
@@ -99,20 +104,21 @@ export const CommentEditor = React.memo(
           onChange={handleContentChange}
           onAttachmentUpload={handleAttachmentUpload}
           onPublish={handleSubmit}
+          publishText="发布"
           publishLoading={isSubmitting}
           boardId={boardId}
           discussionId={discussionId}
+          headerInfo={
+            discussionTitle
+              ? {
+                  icon: <Reply className="h-4 w-4 text-muted-foreground" />,
+                  title: discussionTitle,
+                  onMaximize: () => {},
+                  onClose: onClose,
+                }
+              : undefined
+          }
         />
-        {/* <div className="mt-2 flex items-center justify-between">
-          <div></div>
-          <Button
-            size="sm"
-            onClick={handleSubmit}
-            disabled={isSubmitting || !postForm.content.trim()}
-          >
-            {isSubmitting ? "保存中..." : "确定"}
-          </Button>
-        </div> */}
       </div>
     );
   }

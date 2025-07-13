@@ -205,15 +205,12 @@ export function LoginModal({
               </div>
               <button 
                 type="button"
-                className={`text-sm font-medium ${isActive ? 'text-neutral-400 cursor-not-allowed' : 'text-neutral-500 hover:text-neutral-700'}`}
+                className={`text-sm font-medium text-neutral-500 hover:text-neutral-700'}`}
                 onClick={() => {
-                  if (!isActive) {
                     setIsForgotPasswordOpen(true);
-                  }
                 }}
-                disabled={isActive}
               >
-                {isActive ? `忘记密码？(${remainingSeconds}秒)` : '忘记密码？'}
+                忘记密码？
               </button>
             </div>
             <div className="space-y-4">

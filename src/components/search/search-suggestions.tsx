@@ -116,8 +116,12 @@ export function SearchSuggestions({
                         <UserRound className="h-4 w-4" />
                         <span>{0}成员</span>
                       </div>
-                      <span className="mx-1">·</span>
-                      <span>{board.category?.name}</span>
+                      {board.category && (
+                        <>
+                          <span className="mx-1">·</span>
+                          <span>{board.category?.name}</span>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

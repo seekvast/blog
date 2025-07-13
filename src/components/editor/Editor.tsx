@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { getCaretCoordinates } from "@/lib/utils/caret";
 import { uploadFile, AttachmentType } from "@/lib/utils/upload";
 import { Attachment } from "@/types";
-import { Loader2 } from "lucide-react";
+import { Loader2, Minimize2, Maximize2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface EditorProps {
@@ -22,8 +22,16 @@ interface EditorProps {
   onAttachmentUpload?: (attachment: Attachment) => void;
   onPublish?: () => void;
   publishLoading?: boolean;
+  publishText?: string;
   boardId?: number;
   discussionId?: number;
+  headerInfo?: {
+    icon?: React.ReactNode;
+    title?: string;
+    onMinimize?: () => void;
+    onMaximize?: () => void;
+    onClose?: () => void;
+  };
 }
 
 export const Editor = React.forwardRef<
@@ -44,8 +52,10 @@ export const Editor = React.forwardRef<
     onAttachmentUpload,
     onPublish,
     publishLoading,
+    publishText,
     boardId,
     discussionId,
+    headerInfo,
   }: EditorProps,
   ref
 ) {
@@ -348,27 +358,47 @@ export const Editor = React.forwardRef<
       className={cn(
         "relative flex w-full h-full min-h-0 flex-col overflow-hidden border rounded-md bg-background",
         isFullscreen &&
-          "fixed inset-0 z-50 m-0 h-[calc(100vh-56px)] w-screen rounded-none",
+          "fixed inset-0 z-50 m-0 h-[calc(100vh-56px)] w-screen h-full rounded-none",
         !isFullscreen && "kater-focus-primary",
         className
       )}
     >
-      <Toolbar
-        className={cn(
-          "border-b",
-          isFullscreen && "sticky top-0 z-10 bg-background"
-        )}
-        textareaRef={textareaRef}
-        onImageUpload={handleImageUpload}
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={toggleFullscreen}
-        content={content}
-        selection={selection}
-        previewMode={previewMode}
-        onContentChange={handleContentChange}
-        onSelectionChange={setSelection}
-        onPreviewModeChange={setPreviewMode}
-      />
+      {/* 头部信息 - 只在非全屏模式下显示 */}
+      {headerInfo && (
+        <div className="flex items-center justify-between p-2 bg-background">
+          <div className="flex items-center space-x-2">
+            {headerInfo.icon}
+            <span className="text-sm text-muted-foreground truncate max-w-[200px]">
+              {headerInfo.title}
+            </span>
+          </div>
+          <div className="flex items-center space-x-1">
+            {headerInfo.onMaximize && !isFullscreen && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => toggleFullscreen()}
+              >
+                <Maximize2 className="h-4 w-4" />
+              </Button>
+            )}
+            {headerInfo.onClose && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => {
+                  headerInfo.onClose?.();
+                  toggleFullscreen();
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
 
       <div
         className={cn(
@@ -387,7 +417,7 @@ export const Editor = React.forwardRef<
               onPaste={handlePaste}
               placeholder={placeholder}
               className={cn(
-                "w-full px-3 pt-3 pb-16 outline-none border-none",
+                "w-full px-3 pt-3 pb-3 outline-none border-none",
                 "bg-background",
                 "resize-none",
                 "whitespace-pre-wrap",
@@ -428,16 +458,6 @@ export const Editor = React.forwardRef<
                 }}
               />
             )}
-            {onPublish && (
-              <Button
-                size="sm"
-                className="absolute left-4 bottom-4 z-10"
-                onClick={onPublish}
-                disabled={publishLoading}
-              >
-                {publishLoading ? "发布中..." : "发布"}
-              </Button>
-            )}
           </>
         )}
 
@@ -470,6 +490,27 @@ export const Editor = React.forwardRef<
           </div>
         )}
       </div>
+
+      <Toolbar
+        className={cn(
+          "border-t",
+          isFullscreen && "sticky bottom-0 z-10 bg-background"
+        )}
+        textareaRef={textareaRef}
+        onImageUpload={handleImageUpload}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={toggleFullscreen}
+        content={content}
+        selection={selection}
+        previewMode={previewMode}
+        onContentChange={handleContentChange}
+        onSelectionChange={setSelection}
+        onPreviewModeChange={setPreviewMode}
+        showPublishButton={!!onPublish}
+        onPublish={onPublish}
+        publishLoading={publishLoading}
+        publishText={publishText || "Post Reply"}
+      />
     </div>
   );
 });

@@ -3,6 +3,8 @@
 import { Header } from "@/components/layout/header";
 import { RouteProgress } from "@/components/router/route-progress";
 import { PostEditorProvider } from "@/components/providers/post-editor-provider";
+import { LoginModal } from "@/components/auth/login-modal";
+import { RegisterModal } from "@/components/auth/register-modal";
 
 export default function UserLayout({
   children,
@@ -15,6 +17,9 @@ export default function UserLayout({
       <Header />
       {children}
       <PostEditorProvider />
+      {/* 模态框组件 */}
+      <LoginModal />
+      <RegisterModal />
     </div>
   );
 }

@@ -20,7 +20,6 @@ import {
   Lock,
   MessageSquare,
   Pin,
-  Reply,
   Star,
   Tag,
   ThumbsDown,
@@ -70,7 +69,6 @@ import {
 import { CommentButton } from "@/components/post/comment-button";
 import { DiscussionActions } from "@/components/post/discussion-actions";
 import { useCompactNumberFormat } from "@/lib/utils/format";
-
 
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
@@ -541,7 +539,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
 
   const handleReplyClick = React.useCallback(
     (comment: Post) => {
-        requireAuthAndEmailVerification(() => {
+      requireAuthAndEmailVerification(() => {
         setReplyTo(comment);
         setPostForm((prev) => ({
           ...prev,
@@ -555,7 +553,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
 
   const handleEditClick = React.useCallback(
     (comment: Post) => {
-        requireAuthAndEmailVerification(() => {
+      requireAuthAndEmailVerification(() => {
         setEditingPost(comment);
         setPostForm((prev) => ({
           ...prev,
@@ -589,7 +587,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
 
   const handleFollow = React.useCallback(
     (action: string | null = null) => {
-        requireAuthAndEmailVerification(() => {
+      requireAuthAndEmailVerification(() => {
         followMutation.mutate(action);
       });
     },
@@ -905,30 +903,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   style={{ position: "relative", zIndex: 50 }}
                 >
                   <div className="p-4 pb-[calc(1rem+var(--mobile-nav-height))] lg:pb-4 max-w-4xl mx-auto">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-medium">
-                        {editingPost ? "编辑回复" : "发表回复"}
-                      </h3>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => {
-                          setShowCommentEditor(false);
-                          setReplyTo(null);
-                          setEditingPost(null);
-                          setPostForm({
-                            slug: "",
-                            parent_id: 0,
-                            content: "",
-                            attachments: [],
-                          });
-                        }}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-
                     {user &&
                       postForm.content &&
                       postForm.content.trim().length > 0 && (
@@ -977,6 +951,18 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                       editorRef={editorRef}
                       openLoginModal={openLoginModal}
                       boardId={discussion?.board_id}
+                      discussionTitle={discussion.title}
+                      onClose={() => {
+                        setShowCommentEditor(false);
+                        setReplyTo(null);
+                        setEditingPost(null);
+                        setPostForm({
+                          slug: "",
+                          parent_id: 0,
+                          content: "",
+                          attachments: [],
+                        });
+                      }}
                     />
                   </div>
                 </div>

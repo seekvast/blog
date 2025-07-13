@@ -29,9 +29,6 @@ export default function SettingsPage() {
   const userId = params?.get("hashid");
   const violationTypeParam = params?.get("violation");
   const [activeTab, setActiveTab] = React.useState<SettingsTabType>("profile");
-  const [blacklistType, setBlacklistType] = React.useState<"board" | "user">(
-    "user"
-  );
   const [showViolation, setShowViolation] = React.useState<boolean>(false);
   const [violationType, setViolationType] = React.useState<string>("account");
   const [hashParam, setHashParam] = React.useState<string>("");
@@ -158,33 +155,14 @@ export default function SettingsPage() {
       case "blacklist":
         return (
           <section className="pt-4 lg:px-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center justify-between">
-                <ChevronLeft
-                  className="mr-2 h-5 w-5 cursor-pointer"
-                  onClick={() => setActiveTab("")}
-                />
-                <h2 className="text-xl font-semibold">封锁列表</h2>
-              </div>
-              {/* <Select
-                value={blacklistType}
-                onValueChange={(value: "board" | "user") =>
-                  setBlacklistType(value)
-                }
-              >
-                <SelectTrigger className="w-32 h-8 py-1">
-                  <SelectValue placeholder="选择类型" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="board">看板</SelectItem>
-                  <SelectItem value="user">用户</SelectItem>
-                </SelectContent>
-              </Select> */}
+            <div className="flex items-center">
+              <ChevronLeft
+                className="mr-2 h-5 w-5 cursor-pointer"
+                onClick={() => setActiveTab("")}
+              />
+              <h2 className="text-xl font-semibold">封锁列表</h2>
             </div>
-            <UserBlacklist
-              type={blacklistType}
-              onTypeChange={setBlacklistType}
-            />
+            <UserBlacklist />
           </section>
         );
       case "violation":

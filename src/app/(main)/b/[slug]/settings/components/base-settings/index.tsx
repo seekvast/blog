@@ -64,6 +64,11 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
   const { mutate, isPending: isUpdatePending } = useMutation({
     mutationFn: (values: BoardSettingsFormValues) => {
       const updateData = { ...values, id: board.id };
+
+      if (!updateData.category_id) {
+        delete updateData.category_id;
+      }
+
       return api.boards.update(updateData);
     },
     onSuccess: (data) => {

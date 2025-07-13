@@ -25,7 +25,7 @@ export const boardSchema = z
     answer: z.string().max(100, { message: "答案最长100个字符" }).optional(),
 
     visibility: z.number(),
-    category_id: z.number().optional(),
+    category_id: z.number().nullable().optional(),
     is_nsfw: z.number(),
     attachment_id: z.number().optional(),
     avatar: z.string().max(500).optional(),

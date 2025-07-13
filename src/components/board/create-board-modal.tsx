@@ -6,7 +6,14 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { boardSchema, BoardFormSchema } from "@/validations/board";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import {
   Dialog,
   DialogContent,
@@ -42,7 +49,9 @@ export function CreateBoardModal({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [avatar, setAvatar] = useState<string | undefined>(undefined);
-  const [attachmentId, setAttachmentId] = useState<number | undefined>(undefined);
+  const [attachmentId, setAttachmentId] = useState<number | undefined>(
+    undefined
+  );
 
   const form = useForm<BoardFormSchema>({
     resolver: zodResolver(boardSchema),
@@ -51,7 +60,7 @@ export function CreateBoardModal({
       slug: "",
       desc: "",
       visibility: 0,
-      category_id: 1, // 默认综合分类
+      category_id: null,
       is_nsfw: 0,
       question: "",
       answer: "",
@@ -94,8 +103,8 @@ export function CreateBoardModal({
       toast({
         title: "上传失败",
         description:
-          error instanceof Error 
-            ? error.message 
+          error instanceof Error
+            ? error.message
             : "图片上传失败，请重试。可能的原因：文件格式不支持或网络问题",
         variant: "destructive",
       });
@@ -120,7 +129,7 @@ export function CreateBoardModal({
         attachment_id: attachmentId,
         avatar,
       };
-      
+
       await api.boards.create(formData);
       queryClient.invalidateQueries({ queryKey: ["boards"] });
 
@@ -130,7 +139,7 @@ export function CreateBoardModal({
         slug: "",
         desc: "",
         visibility: 0,
-        category_id: 1,
+        category_id: null,
         is_nsfw: 0,
         question: "",
         answer: "",
@@ -166,7 +175,10 @@ export function CreateBoardModal({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 py-4">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6 py-4"
+          >
             <div className="space-y-2">
               <Label>看板头像</Label>
               <div className="relative">
@@ -227,10 +239,7 @@ export function CreateBoardModal({
                 <FormItem className="space-y-2">
                   <FormLabel>看板网址</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="7-25个英文字母或数字"
-                      {...field}
-                    />
+                    <Input placeholder="7-25个英文字母或数字" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -288,7 +297,11 @@ export function CreateBoardModal({
                   <FormItem className="space-y-2">
                     <FormLabel>看板类型</FormLabel>
                     <Select
-                      value={String(field.value)}
+                      value={
+                        field.value === null || field.value === 0
+                          ? ""
+                          : String(field.value)
+                      }
                       onValueChange={(value) => field.onChange(Number(value))}
                     >
                       <FormControl>
@@ -317,7 +330,7 @@ export function CreateBoardModal({
                   </FormItem>
                 )}
               />
-              
+
               {user && user.age_verified === 1 && (
                 <FormField
                   control={form.control}

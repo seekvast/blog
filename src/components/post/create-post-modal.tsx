@@ -10,7 +10,7 @@ import { BoardSelect } from "@/components/board-select";
 import { useBoardChildrenStore } from "@/store/board-children";
 import { useMarkdownEditor } from "@/store/md-editor";
 import { Editor } from "@/components/editor/editor";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Reply } from "lucide-react";
 import { AttachmentType } from "@/constants/attachment-type";
 import { usePostEditorStore } from "@/store/post-editor";
 import { z } from "zod";
@@ -759,6 +759,13 @@ export default function CreatePostModal() {
                 onFullscreenChange={handleFullscreenChange}
                 onPublish={debouncedHandlePublish}
                 publishLoading={modalState.isSubmitting}
+                publishText="发布"
+                headerInfo={{
+                  icon: <Reply className="h-4 w-4 text-muted-foreground" />,
+                  title: discussionForm.title,
+                  onMaximize: () => {},
+                  onClose: handleClose,
+                }}
                 boardId={discussionForm.board_id || undefined}
                 onAttachmentUpload={(attachment) => {
                   // 将 Attachment 类型转换为 discussionForm.attachments 所需的格式
