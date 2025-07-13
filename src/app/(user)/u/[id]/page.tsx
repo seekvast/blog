@@ -10,6 +10,7 @@ import { api } from "@/lib/api";
 import { useSearchParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/components/providers/auth-provider";
+import { formatDate } from "@/lib/dayjs";
 
 const navItems = [
   {
@@ -30,7 +31,11 @@ const navItems = [
 ];
 
 // 用户名历史列表组件
-function UsernameHistory({ usernameHistory }: { usernameHistory?: string[] }) {
+function UsernameHistory({
+  usernameHistory,
+}: {
+  usernameHistory?: { [key: string]: number }[];
+}) {
   if (!usernameHistory || usernameHistory.length === 0) {
     return (
       <div className="p-6 text-center text-muted-foreground bg-card rounded-lg">
@@ -41,17 +46,26 @@ function UsernameHistory({ usernameHistory }: { usernameHistory?: string[] }) {
 
   return (
     <div className="rounded-lg bg-card">
-      <div className="px-4 border-b">
+      <div className="lg:border-b">
         <h3 className="lg:pb-3 text-md font-semibold">使用者名称历史</h3>
       </div>
-      <ul className="divide-y">
-        {usernameHistory.map((username, index) => (
-          <li key={index} className="p-4 flex items-center justify-between">
-            <div className="flex items-center">
-              <span className="font-medium">{username}</span>
-            </div>
-          </li>
-        ))}
+      <ul className="space-y-2 mt-4">
+        {usernameHistory.map(
+          (username: { [key: string]: number }, index: number) => (
+            <li
+              key={index}
+              className="p-4 flex items-center justify-between w-1/2 text-sm text-muted-foreground bg-muted rounded-lg"
+            >
+              <div>{Object.keys(username)[0]}</div>
+              <div className="text-right">
+                {formatDate(
+                  (Object.values(username)[0] as number) * 1000,
+                  "YYYY-MM-DD"
+                )}
+              </div>
+            </li>
+          )
+        )}
       </ul>
     </div>
   );
