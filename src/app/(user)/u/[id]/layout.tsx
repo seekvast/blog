@@ -119,11 +119,11 @@ export default function UserLayout({
 
           img.onerror = () => {
             console.error("Error loading image");
-            setGradientColor("rgba(0, 0, 0, 0)");
+            setGradientColor("rgba(0, 0, 0, 0.5)");
           };
         } catch (error) {
           console.error("Error getting color:", error);
-          setGradientColor("rgba(0, 0, 0, 0)");
+          setGradientColor("rgba(0, 0, 0, 0.5)");
         }
       };
       getImageColor();

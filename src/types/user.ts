@@ -1,4 +1,5 @@
 import { Category, Response } from "./common";
+import { Board } from "./board";
 
 export interface UserProfile {
   email: string;
@@ -91,17 +92,6 @@ export interface UserBlacklistType {
   blockable_hashid: string;
   blockable_type: "App\\Models\\User" | "App\\Models\\Board";
   blockable: User | Board;
-}
-
-// 看板类型定义
-export interface Board {
-  hashid: string;
-  name: string;
-  slug: string;
-  desc?: string;
-  avatar?: string;
-  created_at?: string;
-  updated_at?: string;
 }
 
 export type LoginResponse = Response<User>;

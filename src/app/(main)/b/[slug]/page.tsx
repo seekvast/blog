@@ -51,7 +51,6 @@ function BoardContent() {
   const [discussionsLoading, setDiscussionsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [boardChildren, setBoardChildren] = useState<BoardChild[]>([]);
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const observerRef = useRef<IntersectionObserver>();
@@ -114,15 +113,17 @@ function BoardContent() {
     staleTime: 1 * 60 * 1000,
   });
 
-  const fetchBoardChildren = async () => {
-    try {
-      if (!board?.id) return;
-      const data = await api.boards.getChildren(board.id);
-      setBoardChildren(data.items);
-    } catch (error) {
-      setError("获取子板块失败");
-    }
-  };
+  const { data: boardChildrenData, refetch: refetchBoardChildren } = useQuery({
+    queryKey: ["boardChildren", board?.id],
+    queryFn: () => api.boards.getChildren(board!.id),
+    enabled: !!board?.id,
+    staleTime: 1 * 60 * 1000,
+    gcTime: 3 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+
+  const boardChildren = boardChildrenData?.items || [];
 
   const fetchDiscussions = async (sort: SortBy = sortBy) => {
     try {
@@ -166,16 +167,14 @@ function BoardContent() {
       // 更新URL参数中的bid
       updateUrlParams(board.id);
 
-      // 获取子板块数据
-      fetchBoardChildren().then(() => {
-        const childParam = searchParams?.get("child");
-        if (childParam) {
-          const childId = parseInt(childParam, 10);
-          if (!isNaN(childId)) {
-            setSelectedChildId(childId);
-          }
+      // 获取子板块数据后处理 URL 参数
+      const childParam = searchParams?.get("child");
+      if (childParam) {
+        const childId = parseInt(childParam, 10);
+        if (!isNaN(childId)) {
+          setSelectedChildId(childId);
         }
-      });
+      }
     }
   }, [board?.id, searchParams, updateUrlParams]);
 
@@ -223,7 +222,7 @@ function BoardContent() {
     mutationFn: (child_id: number) =>
       api.boards.hiddenChild({ child_id, operator: "user" }),
     onSuccess: () => {
-      fetchBoardChildren();
+      refetchBoardChildren();
     },
     onError: () => {
       toast({

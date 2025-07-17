@@ -3,12 +3,14 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { BlacklistItem } from "@/types/common";
+import { BlacklistItem } from "@/types/user";
 import { Pagination } from "@/types/common";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { User } from "@/types/user";
+import { Board } from "@/types/board";
 
 interface UserBlacklistProps {
   type?: "board" | "user";
@@ -199,9 +201,9 @@ export default function UserBlacklist({
       .map((item) => {
         return {
           id: item.blockable_hashid,
-          name: item.blockable.nickname || item.blockable.username,
-          avatar: item.blockable.avatar_url || "/avatar.jpg",
-          description: `@${item.blockable.username}`,
+          name: (item.blockable as User).nickname || (item.blockable as User).username,
+          avatar: (item.blockable as User).avatar_url || "/avatar.jpg",
+          description: `@${(item.blockable as User).username}`,
         };
       });
   }, [data]);
@@ -213,9 +215,9 @@ export default function UserBlacklist({
       .map((item) => {
         return {
           id: item.blockable_hashid,
-          name: item.blockable.name,
-          avatar: item.blockable.avatar || "/board-avatar.jpg",
-          description: item.blockable.desc || "",
+          name: (item.blockable as Board).name,
+          avatar: (item.blockable as Board).avatar || "/board-avatar.jpg",
+          description: (item.blockable as Board).desc || "",
         };
       });
   }, [data]);
@@ -231,10 +233,10 @@ export default function UserBlacklist({
     }
   };
 
-  const handleUnblockUser = async (userHashid: string) => {
+  const handleUnblockUser = async (userId: string) => {
     try {
       await api.users.unblock({
-        blockable_hashid: userHashid,
+        blockable_hashid: userId,
         blockable_type: "user",
       });
       refetch();

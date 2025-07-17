@@ -3,7 +3,6 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
@@ -12,8 +11,6 @@ import { useQuery } from "@tanstack/react-query";
 interface RightSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function RightSidebar({ className, ...props }: RightSidebarProps) {
-  const { data: session } = useSession();
-  //相关文章列表
   const { data: randomDiscussions, refetch: refetchRandomDiscussions } =
     useQuery({
       queryKey: ["random-discussions"],

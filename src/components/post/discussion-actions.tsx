@@ -96,6 +96,10 @@ export function DiscussionActions({
   const { data: boardChildren } = useQuery({
     queryKey: ["boardChildren", discussion.board_id],
     queryFn: () => api.boards.getChildren(discussion.board_id),
+    staleTime: 1 * 60 * 1000,
+    gcTime: 3 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   //通过useMutation删除评论

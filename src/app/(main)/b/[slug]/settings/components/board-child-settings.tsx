@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   DndContext,
   closestCenter,
@@ -143,6 +144,18 @@ function ChildModal({
   editingChild?: BoardChild;
 }) {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const queryClient = useQueryClient();
+
+  const saveChildMutation = useMutation({
+    mutationFn: (data: any) => api.boards.saveChild(data),
+    onSuccess: () => {
+      // 使缓存失效，触发重新获取
+      queryClient.invalidateQueries({
+        queryKey: ["boardChildren", parentId],
+      });
+      onSuccess?.();
+    },
+  });
 
   const formSchema = z.object({
     name: z.string().min(1, "看板名称不能为空"),
@@ -191,10 +204,9 @@ function ChildModal({
         is_hidden: data.is_hidden ? 1 : 0,
         moderator_only: data.moderator_only ? 1 : 0,
       };
-      await api.boards.saveChild(saveData);
+      await saveChildMutation.mutateAsync(saveData);
       onOpenChange(false);
       form.reset();
-      onSuccess?.();
     } catch (error) {
       throw error;
     } finally {
@@ -298,7 +310,6 @@ function ChildModal({
 }
 
 export function BoardChildSettings({ board }: BoardChildSettingsProps) {
-  const [boardChildren, setBoardChildren] = React.useState<BoardChild[]>([]);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
   const [editingChild, setEditingChild] = React.useState<
@@ -309,6 +320,7 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
   >();
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [activeId, setActiveId] = React.useState<number | null>(null);
+  const queryClient = useQueryClient();
 
   const BASE_SORT_GAP = 100; // 基础间隔值
   const MIN_GAP = 10; // 最小间隔，低于此值时触发重排序
@@ -330,19 +342,39 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
     })
   );
 
-  // 获取子版列表
-  const fetchBoardChildren = async () => {
-    try {
-      const data = await api.boards.getChildren(board.id);
-      setBoardChildren(data.items);
-    } catch (error) {
-      console.error("Error fetching subboards:", error);
-    }
-  };
+  const {
+    data: boardChildrenData,
+    isLoading,
+    refetch: refetchBoardChildren,
+  } = useQuery({
+    queryKey: ["boardChildren", board.id],
+    queryFn: () => api.boards.getChildren(board.id),
+    staleTime: 1 * 60 * 1000,
+    gcTime: 3 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
 
-  React.useEffect(() => {
-    fetchBoardChildren();
-  }, [board.id]);
+  const boardChildren = boardChildrenData?.items || [];
+
+  const saveChildMutation = useMutation({
+    mutationFn: (data: any) => api.boards.saveChild(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["boardChildren", board.id],
+      });
+    },
+  });
+
+  const deleteChildMutation = useMutation({
+    mutationFn: (data: { id: number; boardId: number }) =>
+      api.boards.deleteChild(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["boardChildren", board.id],
+      });
+    },
+  });
 
   React.useEffect(() => {
     if (boardChildren.length > 0) {
@@ -354,10 +386,13 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
 
       if (needsRecalculate) {
         const sortedChildren = recalculateSort([...boardChildren]);
-        setBoardChildren(sortedChildren);
+        // 更新缓存中的数据
+        queryClient.setQueryData(["boardChildren", board.id], {
+          items: sortedChildren,
+        });
         Promise.all(
           sortedChildren.map((child) =>
-            api.boards.saveChild({
+            saveChildMutation.mutateAsync({
               board_id: board.id,
               id: child.id,
               sort: child.sort,
@@ -421,17 +456,23 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
       child.id === active.id ? { ...child, sort: newSort } : child
     );
 
-    setBoardChildren(updatedBoardChildren);
+    // 更新缓存中的数据
+    queryClient.setQueryData(["boardChildren", board.id], {
+      items: updatedBoardChildren,
+    });
 
     try {
-      await api.boards.saveChild({
+      await saveChildMutation.mutateAsync({
         board_id: board.id,
         id: active.id as number,
         sort: newSort,
       });
     } catch (error) {
       console.error("更新子版排序失败:", error);
-      setBoardChildren(boardChildren);
+      // 恢复原始数据
+      queryClient.setQueryData(["boardChildren", board.id], {
+        items: boardChildren,
+      });
     }
   };
 
@@ -470,9 +511,11 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
 
     setIsDeleting(true);
     try {
-      await api.boards.deleteChild({ id: deletingChild.id, boardId: board.id });
+      await deleteChildMutation.mutateAsync({
+        id: deletingChild.id,
+        boardId: board.id,
+      });
       setDeleteModalOpen(false);
-      fetchBoardChildren();
     } catch (error) {
       throw error;
     } finally {
@@ -499,7 +542,7 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
         open={modalOpen}
         onOpenChange={handleCloseModal}
         parentId={board.id}
-        onSuccess={fetchBoardChildren}
+        onSuccess={refetchBoardChildren}
         editingChild={editingChild}
       />
 
@@ -550,7 +593,7 @@ export function BoardChildSettings({ board }: BoardChildSettingsProps) {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 isActive={child.id === activeId}
-                onRefresh={fetchBoardChildren}
+                onRefresh={refetchBoardChildren}
               />
             ))}
           </SortableContext>

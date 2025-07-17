@@ -312,6 +312,11 @@ export default function CreatePostModal() {
   // 4. 加载状态优化：使用 loading 状态管理
   const loadBoardChildren = React.useCallback(
     async (boardId: number) => {
+      // 如果正在加载，跳过重复请求
+      if (modalState.loadingChildren) {
+        return;
+      }
+
       try {
         dispatch({ type: "SET_LOADING_CHILDREN", payload: true });
         const data = await api.boards.getChildren(boardId);
@@ -333,7 +338,7 @@ export default function CreatePostModal() {
         dispatch({ type: "SET_LOADING_CHILDREN", payload: false });
       }
     },
-    [setBoardChildren, setDiscussionForm]
+    [setBoardChildren, setDiscussionForm, modalState.loadingChildren]
   );
 
   const handlePublish = React.useCallback(async () => {

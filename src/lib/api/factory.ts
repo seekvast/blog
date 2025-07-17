@@ -23,8 +23,8 @@ import type {
   Response,
   PostVoter,
   OperationLog,
+  BlacklistItem,
 } from "@/types";
-import { BlacklistItem } from "@/types/common";
 
 export interface ApiOptions {
   prefix?: string;

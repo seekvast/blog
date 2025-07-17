@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils";
 import { Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuthModal } from "./auth-modal-store";
-import { useDraftStore } from "@/store/draft";
 import { api } from "@/lib/api";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { ForgotPasswordModal } from "./forgot-password-modal";
@@ -41,7 +40,6 @@ export function LoginModal({
   const router = useRouter();
   const { toast } = useToast();
   const { isLoginOpen, closeLogin, openRegister } = useAuthModal();
-  const { setDraft } = useDraftStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +47,8 @@ export function LoginModal({
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
-  const { remainingSeconds, isActive, startCountdown } = useCountdown("forgot-password");
+  const { remainingSeconds, isActive, startCountdown } =
+    useCountdown("forgot-password");
 
   useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -90,15 +89,7 @@ export function LoginModal({
         return;
       }
 
-      // 登录成功后获取草稿
-      try {
-        const draft = await api.discussions.draft();
-        if (draft) {
-          setDraft(draft);
-        }
-      } catch (error) {
-        console.error("获取草稿失败:", error);
-      }
+      // 登录成功后，auth-provider 会自动获取草稿数据，无需重复请求
 
       if (onOpenChange) {
         onOpenChange(false);
@@ -203,11 +194,11 @@ export function LoginModal({
                   )}
                 </button>
               </div>
-              <button 
+              <button
                 type="button"
                 className={`text-sm font-medium text-neutral-500 hover:text-neutral-700'}`}
                 onClick={() => {
-                    setIsForgotPasswordOpen(true);
+                  setIsForgotPasswordOpen(true);
                 }}
               >
                 忘记密码？
@@ -269,9 +260,9 @@ export function LoginModal({
           </form>
         </DialogContent>
       </Dialog>
-      <ForgotPasswordModal 
-        open={isForgotPasswordOpen} 
-        onOpenChange={setIsForgotPasswordOpen} 
+      <ForgotPasswordModal
+        open={isForgotPasswordOpen}
+        onOpenChange={setIsForgotPasswordOpen}
         onBack={() => setIsForgotPasswordOpen(false)}
       />
     </>

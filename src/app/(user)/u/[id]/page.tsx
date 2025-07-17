@@ -54,7 +54,7 @@ function UsernameHistory({
           (username: { [key: string]: number }, index: number) => (
             <li
               key={index}
-              className="p-4 flex items-center justify-between w-1/2 text-sm text-muted-foreground bg-muted rounded-lg"
+              className="p-3 flex items-center justify-between w-1/2 text-sm text-muted-foreground bg-muted rounded-lg"
             >
               <div>{Object.keys(username)[0]}</div>
               <div className="text-right">

@@ -121,17 +121,43 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  debug: true,
+  debug: process.env.NODE_ENV === "development",
   secret: process.env.NEXTAUTH_SECRET,
 };
+
+// Session 缓存机制
+let sessionCache: { session: any; timestamp: number } | null = null;
+const SESSION_CACHE_DURATION = 1000; // 1秒缓存
 
 export async function getSession() {
   if (typeof window === "undefined") {
     return await getServerSession(authOptions);
   } else {
+    // 客户端环境，使用缓存机制
+    const now = Date.now();
+
+    // 如果缓存存在且未过期，直接返回
+    if (sessionCache && now - sessionCache.timestamp < SESSION_CACHE_DURATION) {
+      return sessionCache.session;
+    }
+
+    // 获取新的 session
     const { getSession } = await import("next-auth/react");
-    return await getSession();
+    const session = await getSession();
+
+    // 更新缓存
+    sessionCache = {
+      session,
+      timestamp: now,
+    };
+
+    return session;
   }
+}
+
+// 清除 session 缓存
+export function clearSessionCache() {
+  sessionCache = null;
 }
 
 // 带有认证token的fetch函数
@@ -187,7 +213,7 @@ let refreshTimeout: NodeJS.Timeout | null = null;
 export async function refreshUserData() {
   try {
     if (typeof window === "undefined") {
-      console.log('服务端环境，跳过刷新用户数据');
+      console.log("服务端环境，跳过刷新用户数据");
       return;
     }
 
@@ -209,7 +235,7 @@ export async function refreshUserData() {
 
     const currentSession = await getSession();
     if (!currentSession?.user) {
-      console.log('用户未登录，无需刷新数据');
+      console.log("用户未登录，无需刷新数据");
       isRefreshing = false;
       return;
     }
