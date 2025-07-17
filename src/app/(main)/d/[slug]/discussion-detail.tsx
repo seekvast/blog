@@ -69,6 +69,8 @@ import {
 import { CommentButton } from "@/components/post/comment-button";
 import { DiscussionActions } from "@/components/post/discussion-actions";
 import { useCompactNumberFormat } from "@/lib/utils/format";
+import { useNsfwWarning } from "@/hooks/use-nsfw-warning";
+import { NsfwWarningModal } from "@/components/nsfw/nsfw-warning-modal";
 
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
@@ -123,6 +125,14 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     discussion?.discussion_user?.subscription || null
   );
   const [showCommentEditor, setShowCommentEditor] = useState(false);
+
+  // NSFW 提醒功能
+  const {
+    showWarning: showNsfwWarning,
+    handleConfirm: handleNsfwConfirm,
+    handleCancel: handleNsfwCancel,
+  } = useNsfwWarning(undefined, discussion);
+
   const queryClient = useQueryClient();
   const [queryParams, setQueryParams] = React.useState<{
     page: number;
@@ -620,6 +630,14 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
 
   return (
     <ErrorBoundary>
+      {/* NSFW 提醒弹窗 */}
+      <NsfwWarningModal
+        open={showNsfwWarning}
+        onOpenChange={() => {}}
+        onConfirm={handleNsfwConfirm}
+        onCancel={handleNsfwCancel}
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto] gap-4 md:gap-6 mb-4 md:mb-8">
         <div className="min-w-0">
           <div className="border-b pb-4 flex-1 max-w-4xl">

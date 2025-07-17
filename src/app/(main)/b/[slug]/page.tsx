@@ -24,6 +24,8 @@ import { toast } from "@/components/ui/use-toast";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useNsfwWarning } from "@/hooks/use-nsfw-warning";
+import { NsfwWarningModal } from "@/components/nsfw/nsfw-warning-modal";
 
 export default function BoardPage() {
   return (
@@ -51,6 +53,7 @@ function BoardContent() {
   const [discussionsLoading, setDiscussionsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [boardChildren, setBoardChildren] = useState<BoardChild[]>([]);
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const observerRef = useRef<IntersectionObserver>();
@@ -63,6 +66,8 @@ function BoardContent() {
     "posts"
   );
   const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
+
+
 
   const updateUrlParams = useCallback(
     (boardId?: number, childId?: number | null) => {
@@ -113,17 +118,22 @@ function BoardContent() {
     staleTime: 1 * 60 * 1000,
   });
 
-  const { data: boardChildrenData, refetch: refetchBoardChildren } = useQuery({
-    queryKey: ["boardChildren", board?.id],
-    queryFn: () => api.boards.getChildren(board!.id),
-    enabled: !!board?.id,
-    staleTime: 1 * 60 * 1000,
-    gcTime: 3 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  });
+  // NSFW 提醒功能 - 必须在条件渲染之前调用
+  const {
+    showWarning: showNsfwWarning,
+    handleConfirm: handleNsfwConfirm,
+    handleCancel: handleNsfwCancel,
+  } = useNsfwWarning(board, undefined);
 
-  const boardChildren = boardChildrenData?.items || [];
+  const fetchBoardChildren = async () => {
+    try {
+      if (!board?.id) return;
+      const data = await api.boards.getChildren(board.id);
+      setBoardChildren(data.items);
+    } catch (error) {
+      setError("获取子板块失败");
+    }
+  };
 
   const fetchDiscussions = async (sort: SortBy = sortBy) => {
     try {
@@ -167,14 +177,16 @@ function BoardContent() {
       // 更新URL参数中的bid
       updateUrlParams(board.id);
 
-      // 获取子板块数据后处理 URL 参数
-      const childParam = searchParams?.get("child");
-      if (childParam) {
-        const childId = parseInt(childParam, 10);
-        if (!isNaN(childId)) {
-          setSelectedChildId(childId);
+      // 获取子板块数据
+      fetchBoardChildren().then(() => {
+        const childParam = searchParams?.get("child");
+        if (childParam) {
+          const childId = parseInt(childParam, 10);
+          if (!isNaN(childId)) {
+            setSelectedChildId(childId);
+          }
         }
-      }
+      });
     }
   }, [board?.id, searchParams, updateUrlParams]);
 
@@ -222,7 +234,7 @@ function BoardContent() {
     mutationFn: (child_id: number) =>
       api.boards.hiddenChild({ child_id, operator: "user" }),
     onSuccess: () => {
-      refetchBoardChildren();
+      fetchBoardChildren();
     },
     onError: () => {
       toast({
@@ -259,6 +271,9 @@ function BoardContent() {
     notFoundError.name = "NotFoundError";
     throw notFoundError;
   }
+  
+
+  
   const handleSubscribeSuccess = () => {
     queryClient.invalidateQueries({ queryKey: ["board", params?.slug] });
     queryClient.invalidateQueries({ queryKey: ["boards"] });
@@ -270,6 +285,14 @@ function BoardContent() {
   };
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto] gap-4 md:gap-6">
+      {/* NSFW 提醒弹窗 */}
+      <NsfwWarningModal
+        open={showNsfwWarning}
+        onOpenChange={() => {}}
+        onConfirm={handleNsfwConfirm}
+        onCancel={handleNsfwCancel}
+      />
+      
       {/* 看板信息 */}
       <div className="min-w-0">
         <div className="flex flex-col bg-background max-w-4xl">

@@ -74,13 +74,6 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["board", board.slug] });
     },
-    onError: () => {
-      toast({
-        variant: "destructive",
-        title: "保存失败",
-        description: "更新设置失败，请重试",
-      });
-    },
   });
 
   const { mutate: deleteBoard, isPending: isDeletePending } = useMutation({
