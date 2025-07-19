@@ -13,6 +13,8 @@ import { RegisterModal } from "@/components/auth/register-modal";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { Plus } from "lucide-react";
 import { usePostEditorStore } from "@/store/post-editor";
+import { GlobalNsfwWarning } from "@/components/nsfw/global-nsfw-warning";
+
 const CreatePostModal = dynamic(
   () => import("@/components/post/create-post-modal"),
   { ssr: false }
@@ -53,6 +55,9 @@ export default function MainLayout({
   return (
     <div className="min-h-screen flex flex-col">
       <RouteProgress />
+
+      {/* 全局 NSFW 警告弹窗 */}
+      <GlobalNsfwWarning />
 
       {/* 头部 */}
       <Header />

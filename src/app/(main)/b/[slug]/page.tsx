@@ -24,8 +24,6 @@ import { toast } from "@/components/ui/use-toast";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useNsfwWarning } from "@/hooks/use-nsfw-warning";
-import { NsfwWarningModal } from "@/components/nsfw/nsfw-warning-modal";
 
 export default function BoardPage() {
   return (
@@ -66,8 +64,6 @@ function BoardContent() {
     "posts"
   );
   const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
-
-
 
   const updateUrlParams = useCallback(
     (boardId?: number, childId?: number | null) => {
@@ -117,13 +113,6 @@ function BoardContent() {
     enabled: !!params?.slug,
     staleTime: 1 * 60 * 1000,
   });
-
-  // NSFW 提醒功能 - 必须在条件渲染之前调用
-  const {
-    showWarning: showNsfwWarning,
-    handleConfirm: handleNsfwConfirm,
-    handleCancel: handleNsfwCancel,
-  } = useNsfwWarning(board, undefined);
 
   const fetchBoardChildren = async () => {
     try {
@@ -271,9 +260,7 @@ function BoardContent() {
     notFoundError.name = "NotFoundError";
     throw notFoundError;
   }
-  
 
-  
   const handleSubscribeSuccess = () => {
     queryClient.invalidateQueries({ queryKey: ["board", params?.slug] });
     queryClient.invalidateQueries({ queryKey: ["boards"] });
@@ -285,14 +272,6 @@ function BoardContent() {
   };
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto] gap-4 md:gap-6">
-      {/* NSFW 提醒弹窗 */}
-      <NsfwWarningModal
-        open={showNsfwWarning}
-        onOpenChange={() => {}}
-        onConfirm={handleNsfwConfirm}
-        onCancel={handleNsfwCancel}
-      />
-      
       {/* 看板信息 */}
       <div className="min-w-0">
         <div className="flex flex-col bg-background max-w-4xl">

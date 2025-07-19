@@ -25,21 +25,29 @@ export function NsfwWarningModal({
   onCancel,
 }: NsfwWarningModalProps) {
   const router = useRouter();
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      onConfirm();
+    }
+    onOpenChange(newOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-center">
           <div className="flex justify-center mb-4">
             <Shield className="h-12 w-12 text-amber-500" />
           </div>
           <DialogTitle className="text-xl font-bold text-center">
-            兒少防護
+            網站訪問提醒
           </DialogTitle>
         </DialogHeader>
 
         <div className="text-center space-y-4">
           <div className="text-sm text-muted-foreground leading-relaxed">
-            <p>即將訪問的內容，可能不適合某些年齡層閱讀，</p>
+            <p>您即將訪問的網站內容，可能包含不適合某些年齡層的內容，</p>
             <p>或不宜在工作時間瀏覽。</p>
           </div>
 
@@ -48,6 +56,7 @@ export function NsfwWarningModal({
               variant="outline"
               className="flex-1"
               onClick={() => {
+                onConfirm(); // 保存冷却时间
                 router.push("/");
               }}
             >
