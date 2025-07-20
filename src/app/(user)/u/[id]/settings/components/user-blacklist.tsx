@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { BlacklistItem } from "@/types/user";
 import { Pagination } from "@/types/common";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,8 +13,7 @@ import { User } from "@/types/user";
 import { Board } from "@/types/board";
 
 interface UserBlacklistProps {
-  type?: "board" | "user";
-  onTypeChange?: (type: "board" | "user") => void;
+  type: "board" | "user";
 }
 
 // 看板黑名单列表组件
@@ -170,23 +169,7 @@ function Users({
 }
 
 // 主黑名单组件
-export default function UserBlacklist({
-  type: externalType,
-  onTypeChange,
-}: UserBlacklistProps) {
-  const [internalType, setInternalType] = React.useState<"board" | "user">(
-    "user"
-  );
-  const type = externalType || internalType;
-
-  const handleTypeChange = (newType: "board" | "user") => {
-    if (onTypeChange) {
-      onTypeChange(newType);
-    } else {
-      setInternalType(newType);
-    }
-  };
-
+export default function UserBlacklist({ type }: UserBlacklistProps) {
   const { data, isLoading, isError, refetch } = useQuery<
     Pagination<BlacklistItem>
   >({
@@ -201,7 +184,9 @@ export default function UserBlacklist({
       .map((item) => {
         return {
           id: item.blockable_hashid,
-          name: (item.blockable as User).nickname || (item.blockable as User).username,
+          name:
+            (item.blockable as User).nickname ||
+            (item.blockable as User).username,
           avatar: (item.blockable as User).avatar_url || "/avatar.jpg",
           description: `@${(item.blockable as User).username}`,
         };
@@ -255,29 +240,19 @@ export default function UserBlacklist({
 
   return (
     <div className="space-y-4">
-      {/* 切换控件 */}
-      <Tabs value={type} onValueChange={handleTypeChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="user">用户</TabsTrigger>
-          <TabsTrigger value="board">看板</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="user" className="mt-4">
-          <Users
-            users={users}
-            isLoading={isLoading}
-            onUnblock={handleUnblockUser}
-          />
-        </TabsContent>
-
-        <TabsContent value="board" className="mt-4">
-          <Boards
-            boards={boards}
-            isLoading={isLoading}
-            onUnblock={handleUnblockBoard}
-          />
-        </TabsContent>
-      </Tabs>
+      {type === "user" ? (
+        <Users
+          users={users}
+          isLoading={isLoading}
+          onUnblock={handleUnblockUser}
+        />
+      ) : (
+        <Boards
+          boards={boards}
+          isLoading={isLoading}
+          onUnblock={handleUnblockBoard}
+        />
+      )}
     </div>
   );
 }

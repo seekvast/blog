@@ -14,7 +14,7 @@ export default function LanguageSettings() {
   const [theme, setTheme] = React.useState<"light" | "dark" | "auto">("auto");
 
   return (
-    <div className="space-y-6">
+    <div className="">
       <Select
         value={theme}
         onValueChange={(value: "light" | "dark" | "auto") => setTheme(value)}

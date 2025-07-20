@@ -41,7 +41,7 @@ const policyItems: PolicyItem[] = [
 
 export default function PolicySettings() {
   return (
-    <div className="space-y-4">
+    <div className="">
       {policyItems.map((item) => (
         <a
           key={item.id}

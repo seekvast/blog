@@ -167,9 +167,9 @@ export default function ProfileSettings({ user }: { user: User | null }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="">
       {/* 個人檔案 */}
-      <div className="py-1 border-b">
+      <div className="">
         <div>
           <Label>個人檔案</Label>
         </div>

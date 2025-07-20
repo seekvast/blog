@@ -86,109 +86,99 @@ export default function NotificationSettings({ user }: { user: User | null }) {
   const handleToggle = (key: keyof NotifyPreferences) => {
     if (!settings) return;
     requireAuthAndEmailVerification(() => {
-    const toggle = {
-      ...settings,
-      [key]: settings[key] === "yes" ? "no" : "yes",
-    };
+      const toggle = {
+        ...settings,
+        [key]: settings[key] === "yes" ? "no" : "yes",
+      };
 
       updatePreferencesMutation.mutate(toggle);
     });
   };
 
   return (
-    <div className="space-y-6">
-      <div className="">
-        {/* 自动关注我回复的文章 */}
-        <div className="flex items-center justify-between py-4 border-b">
-          <div className="flex items-center gap-2">
-            <BookmarkPlus className="w-4 h-4" />
-            <Label className="text-sm ">
-              自动关注我回复的文章
-            </Label>
-          </div>
-          <Switch
-            checked={settings?.autoFollow === "yes"}
-            onCheckedChange={() => handleToggle("autoFollow")}
-          />
+    <div className="">
+      {/* 自动关注我回复的文章 */}
+      <div className="flex items-center justify-between pb-4 border-b">
+        <div className="flex items-center gap-2">
+          <BookmarkPlus className="w-4 h-4" />
+          <Label className="text-sm ">自动关注我回复的文章</Label>
         </div>
+        <Switch
+          checked={settings?.autoFollow === "yes"}
+          onCheckedChange={() => handleToggle("autoFollow")}
+        />
+      </div>
 
-        {/* 当我的文章被下方推时 */}
-        <div className="flex items-center justify-between py-4 border-b">
-          <div className="flex items-center gap-2">
-            <ThumbsUp className="w-4 h-4 " />
-            <Label className="text-sm ">
-              當我的文章被按下推/噓時
-            </Label>
-          </div>
-          <Switch
-            checked={settings?.notify_voted === "yes"}
-            onCheckedChange={() => handleToggle("notify_voted")}
-          />
+      {/* 当我的文章被下方推时 */}
+      <div className="flex items-center justify-between py-4 border-b">
+        <div className="flex items-center gap-2">
+          <ThumbsUp className="w-4 h-4 " />
+          <Label className="text-sm ">當我的文章被按下推/噓時</Label>
         </div>
+        <Switch
+          checked={settings?.notify_voted === "yes"}
+          onCheckedChange={() => handleToggle("notify_voted")}
+        />
+      </div>
 
-        {/* 有人回覆我 */}
-        <div className="flex items-center justify-between py-4 border-b">
-          <div className="flex items-center gap-2">
-            <MessageCircle className="w-4 h-4 " />
-            <Label className="text-sm ">有人回覆我</Label>
-          </div>
-          <Switch
-            checked={settings?.notify_reply === "yes"}
-            onCheckedChange={() => handleToggle("notify_reply")}
-          />
+      {/* 有人回覆我 */}
+      <div className="flex items-center justify-between py-4 border-b">
+        <div className="flex items-center gap-2">
+          <MessageCircle className="w-4 h-4 " />
+          <Label className="text-sm ">有人回覆我</Label>
         </div>
+        <Switch
+          checked={settings?.notify_reply === "yes"}
+          onCheckedChange={() => handleToggle("notify_reply")}
+        />
+      </div>
 
-        {/* 关注的文章有新回覆 */}
-        <div className="flex items-center justify-between py-4 border-b">
-          <div className="flex items-center gap-2">
-            <Heart className="w-4 h-4 " />
-            <Label className="text-sm ">
-              關注的文章有新回覆
-            </Label>
-          </div>
-          <Switch
-            checked={settings?.notify_newPost === "yes"}
-            onCheckedChange={() => handleToggle("notify_newPost")}
-          />
+      {/* 关注的文章有新回覆 */}
+      <div className="flex items-center justify-between py-4 border-b">
+        <div className="flex items-center gap-2">
+          <Heart className="w-4 h-4 " />
+          <Label className="text-sm ">關注的文章有新回覆</Label>
         </div>
+        <Switch
+          checked={settings?.notify_newPost === "yes"}
+          onCheckedChange={() => handleToggle("notify_newPost")}
+        />
+      </div>
 
-        {/* 有人标注我 */}
-        <div className="flex items-center justify-between py-4 border-b">
-          <div className="flex items-center gap-2">
-            <AtSign className="w-4 h-4 " />
-            <Label className="text-sm ">有人標注我</Label>
-          </div>
-          <Switch
-            checked={settings?.notify_userMentioned === "yes"}
-            onCheckedChange={() => handleToggle("notify_userMentioned")}
-          />
+      {/* 有人标注我 */}
+      <div className="flex items-center justify-between py-4 border-b">
+        <div className="flex items-center gap-2">
+          <AtSign className="w-4 h-4 " />
+          <Label className="text-sm ">有人標注我</Label>
         </div>
+        <Switch
+          checked={settings?.notify_userMentioned === "yes"}
+          onCheckedChange={() => handleToggle("notify_userMentioned")}
+        />
+      </div>
 
-        {/* 文章被锁定 */}
-        <div className="flex items-center justify-between py-4 border-b">
-          <div className="flex items-center gap-2">
-            <Lock className="w-4 h-4 " />
-            <Label className="text-sm ">文章被鎖定</Label>
-          </div>
-          <Switch
-            checked={settings?.notify_discussionLocked === "yes"}
-            onCheckedChange={() => handleToggle("notify_discussionLocked")}
-          />
+      {/* 文章被锁定 */}
+      <div className="flex items-center justify-between py-4 border-b">
+        <div className="flex items-center gap-2">
+          <Lock className="w-4 h-4 " />
+          <Label className="text-sm ">文章被鎖定</Label>
         </div>
+        <Switch
+          checked={settings?.notify_discussionLocked === "yes"}
+          onCheckedChange={() => handleToggle("notify_discussionLocked")}
+        />
+      </div>
 
-        {/* 这反内容政策 */}
-        <div className="flex items-center justify-between py-4 border-b">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 " />
-            <Label className="text-sm ">
-              违反內容政策
-            </Label>
-          </div>
-          <Switch
-            checked={settings?.notify_report === "yes"}
-            onCheckedChange={() => handleToggle("notify_report")}
-          />
+      {/* 这反内容政策 */}
+      <div className="flex items-center justify-between pt-4">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 " />
+          <Label className="text-sm ">违反內容政策</Label>
         </div>
+        <Switch
+          checked={settings?.notify_report === "yes"}
+          onCheckedChange={() => handleToggle("notify_report")}
+        />
       </div>
     </div>
   );

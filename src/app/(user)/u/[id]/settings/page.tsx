@@ -14,6 +14,10 @@ import LanguageSettings from "./components/language-settings";
 import ViolationRecords from "./components/violation-records";
 import PolicySettings from "./components/policy-settings";
 import SecuritySettings from "./components/security-settings";
+import SettingsSection from "./components/settings-section";
+import InteractiveSection from "./components/interactive-section";
+import SettingsSkeleton from "./components/settings-skeleton";
+import UserNotFound from "./components/user-not-found";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { User } from "@/types/user";
@@ -31,6 +35,8 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = React.useState<SettingsTabType>("profile");
   const [showViolation, setShowViolation] = React.useState<boolean>(false);
   const [violationType, setViolationType] = React.useState<string>("account");
+  const [showBlacklist, setShowBlacklist] = React.useState<boolean>(false);
+  const [blacklistType, setBlacklistType] = React.useState<string>("user");
   const [hashParam, setHashParam] = React.useState<string>("");
 
   const sectionRefs = {
@@ -152,19 +158,6 @@ export default function SettingsPage() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case "blacklist":
-        return (
-          <section className="pt-4 lg:px-4">
-            <div className="flex items-center">
-              <ChevronLeft
-                className="mr-2 h-5 w-5 cursor-pointer"
-                onClick={() => setActiveTab("")}
-              />
-              <h2 className="text-xl font-semibold">封锁列表</h2>
-            </div>
-            <UserBlacklist />
-          </section>
-        );
       case "violation":
         return (
           <section className="pt-4 lg:px-4">
@@ -189,49 +182,21 @@ export default function SettingsPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="px-4 lg:py-4 lg:px-0">
-        <div className="flex gap-8 relative">
-          {/* 左侧导航骨架 */}
-          <div className="hidden lg:block w-60 flex-shrink-0">
-            <div className="fixed w-60 space-y-2">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-12 bg-gray-200 rounded-lg animate-pulse"
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* 右侧内容骨架 */}
-          <div className="flex-1 space-y-6">
-            <div className="h-8 bg-gray-200 rounded animate-pulse" />
-            <div className="space-y-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="border-b pb-4">
-                  <div className="h-6 bg-gray-200 rounded animate-pulse mb-2" />
-                  <div className="h-4 bg-gray-100 rounded animate-pulse" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <SettingsSkeleton />;
   }
 
   if (!user) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-muted-foreground">用户不存在</div>
-      </div>
-    );
+    return <UserNotFound />;
   }
 
   const handleShowViolation = (tab: string) => {
     setShowViolation(true);
     setViolationType(tab);
+  };
+
+  const handleShowBlacklist = (type: string) => {
+    setShowBlacklist(true);
+    setBlacklistType(type);
   };
   const renderViolation = () => {
     if (!showViolation) return null;
@@ -241,13 +206,58 @@ export default function SettingsPage() {
         <div className="flex items-center">
           <ChevronLeft
             className="mr-2 h-5 w-5 cursor-pointer"
-            onClick={() => setShowViolation(false)}
+            onClick={() => {
+              setShowViolation(false);
+              // 更新URL hash并手动定位到违规锚点
+              window.history.pushState(null, "", "#violation");
+              setActiveTab("violation");
+              setTimeout(() => {
+                if (sectionRefs.violation?.current) {
+                  sectionRefs.violation.current.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+                }
+              }, 100);
+            }}
           />
           <h2 className="text-xl font-semibold">
             {violationType === "account" ? "账号状态" : "活动状态"}
           </h2>
         </div>
         <ViolationRecords violationType={violationType} />
+      </section>
+    );
+  };
+
+  const renderBlacklist = () => {
+    if (!showBlacklist) return null;
+
+    return (
+      <section className="pt-4 lg:px-4">
+        <div className="flex items-center">
+          <ChevronLeft
+            className="mr-2 h-5 w-5 cursor-pointer"
+            onClick={() => {
+              setShowBlacklist(false);
+              // 更新URL hash并手动定位到黑名单锚点
+              window.history.pushState(null, "", "#blacklist");
+              setActiveTab("blacklist");
+              setTimeout(() => {
+                if (sectionRefs.blacklist?.current) {
+                  sectionRefs.blacklist.current.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+                }
+              }, 100);
+            }}
+          />
+          <h2 className="text-xl font-semibold">
+            {blacklistType === "board" ? "黑名单看板" : "黑名单用户"}
+          </h2>
+        </div>
+        <UserBlacklist type={blacklistType as "board" | "user"} />
       </section>
     );
   };
@@ -269,6 +279,8 @@ export default function SettingsPage() {
           {/* 当 showViolation 为 true 时只渲染违规记录内容 */}
           {showViolation ? (
             renderViolation()
+          ) : showBlacklist ? (
+            renderBlacklist()
           ) : (
             <>
               {/* 使用 Tab 切换的内容 */}
@@ -277,137 +289,129 @@ export default function SettingsPage() {
               {/* 使用锚点跳转的内容 - 只显示没有 openTab 属性的菜单项 */}
               {!getMenuOpenTabStatus(activeTab) && (
                 <>
-                  <section
+                  <SettingsSection
                     ref={sectionRefs.profile}
                     id="profile"
-                    className="py-3"
+                    title="个人资讯"
                   >
-                    <h2 className="mb-2 text-xl font-semibold">个人资讯</h2>
                     <ProfileSettings user={user} />
-                  </section>
+                  </SettingsSection>
 
-                  <section
+                  <SettingsSection
                     ref={sectionRefs.security}
                     id="security"
-                    className="py-2 [scroll-margin-top:80px]"
+                    title="帳號安全"
                   >
-                    <h2 className="text-xl font-semibold">帳號安全</h2>
                     <SecuritySettings user={user} />
-                  </section>
+                  </SettingsSection>
 
-                  <section
+                  <SettingsSection
                     ref={sectionRefs.notification}
                     id="notification"
-                    className="py-2 [scroll-margin-top:80px]"
+                    title="通知"
                   >
-                    <h2 className="text-xl font-semibold">通知</h2>
                     <NotificationSettings user={user} />
-                  </section>
+                  </SettingsSection>
 
-                  <section
+                  <SettingsSection
                     ref={sectionRefs.theme}
                     id="theme"
-                    className="py-2 [scroll-margin-top:80px] border-b"
+                    title="外观"
                   >
-                    <h2 className="text-xl font-semibold">外观</h2>
                     <ThemeSettings />
-                  </section>
+                  </SettingsSection>
 
-                  <section
+                  <SettingsSection
                     ref={sectionRefs.privacy}
                     id="privacy"
-                    className="py-2 [scroll-margin-top:80px]"
+                    title="隐私"
                   >
-                    <h2 className="text-xl font-semibold">隐私</h2>
-                    <div className="py-3 border-b">
-                      <Label>上線狀態顯示</Label>
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm  mt-1">
-                          顯示或隱藏你的線上狀態，讓其他使用者知道你是否在線。
-                        </p>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex-1">
+                          <Label className="text-base font-medium">
+                            上線狀態顯示
+                          </Label>
+                          <p className="text-sm mt-1">
+                            顯示或隱藏你的線上狀態，讓其他使用者知道你是否在線。
+                          </p>
+                        </div>
                         <Switch
                           checked={user?.preferences?.discloseOnline === "yes"}
                           onCheckedChange={(checked) =>
                             handleUpdatePreference(checked ? "yes" : "no")
                           }
+                          aria-label="切换在线状态显示"
                         />
                       </div>
                     </div>
-                  </section>
+                  </SettingsSection>
 
-                  <section className="lg:hidden flex justify-between items-center py-4 border-b">
-                    <button
-                      className="w-full flex justify-between items-center text-left"
-                      onClick={() => handleTabChange("blacklist")}
-                    >
-                      <h2 className="text-xl font-semibold">黑名单</h2>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </button>
-                  </section>
+                  <SettingsSection
+                    ref={sectionRefs.blacklist}
+                    id="blacklist"
+                    title="黑名单"
+                  >
+                    <div className="divide-y">
+                      <InteractiveSection
+                        title="黑名单用户"
+                        description="封锁指定用户，避免接收对方的讯息与互动内容。"
+                        onClick={() => handleShowBlacklist("user")}
+                        ariaLabel="查看看板黑名单"
+                        className="pb-4"
+                      />
+                      <InteractiveSection
+                        title="黑名单看板"
+                        description="封锁指定看板，其内容将不再显示于你的页面中。"
+                        onClick={() => handleShowBlacklist("board")}
+                        ariaLabel="查看用户黑名单"
+                        className="pt-4"
+                      />
+                    </div>
+                  </SettingsSection>
 
-                  <section
+                  <SettingsSection
                     ref={sectionRefs.violation}
                     id="violation"
-                    className="py-2 [scroll-margin-top:80px]"
+                    title="违规"
                   >
-                    <h2 className="text-xl font-semibold">违规</h2>
-                    <div className="space-y-6">
-                      <div
-                        className="py-3 border-b cursor-pointer"
+                    <div className="divide-y">
+                      <InteractiveSection
+                        title="账号状态"
+                        description="当你的文章被删除，账号被停用或发送其他重大变更时，相关通知在此显示。"
                         onClick={() => handleShowViolation("account")}
-                      >
-                        <Label className="font-bold">账号状态</Label>
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm text- mt-1">
-                            当你的文章被删除，账号被停用或发送其他重大变更时，相关通知在此显示。
-                          </p>
-                          <div
-                            className="flex items-center gap-2 cursor-pointer"
-                            onClick={() => handleShowViolation("account")}
-                          >
-                            <ChevronRight className="h-4 w-4" />
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        className="py-3 border-b cursor-pointer"
+                        ariaLabel="查看账号状态违规记录"
+                        className="pb-4"
+                      />
+                      <InteractiveSection
+                        title="活动状态"
+                        description="接收看板管理员对文章，权限及其他管理操作的相关通知将在此显示。"
                         onClick={() => handleShowViolation("board")}
-                      >
-                        <Label className="font-bold">活动状态</Label>
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm  mt-1">
-                            接收看板管理员对文章，权限及其他管理操作的相关通知将在此显示。
-                          </p>
-                          <div
-                            className="flex items-center gap-2 cursor-pointer"
-                            onClick={() => handleShowViolation("board")}
-                          >
-                            <ChevronRight className="h-4 w-4" />
-                          </div>
-                        </div>
-                      </div>
+                        ariaLabel="查看活动状态违规记录"
+                        className="pt-4"
+                      />
                     </div>
-                  </section>
+                  </SettingsSection>
 
-                  <section
+                  <SettingsSection
                     ref={sectionRefs.language}
                     id="language"
-                    className="py-4 [scroll-margin-top:80px] border-b"
+                    title=""
                   >
-                    <div className="flex items-center justify-between ">
+                    <div className="flex items-center justify-between">
                       <h2 className="text-xl font-semibold">语言设置</h2>
                       <LanguageSettings />
                     </div>
-                  </section>
+                  </SettingsSection>
 
-                  <section
+                  <SettingsSection
                     ref={sectionRefs.policy}
                     id="policy"
-                    className="py-4 [scroll-margin-top:80px]"
+                    title="网站政策"
+                    showBorder={false}
                   >
-                    <h2 className="text-xl font-semibold">网站政策</h2>
                     <PolicySettings />
-                  </section>
+                  </SettingsSection>
                 </>
               )}
             </>

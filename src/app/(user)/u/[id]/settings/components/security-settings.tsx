@@ -394,9 +394,9 @@ export default function SecuritySettings({ user }: { user: User | null }) {
   })();
 
   return (
-    <div className="space-y-4">
+    <div className="">
       {/* 电子邮件设置 */}
-      <div className="py-3 border-b">
+      <div className="pb-3 border-b">
         <Label className="font-bold">电子邮件</Label>
         <div className="flex items-center justify-between gap-2">
           <p className="text-sm  mt-1">
@@ -666,7 +666,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       </Dialog>
 
       {/* 年龄验证 */}
-      <div className="py-3 border-b">
+      <div className="pt-3">
         <Label className="font-bold">年龄验证</Label>
         <div className="flex items-center justify-between gap-2">
           <p className="text-sm mt-1">驗證你的年齡以存取特定內容</p>

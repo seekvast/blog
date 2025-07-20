@@ -109,7 +109,7 @@ export const navGroups: NavGroup[] = [
     title: "黑名单",
     icon: UserRoundX,
     href: "blacklist",
-    openTab: true,
+    openTab: false,
     items: [
       {
         label: "封锁列表",
@@ -155,7 +155,10 @@ export const navGroups: NavGroup[] = [
   },
 ];
 
-export default function SettingsSidebar({ activeTab, onTabChange }: SettingsSidebarProps) {
+export default function SettingsSidebar({
+  activeTab,
+  onTabChange,
+}: SettingsSidebarProps) {
   const handleTabClick = (
     e: React.MouseEvent<HTMLElement>,
     tab: SettingsTabType,
@@ -179,11 +182,15 @@ export default function SettingsSidebar({ activeTab, onTabChange }: SettingsSide
                   <a
                     className={cn(
                       "flex items-center px-4 py-2 rounded-lg transition-colors",
-                      isActive ? "bg-blue-subtle text-primary" : "hover:bg-subtle"
+                      isActive
+                        ? "bg-blue-subtle text-primary"
+                        : "hover:bg-subtle"
                     )}
                     key={group.href}
                     href="#"
-                    onClick={(e) => handleTabClick(e, group.href, group.openTab)}
+                    onClick={(e) =>
+                      handleTabClick(e, group.href, group.openTab)
+                    }
                   >
                     <Icon className="mr-2 h-4 w-4" />
                     <span>{group.title}</span>
