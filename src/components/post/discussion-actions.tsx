@@ -100,6 +100,8 @@ export function DiscussionActions({
     gcTime: 3 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+
+    enabled: showDialog && !!discussion.board_id,
   });
 
   //通过useMutation删除评论

@@ -187,6 +187,11 @@ export default function CreatePostModal() {
 
   const updateSelectedBoard = React.useCallback(
     (boardId: number, board?: Board) => {
+      // 如果已经有相同的selectedBoard，不再更新
+      if (selectedBoard && selectedBoard.id === boardId) {
+        return;
+      }
+
       if (board) {
         setSelectedBoard(board);
         setForceUpdateKey((prev) => prev + 1);
@@ -195,13 +200,16 @@ export default function CreatePostModal() {
         api.boards
           .get({ id: boardId })
           .then((boardData) => {
-            setSelectedBoard(boardData);
-            setForceUpdateKey((prev) => prev + 1);
+            // 确保board_id没有变化
+            if (boardId === discussionForm.board_id) {
+              setSelectedBoard(boardData);
+              setForceUpdateKey((prev) => prev + 1);
+            }
           })
           .catch(console.error);
       }
     },
-    []
+    [selectedBoard, discussionForm.board_id]
   );
 
   React.useEffect(() => {
@@ -312,33 +320,68 @@ export default function CreatePostModal() {
   // 4. 加载状态优化：使用 loading 状态管理
   const loadBoardChildren = React.useCallback(
     async (boardId: number) => {
+      // 如果模态框不可见，跳过请求
+      if (!isVisible) {
+        return;
+      }
+
       // 如果正在加载，跳过重复请求
       if (modalState.loadingChildren) {
         return;
       }
 
+      // 如果board_id为0或未定义，不进行加载
+      if (!boardId) {
+        return;
+      }
+
+      // 添加一个标志，标记当前正在处理的boardId
+      const processingBoardId = boardId;
+
       try {
         dispatch({ type: "SET_LOADING_CHILDREN", payload: true });
         const data = await api.boards.getChildren(boardId);
-        setBoardChildren(data);
-        if (!discussionForm.board_child_id && data.items.length > 0) {
-          const defaultChild = data.items.find(
-            (child) => child.is_default === 1
-          );
-          if (defaultChild) {
-            setDiscussionForm((prev) => ({
-              ...prev,
-              board_child_id: defaultChild.id,
-            }));
+
+        // 确保当前处理的仍然是同一个boardId，避免竞态条件
+        // 同时确保模态框仍然可见
+        if (processingBoardId === discussionForm.board_id && isVisible) {
+          setBoardChildren(data);
+
+          // 只在没有设置子版块ID且有子版块时设置默认子版块
+          if (!discussionForm.board_child_id && data.items.length > 0) {
+            const defaultChild = data.items.find(
+              (child) => child.is_default === 1
+            );
+            if (defaultChild) {
+              // 使用函数式更新，确保使用最新的状态
+              setDiscussionForm((prev) => {
+                // 如果已经有了board_child_id，不再更新
+                if (prev.board_child_id) return prev;
+                return {
+                  ...prev,
+                  board_child_id: defaultChild.id,
+                };
+              });
+            }
           }
         }
       } catch (error) {
         console.error("Failed to load board children:", error);
       } finally {
-        dispatch({ type: "SET_LOADING_CHILDREN", payload: false });
+        // 只有当前处理的仍然是同一个boardId且模态框仍然可见时，才更新loading状态
+        if (processingBoardId === discussionForm.board_id && isVisible) {
+          dispatch({ type: "SET_LOADING_CHILDREN", payload: false });
+        }
       }
     },
-    [setBoardChildren, setDiscussionForm, modalState.loadingChildren]
+    [
+      setBoardChildren,
+      setDiscussionForm,
+      modalState.loadingChildren,
+      discussionForm.board_id,
+      discussionForm.board_child_id,
+      isVisible,
+    ]
   );
 
   const handlePublish = React.useCallback(async () => {
@@ -459,10 +502,18 @@ export default function CreatePostModal() {
     }
   }
 
+  // 使用useRef存储上一次加载的boardId，避免重复加载
+  const lastLoadedBoardIdRef = React.useRef<number | null>(null);
+
   React.useEffect(() => {
-    if (discussionForm.board_id) {
-      loadBoardChildren(discussionForm.board_id);
-    } else {
+    // 如果模态框不可见，不加载数据，同时清空上一次加载的boardId
+    if (!isVisible) {
+      lastLoadedBoardIdRef.current = null;
+      return;
+    }
+
+    // 如果board_id为0或未定义，不进行加载
+    if (!discussionForm.board_id) {
       setBoardChildren({
         code: 0,
         items: [],
@@ -472,8 +523,26 @@ export default function CreatePostModal() {
         last_page: 1,
         message: "",
       });
+      return;
     }
-  }, [discussionForm.board_id, loadBoardChildren]);
+
+    // 如果board_id没有变化，不重新加载
+    if (discussionForm.board_id === lastLoadedBoardIdRef.current) {
+      return;
+    }
+
+    // 更新上一次加载的boardId
+    lastLoadedBoardIdRef.current = discussionForm.board_id;
+
+    // 使用setTimeout实现简单的防抖，避免频繁调用
+    const timeoutId = setTimeout(() => {
+      loadBoardChildren(discussionForm.board_id);
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [discussionForm.board_id, loadBoardChildren, setBoardChildren, isVisible]);
 
   React.useEffect(() => {
     const hasUnsaved =
@@ -548,6 +617,8 @@ export default function CreatePostModal() {
     if (!isVisible) {
       resetAllStates();
       usePostEditorStore.setState({ discussion: undefined });
+      // 重置lastLoadedBoardIdRef，确保下次打开时能正确加载数据
+      lastLoadedBoardIdRef.current = null;
     }
   }, [isVisible, resetAllStates]);
 
@@ -626,11 +697,30 @@ export default function CreatePostModal() {
                     ref={boardSelectRef}
                     value={discussionForm.board_id}
                     onChange={(value, board) => {
-                      setDiscussionForm((prev) => ({
-                        ...prev,
-                        board_id: value,
-                      }));
-                      updateSelectedBoard(value, board);
+                      // 如果选择的是同一个看板，不进行任何操作
+                      if (value === discussionForm.board_id) return;
+
+                      // 一次性更新所有状态，避免多次渲染
+                      const updateStates = () => {
+                        // 更新discussionForm
+                        setDiscussionForm((prev) => ({
+                          ...prev,
+                          board_id: value,
+                          board_child_id: undefined, // 重置子版块ID
+                        }));
+
+                        // 如果提供了board对象，直接使用它
+                        if (board) {
+                          setSelectedBoard(board);
+                          setForceUpdateKey((prev) => prev + 1);
+                        } else {
+                          // 否则通过updateSelectedBoard函数获取
+                          updateSelectedBoard(value);
+                        }
+                      };
+
+                      // 执行状态更新
+                      updateStates();
                     }}
                   />
                 </div>
