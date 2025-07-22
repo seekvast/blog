@@ -160,12 +160,12 @@ export const CommentItem = ({
         </Link>
         <div className="flex-1 min-w-0 overflow-hidden">
           <div className="flex justify-between w-full items-start">
-            <div className="flex items-start gap-2 text-xs md:text-sm text-muted-foreground min-w-0 flex-1 flex-wrap">
+            <div className="flex items-baseline gap-2 text-xs md:text-sm text-muted-foreground min-w-0 flex-1 flex-wrap">
               <Link
                 href={`/u/${comment.user.username}?hashid=${comment.user.hashid}`}
                 className="flex-shrink-0"
               >
-                <span className="font-medium text-base truncate">
+                <span className="font-medium text-base truncate md:max-w-[20ch]">
                   {comment.user.nickname || comment.user.username}
                 </span>
               </Link>
