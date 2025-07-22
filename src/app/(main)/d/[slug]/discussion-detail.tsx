@@ -651,12 +651,14 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                     <Link
                       href={`/u/${discussion.user.username}?hashid=${discussion.user.hashid}`}
                     >
-                      <span className="text-base md:text-lg font-medium truncate">
+                      <span className="text-base md:text-lg font-medium truncate max-w-[20ch]  inline-block">
                         {discussion.user.nickname}
                       </span>
                     </Link>
                     <div className="flex items-center space-x-2 min-w-0 text-muted-foreground">
-                      <span>@{discussion.user.nickname}</span>
+                      <span className="truncate max-w-[10ch] inline-block">
+                        @{discussion.user.username}
+                      </span>
                       <UserRoleBadge
                         boardUser={discussion.board_user}
                         board={discussion.board}

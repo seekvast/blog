@@ -36,15 +36,20 @@ export const BoardSelect = React.forwardRef<
     undefined
   );
   const debouncedSearch = React.useRef<NodeJS.Timeout>();
+  const initialLoadDone = React.useRef(false);
+
   React.useEffect(() => {
     if (value) {
       const board = boards.find((board) => board.id === value);
       setSelectedBoard(board);
     }
   }, [value, boards, loading]);
+
   // 加载看板列表
   const loadBoards = React.useCallback(
     async (searchName: string, pageNum: number, append = false) => {
+      if (loading) return; // 防止重复请求
+
       try {
         setLoading(true);
         const queryParams = {
@@ -52,7 +57,7 @@ export const BoardSelect = React.forwardRef<
           per_page: 100,
           visibility: BoardVisibility.PUBLIC,
           name: "",
-          q: !searchName ? 'subscribed' : 'all',
+          q: !searchName ? "subscribed" : "all",
         };
         if (searchName) queryParams.name = searchName;
 
@@ -61,14 +66,19 @@ export const BoardSelect = React.forwardRef<
         if (data.items.length > 0) {
           setBoards((prev) => (append ? [...prev, ...data.items] : data.items));
           setHasMore(pageNum < data.last_page);
+        } else {
+          setBoards(append ? boards : []);
+          setHasMore(false);
         }
+        initialLoadDone.current = true;
       } catch (error) {
         console.error("Failed to load boards:", error);
+        setHasMore(false);
       } finally {
         setLoading(false);
       }
     },
-    []
+    [loading, boards]
   );
 
   // 处理搜索
@@ -96,10 +106,10 @@ export const BoardSelect = React.forwardRef<
 
   // 只在打开选择器时加载看板列表
   React.useEffect(() => {
-    if (boards.length === 0 && !loading) {
+    if (isOpen && boards.length === 0 && !initialLoadDone.current && !loading) {
       loadBoards("", 1);
     }
-  }, [boards.length, loading, loadBoards]);
+  }, [isOpen, boards.length, loading, loadBoards]);
 
   // 暴露重置方法
   React.useImperativeHandle(ref, () => ({
@@ -109,6 +119,7 @@ export const BoardSelect = React.forwardRef<
       setPage(1);
       setHasMore(true);
       setSelectedBoard(undefined);
+      initialLoadDone.current = false;
     },
   }));
 
@@ -117,7 +128,7 @@ export const BoardSelect = React.forwardRef<
       value={value?.toString()}
       onValueChange={(value) => {
         const boardId = parseInt(value);
-        const selectedBoard = boards.find(board => board.id === boardId);
+        const selectedBoard = boards.find((board) => board.id === boardId);
         onChange?.(boardId, selectedBoard);
       }}
       onOpenChange={setIsOpen}
