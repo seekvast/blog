@@ -902,14 +902,14 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             {showCommentEditor && (
               <div className="fixed inset-0 flex flex-col justify-end animate-in fade-in duration-300 w-full z-50">
                 <div
-                  className="bg-background animate-in shadow-[0_-4px_15px_rgba(0,0,0,0.12)] slide-in-from-bottom duration-300"
+                  className="bg-background"
                   style={{ position: "relative", zIndex: 50 }}
                 >
-                  <div className="p-4 pb-[calc(1rem+var(--mobile-nav-height))] lg:pb-4 max-w-4xl mx-auto">
+                  <div className="rounded-t-md pb-[calc(1rem+var(--mobile-nav-height))] lg:pb-0 max-w-4xl mx-auto  shadow-[0_-4px_15px_rgba(0,0,0,0.12)]">
                     {user &&
                       postForm.content &&
                       postForm.content.trim().length > 0 && (
-                        <div className="mb-6 pt-2 pb-4 border-b">
+                        <div className="mb-6 pt-4">
                           <div className="flex items-start space-x-3 px-2 md:px-4 min-w-0">
                             <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
                               <AvatarImage src={user.avatar_url} />
