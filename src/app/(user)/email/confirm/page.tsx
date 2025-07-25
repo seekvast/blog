@@ -43,7 +43,7 @@ export default function EmailConfirmPage() {
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isResending, setIsResending] = useState(false);
   const { remainingSeconds: countdown, startCountdown } =
-    useCountdown("email-resend");
+    useCountdown("email-resend", session?.user);
 
   const token = searchParams?.get("token");
 

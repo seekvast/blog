@@ -17,7 +17,10 @@ export function EmailVerificationBanner() {
   const { toast } = useToast();
   const [isVisible, setIsVisible] = useState(true);
   const [isSending, setIsSending] = useState(false);
-  const { remainingSeconds: countdown, startCountdown } = useCountdown("email-resend");
+  const { remainingSeconds: countdown, startCountdown } = useCountdown(
+    "email-resend",
+    session?.user
+  );
   const [attempts, setAttempts] = useState<number[]>([]);
   const [isRateLimited, setIsRateLimited] = useState(false);
 

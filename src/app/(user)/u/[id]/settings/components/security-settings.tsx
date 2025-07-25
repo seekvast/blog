@@ -82,7 +82,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
   });
   const [isSendingCode, setIsSendingCode] = useState(false);
   const { remainingSeconds: countdown, startCountdown } =
-    useCountdown("email-verification");
+    useCountdown("email-verification", user);
   const [nsfwVisible, setNsfwVisible] = useState(user.preferences?.nsfwVisible);
   const [verificationImageUrl, setVerificationImageUrl] = useState<
     string | null
