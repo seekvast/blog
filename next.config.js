@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 信任代理，正确处理X-Forwarded-* 头
+  experimental: {
+    trustHost: true,
+  },
   images: {
     remotePatterns: [
       {
@@ -15,20 +19,6 @@ const nextConfig = {
         hostname: "**",
       },
     ],
-  },
-  async rewrites() {
-    return [
-      // 排除 auth 相关的路径，这些由 NextAuth.js 处理
-      {
-        source: "/api/auth/:path*",
-        destination: "/api/auth/:path*", // 保持原路径不变
-      },
-      // 其他 API 请求代理到后端服务器
-      {
-        source: "/api/:path*",
-        destination: "http://api.kater.host/:path*",
-      },
-    ];
   },
 };
 

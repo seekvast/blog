@@ -2,7 +2,7 @@ import { DiscussionsList } from "@/components/discussion/discussions-list";
 import { api } from "@/lib/api";
 import { getFollowingMetadata } from "@/lib/metadata";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/auth/auth-options";
 import { LoginPrompt } from "@/components/auth/login-prompt";
 import { getDiscussionPreferencesFromCookie } from "@/lib/discussion-preferences-server";
 

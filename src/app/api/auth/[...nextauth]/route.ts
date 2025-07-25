@@ -1,5 +1,5 @@
 import NextAuth from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/auth/auth-options";
 
 // 在 App Router 中，不需要手动处理 query 参数
 const handler = NextAuth(authOptions);

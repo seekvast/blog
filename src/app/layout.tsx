@@ -9,7 +9,7 @@ import { QueryProvider } from "@/components/providers/query-provider";
 import { EmailVerificationProvider } from "@/components/providers/email-verification-provider";
 import { InterestSelectionProvider } from "@/components/providers/interest-selection-provider";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/auth/auth-options";
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata = {
