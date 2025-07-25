@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Icon } from "@/components/icons";
-import { UserLink } from "@/components/markdown/user-link";
+import { UserLink } from "@/components/editor/user-link";
 
 interface User {
   hashid: string;
@@ -31,7 +31,11 @@ export function ReplyReference({ comment, onClose }: ReplyReferenceProps) {
   return (
     <div className="flex items-start gap-2 border-b bg-muted/30 px-3 py-2 text-sm">
       <div className="flex-1">
-        回复 <UserLink href={`/users/${comment.user.hashid}`}>{comment.user.nickname}</UserLink>：
+        回复{" "}
+        <UserLink href={`/users/${comment.user.hashid}`}>
+          {comment.user.nickname}
+        </UserLink>
+        ：
         <div className="mt-1 line-clamp-1 text-muted-foreground">
           {comment.content}
         </div>

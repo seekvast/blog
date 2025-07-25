@@ -7,7 +7,6 @@ interface UserLinkProps {
 }
 
 export function UserLink({ href, children }: UserLinkProps) {
-
   // 处理空链接
   if (!href) return <>{children}</>;
 
