@@ -77,6 +77,33 @@ export async function runResponseDataInterceptors(
   return interceptedData;
 }
 
+// 在服务端自动注入 IP 地址
+addRequestInterceptor(async (options: FetchOptions): Promise<FetchOptions> => {
+  if (typeof window === "undefined") {
+    try {
+      const { headers } = await import("next/headers");
+      const headerList = headers();
+
+      const ip =
+        headerList.get("x-forwarded-for")?.split(",")[0].trim() ||
+        headerList.get("x-real-ip") ||
+        "";
+      if (ip) {
+        const newHeaders = new Headers(options.headers);
+        newHeaders.set("X-User-IP", ip);
+        options.headers = newHeaders;
+      }
+    } catch (error) {
+      // 在非请求上下文中调用 headers()
+      // 因为有些服务端场景（如 getStaticProps）可能没有请求上下文
+      console.warn(
+        "Could not get headers in this server context. IP will not be sent."
+      );
+    }
+  }
+  return options;
+});
+
 // 默认拦截器
 addRequestInterceptor(async (options) => {
   // 处理查询参数

@@ -1,9 +1,5 @@
-// src/lib/auth-options.ts
-// ⚠️ [服务器专用] - 此文件包含服务器端逻辑，请勿在任何客户端组件中导入。
-
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { headers } from "next/headers"; // 在这里导入是安全的
 import { api } from "@/lib/api";
 import { User as ApiUser } from "@/types/user";
 
@@ -30,30 +26,21 @@ export const authOptions: NextAuthOptions = {
         auth_token: { label: "Token", type: "text" },
       },
       async authorize(credentials) {
-        // 在 authorize 函数内部安全地获取 IP 地址
-        const ip =
-          headers().get("x-forwarded-for")?.split(",")[0].trim() ||
-          headers().get("x-real-ip") ||
-          "127.0.0.1";
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Please enter your email and password");
         }
         let data: ApiUser;
         if (credentials.auth_token) {
-          // 刷新 token 时也可以传递 IP 用于审计
           data = await api.users.refreshToken();
         } else {
-          // 登录时将 IP 传递给后端 API
           data = await api.users.login({
             email: credentials.email,
             password: credentials.password,
             turnstile_token: credentials.turnstile_token ?? "",
             auth_token: credentials.auth_token ?? "",
-            ip_address: ip,
           });
         }
 
-        // 确保你的 API 返回了有效数据
         if (!data || !data.hashid) {
           return null;
         }
@@ -106,8 +93,22 @@ export const authOptions: NextAuthOptions = {
       // 当 session 被更新时（例如调用 useSession().update()）
       if (trigger === "update" && session?.user) {
         const refreshUser = await api.users.refreshToken();
-        // ... 更新 token 的逻辑 ...
+        token.hashid = refreshUser.hashid;
+        token.username = refreshUser.username;
+        token.email = refreshUser.email;
         token.nickname = refreshUser.nickname;
+        token.avatar_url = refreshUser.avatar_url;
+        token.cover = refreshUser.cover;
+        token.bio = refreshUser.bio;
+        token.gender = refreshUser.gender;
+        token.birthday = refreshUser.birthday;
+        token.is_email_confirmed = refreshUser.is_email_confirmed;
+        token.joined_at = refreshUser.joined_at;
+        token.last_seen_at = refreshUser.last_seen_at;
+        token.preferences = refreshUser.preferences;
+        token.token = refreshUser.token;
+        token.is_board_moderator = refreshUser.is_board_moderator;
+        token.age_verified = refreshUser.age_verified;
       }
       return token;
     },
