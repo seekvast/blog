@@ -83,15 +83,19 @@ addRequestInterceptor(async (options: FetchOptions): Promise<FetchOptions> => {
     try {
       const { headers } = await import("next/headers");
       const headerList = headers();
+      const newHeaders = new Headers(options.headers);
 
       const ip =
         headerList.get("x-forwarded-for")?.split(",")[0].trim() ||
         headerList.get("x-real-ip") ||
         "";
       if (ip) {
-        const newHeaders = new Headers(options.headers);
-        newHeaders.set("X-User-IP", ip);
+        newHeaders.set("x-user-ip", ip);
         options.headers = newHeaders;
+      }
+      const userAgent = headerList.get("user-agent") || "";
+      if (userAgent) {
+        newHeaders.set("user-agent", userAgent);
       }
     } catch (error) {
       // 在非请求上下文中调用 headers()
