@@ -305,10 +305,6 @@ export function ReportDialog({
         open={open}
         onOpenChange={(isOpen) => {
           onOpenChange(isOpen);
-          if (!isOpen) {
-            // queryClient.removeQueries({ queryKey: ["board", form.board_id] });
-            // queryClient.resetQueries({ queryKey: ["board", form.board_id] });
-          }
         }}
       >
         <DialogContent className="max-h-[70vh] lg:max-h-[80vh] flex flex-col">

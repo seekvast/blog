@@ -22,6 +22,8 @@ import { toast } from "@/components/ui/use-toast";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { ReportDialog } from "@/components/report/report-dialog";
+import { ReportTarget } from "@/constants/report-target";
 
 export default function BoardPage() {
   return (
@@ -528,6 +530,18 @@ function BoardContent() {
           </div>
         </div>
       </div>
+
+      <ReportDialog
+        open={reportToKaterOpen}
+        onOpenChange={setReportToKaterOpen}
+        title="向Kater檢舉"
+        form={{
+          user_hashid: board.creator_hashid,
+          board_id: board.id,
+          target: ReportTarget.BOARD,
+          reported_to: "admin",
+        }}
+      />
     </div>
   );
 }

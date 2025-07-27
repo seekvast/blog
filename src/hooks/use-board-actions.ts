@@ -1,123 +1,134 @@
 "use client";
 
-import { useState } from "react";
-import { Board } from "@/types";
-import { api } from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast, useToast } from "@/components/ui/use-toast";
+import { api } from "@/lib/api";
+import { useToast } from "@/components/ui/use-toast";
+
+type MutateOptions = {
+  onSuccess?: (...args: any[]) => void;
+  onError?: (...args: any[]) => void;
+};
 
 export function useBoardActions() {
-  const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // 加入看板（不需要回答问题）
-  const { mutate: subscribeAction } = useMutation({
-    mutationFn: (boardId: number) =>
-      api.boards.subscribe({ board_id: boardId }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["boards"] });
-      queryClient.invalidateQueries({ queryKey: ["board_detail"] });
-      queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
-    },
-    onError: (error) => {
-      toast({
-        title: "错误",
-        description: "加入看板失败",
-        variant: "destructive",
-      });
-    },
-  });
+  const invalidateBoardQueries = () => {
+    queryClient.invalidateQueries({ queryKey: ["boards"] });
+    queryClient.invalidateQueries({ queryKey: ["board_detail"] });
+    queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
+  };
 
-  const { mutate: blockAction } = useMutation({
+  const commonOnError = (error: unknown) => {
+    toast({
+      title: "操作失败",
+      description: error instanceof Error ? error.message : "出现未知错误",
+      variant: "destructive",
+    });
+  };
+
+  const { mutate: subscribeAction, isPending: isSubscribingWithoutAnswer } =
+    useMutation({
+      mutationFn: (boardId: number) =>
+        api.boards.subscribe({ board_id: boardId }),
+      onError: commonOnError,
+    });
+
+  const { mutate: blockAction, isPending: isBlocking } = useMutation({
     mutationFn: (params: { board_id: number; quit?: boolean }) =>
       api.boards.block(params),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["boards"] });
-      queryClient.invalidateQueries({ queryKey: ["board_detail"] });
-      queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
-    },
-    onError: (error) => {
-      toast({
-        title: "错误",
-        description: "拉黑看板失败",
-        variant: "destructive",
-      });
-    },
+    onError: commonOnError,
   });
 
-  // 退出看板
-  const { mutate: unsubscribeAction } = useMutation({
-    mutationFn: (boardId: number) =>
-      api.boards.unsubscribe({ board_id: boardId }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["boards"] });
-      queryClient.invalidateQueries({ queryKey: ["board_detail"] });
-      queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
-    },
-    onError: (error) => {
-      toast({
-        title: "错误",
-        description: "退出看板失败",
-        variant: "destructive",
-      });
-    },
+  const { mutate: unsubscribeAction, isPending: isUnsubscribing } = useMutation(
+    {
+      mutationFn: (boardId: number) =>
+        api.boards.unsubscribe({ board_id: boardId }),
+      onError: commonOnError,
+    }
+  );
+
+  const {
+    mutate: subscribeWithAnswerAction,
+    isPending: isSubscribingWithAnswer,
+  } = useMutation({
+    mutationFn: ({ boardId, answer }: { boardId: number; answer: string }) =>
+      api.boards.subscribe({
+        board_id: boardId,
+        answer: answer.trim(),
+      }),
+    onError: commonOnError,
   });
 
-  const handleSubscribe = async (boardId: number) => {
-    subscribeAction(boardId);
-  };
-
-  const handleBlock = async (boardId: number, quit?: boolean) => {
-    blockAction({ board_id: boardId, quit });
-  };
-
-  const handleUnsubscribe = async (boardId: number, onSuccess?: () => void) => {
-    unsubscribeAction(boardId, {
+  const handleSubscribe = (boardId: number, options?: MutateOptions) => {
+    subscribeAction(boardId, {
       onSuccess: () => {
-        onSuccess?.();
-        queryClient.invalidateQueries({ queryKey: ["boards"] });
-        queryClient.invalidateQueries({ queryKey: ["board_detail"] });
-        queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
+        invalidateBoardQueries();
+        options?.onSuccess?.();
       },
     });
   };
 
-  const handleReport = () => {
-    setReportDialogOpen(true);
+  const handleBlock = (
+    boardId: number,
+    quit?: boolean,
+    options?: MutateOptions
+  ) => {
+    blockAction(
+      { board_id: boardId, quit },
+      {
+        onSuccess: () => {
+          invalidateBoardQueries();
+          options?.onSuccess?.();
+        },
+      }
+    );
   };
 
-  // 加入看板（需要回答问题）
-  const { mutate: subscribeWithAnswer, isPending: isSubscribing } = useMutation(
-    {
-      mutationFn: ({ boardId, answer }: { boardId: number; answer: string }) =>
-        api.boards.subscribe({
-          board_id: boardId,
-          answer: answer.trim(),
-        }),
+  const handleUnsubscribe = (boardId: number, options?: MutateOptions) => {
+    unsubscribeAction(boardId, {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["boards"] });
-        queryClient.invalidateQueries({ queryKey: ["board_detail"] });
-        queryClient.invalidateQueries({ queryKey: ["recommend-boards"] });
+        invalidateBoardQueries();
+        options?.onSuccess?.();
       },
-      onError: (error) => {
-        toast({
-          title: "错误",
-          description: error instanceof Error ? error.message : "加入看板失败",
-          variant: "destructive",
-        });
+    });
+  };
+
+  const cancelSubscriptionRequest = (
+    boardId: number,
+    options?: MutateOptions
+  ) => {
+    unsubscribeAction(boardId, {
+      onSuccess: () => {
+        invalidateBoardQueries();
+        options?.onSuccess?.();
       },
-    }
-  );
+    });
+  };
+
+  const subscribeWithAnswer = (
+    params: { boardId: number; answer: string },
+    options?: MutateOptions
+  ) => {
+    subscribeWithAnswerAction(
+      { boardId: params.boardId, answer: params.answer },
+      {
+        onSuccess: () => {
+          invalidateBoardQueries();
+          options?.onSuccess?.();
+        },
+      }
+    );
+  };
 
   return {
-    reportDialogOpen,
-    setReportDialogOpen,
     handleSubscribe,
     handleBlock,
     handleUnsubscribe,
-    handleReport,
+    cancelSubscriptionRequest,
     subscribeWithAnswer,
-    isSubscribing,
+    isSubscribing: isSubscribingWithoutAnswer || isSubscribingWithAnswer,
+    isBlocking,
+    isUnsubscribing,
   };
 }

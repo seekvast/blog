@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { api } from "@/lib/api";
 import { useToast } from "@/components/ui/use-toast";
 import { BoardApprovalMode } from "@/constants/board-approval-mode";
 
@@ -43,23 +42,16 @@ export function BoardActionButton({
   onBlockSuccess,
 }: BoardActionButtonProps) {
   const { requireAuth, requireAuthAndEmailVerification } = useRequireAuth();
-  const { handleBlock, handleUnsubscribe, handleReport, handleSubscribe } =
-    useBoardActions();
+  const {
+    handleBlock,
+    handleUnsubscribe,
+    handleSubscribe,
+    cancelSubscriptionRequest,
+    isBlocking,
+    isUnsubscribing,
+  } = useBoardActions();
 
   const [subscribeBoardOpen, setSubscribeBoardOpen] = useState(false);
-
-  // 渲染对话框
-  const renderSubscribeDialog = () => {
-    return (
-      <SubscribeBoardDialog
-        open={subscribeBoardOpen}
-        onOpenChange={setSubscribeBoardOpen}
-        boardId={board.id}
-        question={board.question || ""}
-        onSuccess={onSubscribeSuccess}
-      />
-    );
-  };
 
   const handleSubscribeBoard = () => {
     requireAuthAndEmailVerification(() => {
@@ -70,41 +62,47 @@ export function BoardActionButton({
       ) {
         setSubscribeBoardOpen(true);
       } else {
-        handleSubscribe(board.id);
-        onSubscribeSuccess?.();
+        handleSubscribe(board.id, { onSuccess: onSubscribeSuccess });
       }
     }, EmailVerificationRequiredFeature.FOLLOW_BOARD);
   };
 
   const handleBlockBoard = (quit?: boolean) => {
     requireAuthAndEmailVerification(() => {
-      handleBlock(board.id, quit);
-      onBlockSuccess?.();
+      handleBlock(board.id, quit, { onSuccess: onBlockSuccess });
     }, EmailVerificationRequiredFeature.BLOCK);
   };
 
   const handleReportBoard = () => {
     requireAuthAndEmailVerification(() => {
-      if (setReportToKaterOpen) {
-        setReportToKaterOpen(true);
-      } else {
-        handleReport();
-      }
+      setReportToKaterOpen?.(true);
     }, EmailVerificationRequiredFeature.REPORT);
   };
 
-  // 未加入
+  // 1. Owner or Admin view
+  const { status, user_role } = board.board_user || {};
   if (
-    !board.board_user ||
-    board.board_user.status === BoardUserStatus.KICK_OUT
+    (board.is_joined || status === 1) &&
+    user_role &&
+    [1, 2].includes(user_role)
   ) {
-    const content = board.history ? (
+    return (
+      <Button variant="outline" size="sm" className="rounded-full" asChild>
+        <Link href={`/b/${board.slug}/settings`}>设定</Link>
+      </Button>
+    );
+  }
+
+  // 2. Pending approval view
+  if (board.history) {
+    return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             size="sm"
             className="rounded-full flex items-center gap-1"
             variant="outline"
+            disabled={isUnsubscribing}
           >
             审核中 <ChevronDown className="h-4 w-4" />
           </Button>
@@ -113,68 +111,21 @@ export function BoardActionButton({
           <DropdownMenuItem
             onClick={() =>
               requireAuth(() => {
-                handleUnsubscribe(board.id);
+                cancelSubscriptionRequest(board.id);
               })
             }
             className="cursor-pointer text-destructive hover:text-destructive"
+            disabled={isUnsubscribing}
           >
-            取消申请
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ) : (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            size="sm"
-            className="rounded-full flex items-center gap-1 bg-blue-600 hover:bg-blue-700"
-          >
-            加入 <ChevronDown className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-40">
-          <DropdownMenuItem
-            onClick={handleSubscribeBoard}
-            className="cursor-pointer"
-          >
-            <UserRound className="mr-2 h-4 w-4" />
-            加入
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() => handleBlockBoard()}
-          >
-            <LockIcon className="mr-2 h-4 w-4" />
-            拉黑
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={handleReportBoard}
-          >
-            <Flag className="mr-2 h-4 w-4" />
-            检举看板
+            {isUnsubscribing ? "取消中..." : "取消申请"}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );
-    return (
-      <>
-        {content}
-        {renderSubscribeDialog()}
-      </>
-    );
   }
 
-  const { status, user_role } = board.board_user;
-  if ((board.is_joined || status === 1) && [1, 2].includes(user_role)) {
-    return (
-      <Button variant="outline" size="sm" className="rounded-full">
-        <Link href={`/b/${board.slug}/settings`}>设定</Link>
-      </Button>
-    );
-  }
-
-  if (status === 1) {
+  // 3. Joined view
+  if (status === BoardUserStatus.PASS) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -182,6 +133,7 @@ export function BoardActionButton({
             size="sm"
             className="rounded-full flex items-center gap-1"
             variant="outline"
+            disabled={isUnsubscribing || isBlocking}
           >
             已加入 <ChevronDown className="h-4 w-4" />
           </Button>
@@ -194,8 +146,9 @@ export function BoardActionButton({
               })
             }
             className="cursor-pointer text-destructive"
+            disabled={isBlocking}
           >
-            退出并拉黑
+            {isBlocking ? "处理中..." : "退出并拉黑"}
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() =>
@@ -204,21 +157,75 @@ export function BoardActionButton({
               })
             }
             className="cursor-pointer"
+            disabled={isUnsubscribing}
           >
-            退出
+            {isUnsubscribing ? "退出中..." : "退出"}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );
   }
 
-  // 其他状态
-  return (
-    <Button variant="outline" size="sm" className="rounded-full">
-      {BoardUserStatusMapping[status as keyof typeof BoardUserStatusMapping] ||
-        ""}
-    </Button>
-  );
+  // 4. Not joined or kicked out view
+  if (!board.board_user || status === BoardUserStatus.KICK_OUT) {
+    return (
+      <>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="sm"
+              className="rounded-full flex items-center gap-1 bg-blue-600 hover:bg-blue-700"
+              disabled={isBlocking}
+            >
+              加入 <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem
+              onClick={handleSubscribeBoard}
+              className="cursor-pointer"
+            >
+              <UserRound className="mr-2 h-4 w-4" />
+              加入
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => handleBlockBoard()}
+              disabled={isBlocking}
+            >
+              <LockIcon className="mr-2 h-4 w-4" />
+              {isBlocking ? "拉黑中..." : "拉黑"}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={handleReportBoard}
+            >
+              <Flag className="mr-2 h-4 w-4" />
+              检举看板
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <SubscribeBoardDialog
+          open={subscribeBoardOpen}
+          onOpenChange={setSubscribeBoardOpen}
+          boardId={board.id}
+          question={board.question || ""}
+          onSuccess={onSubscribeSuccess}
+        />
+      </>
+    );
+  }
+
+  // 5. Other statuses
+  if (status && status in BoardUserStatusMapping) {
+    return (
+      <Button variant="outline" size="sm" className="rounded-full">
+        {BoardUserStatusMapping[status as keyof typeof BoardUserStatusMapping]}
+      </Button>
+    );
+  }
+
+  return null;
 }
 
 interface SubscribeBoardDialogProps {

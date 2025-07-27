@@ -7,8 +7,8 @@ import { UserRound } from "lucide-react";
 import { Board } from "@/types";
 import { BoardActionButton } from "./board-action-button";
 import { ReportDialog } from "@/components/report/report-dialog";
-import { useBoardActions } from "@/hooks/use-board-actions";
 import { ReportTarget } from "@/constants/report-target";
+import { useState } from "react";
 
 interface BoardItemProps {
   board: Board;
@@ -17,8 +17,7 @@ interface BoardItemProps {
 }
 
 export function BoardItem({ board, onBlockSuccess, onSubscribeSuccess }: BoardItemProps) {
-  const { reportDialogOpen, setReportDialogOpen } = useBoardActions();
-
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
   return (
     <div className="flex items-center justify-between py-4">
       <div className="flex items-center space-x-4">
