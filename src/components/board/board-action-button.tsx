@@ -76,9 +76,9 @@ export function BoardActionButton({
     }, EmailVerificationRequiredFeature.FOLLOW_BOARD);
   };
 
-  const handleBlockBoard = () => {
+  const handleBlockBoard = (quit?: boolean) => {
     requireAuthAndEmailVerification(() => {
-      handleBlock(board.id);
+      handleBlock(board.id, quit);
       onBlockSuccess?.();
     }, EmailVerificationRequiredFeature.BLOCK);
   };
@@ -142,7 +142,7 @@ export function BoardActionButton({
           </DropdownMenuItem>
           <DropdownMenuItem
             className="cursor-pointer"
-            onClick={handleBlockBoard}
+            onClick={() => handleBlockBoard()}
           >
             <LockIcon className="mr-2 h-4 w-4" />
             拉黑
@@ -190,12 +190,22 @@ export function BoardActionButton({
           <DropdownMenuItem
             onClick={() =>
               requireAuth(() => {
-                handleUnsubscribe(board.id, onBlockSuccess);
+                handleBlockBoard(true);
               })
             }
-            className="cursor-pointer text-destructive hover:text-destructive"
+            className="cursor-pointer text-destructive"
           >
             退出并拉黑
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() =>
+              requireAuth(() => {
+                handleUnsubscribe(board.id);
+              })
+            }
+            className="cursor-pointer"
+          >
+            退出
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

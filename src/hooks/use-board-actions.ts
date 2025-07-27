@@ -30,7 +30,8 @@ export function useBoardActions() {
   });
 
   const { mutate: blockAction } = useMutation({
-    mutationFn: (boardId: number) => api.boards.block({ board_id: boardId }),
+    mutationFn: (params: { board_id: number; quit?: boolean }) =>
+      api.boards.block(params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["boards"] });
       queryClient.invalidateQueries({ queryKey: ["board_detail"] });
@@ -67,8 +68,8 @@ export function useBoardActions() {
     subscribeAction(boardId);
   };
 
-  const handleBlock = async (boardId: number) => {
-    blockAction(boardId);
+  const handleBlock = async (boardId: number, quit?: boolean) => {
+    blockAction({ board_id: boardId, quit });
   };
 
   const handleUnsubscribe = async (boardId: number, onSuccess?: () => void) => {
