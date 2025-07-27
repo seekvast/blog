@@ -139,11 +139,11 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     });
   }, []);
 
-  useClickOutside(editorPanelRef, () => {
-    if (showCommentEditor) {
-      handleCloseEditor();
-    }
-  });
+  // useClickOutside(editorPanelRef, () => {
+  //   if (showCommentEditor) {
+  //     handleCloseEditor();
+  //   }
+  // });
 
   const queryClient = useQueryClient();
   const [queryParams, setQueryParams] = React.useState<{
@@ -486,6 +486,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       queryClient.invalidateQueries({
         queryKey: ["discussion", slug],
       });
+      setShowCommentEditor(false);
     },
     onError: (error) => {
       toast({
@@ -519,6 +520,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       queryClient.invalidateQueries({
         queryKey: ["discussion", slug],
       });
+      setShowCommentEditor(false);
     },
     onError: (error) => {
       toast({
@@ -921,13 +923,13 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             </div>
 
             {showCommentEditor && (
-              <div className="fixed bottom-0 inset-x-0 animate-in fade-in duration-300 w-full z-50">
+              <div className="fixed bottom-0 inset-x-0 animate-in fade-in duration-300 z-50">
                 <div
                   ref={editorPanelRef}
-                  className="bg-background"
+                  className="bg-background rounded-t-md max-w-4xl mx-auto shadow-[0_-4px_15px_rgba(0,0,0,0.12)]"
                   style={{ position: "relative", zIndex: 50 }}
                 >
-                  <div className="rounded-t-md pb-[calc(1rem+var(--mobile-nav-height))] lg:pb-0 max-w-4xl mx-auto  shadow-[0_-4px_15px_rgba(0,0,0,0.12)]">
+                  <div className="pb-[calc(1rem+var(--mobile-nav-height))] lg:pb-0">
                     {user &&
                       postForm.content &&
                       postForm.content.trim().length > 0 && (
@@ -968,7 +970,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                         } else {
                           handleSubmitComment(form);
                         }
-                        setShowCommentEditor(false);
                       }}
                       isSubmitting={isSubmitting}
                       replyTo={replyTo}
@@ -1027,9 +1028,10 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 <Button
                   variant="secondary"
                   className="flex-grow justify-start rounded-r-none rounded-l-md"
-                  onClick={() =>
-                    handleFollow(followStatus === "follow" ? null : "follow")
-                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleFollow(followStatus === "follow" ? null : "follow");
+                  }}
                   disabled={followMutation.isPending}
                 >
                   <Star
@@ -1113,7 +1115,10 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 <Button
                   variant="secondary"
                   className="flex-grow justify-start rounded-r-none rounded-l-md"
-                  onClick={handleBookmark}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleBookmark();
+                  }}
                   disabled={bookmarkMutation.isPending}
                 >
                   <Bookmark

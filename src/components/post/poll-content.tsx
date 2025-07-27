@@ -147,6 +147,7 @@ export function PollContent({ discussion }: PollContentProps) {
           poll.options.map((option) => {
             const percentage =
               totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
+            const displayPercentage = Math.min(percentage, 100);
             return (
               <div
                 key={option.id}
@@ -154,7 +155,7 @@ export function PollContent({ discussion }: PollContentProps) {
               >
                 <div
                   className="absolute inset-0 bg-muted"
-                  style={{ width: `${percentage}%` }}
+                  style={{ width: `${displayPercentage}%` }}
                 />
                 <div className="relative flex items-center space-x-2 p-2">
                   <Checkbox
@@ -187,6 +188,7 @@ export function PollContent({ discussion }: PollContentProps) {
             {poll.options.map((option) => {
               const percentage =
                 totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
+              const displayPercentage = Math.min(percentage, 100);
               return (
                 <div
                   key={option.id}
@@ -194,7 +196,7 @@ export function PollContent({ discussion }: PollContentProps) {
                 >
                   <div
                     className="absolute inset-0 bg-muted  "
-                    style={{ width: `${percentage}%` }}
+                    style={{ width: `${displayPercentage}%` }}
                   />
                   <div className="relative flex items-center space-x-2 p-2">
                     <RadioGroupItem
