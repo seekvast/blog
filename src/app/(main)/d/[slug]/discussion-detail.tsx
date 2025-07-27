@@ -443,14 +443,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       }),
     onSuccess: (_, { postId, vote, isMainPost }) => {
       if (isMainPost) {
-        api.discussions
-          .get(slug)
-          .then((data) => {
-            setDiscussion(data);
-          })
-          .catch((error) => {
-            console.error("Failed to refresh discussion data:", error);
-          });
+        queryClient.invalidateQueries({ queryKey: ["discussion", slug] });
       } else {
         updatePostVoteData(queryClient, postId, vote);
       }
@@ -799,17 +792,17 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             {discussion.poll && <PollContent discussion={discussion} />}
           </div>
           <div className="flex justify-between items-center mb-4 px-2 text-muted-foreground text-sm">
-            <div className="flex items-center space-x-4 md:space-x-8 cursor-pointer">
-              <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-4 md:space-x-8">
+              <button
+                className="flex items-center space-x-2"
+                onClick={() => handleVote(discussion.main_post.id, "up", true)}
+              >
                 <ThumbsUp
                   className={cn(
                     "h-4 w-4",
                     discussion.main_post.user_voted?.vote === "up" &&
                       "text-primary fill-primary"
                   )}
-                  onClick={() =>
-                    handleVote(discussion.main_post.id, "up", true)
-                  }
                 />
                 {discussion.main_post.up_votes_count > 0 && (
                   <Popover>
@@ -825,7 +818,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                     </PopoverContent>
                   </Popover>
                 )}
-              </div>
+              </button>
               <button
                 onClick={() =>
                   handleVote(discussion.main_post.id, "down", true)

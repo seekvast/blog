@@ -1,14 +1,17 @@
 import { getSession as getReactSession, signIn } from "next-auth/react";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "./auth/auth-options";
 
 // Session 缓存机制
 let sessionCache: { session: any; timestamp: number } | null = null;
 const SESSION_CACHE_DURATION = 1000; // 1秒缓存
 
-/**
- * 获取带缓存的 Session。
- * 在服务器组件中，请直接使用 `import { getServerSession } from "next-auth/next"`。
- */
 export async function getSession() {
+  // 服务端环境
+  if (typeof window === "undefined") {
+    return await getServerSession(authOptions);
+  }
+
   const now = Date.now();
 
   // 如果缓存存在且未过期，直接返回

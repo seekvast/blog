@@ -81,8 +81,10 @@ export default function SecuritySettings({ user }: { user: User | null }) {
     captcha: "",
   });
   const [isSendingCode, setIsSendingCode] = useState(false);
-  const { remainingSeconds: countdown, startCountdown } =
-    useCountdown("email-verification", user);
+  const { remainingSeconds: countdown, startCountdown } = useCountdown(
+    "email-verification",
+    user
+  );
   const [nsfwVisible, setNsfwVisible] = useState(user.preferences?.nsfwVisible);
   const [verificationImageUrl, setVerificationImageUrl] = useState<
     string | null
@@ -386,7 +388,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
   };
 
   const today = new Date().toISOString().split("T")[0];
-  const minDate = "1-01-01";
+  const minDate = "1900-01-01";
   const maxDate = (() => {
     const date = new Date();
     date.setFullYear(date.getFullYear() - 13);
