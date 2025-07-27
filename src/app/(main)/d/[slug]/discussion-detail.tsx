@@ -69,6 +69,7 @@ import {
 import { CommentButton } from "@/components/post/comment-button";
 import { DiscussionActions } from "@/components/post/discussion-actions";
 import { useCompactNumberFormat } from "@/lib/utils/format";
+import { useClickOutside } from "@/hooks/use-click-outside";
 
 interface DiscussionDetailProps {
   initialDiscussion: Discussion;
@@ -123,6 +124,26 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     discussion?.discussion_user?.subscription || null
   );
   const [showCommentEditor, setShowCommentEditor] = useState(false);
+
+  const editorPanelRef = React.useRef<HTMLDivElement>(null);
+
+  const handleCloseEditor = React.useCallback(() => {
+    setShowCommentEditor(false);
+    setReplyTo(null);
+    setEditingPost(null);
+    setPostForm({
+      slug: "",
+      parent_id: 0,
+      content: "",
+      attachments: [],
+    });
+  }, []);
+
+  useClickOutside(editorPanelRef, () => {
+    if (showCommentEditor) {
+      handleCloseEditor();
+    }
+  });
 
   const queryClient = useQueryClient();
   const [queryParams, setQueryParams] = React.useState<{
@@ -900,8 +921,9 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             </div>
 
             {showCommentEditor && (
-              <div className="fixed inset-0 flex flex-col justify-end animate-in fade-in duration-300 w-full z-50">
+              <div className="fixed bottom-0 inset-x-0 animate-in fade-in duration-300 w-full z-50">
                 <div
+                  ref={editorPanelRef}
                   className="bg-background"
                   style={{ position: "relative", zIndex: 50 }}
                 >
@@ -955,17 +977,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                       openLoginModal={openLoginModal}
                       boardId={discussion?.board_id}
                       discussionTitle={discussion.title}
-                      onClose={() => {
-                        setShowCommentEditor(false);
-                        setReplyTo(null);
-                        setEditingPost(null);
-                        setPostForm({
-                          slug: "",
-                          parent_id: 0,
-                          content: "",
-                          attachments: [],
-                        });
-                      }}
+                      onClose={handleCloseEditor}
                     />
                   </div>
                 </div>

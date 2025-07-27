@@ -308,6 +308,14 @@
       "title": "{{operator_name}} 撤銷禁言 {{username}}",
       "content": ""
     },
+    "user.restrict": {
+      "title": "{{operator_name}} 限制了用户 {{username}} 部分功能 {{days}} 天",
+      "content": ""
+    },
+    "user.warn": {
+      "title": "{{operator_name}} 警告了用户 {{username}}",
+      "content": ""
+    },
     "board.create": {
       "title": "{{operator_name}} 建立了看板 {{name}}",
       "content": ""
@@ -326,6 +334,14 @@
     },
     "board.restore": {
       "title": "{{operator_name}} 恢復了看板 {{name}}",
+      "content": ""
+    },
+    "board.restrict": {
+      "title": "{{operator_name}} 限制了看板 {{name}} 部分功能 {{ days }} 天",
+      "content": ""
+    },
+    "board.warn": {
+      "title": "{{operator_name}} 警告了看板 {{name}}",
       "content": ""
     },
     "board_rule.create": {

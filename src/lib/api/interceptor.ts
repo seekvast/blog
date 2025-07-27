@@ -84,11 +84,15 @@ addRequestInterceptor(async (options: FetchOptions): Promise<FetchOptions> => {
       const { headers } = await import("next/headers");
       const headerList = headers();
       const newHeaders = new Headers(options.headers);
-
       const ip =
         headerList.get("x-forwarded-for")?.split(",")[0].trim() ||
         headerList.get("x-real-ip") ||
         "";
+      console.log(
+        headerList.get("x-forwarded-for"),
+        "headerList............................."
+      );
+
       if (ip) {
         newHeaders.set("x-user-ip", ip);
         options.headers = newHeaders;

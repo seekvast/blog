@@ -1,9 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // 信任代理，正确处理X-Forwarded-* 头
-  experimental: {
-    trustHost: true,
-  },
   images: {
     remotePatterns: [
       {
