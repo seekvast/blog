@@ -33,13 +33,13 @@ import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useBoardActions } from "@/hooks/use-board-actions";
 import { useLanguageName } from "@/hooks/use-language-name";
 import { useEmailVerificationGuard } from "@/hooks/use-email-verification-guard";
-import { EmailVerificationRequiredFeature } from "@/config/email-verification";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { RecommendedBoardItem } from "@/components/board/recommended-board-item";
 
 interface NavItem {
   title: string;
@@ -218,46 +218,11 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
           </div>
           <div className="border-y py-3 space-y-1">
             {boards?.map((board) => (
-              <div
-                key={board.name}
-                className="flex items-center justify-between rounded-lg px-2 py-2"
-              >
-                <div className="flex items-center gap-3">
-                  <Link href={`/b/${board.name}`}>
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback>
-                        {board.name[0].toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Link>
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/b/${board.slug}`}
-                        className="text-sm font-medium"
-                      >
-                        {board.name}
-                      </Link>
-                      {board.is_nsfw === 1 && (
-                        <Badge variant="destructive" className="h-5">
-                          成人
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Users className="h-3 w-3" />
-                      <span>{board.users_count}</span>
-                    </div>
-                  </div>
-                </div>
-                <div onClick={(e) => e.preventDefault()}>
-                  <BoardActionButton 
-                    board={board}
-                    onSubscribeSuccess={handleSubscribeSuccess}
-                  />
-                </div>
-              </div>
+              <RecommendedBoardItem
+                key={board.id}
+                board={board}
+                onSubscribeSuccess={handleSubscribeSuccess}
+              />
             ))}
           </div>
         </div>
