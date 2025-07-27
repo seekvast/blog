@@ -19,12 +19,13 @@ interface BoardSelectProps {
   value?: number;
   onChange?: (value: number, board?: Board) => void;
   ref?: React.ForwardedRef<{ reset: () => void }>;
+  board?: Board | null;
 }
 
 export const BoardSelect = React.forwardRef<
   { reset: () => void },
   BoardSelectProps
->(function BoardSelect({ value, onChange }, ref) {
+>(function BoardSelect({ value, onChange, board }, ref) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [boards, setBoards] = React.useState<Board[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -32,18 +33,8 @@ export const BoardSelect = React.forwardRef<
   const [hasMore, setHasMore] = React.useState(true);
   const [isOpen, setIsOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const [selectedBoard, setSelectedBoard] = React.useState<Board | undefined>(
-    undefined
-  );
   const debouncedSearch = React.useRef<NodeJS.Timeout>();
   const initialLoadDone = React.useRef(false);
-
-  React.useEffect(() => {
-    if (value) {
-      const board = boards.find((board) => board.id === value);
-      setSelectedBoard(board);
-    }
-  }, [value, boards, loading]);
 
   // 加载看板列表
   const loadBoards = React.useCallback(
@@ -118,7 +109,6 @@ export const BoardSelect = React.forwardRef<
       setSearchQuery("");
       setPage(1);
       setHasMore(true);
-      setSelectedBoard(undefined);
       initialLoadDone.current = false;
     },
   }));
@@ -135,13 +125,9 @@ export const BoardSelect = React.forwardRef<
     >
       <SelectTrigger className="w-full py-2">
         <SelectValue placeholder="请选择看板">
-          {(value !== undefined && selectedBoard) || value === undefined ? (
-            <div className="flex items-center justify-start gap-2 w-full">
-              <span className="truncate">
-                {selectedBoard?.name || "请选择看板"}
-              </span>
-            </div>
-          ) : null}
+          <div className="flex items-center justify-start gap-2 w-full">
+            <span className="truncate">{board?.name || "请选择看板"}</span>
+          </div>
         </SelectValue>
       </SelectTrigger>
       <SelectContent>

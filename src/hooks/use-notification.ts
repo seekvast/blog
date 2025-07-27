@@ -4,6 +4,7 @@ import * as React from "react";
 import { api } from "@/lib/api";
 import { Notification } from "@/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/components/providers/auth-provider";
 
 export type NotificationTabType =
   | "all"
@@ -40,6 +41,7 @@ export function useUnreadNotificationCount(
   enabled = true,
   pollingInterval = 30000
 ) {
+  const { user } = useAuth();
   // 获取未读通知数量
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["notifications", "unread-count"],
@@ -47,7 +49,7 @@ export function useUnreadNotificationCount(
       const response = await api.notifications.unreadCount();
       return response || 0;
     },
-    enabled,
+    enabled: !!user && enabled, 
     refetchInterval: pollingInterval,
     refetchIntervalInBackground: true,
     staleTime: pollingInterval - 1000,
@@ -81,7 +83,7 @@ export function useNotifications(autoLoad: boolean = true) {
         const response = await api.notifications.list({
           page: pageNum,
           per_page: 50,
-          q: type !== 'all' ? type : undefined,
+          q: type !== "all" ? type : undefined,
           ...query,
         });
 
@@ -105,18 +107,22 @@ export function useNotifications(autoLoad: boolean = true) {
     [queryClient]
   );
 
-  const [activeType, setActiveType] = React.useState<NotificationTabType>("all");
+  const [activeType, setActiveType] =
+    React.useState<NotificationTabType>("all");
 
   const loadMore = React.useCallback(() => {
     if (!loadingRef.current && hasMore) {
       fetchNotifications(page + 1, activeType);
     }
   }, [hasMore, page, fetchNotifications, activeType]);
-  
-  const changeType = React.useCallback((type: NotificationTabType) => {
-    setActiveType(type);
-    fetchNotifications(1, type);
-  }, [fetchNotifications]);
+
+  const changeType = React.useCallback(
+    (type: NotificationTabType) => {
+      setActiveType(type);
+      fetchNotifications(1, type);
+    },
+    [fetchNotifications]
+  );
 
   // 自动加载第一页数据
   React.useEffect(() => {

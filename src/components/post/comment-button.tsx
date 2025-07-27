@@ -6,10 +6,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useBoardPermission } from "@/hooks/use-board-permission";
-import { Loader2, CornerUpLeft } from "lucide-react";
+import { Loader2, CornerUpLeft, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Discussion } from "@/types";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+} from "@/components/ui/dropdown-menu";
 
 interface CommentButtonProps {
   discussion: Discussion;
@@ -21,6 +26,7 @@ interface CommentButtonProps {
   className?: string;
   variant?: "button" | "text";
   size?: "default" | "sm" | "lg";
+  dropdownContent?: ReactNode;
 }
 
 export function CommentButton({
@@ -33,6 +39,7 @@ export function CommentButton({
   className,
   variant = "button",
   size = "default",
+  dropdownContent,
 }: CommentButtonProps) {
   const { canPost, statusText, status } = useBoardPermission({
     discussion,
@@ -87,7 +94,15 @@ export function CommentButton({
       text: isReply ? "评论" : "回复",
       tooltip: isReply ? "发表回复" : "发表评论",
     };
-  }, [showEditor, isSubmitting, isLocked, canPost, statusText, status]);
+  }, [
+    showEditor,
+    isSubmitting,
+    isLocked,
+    canPost,
+    statusText,
+    status,
+    isReply,
+  ]);
 
   if (buttonState.hidden) {
     return null;
@@ -129,21 +144,62 @@ export function CommentButton({
     );
   }
 
+  const mainButton = (
+    <Button
+      variant={buttonState.disabled ? "secondary" : "default"}
+      size={size}
+      className={cn(
+        "flex-grow justify-start  w-full",
+        dropdownContent ? "rounded-r-none" : "rounded-md",
+        className
+      )}
+      onClick={onClick}
+      disabled={buttonState.disabled}
+    >
+      <CornerUpLeft className="mr-2 h-4 w-4" />
+      {buttonContent}
+    </Button>
+  );
+
+  if (dropdownContent) {
+    return (
+      <div className="inline-flex rounded-md shadow-sm w-full">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>{mainButton}</TooltipTrigger>
+            {buttonState.tooltip && (
+              <TooltipContent>
+                <p>{buttonState.tooltip}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant={buttonState.disabled ? "secondary" : "default"}
+              size={size}
+              className={cn(
+                "px-3 rounded-l-none rounded-r-md border-l",
+                buttonState.disabled
+                  ? "border-border"
+                  : "border-primary-foreground/20"
+              )}
+              disabled={buttonState.disabled}
+            >
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          {dropdownContent}
+        </DropdownMenu>
+      </div>
+    );
+  }
+
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant={buttonState.disabled ? "secondary" : "default"}
-            size={size}
-            className={cn("flex-grow justify-start  w-full", className)}
-            onClick={onClick}
-            disabled={buttonState.disabled}
-          >
-            <CornerUpLeft className="mr-2 h-4 w-4" />
-            {buttonContent}
-          </Button>
-        </TooltipTrigger>
+        <TooltipTrigger asChild>{mainButton}</TooltipTrigger>
         {buttonState.tooltip && (
           <TooltipContent>
             <p>{buttonState.tooltip}</p>

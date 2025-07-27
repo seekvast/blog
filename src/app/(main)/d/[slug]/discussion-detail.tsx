@@ -704,8 +704,8 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2 lg:space-x-4 text-sm text-muted-foreground">
-                  <div className="flex items-center space-x-1">
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                  <div className="flex items-center space-x-2">
                     <Popover>
                       <PopoverTrigger asChild>
                         <button className="hover:text-primary">
@@ -741,41 +741,36 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                         </div>
                       </PopoverContent>
                     </Popover>
-                    {discussion.main_post.editor && (
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <div>
-                            <span className="flex-shrink-0 mx-2 text-gray-300">
-                              ·
-                            </span>
-                            <button className="text-muted-foreground hover:text-primary">
-                              已编辑
-                            </button>
-                          </div>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className="p-3 w-full"
-                          side="top"
-                          align="center"
-                          sideOffset={5}
-                        >
-                          <div className="space-y-2 text-muted-foreground">
-                            <div className="text-xs space-y-1">
-                              {discussion.main_post.editor.nickname ||
-                                discussion.main_post.editor.username}{" "}
-                              编辑于{" "}
-                              {discussion.main_post.edited_at
-                                ? formatDate(
-                                    discussion.main_post.edited_at,
-                                    "YYYY年M月D日"
-                                  )
-                                : "未知"}
-                            </div>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    )}
                   </div>
+                  {discussion.main_post.editor && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className="text-muted-foreground hover:text-primary">
+                          已编辑
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className=" w-full"
+                        side="top"
+                        align="center"
+                        sideOffset={5}
+                      >
+                        <div className="space-y-2 text-muted-foreground">
+                          <div className="text-xs space-y-1">
+                            {discussion.main_post.editor.nickname ||
+                              discussion.main_post.editor.username}{" "}
+                            编辑于{" "}
+                            {discussion.main_post.edited_at
+                              ? formatDate(
+                                  discussion.main_post.edited_at,
+                                  "YYYY年M月D日"
+                                )
+                              : "未知"}
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
                   <div className="flex items-center space-x-2 text-muted-foreground">
                     <span>
                       来自{" "}
@@ -992,36 +987,23 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             <div className="flex w-full flex-col space-y-3">
               {/* Reply Button */}
               {!showCommentEditor && (
-                <div className="inline-flex rounded-md shadow-sm w-full">
-                  <CommentButton
-                    discussion={discussion}
-                    isLocked={discussion?.is_locked === 1}
-                    isSubmitting={isSubmitting}
-                    showEditor={showCommentEditor}
-                    isReply={true}
-                    onClick={() => {
-                      if (!user) {
-                        openLoginModal();
-                        return;
-                      }
-                      setShowCommentEditor(true);
-                    }}
-                    className="rounded-r-none rounded-l-md"
-                    size="default"
-                    variant="button"
-                  />
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="default"
-                        size="default"
-                        className="px-3 rounded-l-none rounded-r-md border-l border-primary-foreground/20"
-                      >
-                        <ChevronDown className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                  </DropdownMenu>
-                </div>
+                <CommentButton
+                  discussion={discussion}
+                  isLocked={discussion?.is_locked === 1}
+                  isSubmitting={isSubmitting}
+                  showEditor={showCommentEditor}
+                  isReply={true}
+                  onClick={() => {
+                    if (!user) {
+                      openLoginModal();
+                      return;
+                    }
+                    setShowCommentEditor(true);
+                  }}
+                  size="default"
+                  variant="button"
+                  dropdownContent={<DropdownMenuContent />}
+                />
               )}
               {/* Follow Button */}
               <div className="inline-flex rounded-md shadow-sm w-full">

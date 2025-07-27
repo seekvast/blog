@@ -696,6 +696,7 @@ export default function CreatePostModal() {
                   <BoardSelect
                     ref={boardSelectRef}
                     value={discussionForm.board_id}
+                    board={selectedBoard}
                     onChange={(value, board) => {
                       // 如果选择的是同一个看板，不进行任何操作
                       if (value === discussionForm.board_id) return;
