@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useBoardActions } from "@/hooks/use-board-actions";
 import { useRequireAuth } from "@/hooks/use-require-auth";
-import { useEmailVerificationGuard } from "@/hooks/use-email-verification-guard";
 import { EmailVerificationRequiredFeature } from "@/config/email-verification";
 import {
   Dialog,
@@ -191,7 +190,7 @@ export function BoardActionButton({
           <DropdownMenuItem
             onClick={() =>
               requireAuth(() => {
-                handleUnsubscribe(board.id);
+                handleUnsubscribe(board.id, onBlockSuccess);
               })
             }
             className="cursor-pointer text-destructive hover:text-destructive"

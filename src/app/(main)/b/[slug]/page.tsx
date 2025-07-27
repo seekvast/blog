@@ -14,8 +14,6 @@ import { Discussion } from "@/types/discussion";
 import { DiscussionItem } from "@/components/discussion/discussion-item";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { BoardActionButton } from "@/components/board/board-action-button";
-import { useRequireAuth } from "@/hooks/use-require-auth";
-import { useBoardActions } from "@/hooks/use-board-actions";
 import { useQuery } from "@tanstack/react-query";
 import { DiscussionControls } from "@/components/discussion/discussion-controls";
 import { SortBy } from "@/types/display-preferences";
@@ -105,7 +103,7 @@ function BoardContent() {
     isLoading: loading,
     error: boardError,
   } = useQuery({
-    queryKey: ["board", params?.slug],
+    queryKey: ["board_detail", params?.slug],
     queryFn: async () => {
       const data = await api.boards.get({ slug: params?.slug });
       return data;
@@ -261,11 +259,6 @@ function BoardContent() {
     throw notFoundError;
   }
 
-  const handleSubscribeSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ["board", params?.slug] });
-    queryClient.invalidateQueries({ queryKey: ["boards"] });
-  };
-
   // 拉黑看板成功后的回调
   const handleBlockSuccess = () => {
     router.back();
@@ -294,7 +287,6 @@ function BoardContent() {
                   <BoardActionButton
                     board={board}
                     setReportToKaterOpen={setReportToKaterOpen}
-                    onSubscribeSuccess={handleSubscribeSuccess}
                     onBlockSuccess={handleBlockSuccess}
                   />
                 </div>
