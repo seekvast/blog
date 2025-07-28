@@ -32,7 +32,6 @@ import { PostNavigator } from "@/components/post/post-navigator";
 import { useLoginModal } from "@/components/providers/login-modal-provider";
 import { PostContent } from "@/components/post/post-content";
 import { api } from "@/lib/api";
-import { Preview } from "@/components/editor/preview";
 import { toast } from "@/components/ui/use-toast";
 import { VotersList } from "@/components/post/voters-list";
 import { useState } from "react";
@@ -883,6 +882,10 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   onEditComment={handleEditComment}
                   isLocked={discussion?.is_locked === 1}
                   queryKey={["discussion-posts", slug]}
+                  showPreview={showCommentEditor}
+                  previewContent={postForm.content}
+                  previewUser={user}
+                  replyTo={replyTo}
                 />
               </InfiniteScroll>
               {!currentDiscussion?.is_locked && (
@@ -918,31 +921,6 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   style={{ position: "relative", zIndex: 50 }}
                 >
                   <div className="pb-[calc(1rem+var(--mobile-nav-height))] lg:pb-0">
-                    {user &&
-                      postForm.content &&
-                      postForm.content.trim().length > 0 && (
-                        <div className="mb-6 pt-4">
-                          <div className="flex items-start space-x-3 px-2 md:px-4 min-w-0">
-                            <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
-                              <AvatarImage src={user.avatar_url} />
-                              <AvatarFallback>
-                                {user.nickname?.[0].toUpperCase() ||
-                                  user.username?.[0].toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0 overflow-hidden">
-                              <div className="flex items-center">
-                                <span className="font-medium text-sm md:text-base truncate">
-                                  {user.nickname || user.username}
-                                </span>
-                              </div>
-                              <div className="mt-1 text-gray-900 text-base break-words">
-                                <Preview content={postForm.content} />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     <CommentEditor
                       user={user || null}
                       postForm={postForm}

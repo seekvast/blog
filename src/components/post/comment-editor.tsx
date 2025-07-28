@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Editor } from "@/components/editor/editor";
+import { Editor } from "@/components/editor/md-editor";
 import { AttachmentType } from "@/constants/attachment-type";
 import type { Post } from "@/types/discussion";
 import type { User } from "@/types/user";
