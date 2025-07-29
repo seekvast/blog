@@ -219,7 +219,7 @@ export function LoginModal({
                   }}
                   options={{
                     theme: "auto",
-                    size: "normal",
+                    size: "flexible",
                   }}
                   className="flex justify-center items-center"
                 />

@@ -25,6 +25,54 @@
   .cf-turnstile iframe {
     width: 100% !important;
     max-width: 600px;
+    min-width: 300px;
+  }
+
+  /* 针对 Cloudflare 生成的容器 div */
+  .cf-turnstile > div {
+    width: 100% !important;
+    min-width: 300px !important;
+    max-width: 100% !important;
+  }
+
+  /* 尝试影响 shadow root 内的样式 */
+  .cf-turnstile * {
+    width: 100% !important;
+    min-width: 300px !important;
+    max-width: 100% !important;
+  }
+
+  /* Flexible 模式下的 Turnstile 样式 */
+  .cf-turnstile iframe[src*="turnstile"] {
+    width: 100% !important;
+    min-width: 300px !important;
+    max-width: 100% !important;
+  }
+
+  /* 移动端优化 */
+  @media (max-width: 640px) {
+    .cf-turnstile iframe {
+      min-width: 280px !important;
+      max-width: 100% !important;
+    }
+
+    .cf-turnstile > div {
+      min-width: 280px !important;
+      max-width: 100% !important;
+    }
+  }
+
+  /* 小屏幕设备优化 */
+  @media (max-width: 480px) {
+    .cf-turnstile iframe {
+      min-width: 250px !important;
+      width: 100% !important;
+    }
+
+    .cf-turnstile > div {
+      min-width: 250px !important;
+      width: 100% !important;
+    }
   }
 
   .safe-area-bottom {

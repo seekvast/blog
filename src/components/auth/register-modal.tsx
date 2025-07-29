@@ -497,29 +497,27 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
 
                   <div className="space-y-5">
                     {/* Cloudflare Turnstile 验证 */}
-                    <div className="flex justify-center w-full">
-                      <div className="cf-turnstile flex justify-center">
-                        <Turnstile
-                          siteKey={TURNSTILE_SITE_KEY}
-                          onSuccess={(token) => {
-                            console.log("Turnstile success:", token);
-                            setTurnstileToken(token);
-                          }}
-                          onError={() => {
-                            console.log("Turnstile error");
-                            setTurnstileToken(null);
-                          }}
-                          onExpire={() => {
-                            console.log("Turnstile expired");
-                            setTurnstileToken(null);
-                          }}
-                          options={{
-                            theme: "auto",
-                            size: "normal",
-                          }}
-                          className="flex justify-center items-center"
-                        />
-                      </div>
+                    <div className="cf-turnstile flex justify-center">
+                      <Turnstile
+                        siteKey={TURNSTILE_SITE_KEY}
+                        onSuccess={(token) => {
+                          console.log("Turnstile success:", token);
+                          setTurnstileToken(token);
+                        }}
+                        onError={() => {
+                          console.log("Turnstile error");
+                          setTurnstileToken(null);
+                        }}
+                        onExpire={() => {
+                          console.log("Turnstile expired");
+                          setTurnstileToken(null);
+                        }}
+                        options={{
+                          theme: "auto",
+                          size: "flexible",
+                        }}
+                        className="flex justify-center items-center"
+                      />
                     </div>
                     <Button
                       type="button"
@@ -680,26 +678,24 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
                   </div>
 
                   {/* Cloudflare Turnstile 验证 */}
-                  <div className="flex justify-center my-4 w-full">
-                    <div className="cf-turnstile flex justify-center">
-                      <Turnstile
-                        siteKey={TURNSTILE_SITE_KEY}
-                        onSuccess={(token) => {
-                          setTurnstileToken(token);
-                        }}
-                        onError={() => {
-                          setTurnstileToken(null);
-                        }}
-                        onExpire={() => {
-                          setTurnstileToken(null);
-                        }}
-                        options={{
-                          theme: "auto",
-                          size: "normal",
-                        }}
-                        className="flex justify-center items-center"
-                      />
-                    </div>
+                  <div className="cf-turnstile flex justify-center">
+                    <Turnstile
+                      siteKey={TURNSTILE_SITE_KEY}
+                      onSuccess={(token) => {
+                        setTurnstileToken(token);
+                      }}
+                      onError={() => {
+                        setTurnstileToken(null);
+                      }}
+                      onExpire={() => {
+                        setTurnstileToken(null);
+                      }}
+                      options={{
+                        theme: "auto",
+                        size: "flexible",
+                      }}
+                      className="flex justify-center items-center"
+                    />
                   </div>
 
                   <div className="flex gap-4 pt-4">

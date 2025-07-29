@@ -27,10 +27,18 @@ export function NsfwWarningModal({
   const router = useRouter();
 
   const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen) {
-      onConfirm();
-    }
     onOpenChange(newOpen);
+    router.push("/");
+  };
+
+  const handleLeave = () => {
+    onOpenChange(false);
+    router.push("/");
+  };
+
+  const handleConfirm = () => {
+    onConfirm();
+    onOpenChange(false);
   };
 
   return (
@@ -52,17 +60,10 @@ export function NsfwWarningModal({
           </div>
 
           <div className="flex space-x-3 pt-4">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => {
-                onConfirm(); // 保存冷却时间
-                router.push("/");
-              }}
-            >
+            <Button variant="outline" className="flex-1" onClick={handleLeave}>
               離開
             </Button>
-            <Button className="flex-1" onClick={onConfirm}>
+            <Button className="flex-1" onClick={handleConfirm}>
               我知道了
             </Button>
           </div>
