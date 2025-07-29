@@ -92,7 +92,10 @@ export const CommentEditor = React.memo(
     }
 
     return (
-      <div id="comment" className="flex flex-col min-h-[260px]">
+      <div
+        id="comment"
+        className="flex flex-col min-h-[260px] lg:min-h-[300px]"
+      >
         <Editor
           ref={editorRef}
           className="flex-grow"

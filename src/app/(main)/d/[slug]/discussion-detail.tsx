@@ -49,6 +49,7 @@ import { Button } from "@/components/ui/button";
 import { CommentList } from "@/components/post/comment-list";
 import { CommentEditor } from "@/components/post/comment-editor";
 import { ErrorBoundary } from "@/components/error/error-boundary";
+import { Preview } from "@/components/editor/preview";
 import Link from "next/link";
 import { PollContent } from "@/components/post/poll-content";
 import { PostForm } from "@/validations/post";
@@ -124,7 +125,41 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   );
   const [showCommentEditor, setShowCommentEditor] = useState(false);
 
-  const editorPanelRef = React.useRef<HTMLDivElement>(null);
+  const commentEditorRef = React.useRef<HTMLDivElement>(null);
+  const replyPlaceholderRef = React.useRef<HTMLDivElement>(null);
+
+  const getComposerHeight = React.useCallback(() => {
+    if (commentEditorRef.current) {
+      return commentEditorRef.current.offsetHeight + 300;
+    }
+    // 如果没有编辑器元素，使用预估高度
+    return 400;
+  }, []);
+
+  // 滚动到 Reply 占位符的方法
+  const scrollToReplyPlaceholder = React.useCallback(() => {
+    setTimeout(() => {
+      if (replyPlaceholderRef.current) {
+        const placeholder = replyPlaceholderRef.current;
+        const placeholderRect = placeholder.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+
+        // 计算 Composer 高度
+        const composerHeight = getComposerHeight();
+
+        const targetScrollTop =
+          window.pageYOffset +
+          placeholderRect.bottom -
+          windowHeight +
+          composerHeight;
+
+        window.scrollTo({
+          top: targetScrollTop,
+          behavior: "smooth",
+        });
+      }
+    }, 300);
+  }, [getComposerHeight]);
 
   const handleCloseEditor = React.useCallback(() => {
     setShowCommentEditor(false);
@@ -850,6 +885,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                     return;
                   }
                   setShowCommentEditor(true);
+                  scrollToReplyPlaceholder();
                 }}
                 variant="text"
                 size="sm"
@@ -882,41 +918,76 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   onEditComment={handleEditComment}
                   isLocked={discussion?.is_locked === 1}
                   queryKey={["discussion-posts", slug]}
-                  showPreview={showCommentEditor}
-                  previewContent={postForm.content}
-                  previewUser={user}
-                  replyTo={replyTo}
                 />
               </InfiniteScroll>
               {!currentDiscussion?.is_locked && (
-                <div className="flex items-start space-x-3 px-2 md:px-4 mt-4">
-                  <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
-                    <AvatarFallback>
-                      <UserRound className="h-4 w-4 md:h-5 md:w-5" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div
-                    className="flex-1 p-3 border border-border rounded-md bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => {
-                      if (!user) {
-                        openLoginModal();
-                        return;
-                      }
-                      setShowCommentEditor(true);
-                    }}
-                  >
-                    <div className="text-sm text-muted-foreground">
-                      说点什么吧...
+                <>
+                  {showCommentEditor ? (
+                    <div className="mt-4" ref={replyPlaceholderRef}>
+                      <div className="rounded-lg bg-muted p-4">
+                        <div className="flex items-start space-x-3 min-w-0">
+                          <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
+                            <AvatarImage src={user?.avatar_url} />
+                            <AvatarFallback>
+                              {user?.nickname?.[0].toUpperCase() ||
+                                user?.username?.[0].toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0 overflow-hidden">
+                            <div className="flex justify-between w-full items-start">
+                              <div className="flex items-baseline gap-2 text-xs md:text-sm text-muted-foreground min-w-0 flex-1 flex-wrap">
+                                <span className="font-medium text-base truncate md:max-w-[20ch]">
+                                  {user?.nickname || user?.username}
+                                </span>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  {replyTo && (
+                                    <span className="text-primary flex-shrink-0">
+                                      回复 @{replyTo.user.nickname}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="mt-2 text-sm md:text-base">
+                              <Preview content={postForm.content} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  ) : (
+                    <div className="flex items-start space-x-3 px-2 md:px-4 mt-4">
+                      <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
+                        <AvatarFallback>
+                          <UserRound className="h-4 w-4 md:h-5 md:w-5" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <div
+                        className="flex-1 p-3 border border-border rounded-md bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => {
+                          if (!user) {
+                            openLoginModal();
+                            return;
+                          }
+                          setShowCommentEditor(true);
+                          scrollToReplyPlaceholder();
+                        }}
+                        ref={replyPlaceholderRef}
+                      >
+                        <div className="text-sm text-muted-foreground">
+                          说点什么吧...
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
             {showCommentEditor && (
               <div className="fixed bottom-0 inset-x-0 animate-in fade-in duration-300 z-50">
                 <div
-                  ref={editorPanelRef}
+                  ref={commentEditorRef}
                   className="bg-background rounded-t-md max-w-4xl mx-auto shadow-[0_-4px_15px_rgba(0,0,0,0.12)]"
                   style={{ position: "relative", zIndex: 50 }}
                 >
@@ -957,25 +1028,26 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           {user ? (
             <div className="flex w-full flex-col space-y-3">
               {/* Reply Button */}
-              {!showCommentEditor && (
-                <CommentButton
-                  discussion={discussion}
-                  isLocked={discussion?.is_locked === 1}
-                  isSubmitting={isSubmitting}
-                  showEditor={showCommentEditor}
-                  isReply={true}
-                  onClick={() => {
-                    if (!user) {
-                      openLoginModal();
-                      return;
-                    }
-                    setShowCommentEditor(true);
-                  }}
-                  size="default"
-                  variant="button"
-                  dropdownContent={<DropdownMenuContent />}
-                />
-              )}
+
+              <CommentButton
+                discussion={discussion}
+                isLocked={discussion?.is_locked === 1}
+                isSubmitting={isSubmitting}
+                showEditor={showCommentEditor}
+                isReply={true}
+                onClick={() => {
+                  if (!user) {
+                    openLoginModal();
+                    return;
+                  }
+                  setShowCommentEditor(true);
+                  scrollToReplyPlaceholder();
+                }}
+                size="default"
+                variant="button"
+                dropdownContent={<DropdownMenuContent />}
+              />
+
               {/* Follow Button */}
               <div className="inline-flex rounded-md shadow-sm w-full">
                 <Button
