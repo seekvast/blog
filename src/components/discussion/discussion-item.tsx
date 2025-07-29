@@ -255,38 +255,6 @@ export const DiscussionItem = React.forwardRef<
                 <span>{discussion.board_child?.name}</span>
               </Link>
             </div>
-            {discussion.main_post.editor && (
-              <Popover>
-                <PopoverTrigger asChild>
-                  <div>
-                    <span className="flex-shrink-0 mx-2 text-gray-300">·</span>
-                    <button className="text-muted-foreground hover:text-primary">
-                      已编辑
-                    </button>
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="p-3 w-full"
-                  side="top"
-                  align="center"
-                  sideOffset={5}
-                >
-                  <div className="space-y-2 text-muted-foreground">
-                    <div className="text-xs space-y-1">
-                      {discussion.main_post.editor.nickname ||
-                        discussion.main_post.editor.username}{" "}
-                      编辑于{" "}
-                      {discussion.main_post.edited_at
-                        ? formatDate(
-                            discussion.main_post.edited_at,
-                            "YYYY年M月D日"
-                          )
-                        : "未知"}
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
           </div>
         </div>
       </div>

@@ -186,7 +186,7 @@ export const CommentItem = ({
                 <span className="flex-shrink-0">
                   {fromNow(comment.created_at)}
                 </span>
-                {comment.editor && (
+                {/* {comment.editor && (
                   <Popover>
                     <PopoverTrigger asChild>
                       <button className="hover:text-primary flex-shrink-0">
@@ -210,7 +210,7 @@ export const CommentItem = ({
                       </div>
                     </PopoverContent>
                   </Popover>
-                )}
+                )} */}
               </div>
             </div>
 

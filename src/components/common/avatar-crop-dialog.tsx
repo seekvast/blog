@@ -243,7 +243,7 @@ export default function AvatarCropDialog({
 
         <div className="p-6">
           <div className="flex flex-col sm:flex-row gap-6 items-start">
-            <div className="w-full sm:w-3/4 bg-[#f8f8f8] rounded-md">
+            <div className="w-full sm:w-3/4 rounded-md">
               {src && (
                 <ReactCrop
                   crop={crop}
@@ -273,7 +273,7 @@ export default function AvatarCropDialog({
                 </ReactCrop>
               )}
               {!src && <div className="text-center p-10">请提供图片来源</div>}
-              <div className="flex items-center py-3 bg-white">
+              <div className="flex items-center py-3 bg-background">
                 {onReselect && (
                   <Button
                     variant="outline"
@@ -291,7 +291,7 @@ export default function AvatarCropDialog({
             </div>
 
             <div className="flex flex-col items-center gap-3 sm:w-1/4">
-              <div className="w-32 h-32 overflow-hidden rounded-full flex items-center justify-center bg-gray-100 shadow-sm">
+              <div className="w-32 h-32 overflow-hidden rounded-full flex items-center justify-center shadow-sm">
                 {previewUrl ? (
                   <img
                     src={previewUrl}

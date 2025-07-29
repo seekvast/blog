@@ -351,8 +351,8 @@ export function ReportDialog({
           <DialogHeader>
             <DialogTitle className="text-xl">感谢您的检举</DialogTitle>
             <DialogDescription className="mt-2">
-              {form.target === ReportTarget.BOARD ? (
-                <p>如果看板管理人员确认已违反规范，将会进行处置。</p>
+              {form.reported_to === 'moderator' ? (
+                <p>如果看板管理人员确认已违反规范，将会进行处置</p>
               ) : (
                 <p>
                   如果我们确认该内容确实违反
