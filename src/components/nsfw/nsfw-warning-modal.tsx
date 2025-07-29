@@ -69,8 +69,8 @@ export function NsfwWarningModal({
           </div>
 
           <div className="pt-2">
-            <button
-              className="text-sm text-blue-600 hover:text-blue-700 underline"
+            <div
+              className="text-sm text-blue-600 hover:text-blue-700 underline cursor-pointer"
               onClick={() => {
                 window.open(
                   "https://support.kater.me/docs/policy/age-verification/",
@@ -79,7 +79,7 @@ export function NsfwWarningModal({
               }}
             >
               為什麼會出現此訊息？
-            </button>
+            </div>
           </div>
         </div>
       </DialogContent>

@@ -440,9 +440,7 @@ function BoardContent() {
                 ))}
               </InfiniteScroll>
               {/* 4. 添加加载状态指示器 */}
-              <div className="h-10 flex items-center justify-center text-muted-foreground">
-                {!hasMore && totalPages > 1 && <div>No more items</div>}
-              </div>
+              <div className="h-10 flex items-center justify-center text-muted-foreground"></div>
             </>
           )}
 
