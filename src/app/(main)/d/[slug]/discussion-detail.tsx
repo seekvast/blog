@@ -991,7 +991,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   className="bg-background rounded-t-md max-w-4xl mx-auto shadow-[0_-4px_15px_rgba(0,0,0,0.12)]"
                   style={{ position: "relative", zIndex: 50 }}
                 >
-                  <div className="pb-[calc(1rem+var(--mobile-nav-height))] lg:pb-0">
+                  <div className="pb-[var(--mobile-nav-height)] lg:pb-0">
                     <CommentEditor
                       user={user || null}
                       postForm={postForm}
