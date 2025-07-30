@@ -252,8 +252,7 @@ export function FormFields({
               </FormItem>
             )}
           />
-          {(form.watch("approval_mode") === 1 ||
-            form.watch("approval_mode") === 2) && (
+          {form.watch("approval_mode") === 1 && (
             <FormField
               control={form.control}
               name="answer"

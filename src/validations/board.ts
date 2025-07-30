@@ -38,8 +38,7 @@ export const boardSchema = z
     (data) => {
       // 当 approval_mode 为 AUTO 或 APPROVAL 时，question 不能为空
       if (
-        (data.approval_mode === BoardApprovalMode.AUTO ||
-          data.approval_mode === BoardApprovalMode.APPROVAL) &&
+        data.approval_mode === BoardApprovalMode.AUTO &&
         (!data.question || data.question.trim() === "")
       ) {
         return false;
@@ -47,7 +46,7 @@ export const boardSchema = z
       return true;
     },
     {
-      message: "自动或管理员审核模式下，问题不能为空",
+      message: "自动审核模式下，问题不能为空",
       path: ["question"],
     }
   )
@@ -55,8 +54,7 @@ export const boardSchema = z
     (data) => {
       // 当 approval_mode 为 AUTO 或 APPROVAL 时，answer 不能为空
       if (
-        (data.approval_mode === BoardApprovalMode.AUTO ||
-          data.approval_mode === BoardApprovalMode.APPROVAL) &&
+        data.approval_mode === BoardApprovalMode.AUTO &&
         (!data.answer || data.answer.trim() === "")
       ) {
         return false;
