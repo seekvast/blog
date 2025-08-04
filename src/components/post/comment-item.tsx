@@ -148,9 +148,7 @@ export const CommentItem = ({
       className={cn("pt-2 pb-4 border-b", level > 0 && "border-b-0 pb-0")}
     >
       <div className="flex items-start space-x-3 px-2 md:px-4 min-w-0">
-        <Link
-          href={`/u/${comment.user.username}?hashid=${comment.user.hashid}`}
-        >
+        <Link href={`/u/${comment.user.username}`}>
           <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
             <AvatarImage src={comment.user.avatar_url} />
             <AvatarFallback>
@@ -162,7 +160,7 @@ export const CommentItem = ({
           <div className="flex justify-between w-full items-start">
             <div className="flex items-baseline gap-2 text-xs md:text-sm text-muted-foreground min-w-0 flex-1 flex-wrap">
               <Link
-                href={`/u/${comment.user.username}?hashid=${comment.user.hashid}`}
+                href={`/u/${comment.user.username}`}
                 className="flex-shrink-0"
               >
                 <span className="font-medium text-base truncate md:max-w-[20ch]">

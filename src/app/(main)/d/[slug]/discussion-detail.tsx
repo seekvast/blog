@@ -681,9 +681,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
             </div>
 
             <div className="mt-2 flex items-center space-x-3">
-              <Link
-                href={`/u/${discussion.user.username}?hashid=${discussion.user.hashid}`}
-              >
+              <Link href={`/u/${discussion.user.username}`}>
                 <Avatar className="h-12 w-12 md:h-14 md:w-14 flex-shrink-0">
                   <AvatarImage
                     src={discussion.user.avatar_url}
@@ -699,7 +697,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-baseline space-x-2 min-w-0 flex-1">
                     <Link
-                      href={`/u/${discussion.user.username}?hashid=${discussion.user.hashid}`}
+                      href={`/u/${discussion.user.username}`}
                     >
                       <span className="text-base block md:text-lg font-medium truncate max-w-[20ch] lg:max-w-full">
                         {discussion.user.nickname}

@@ -1,19 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useParams } from "next/navigation";
 import { DiscussionItem } from "@/components/discussion/discussion-item";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { api } from "@/lib/api";
-import type { Discussion } from "@/types/discussion";
-import type { Pagination } from "@/types/common";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 import { DiscussionControls } from "@/components/discussion/discussion-controls";
 
 export function UserPosts() {
-  const searchParams = useSearchParams();
-  const hashid = searchParams?.get("hashid");
+  const pathname = usePathname();
+  const params = useParams();
+  const username = pathname?.split("/").pop();
+  const usernameParam = params?.username as string; // 从路径参数中获取 [username]
   const observerRef = useRef<IntersectionObserver>();
   const displayMode = useDiscussionDisplayStore((state) =>
     state.getDisplayMode()
@@ -30,12 +30,13 @@ export function UserPosts() {
     error,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ["userDiscussions", hashid, sortBy],
+    queryKey: ["userDiscussions", usernameParam, sortBy],
     queryFn: async ({ pageParam = 1 }) => {
       return api.discussions.list({
+        from: "user",
         page: pageParam,
         per_page: 10,
-        user_hashid: hashid || undefined,
+        username: usernameParam || undefined,
         sort: sortBy,
       });
     },
@@ -45,7 +46,7 @@ export function UserPosts() {
         ? lastPage.current_page + 1
         : undefined;
     },
-    enabled: !!hashid,
+    enabled: !!usernameParam,
     staleTime: 0,
     retry: 1,
   });
@@ -114,7 +115,7 @@ export function UserPosts() {
           {/* 加载更多时出错显示 */}
           {isError && discussions.length > 0 && (
             <div className="flex flex-col items-center justify-center py-4">
-              <p className="text-destructive mb-2">加载更多数据时出错</p>
+              <p className="text-destructive mb-2">加载数据时出错</p>
               <button
                 onClick={handleRetry}
                 className="px-3 py-1 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 text-sm"

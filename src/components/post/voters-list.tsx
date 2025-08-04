@@ -91,7 +91,7 @@ export const VotersList = ({ postId }: VotersListProps) => {
               <Link
                 key={voter.id}
                 className="flex items-center p-2 rounded-md transition-colors hover:bg-muted"
-                href={`/u/${voter.user.username}?hashid=${voter.user.hashid}`}
+                href={`/u/${voter.user.username}`}
               >
                 <Avatar className="h-12 w-12 md:h-14 md:w-14 flex-shrink-0">
                   <AvatarImage src={voter.user.avatar_url} />
@@ -100,7 +100,12 @@ export const VotersList = ({ postId }: VotersListProps) => {
                   </AvatarFallback>
                 </Avatar>
                 <div className="ml-3">
-                  <div className="font-semibold">{voter.user.nickname}</div>
+                  <Link
+                    href={`/u/${voter.user.username}`}
+                    className="text-sm text-blue-600 hover:text-blue-700"
+                  >
+                    {voter.user.nickname}
+                  </Link>
                   <div className="text-sm text-muted-foreground">
                     @{voter.user.username}
                   </div>

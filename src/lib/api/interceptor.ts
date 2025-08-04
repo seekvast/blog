@@ -88,10 +88,6 @@ addRequestInterceptor(async (options: FetchOptions): Promise<FetchOptions> => {
         headerList.get("x-forwarded-for")?.split(",")[0].trim() ||
         headerList.get("x-real-ip") ||
         "";
-      console.log(
-        headerList.get("x-forwarded-for"),
-        "headerList............................."
-      );
 
       if (ip) {
         newHeaders.set("x-user-ip", ip);

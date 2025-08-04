@@ -11,7 +11,7 @@ interface UserItemProps {
 export function UserItem({ user, className }: UserItemProps) {
   return (
     <div className="flex items-center space-x-3 p-3">
-      <Link href={`/u/${user.username}?hashid=${user.hashid}`}>
+      <Link href={`/u/${user.username}`}>
         <Avatar className="h-14 w-14">
           <AvatarImage src={user.avatar_url} alt={user.username} />
           <AvatarFallback>{user.username?.[0].toUpperCase()}</AvatarFallback>
@@ -20,7 +20,7 @@ export function UserItem({ user, className }: UserItemProps) {
 
       <div className="flex flex-col min-w-0">
         <div className="flex items-center gap-1">
-          <Link href={`/u/${user.username}?hashid=${user.hashid}`}>
+          <Link href={`/u/${user.username}`}>
             <span className="text-base font-medium text-primary truncate">
               {user.username}
             </span>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, usePathname, useSearchParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import NotFound from "@/app/not-found";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -30,10 +30,8 @@ export default function UserLayout({
   children: React.ReactNode;
 }) {
   const params = useParams();
-  const searchParams = useSearchParams();
   const pathname = usePathname();
-  const username = params?.id as string;
-  const hashid = searchParams?.get("hashid");
+  const username = params?.username as string; // 修改为 username 参数
   const isSettingsPage = pathname?.includes(`/u/${username}/settings`) ?? false;
   const { data: session } = useSession();
   const { toast } = useToast();
@@ -52,16 +50,16 @@ export default function UserLayout({
     error,
     status,
   } = useQuery({
-    queryKey: ["user", hashid],
-    queryFn: () => api.users.get({ hashid: hashid }),
-    enabled: !!hashid,
+    queryKey: ["user", username],
+    queryFn: () => api.users.get({ username: username }),
+    enabled: !!username,
     staleTime: 1 * 60 * 1000,
     gcTime: 3 * 60 * 1000,
   });
 
   // 判断是否显示404页面
   const notFound =
-    (status === "error" || (status === "success" && !userData)) && !!hashid;
+    (status === "error" || (status === "success" && !userData)) && !!username;
   const isCurrentUser = session?.user?.hashid === userData?.hashid;
   // 使用 useEffect 处理 blocked 状态
   useEffect(() => {
@@ -240,7 +238,7 @@ export default function UserLayout({
                 {isCurrentUser ? (
                   <Button size="sm" className="rounded-full primary" asChild>
                     <Link
-                      href={`/u/${username}/settings?hashid=${userData.hashid}`}
+                      href={`/u/${username}/settings`}
                     >
                       修改个人信息
                     </Link>

@@ -23,10 +23,10 @@ import { CommentActions } from "@/components/post/comment-actions";
 
 interface UserRepliesProps {
   replies?: Post[];
-  hashid?: string;
+  username?: string; // 修改参数名
 }
 
-export function UserReplies({ hashid }: UserRepliesProps) {
+export function UserReplies({ username }: UserRepliesProps) {
   const queryClient = useQueryClient();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery<
@@ -39,7 +39,7 @@ export function UserReplies({ hashid }: UserRepliesProps) {
       queryKey: ["user-replies"],
       queryFn: ({ pageParam = 1 }) =>
         api.users.getPosts({
-          hashid: hashid || undefined,
+          username: username || undefined, // 使用 username 参数
           page: pageParam,
           per_page: 10,
         }),

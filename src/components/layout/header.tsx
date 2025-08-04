@@ -123,24 +123,27 @@ export function Header({ className }: HeaderProps) {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Avatar className="h-8 w-8 cursor-pointer ring-offset-background transition-opacity hover:opacity-80">
-                      <AvatarImage src={user.avatar_url || ""} />
-                      <AvatarFallback>
-                        {user.nickname?.[0].toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
+                    <Link href={`/u/${user.username}`}>
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage
+                          src={user.avatar_url}
+                          alt={user.nickname}
+                        />
+                        <AvatarFallback>
+                          {user.nickname[0].toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Link>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
-                    <Link href={`/u/${user.username}?hashid=${user.hashid}`}>
+                    <Link href={`/u/${user.username}`}>
                       <DropdownMenuItem className="cursor-pointer">
                         <User2 className="mr-2 h-4 w-4" />
                         <span>基本资料</span>
                       </DropdownMenuItem>
                     </Link>
 
-                    <Link
-                      href={`/u/${user.username}/settings?hashid=${user.hashid}`}
-                    >
+                    <Link href={`/u/${user.username}/settings`}>
                       <DropdownMenuItem className="cursor-pointer">
                         <Settings className="mr-2 h-4 w-4" />
                         <span>个人设定</span>

@@ -83,13 +83,14 @@ export function PollVotersDialog({
                 {allVoters.map((voter) => (
                   <div key={voter.id} className="flex items-center space-x-4">
                     <Link
-                      href={`/u/${voter.user.username}?hashid=${voter.user.hashid}`}
+                      href={`/u/${voter.user.username}`}
                       className="flex items-center space-x-4"
                     >
                       <Avatar>
                         <AvatarImage src={voter.user.avatar_url} />
                         <AvatarFallback>
-                          {voter.user.nickname?.[0].toUpperCase() || voter.user.username[0].toUpperCase()}
+                          {voter.user.nickname?.[0].toUpperCase() ||
+                            voter.user.username[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="space-y-1">

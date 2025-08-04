@@ -76,12 +76,12 @@ export const DiscussionItem = React.forwardRef<
   const debouncedVote = useCallback(
     debounce(() => {
       requireAuthAndEmailVerification(() => {
-          if (!isVoting) {
-            setIsVoting(true);
-            voteMutation.mutate();
-          }
-        });
-      }, 500),
+        if (!isVoting) {
+          setIsVoting(true);
+          voteMutation.mutate();
+        }
+      });
+    }, 500),
     [voteMutation, requireAuthAndEmailVerification]
   );
 
@@ -103,9 +103,7 @@ export const DiscussionItem = React.forwardRef<
     <article ref={ref} className={cn("py-4 w-full")}>
       <div className="flex space-x-3 w-full">
         {/* 作者头像 */}
-        <Link
-          href={`/u/${discussion.user.username}?hashid=${discussion.user.hashid}`}
-        >
+        <Link href={`/u/${discussion.user.username}`}>
           <Avatar className="h-10 w-10 flex-shrink-0">
             <AvatarImage
               src={discussion.user.avatar_url}

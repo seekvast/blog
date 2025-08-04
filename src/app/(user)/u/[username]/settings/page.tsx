@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation";
 import SettingsSidebar, {
   SettingsTabType,
   navGroups,
@@ -22,16 +22,16 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { User } from "@/types/user";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { api } from "@/lib/api";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 
 export default function SettingsPage() {
   const { requireAuthAndEmailVerification } = useRequireAuth();
   const queryClient = useQueryClient();
-  const params = useSearchParams();
-  const userId = params?.get("hashid");
-  const violationTypeParam = params?.get("violation");
+  const params = useParams();
+  const username = params?.username;
+  const violationTypeParam = useSearchParams()?.get("violation");
   const [activeTab, setActiveTab] = React.useState<SettingsTabType>("profile");
   const [showViolation, setShowViolation] = React.useState<boolean>(false);
   const [violationType, setViolationType] = React.useState<string>("account");
@@ -52,9 +52,9 @@ export default function SettingsPage() {
   };
 
   const { data: user, isLoading } = useQuery({
-    queryKey: ["user", userId],
-    queryFn: () => api.users.get({ hashid: userId }),
-    enabled: !!userId,
+    queryKey: ["user", username],
+    queryFn: () => api.users.get({ username: username }),
+    enabled: !!username,
     staleTime: 1 * 60 * 1000,
     gcTime: 3 * 60 * 1000,
   });
@@ -65,10 +65,10 @@ export default function SettingsPage() {
         preferences: {
           discloseOnline: value,
         },
-        hashid: userId,
+        username: username,
       });
       //更新user缓存
-      queryClient.setQueryData<User>(["user", userId], (user) => {
+      queryClient.setQueryData<User>(["user", username], (user) => {
         if (!user) return user;
         return {
           ...user,

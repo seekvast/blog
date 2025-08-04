@@ -96,14 +96,14 @@ function UsernameHistorySkeleton() {
 
 export default function UserPage() {
   const { user } = useAuth();
-  const searchParams = useSearchParams();
-  const hashid = searchParams?.get("hashid");
+  const params = useParams();
+  const username = params?.username as string; // 从路径参数获取 username
   const [activeTab, setActiveTab] = React.useState<UserTabType>("replies");
 
   const { data: userData, isLoading } = useQuery({
-    queryKey: ["user", hashid],
-    queryFn: () => api.users.get({ hashid: hashid }),
-    enabled: !!hashid,
+    queryKey: ["user", username],
+    queryFn: () => api.users.get({ username: username }),
+    enabled: !!username,
   });
 
   const filteredNavItems = React.useMemo(() => {
@@ -119,7 +119,7 @@ export default function UserPage() {
       case "posts":
         return <UserPosts />;
       case "replies":
-        return <UserReplies hashid={hashid || undefined} />;
+        return <UserReplies username={username || undefined} />;
       case "history":
         return (
           <div className="min-h-screen">
