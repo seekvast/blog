@@ -1,12 +1,6 @@
 "use client";
 
 import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -26,11 +20,6 @@ export function NsfwWarningModal({
 }: NsfwWarningModalProps) {
   const router = useRouter();
 
-  const handleOpenChange = (newOpen: boolean) => {
-    onOpenChange(newOpen);
-    router.push("/");
-  };
-
   const handleLeave = () => {
     onOpenChange(false);
     router.push("/");
@@ -41,48 +30,45 @@ export function NsfwWarningModal({
     onOpenChange(false);
   };
 
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <Shield className="h-12 w-12 text-amber-500" />
-          </div>
-          <DialogTitle className="text-xl font-bold text-center">
-            網站訪問提醒
-          </DialogTitle>
-        </DialogHeader>
+    <div className="fixed inset-0 z-50 bg-background/70 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="w-full max-w-md mx-auto text-center space-y-6 p-8">
+        {/* 标题 */}
+        <h1 className="text-2xl font-bold text-foreground">兒少防護</h1>
 
-        <div className="text-center space-y-4">
-          <div className="text-sm text-muted-foreground leading-relaxed">
-            <p>您即將訪問的網站內容，可能包含不適合某些年齡層的內容，</p>
-            <p>或不宜在工作時間瀏覽。</p>
-          </div>
-
-          <div className="flex space-x-3 pt-4">
-            <Button variant="outline" className="flex-1" onClick={handleLeave}>
-              離開
-            </Button>
-            <Button className="flex-1" onClick={handleConfirm}>
-              我知道了
-            </Button>
-          </div>
-
-          <div className="pt-2">
-            <div
-              className="text-sm text-blue-600 hover:text-blue-700 underline cursor-pointer"
-              onClick={() => {
-                window.open(
-                  "https://support.kater.me/docs/policy/age-verification/",
-                  "_blank"
-                );
-              }}
-            >
-              為什麼會出現此訊息？
-            </div>
-          </div>
+        {/* 内容 */}
+        <div className="space-y-2 text-muted-foreground">
+          <p>即將訪問的內容，可能不適合某些年齡層閱讀，</p>
+          <p>或不宜在工作時間瀏覽。</p>
         </div>
-      </DialogContent>
-    </Dialog>
+
+        {/* 按钮 */}
+        <div className="flex space-x-3 pt-4">
+          <Button variant="outline" className="flex-1" onClick={handleLeave}>
+            離開
+          </Button>
+          <Button className="flex-1" onClick={handleConfirm}>
+            我知道了
+          </Button>
+        </div>
+
+        {/* 帮助链接 */}
+        <div className="pt-2">
+          <button
+            className="text-sm text-blue-600 hover:text-blue-700 underline"
+            onClick={() => {
+              window.open(
+                "https://support.kater.me/docs/policy/age-verification/",
+                "_blank"
+              );
+            }}
+          >
+            為什麼會出現此訊息？
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

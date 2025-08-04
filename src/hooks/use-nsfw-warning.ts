@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { isTaipeiTimezone } from "@/utils/timezone";
 import { usePathname } from "next/navigation";
-import type { Board, Discussion } from "@/types";
 
 const NSFW_COOLDOWN_KEY = "nsfw-warning-cooldown";
 const NSFW_COOLDOWN_DURATION = 24 * 60 * 60; // 24小时

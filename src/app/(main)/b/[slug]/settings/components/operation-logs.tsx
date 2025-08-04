@@ -230,7 +230,7 @@ export function OperationLogs({ board }: OperationLogsProps) {
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-gray-900">{renderTitle(log)}</span>
+                      <span className="text-foreground">{renderTitle(log)}</span>
 
                       <Badge
                         className={cn(
