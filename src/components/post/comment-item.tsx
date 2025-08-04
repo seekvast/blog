@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { formatDate, fromNow } from "@/lib/dayjs";
-import { MinusCircle, UserRound } from "lucide-react";
+import { ChevronDown, MinusCircle, UserRound } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { PostContent } from "@/components/post/post-content";
 import { cn } from "@/lib/utils";
@@ -270,14 +270,13 @@ export const CommentItem = ({
             <div className="mt-2 space-y-4 py-4">
               {/* 只有在用户手动折叠过的情况下才显示折叠状态 */}
               {hasManuallyCollapsed.current && !showChildren ? (
-                <div className="text-center">
-                  <button
-                    onClick={() => handleToggleChildren(true)}
-                    className="text-sm text-primary hover:text-primary/80 font-medium"
-                  >
-                    查看 {comment.children.length} 条回复
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleToggleChildren(true)}
+                  className="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
+                >
+                  <ChevronDown className="h-4 w-4" />
+                  <span>查看 {comment.children.length} 条回复</span>
+                </button>
               ) : (
                 <>
                   {comment.children
@@ -297,7 +296,7 @@ export const CommentItem = ({
                       />
                     ))}
 
-                  <div className="flex justify-between items-center mt-4 px-2">
+                  <div className="flex items-center gap-x-4 mt-4 px-2">
                     {comment.children.length > visibleChildrenCount ? (
                       <button
                         onClick={() =>
@@ -305,6 +304,7 @@ export const CommentItem = ({
                         }
                         className="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
                       >
+                        <ChevronDown className="h-4 w-4" />
                         <span>
                           查看剩余{" "}
                           {comment.children.length - visibleChildrenCount}{" "}

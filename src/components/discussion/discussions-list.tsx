@@ -39,31 +39,6 @@ export function DiscussionsList({
   const displayMode = getDisplayMode();
   const sortBy = getSortBy();
 
-  // 用于跟踪是否是初始化状态
-  const isInitializedRef = useRef(false);
-  const initialSortByRef = useRef(sortBy);
-  const initialActiveTabRef = useRef(activeTab);
-
-  // 检查是否需要重新获取数据
-  const shouldFetchData = useCallback(
-    (newActiveTab: "recommend" | "trace", newSortBy: SortBy) => {
-      // 如果还没有初始化，记录初始值并跳过
-      if (!isInitializedRef.current) {
-        initialSortByRef.current = newSortBy;
-        initialActiveTabRef.current = newActiveTab;
-        isInitializedRef.current = true;
-        return false;
-      }
-
-      // 如果 activeTab 或 sortBy 发生了变化，需要重新获取
-      return (
-        newActiveTab !== initialActiveTabRef.current ||
-        newSortBy !== initialSortByRef.current
-      );
-    },
-    []
-  );
-
   const {
     data,
     fetchNextPage,
@@ -90,13 +65,11 @@ export function DiscussionsList({
     },
     initialPageParam: 1,
     // 使用初始数据
-    initialData: shouldFetchData(activeTab, sortBy)
-      ? undefined
-      : {
-          pages: [initialDiscussions],
-          pageParams: [1],
-        },
-    staleTime: 10 * 1000,
+    initialData: {
+      pages: [initialDiscussions],
+      pageParams: [1],
+    },
+    staleTime: 0,
     refetchOnWindowFocus: false,
   });
 
@@ -114,17 +87,6 @@ export function DiscussionsList({
       fetchNextPage();
     }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-
-    if (shouldFetchData(activeTab, sortBy)) {
-      refetch();
-      // 更新初始值
-      initialSortByRef.current = sortBy;
-      initialActiveTabRef.current = activeTab;
-    }
-  }, [activeTab, sortBy, shouldFetchData, refetch]);
 
   return (
     <div className="flex flex-col">

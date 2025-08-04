@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Portal } from "@radix-ui/react-portal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import { AlertTriangle, Reply } from "lucide-react";
 import { AttachmentType } from "@/constants/attachment-type";
 import { usePostEditorStore } from "@/store/post-editor";
 import { z } from "zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { useDraftStore } from "@/store/draft";
 
@@ -28,6 +28,7 @@ import {
 } from "@/validations/discussion";
 import { Board } from "@/types/board";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Discussion } from "@/types/discussion";
 
 const initDiscussionForm: DiscussionForm = {
   slug: "",
@@ -67,7 +68,9 @@ interface PollState {
 
 export default function CreatePostModal() {
   const router = useRouter();
+  const pathname = usePathname();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [pendingAction, setPendingAction] = React.useState<(() => void) | null>(
     null
   );
@@ -112,6 +115,7 @@ export default function CreatePostModal() {
   );
   const boardSelectRef = React.useRef<{ reset: () => void }>(null);
   const [isEditorFullscreen, setIsEditorFullscreen] = React.useState(false);
+  const [initialPath, setInitialPath] = React.useState<string | null>(null);
 
   const { boardChildren, setBoardChildren: setBoardChildren } =
     useBoardChildrenStore();
@@ -217,6 +221,34 @@ export default function CreatePostModal() {
       updateSelectedBoard(discussionForm.board_id);
     }
   }, [discussionForm.board_id, selectedBoard, updateSelectedBoard]);
+
+  const createDiscussionMutation = useMutation({
+    mutationFn: (data: any) => api.discussions.create(data),
+    onSuccess: async (discussion) => {
+      // 使相关查询失效以刷新数据
+      await queryClient.invalidateQueries({ queryKey: ["discussions"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["discussions", discussion.slug],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["discussion", discussion.slug],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["discussion-posts", discussion.slug, discussion.board_id],
+      });
+      router.push(`/d/${discussion.slug}?board_id=${discussion.board_id}`);
+    },
+    onError: (error) => {
+      if (error instanceof z.ZodError) {
+        dispatch({ type: "SET_ERRORS", payload: error.errors[0].message });
+      } else {
+        dispatch({ type: "SET_ERRORS", payload: "发布失败" });
+      }
+    },
+    onSettled: () => {
+      dispatch({ type: "SET_SUBMITTING", payload: false });
+    },
+  });
 
   React.useEffect(() => {
     if (isVisible && openFrom === "edit" && discussion) {
@@ -385,51 +417,37 @@ export default function CreatePostModal() {
   );
 
   const handlePublish = React.useCallback(async () => {
-    try {
-      const validatedDiscussion = discussionSchema.parse({
-        ...discussionForm,
-        content: content.trim(),
-        poll: pollState.data,
-      });
+    const validatedDiscussion = discussionSchema.parse({
+      ...discussionForm,
+      content: content.trim(),
+      poll: pollState.data,
+    });
 
-      dispatch({ type: "SET_SUBMITTING", payload: true });
+    dispatch({ type: "SET_SUBMITTING", payload: true });
 
-      const data = {
-        slug: validatedDiscussion.slug,
-        title: validatedDiscussion.title,
-        content: validatedDiscussion.content,
-        board_id: validatedDiscussion.board_id,
-        board_child_id: validatedDiscussion.board_child_id,
-        attachments: validatedDiscussion.attachments,
-        poll: validatedDiscussion.poll,
-      };
+    const data = {
+      slug: validatedDiscussion.slug,
+      title: validatedDiscussion.title,
+      content: validatedDiscussion.content,
+      board_id: validatedDiscussion.board_id,
+      board_child_id: validatedDiscussion.board_child_id,
+      attachments: validatedDiscussion.attachments,
+      poll: validatedDiscussion.poll,
+    };
 
-      const discussion = await api.discussions.create(data);
-      resetAllStates();
-      router.push(`/d/${discussion.slug}?board_id=${discussion.board_id}`);
-      setIsVisible(false);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        dispatch({ type: "SET_ERRORS", payload: error.errors[0].message });
-      } else {
-        dispatch({ type: "SET_ERRORS", payload: "发布失败" });
-      }
-    } finally {
-      dispatch({ type: "SET_SUBMITTING", payload: false });
-    }
-  }, [
-    discussionForm,
-    content,
-    pollState.data,
-    resetAllStates,
-    router,
-    setIsVisible,
-  ]);
+    createDiscussionMutation.mutate(data);
+  }, [discussionForm, content, pollState.data, createDiscussionMutation]);
 
   const debouncedHandlePublish = React.useMemo(
     () => debounce(handlePublish, 300), // 300ms 的防抖时间
     [handlePublish]
   );
+
+  React.useEffect(() => {
+    return () => {
+      usePostEditorStore.setState({ isVisible: false, discussion: undefined });
+    };
+  }, []);
 
   // 计算投票按钮的禁用状态
   const isPollButtonDisabled = React.useMemo(() => {
@@ -441,6 +459,19 @@ export default function CreatePostModal() {
       selectedBoard.board_user.user_role
     );
   }, [pollState.data, pollState.isEditing, selectedBoard, forceUpdateKey]);
+
+  React.useEffect(() => {
+    if (isVisible && initialPath && pathname !== initialPath) {
+      usePostEditorStore.setState({ isVisible: false, discussion: undefined });
+      setInitialPath(null);
+    }
+  }, [pathname, isVisible, initialPath]);
+
+  React.useEffect(() => {
+    if (isVisible && !initialPath) {
+      setInitialPath(pathname);
+    }
+  }, [isVisible, initialPath, pathname]);
 
   function modalReducer(
     state: ModalState,
@@ -616,7 +647,6 @@ export default function CreatePostModal() {
   React.useEffect(() => {
     if (!isVisible) {
       resetAllStates();
-      usePostEditorStore.setState({ discussion: undefined });
       // 重置lastLoadedBoardIdRef，确保下次打开时能正确加载数据
       lastLoadedBoardIdRef.current = null;
     }
