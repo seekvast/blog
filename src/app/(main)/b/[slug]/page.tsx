@@ -486,7 +486,7 @@ function BoardContent() {
                           {child.name}
                         </h3>
                         <button
-                          className="text-xs px-2 py-1 rounded-full bg-gray-100"
+                          className="text-xs px-2 py-1 rounded-full bg-secondary"
                           onClick={() => handleHide(child)}
                         >
                           {child.user_hidden

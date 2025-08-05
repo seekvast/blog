@@ -130,7 +130,7 @@ export function LoginModal({
         }}
       >
         <DialogContent className="max-w-[480px] p-8">
-          <DialogHeader className="mb-6">
+          <DialogHeader className="mb-6 text-left">
             <DialogTitle className="text-3xl font-medium">登入</DialogTitle>
             <div className="text-sm text-muted-foreground">
               還沒有賬號？

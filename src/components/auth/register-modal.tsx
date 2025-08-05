@@ -408,7 +408,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
         }}
       >
         <DialogContent className="sm:max-w-[425px] w-[calc(100%-2rem)] rounded-lg p-6">
-          <DialogHeader className="mb-4">
+          <DialogHeader className="text-left mb-4">
             <div className="space-y-2">
               <p className="text-sm text-neutral-500">第{step}步，共2步</p>
               <DialogTitle className="text-3xl font-medium">
