@@ -35,6 +35,8 @@ interface CommentItemProps {
   isLocked?: boolean;
   queryKey?: string | string[];
   level?: number;
+  highlightPostId?: string | null;
+  onElementReady?: (id: string, element: HTMLDivElement) => void;
 }
 
 export const CommentItem = ({
@@ -47,9 +49,18 @@ export const CommentItem = ({
   isLocked = false,
   queryKey,
   level = 0,
+  highlightPostId,
+  onElementReady,
 }: CommentItemProps) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [isReplying, setIsReplying] = React.useState(false);
+  const commentRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (commentRef.current && onElementReady) {
+      onElementReady(`post-${comment.id}`, commentRef.current);
+    }
+  }, [comment.id, onElementReady]);
 
   const hasManuallyCollapsed = React.useRef(false);
   const [showChildren, setShowChildren] = React.useState(true);
@@ -144,10 +155,18 @@ export const CommentItem = ({
 
   return (
     <div
-      id={`comment-${comment.id}`}
-      className={cn("pt-2 pb-4 border-b", level > 0 && "border-b-0 pb-0")}
+      ref={commentRef}
+      id={`post-${comment.id}`}
+      className={cn(
+        "pt-2 pb-4 border-b",
+        highlightPostId === `post-${comment.id}` && "highlight",
+        level > 0 && "border-b-0 pb-0"
+      )}
     >
-      <div className="flex items-start space-x-3 px-2 md:px-4 min-w-0">
+      <div
+        className="flex items-start space-x-3 px-2 md:px-4 min-w-0"
+        data-testid="comment-content-wrapper"
+      >
         <Link href={`/u/${comment.user.username}`}>
           <Avatar className="h-8 w-8 md:h-12 md:w-12 flex-shrink-0">
             <AvatarImage src={comment.user.avatar_url} />
@@ -175,7 +194,7 @@ export const CommentItem = ({
                 />
                 {comment.parent_post && (
                   <Link
-                    href={`#comment-${comment.parent_post.id}`}
+                    href={`#post-${comment.parent_post.id}`}
                     className="text-primary flex-shrink-0"
                   >
                     @{comment.parent_post.user.nickname}
@@ -293,6 +312,8 @@ export const CommentItem = ({
                         level={level + 1}
                         isLocked={isLocked}
                         queryKey={queryKey}
+                        highlightPostId={highlightPostId}
+                        onElementReady={onElementReady}
                       />
                     ))}
 

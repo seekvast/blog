@@ -103,14 +103,14 @@ export function UserReplies({ username }: UserRepliesProps) {
               {/* 右侧内容区 */}
               <div className="flex-1 space-y-3">
                 {/* 回复的文章标题 */}
-                {/* <div>
+                <h3>
                   <Link
-                    href={`/d/${reply.discussion_slug}`}
-                    className="text-sm text-blue-600 hover:text-blue-700"
+                    href={`/d/${reply.discussion_slug}#post-${reply.id}`}
+                    className="hover:text-primary/80 font-medium"
                   >
-                    {reply.parent_post?.discussion?.title}
+                    {reply.discussion?.title}
                   </Link>
-                </div> */}
+                </h3>
 
                 {/* 引用的内容 */}
                 <div className="bg-subtle rounded-lg p-3">

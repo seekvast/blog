@@ -255,3 +255,24 @@
     padding-bottom: var(--mobile-nav-height);
   }
 }
+
+.highlight {
+  animation: highlight-animation 1s ease-out;
+  background-color: hsl(var(--muted)) !important;
+  border-radius: 8px !important;
+  /* padding: 8px !important;
+  margin: 4px 0 !important; */
+}
+
+@keyframes highlight-animation {
+  0% {
+    background-color: hsl(var(--muted)) !important;
+    border-color: hsl(var(--border)) !important;
+    transform: scale(1.02);
+  }
+  100% {
+    background-color: transparent !important;
+    border-color: transparent !important;
+    transform: scale(1);
+  }
+}

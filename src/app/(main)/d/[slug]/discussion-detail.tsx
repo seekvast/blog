@@ -34,7 +34,7 @@ import { PostContent } from "@/components/post/post-content";
 import { api } from "@/lib/api";
 import { toast } from "@/components/ui/use-toast";
 import { VotersList } from "@/components/post/voters-list";
-import { useState } from "react";
+import { useState, useLayoutEffect } from "react";
 import {
   useMutation,
   useQueryClient,
@@ -124,9 +124,22 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     discussion?.discussion_user?.subscription || null
   );
   const [showCommentEditor, setShowCommentEditor] = useState(false);
+  const [targetPostId, setTargetPostId] = useState<string | null>(null);
+  const [highlightPostId, setHighlightPostId] = useState<string | null>(null);
+  const commentElementsRef = React.useRef<Map<string, HTMLDivElement>>(
+    new Map()
+  );
+
+  const handleElementReady = React.useCallback(
+    (id: string, element: HTMLDivElement) => {
+      commentElementsRef.current.set(id, element);
+    },
+    []
+  );
 
   const commentEditorRef = React.useRef<HTMLDivElement>(null);
   const replyPlaceholderRef = React.useRef<HTMLDivElement>(null);
+  const targetElementRef = React.useRef<HTMLDivElement>(null);
 
   const getComposerHeight = React.useCallback(() => {
     if (commentEditorRef.current) {
@@ -228,9 +241,21 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
   });
 
   React.useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith("#post-")) {
+      const postId = hash.substring(1);
+      setTargetPostId(postId);
+    }
+  }, []);
+
+  React.useEffect(() => {
     if (comments.pages && comments.pages.length > 0) {
       setTotalPosts(comments.pages[0].total);
     }
+  }, [comments.pages]);
+
+  const allComments = React.useMemo(() => {
+    return comments.pages?.flatMap((page) => page.items) || [];
   }, [comments.pages]);
 
   const loadLastPage = React.useCallback(async () => {
@@ -269,9 +294,46 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
     });
   }, [comments.pages]);
 
-  const allComments = React.useMemo(() => {
-    return comments.pages?.flatMap((page) => page.items) || [];
-  }, [comments.pages]);
+  React.useLayoutEffect(() => {
+    if (!targetPostId || isFetchingNextPage || isLoading) return;
+
+    const targetComment = allComments.find(
+      (comment) => `post-${comment.id}` === targetPostId
+    );
+
+    if (targetComment) {
+      // 找到目标评论，设置高亮并滚动
+      setHighlightPostId(targetPostId);
+
+      // 使用ref滚动到目标位置
+      setTimeout(() => {
+        const targetElement = commentElementsRef.current.get(targetPostId);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
+
+      // 3秒后移除高亮
+      setTimeout(() => {
+        setHighlightPostId(null);
+      }, 3000);
+
+      setTargetPostId(null);
+    } else {
+      if (hasNextPage) {
+        fetchNextPage();
+      } else {
+        setTargetPostId(null);
+      }
+    }
+  }, [
+    targetPostId,
+    allComments,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    isLoading,
+  ]);
 
   const bookmarkMutation = useMutation({
     mutationFn: () =>
@@ -696,9 +758,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
               <div className="flex-1 min-w-0 overflow-hidden space-y-1">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-baseline space-x-2 min-w-0 flex-1">
-                    <Link
-                      href={`/u/${discussion.user.username}`}
-                    >
+                    <Link href={`/u/${discussion.user.username}`}>
                       <span className="text-base block md:text-lg font-medium truncate max-w-[20ch] lg:max-w-full">
                         {discussion.user.nickname}
                       </span>
@@ -916,6 +976,8 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   onEditComment={handleEditComment}
                   isLocked={discussion?.is_locked === 1}
                   queryKey={["discussion-posts", slug]}
+                  highlightPostId={highlightPostId}
+                  onElementReady={handleElementReady}
                 />
               </InfiniteScroll>
               {!currentDiscussion?.is_locked && (

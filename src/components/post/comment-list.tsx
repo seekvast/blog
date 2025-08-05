@@ -18,6 +18,8 @@ interface CommentListProps {
   onEdit?: (comment: Post) => void;
   isLocked?: boolean;
   queryKey?: string | string[];
+  highlightPostId?: string | null;
+  onElementReady?: (id: string, element: HTMLDivElement) => void;
 }
 
 export const CommentList = React.memo(
@@ -31,6 +33,8 @@ export const CommentList = React.memo(
     onEdit,
     isLocked,
     queryKey,
+    highlightPostId,
+    onElementReady,
   }: CommentListProps) => {
     if (!comments.length && isLoading) {
       return (
@@ -64,6 +68,8 @@ export const CommentList = React.memo(
               onEditComment={onEditComment}
               onEdit={onEdit}
               isLocked={isLocked}
+              highlightPostId={highlightPostId}
+              onElementReady={onElementReady}
             />
           ))}
         </div>
