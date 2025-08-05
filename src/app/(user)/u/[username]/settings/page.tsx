@@ -138,22 +138,30 @@ export default function SettingsPage() {
 
   // 处理 Tab 切换
   const handleTabChange = (tab: SettingsTabType) => {
+    // 重置 InteractiveSection 状态，确保关闭任何打开的详细页面
+    setShowViolation(false);
+    setShowBlacklist(false);
+    setViolationType("account");
+    setBlacklistType("user");
+
     setActiveTab(tab);
 
     window.history.pushState(null, "", `#${tab}`);
-    if (!getMenuOpenTabStatus(tab) && sectionRefs[tab]?.current) {
-      if (tab === "profile") {
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth",
-        });
-      } else {
-        sectionRefs[tab].current?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
+    setTimeout(() => {
+      if (!getMenuOpenTabStatus(tab) && sectionRefs[tab]?.current) {
+        if (tab === "profile") {
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+          });
+        } else {
+          sectionRefs[tab].current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
       }
-    }
+    }, 100);
   };
 
   const renderTabContent = () => {
