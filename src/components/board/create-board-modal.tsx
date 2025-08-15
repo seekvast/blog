@@ -33,11 +33,16 @@ import {
 } from "@/components/ui/select";
 import { ImagePlus } from "lucide-react";
 import { api } from "@/lib/api";
+import { Turnstile } from "@marsidev/react-turnstile";
 
 interface CreateBoardModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+const TURNSTILE_SITE_KEY =
+  process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY ||
+  "1x00000000000000000000AA";
 
 export function CreateBoardModal({
   open,
@@ -52,6 +57,7 @@ export function CreateBoardModal({
   const [attachmentId, setAttachmentId] = useState<number | undefined>(
     undefined
   );
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const form = useForm<BoardFormSchema>({
     resolver: zodResolver(boardSchema),
@@ -122,8 +128,29 @@ export function CreateBoardModal({
       return;
     }
 
+    if (!turnstileToken) {
+      toast({
+        variant: "destructive",
+        title: "验证未完成",
+        description: "请先完成人机验证",
+      });
+      return;
+    }
+
     try {
       setLoading(true);
+
+      // 先在服务端验证 Turnstile token
+      const verifyRes = await api.auth.verifyTurnstile(turnstileToken);
+      if (!verifyRes?.success) {
+        toast({
+          variant: "destructive",
+          title: "验证失败",
+          description: "人机验证失败，请重试",
+        });
+        return;
+      }
+
       const formData = {
         ...data,
         attachment_id: attachmentId,
@@ -149,6 +176,7 @@ export function CreateBoardModal({
       });
       setAvatar(undefined);
       setAttachmentId(undefined);
+      setTurnstileToken(null);
 
       router.push(`/b/${data.slug}`);
       toast({
@@ -160,7 +188,7 @@ export function CreateBoardModal({
       toast({
         variant: "destructive",
         title: "失败",
-        description: error.message || "看板创建失败，请重试",
+        description: error?.message || "看板创建失败，请重试",
       });
     } finally {
       setLoading(false);
@@ -359,13 +387,32 @@ export function CreateBoardModal({
               )}
             </div>
 
-            <Button
-              type="submit"
-              className="w-full bg-blue-600 text-white hover:bg-blue-700"
-              disabled={loading}
-            >
-              {loading ? "创建中..." : "建立看板"}
-            </Button>
+            <div className="space-y-4">
+              <div className="cf-turnstile flex justify-center">
+                <Turnstile
+                  siteKey={TURNSTILE_SITE_KEY}
+                  onSuccess={(token) => {
+                    setTurnstileToken(token);
+                  }}
+                  onError={() => {
+                    setTurnstileToken(null);
+                  }}
+                  onExpire={() => {
+                    setTurnstileToken(null);
+                  }}
+                  options={{ theme: "auto", size: "flexible" }}
+                  className="flex justify-center items-center"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                disabled={loading || !turnstileToken}
+              >
+                {loading ? "创建中..." : "建立看板"}
+              </Button>
+            </div>
           </form>
         </Form>
 
