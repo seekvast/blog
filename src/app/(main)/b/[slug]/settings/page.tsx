@@ -98,7 +98,9 @@ export default function BoardSettingsPage() {
               </Avatar>
             </Link>
             <div>
-              <h1 className="text-2xl font-bold">{board.name}</h1>
+              <Link href={`/b/${board.slug}`} className="text-xl font-semibold">
+                {board.name}
+              </Link>
               <div className="text-sm text-muted-foreground mt-1 flex items-center flex-wrap">
                 <span>{board.visibility >= 1 ? "私密" : "公開"}</span>
                 <span className="mx-1.5">·</span>

@@ -35,23 +35,28 @@ export function InterestSelection({
   const fetchCategoriesAndUserSelections = async () => {
     try {
       setIsLoading(true);
-      
+
       const allCategories = await api.common.categories();
-      
+
       if (user) {
-        const userInfo = await api.users.get({hashid: user.hashid});
-        
-        const userSelectedIds = userInfo.categories?.map((cat: Category) => cat.id) || [];
-        
-        setCategories(allCategories.map((cat) => ({
-          ...cat,
-          selected: userSelectedIds.includes(cat.id)
-        })));
+        const userInfo = await api.users.get({ username: user.username });
+
+        const userSelectedIds =
+          userInfo.categories?.map((cat: Category) => cat.id) || [];
+
+        setCategories(
+          allCategories.map((cat) => ({
+            ...cat,
+            selected: userSelectedIds.includes(cat.id),
+          }))
+        );
       } else {
-        setCategories(allCategories.map((cat) => ({
-          ...cat,
-          selected: false
-        })));
+        setCategories(
+          allCategories.map((cat) => ({
+            ...cat,
+            selected: false,
+          }))
+        );
       }
     } catch (error) {
       toast({
@@ -125,9 +130,7 @@ export function InterestSelection({
               onClick={() => toggleCategory(category.id)}
               className={`
                 relative py-2 px-3 rounded-full cursor-pointer transition-all flex items-center
-                ${
-                  category.selected ? "bg-primary text-white" : "bg-subtle"
-                }
+                ${category.selected ? "bg-primary text-white" : "bg-subtle"}
               `}
             >
               {!category.selected && (

@@ -848,7 +848,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                             {discussion.main_post.edited_at
                               ? formatDate(
                                   discussion.main_post.edited_at,
-                                  "YYYY年M月D日"
+                                  "YYYY年M月D日 HH:mm:ss"
                                 )
                               : "未知"}
                           </div>

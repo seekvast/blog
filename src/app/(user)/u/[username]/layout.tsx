@@ -204,7 +204,7 @@ export default function UserLayout({
                         {userData.nickname}
                       </h1>
                     </div>
-                    <div className="flex  space-x-2 text-white text-sm">
+                    <div className="flex flex-wrap md:space-x-2 text-white text-sm">
                       <span>@{userData.username} </span>
                       {userData.preferences?.discloseOnline === "yes" &&
                       userData.is_online ? (
@@ -217,7 +217,7 @@ export default function UserLayout({
                           <span>{fromNow(userData?.last_seen_at || "")}</span>
                         </div>
                       )}
-                      <div>
+                      <div className="flex items-center space-x-1">
                         <span>加入于</span>{" "}
                         <span>
                           {userData.created_at
@@ -237,11 +237,7 @@ export default function UserLayout({
                 </div>
                 {isCurrentUser ? (
                   <Button size="sm" className="rounded-full primary" asChild>
-                    <Link
-                      href={`/u/${username}/settings`}
-                    >
-                      修改个人信息
-                    </Link>
+                    <Link href={`/u/${username}/settings`}>修改个人信息</Link>
                   </Button>
                 ) : (
                   <div className="flex items-center space-x-2">
