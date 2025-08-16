@@ -90,6 +90,10 @@ export function DiscussionActions({
     queryClient.invalidateQueries({
       queryKey: ["userDiscussions"],
     });
+
+    queryClient.invalidateQueries({
+      queryKey: ["discussion", discussion.slug],
+    });
     onChange?.(discussion.slug);
   };
   //获取看板子版列表

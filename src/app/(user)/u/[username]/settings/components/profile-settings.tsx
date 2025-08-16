@@ -6,7 +6,7 @@ import {
   Upload as UploadIcon,
   Trash as TrashIcon,
 } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -94,6 +94,7 @@ export default function ProfileSettings({ user }: { user: User | null }) {
   const bgInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [gradientColor, setGradientColor] = useState("rgba(0, 0, 0, 0.3)");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -129,6 +130,60 @@ export default function ProfileSettings({ user }: { user: User | null }) {
       setIsBgUploading(false);
     }
   };
+
+  useEffect(() => {
+    if (!bgImage) {
+      setGradientColor("rgba(0, 0, 0, 0.3)"); // 如果没有图片，重置为默认颜色
+      return;
+    }
+
+    const getImageColor = async () => {
+      try {
+        const img = document.createElement("img");
+        img.crossOrigin = "Anonymous";
+        img.src = `/api/proxy-image?url=${encodeURIComponent(bgImage)}`;
+
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return;
+
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+
+          let r = 0,
+            g = 0,
+            b = 0;
+          for (let i = 0; i < data.length; i += 4) {
+            r += data[i];
+            g += data[i + 1];
+            b += data[i + 2];
+          }
+
+          const count = data.length / 4;
+          r = Math.round(r / count);
+          g = Math.round(g / count);
+          b = Math.round(b / count);
+
+          setGradientColor(`rgba(${r}, ${g}, ${b}, 0.5)`);
+        };
+
+        img.onerror = () => {
+          console.error("Error loading background image for color extraction");
+          setGradientColor("rgba(0, 0, 0, 0.5)"); // Fallback color
+        };
+      } catch (error) {
+        console.error("Error getting color:", error);
+        setGradientColor("rgba(0, 0, 0, 0.5)"); // Fallback color
+      }
+    };
+
+    getImageColor();
+  }, [bgImage]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
@@ -207,14 +262,22 @@ export default function ProfileSettings({ user }: { user: User | null }) {
             {/* 背景图 */}
             <div className="flex justify-between flex-row  px-4 overflow-hidden h-[200px] relative">
               {bgImage && (
-                <div className="absolute inset-0 -z-10">
-                  <Image
-                    src={bgImage}
-                    alt="Background"
-                    fill
-                    className="object-cover"
+                <>
+                  <div className="absolute inset-0 -z-10">
+                    <Image
+                      src={bgImage}
+                      alt="Background"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div
+                    className="absolute inset-0 -z-10 transition-colors duration-300"
+                    style={{
+                      backgroundColor: gradientColor,
+                    }}
                   />
-                </div>
+                </>
               )}
               {isBgUploading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/30">
