@@ -166,8 +166,7 @@ export function BoardActionButton({
     );
   }
 
-  // 4. Not joined or kicked out view
-  if (!board.board_user || status === BoardUserStatus.KICK_OUT) {
+  if (!board.board_user || status === BoardUserStatus.KICK_OUT || status === BoardUserStatus.LEAVE) {
     return (
       <>
         <DropdownMenu>
@@ -215,8 +214,38 @@ export function BoardActionButton({
       </>
     );
   }
+    
+  //禁言中用户可退出看板
+  if (status === BoardUserStatus.MUTE) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            size="sm"
+            className="rounded-full flex items-center gap-1"
+            variant="outline"
+            disabled={isUnsubscribing}
+          >
+            已禁言 <ChevronDown className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-40">
+          <DropdownMenuItem
+            onClick={() =>
+              requireAuth(() => {
+                handleUnsubscribe(board.id, 7);
+              })
+            }
+            className="cursor-pointer"
+            disabled={isUnsubscribing}
+          >
+            {isUnsubscribing ? "退出中..." : "退出"}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
 
-  // 5. Other statuses
   if (status && status in BoardUserStatusMapping) {
     return (
       <Button variant="outline" size="sm" className="rounded-full">

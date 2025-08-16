@@ -63,7 +63,7 @@ export const CommentItem = ({
   }, [comment.id, onElementReady]);
 
   const hasManuallyCollapsed = React.useRef(false);
-  const [showChildren, setShowChildren] = React.useState(true);
+  const [showChildren, setShowChildren] = React.useState(false);
   const [visibleChildrenCount, setVisibleChildrenCount] = React.useState(15);
 
   const handleToggleChildren = (show: boolean) => {
@@ -287,8 +287,7 @@ export const CommentItem = ({
           {/* 渲染子评论 */}
           {comment.children && comment.children.length > 0 && (
             <div className="mt-2 space-y-4 py-4">
-              {/* 只有在用户手动折叠过的情况下才显示折叠状态 */}
-              {hasManuallyCollapsed.current && !showChildren ? (
+              {!showChildren ? (
                 <button
                   onClick={() => handleToggleChildren(true)}
                   className="text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"

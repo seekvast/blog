@@ -40,13 +40,11 @@ export function useBoardActions() {
     onError: commonOnError,
   });
 
-  const { mutate: unsubscribeAction, isPending: isUnsubscribing } = useMutation(
-    {
-      mutationFn: (boardId: number) =>
-        api.boards.unsubscribe({ board_id: boardId }),
-      onError: commonOnError,
-    }
-  );
+  const { mutate: unsubscribeAction, isPending: isUnsubscribing } = useMutation<any, any, { boardId: number; action?: number }>({
+    mutationFn: ({ boardId, action = 0 }) =>
+      api.boards.unsubscribe({ board_id: boardId, action }),
+    onError: commonOnError,
+  });
 
   const {
     mutate: subscribeWithAnswerAction,
@@ -85,8 +83,12 @@ export function useBoardActions() {
     );
   };
 
-  const handleUnsubscribe = (boardId: number, options?: MutateOptions) => {
-    unsubscribeAction(boardId, {
+  const handleUnsubscribe = (
+    boardId: number,
+    action?: number,
+    options?: MutateOptions
+  ) => {
+    unsubscribeAction({ boardId, action }, {
       onSuccess: () => {
         invalidateBoardQueries();
         options?.onSuccess?.();
@@ -98,7 +100,7 @@ export function useBoardActions() {
     boardId: number,
     options?: MutateOptions
   ) => {
-    unsubscribeAction(boardId, {
+    unsubscribeAction({ boardId, action: 1 }, {
       onSuccess: () => {
         invalidateBoardQueries();
         options?.onSuccess?.();

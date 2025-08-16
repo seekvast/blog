@@ -5,6 +5,7 @@ export const BoardUserStatus = {
   BAN: 4,
   MUTE: 5,
   KICK_OUT: 6,
+  LEAVE: 7,
 } as const;
 
 export const BoardUserStatusMapping = {
@@ -14,6 +15,7 @@ export const BoardUserStatusMapping = {
   [BoardUserStatus.BAN]: "封锁",
   [BoardUserStatus.MUTE]: "禁言",
   [BoardUserStatus.KICK_OUT]: "踢出",
+  [BoardUserStatus.LEAVE]: "退出",
 } as const;
 
 // TypeScript 类型定义
