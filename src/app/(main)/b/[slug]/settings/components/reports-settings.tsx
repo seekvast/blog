@@ -6,15 +6,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
@@ -25,10 +16,7 @@ import { BoardUser } from "@/types";
 import { formatDate } from "@/lib/utils";
 import { Pagination } from "@/types/common";
 import { useToast } from "@/components/ui/use-toast";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  moderationProcessSchema,
   type ModerationProcessSchema,
   ActionMode,
 } from "@/validations/moderation";
@@ -58,7 +46,8 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
 
   const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
   const [isProcessDialogOpen, setIsProcessDialogOpen] = useState(false);
-
+  const [isBoardModerator, setIsBoardModerator] = useState(false);
+    
   const { data: managersData } = useQuery<BoardUser[]>({
     queryKey: ["board-managers", board.id],
     queryFn: () => api.boards.getManagers({ board_id: board.id }),
@@ -182,9 +171,14 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
     return typeMap[targetType] || targetType;
   };
 
-  const handleOpenProcessDialog = (reportId: number) => {
-    setSelectedReportId(reportId);
+  const handleOpenProcessDialog = (report: Report) => {
+    setSelectedReportId(report.id);
     setIsProcessDialogOpen(true);
+    //isBoardModerator
+    const isBoardModerator = managers.some(
+      (manager) => manager.user_hashid === report?.user_hashid
+    );
+    setIsBoardModerator(isBoardModerator);
   };
 
   const handleProcess = (data: ModerationProcessSchema) => {
@@ -195,6 +189,7 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
     });
     setIsProcessDialogOpen(false);
     setSelectedReportId(null);
+    setIsBoardModerator(false);
   };
 
   // 恢复简单的撤销处理函数
@@ -312,7 +307,7 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
                   variant="secondary"
                   size="sm"
                   className="h-7"
-                  onClick={() => handleOpenProcessDialog(report.id)}
+                  onClick={() => handleOpenProcessDialog(report)}
                   disabled={
                     report.status !== 0 || processReportMutation.isPending
                   }
@@ -341,6 +336,7 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
         onProcess={handleProcess}
         isPending={processReportMutation.isPending}
         scene="report"
+        isBoardModerator={isBoardModerator}
       />
     </div>
   );

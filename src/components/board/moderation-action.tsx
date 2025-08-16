@@ -23,7 +23,8 @@ import {
   type ModerationProcessSchema,
   ActionMode,
 } from "@/validations/moderation";
-
+import { Report } from "@/types";
+import { BoardUser } from "@/types";
 // 定义场景类型
 export type ModerationScene = "report" | "board";
 
@@ -34,6 +35,9 @@ interface ModerationActionProps {
   isPending: boolean;
   scene?: ModerationScene;
   defaultAction?: ActionMode;
+  report?: Report;
+  managers?: BoardUser[];
+  isBoardModerator?: boolean;
 }
 
 export function ModerationAction({
@@ -43,6 +47,7 @@ export function ModerationAction({
   isPending,
   scene = "board",
   defaultAction,
+  isBoardModerator,
 }: ModerationActionProps) {
   const form = useForm<ModerationProcessSchema>({
     resolver: zodResolver(moderationProcessSchema),
@@ -91,38 +96,49 @@ export function ModerationAction({
                     <Label htmlFor="delete">删除文章/回覆</Label>
                   </div>
                 )}
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    value={String(ActionMode.KICK_OUT)}
-                    id="kickout"
-                  />
-                  <Label htmlFor="kickout">踢出看板(可重複加入)</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value={String(ActionMode.BAN)} id="ban" />
-                  <Label htmlFor="ban">封鎖</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value={String(ActionMode.MUTE)} id="mute" />
-                  <Label htmlFor="mute">禁言</Label>
-                  {form.watch("act_mode") === ActionMode.MUTE && (
-                    <div className="ml-4 flex items-center">
-                      <input
-                        type="number"
-                        className="w-16 h-7 p-1 border rounded-md"
-                        min="1"
-                        max="31"
-                        onChange={(e) =>
-                          form.setValue(
-                            "mute_days",
-                            parseInt(e.target.value) || undefined
-                          )
-                        }
+                {/* report场景下看板管理员无需下列处置 */}
+                {!(scene === "report" && isBoardModerator) && (
+                  <>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem
+                        value={String(ActionMode.KICK_OUT)}
+                        id="kickout"
                       />
-                      <span className="ml-1">天</span>
+                      <Label htmlFor="kickout">踢出看板(可重複加入)</Label>
                     </div>
-                  )}
-                </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem
+                        value={String(ActionMode.BAN)}
+                        id="ban"
+                      />
+                      <Label htmlFor="ban">封鎖</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem
+                        value={String(ActionMode.MUTE)}
+                        id="mute"
+                      />
+                      <Label htmlFor="mute">禁言</Label>
+                      {form.watch("act_mode") === ActionMode.MUTE && (
+                        <div className="ml-4 flex items-center">
+                          <input
+                            type="number"
+                            className="w-16 h-7 p-1 border rounded-md"
+                            min="1"
+                            max="31"
+                            onChange={(e) =>
+                              form.setValue(
+                                "mute_days",
+                                parseInt(e.target.value) || undefined
+                              )
+                            }
+                          />
+                          <span className="ml-1">天</span>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </RadioGroup>
               {form.formState.errors.act_mode && (
                 <p className="text-sm text-destructive">
