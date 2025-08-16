@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useLayoutStore } from "@/store/layout";
 import Link from "next/link";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useInterestSelection } from "@/components/providers/interest-selection-provider";
@@ -31,6 +32,7 @@ interface HeaderProps {
 }
 
 export function Header({ className }: HeaderProps) {
+  const isHeaderVisible = useLayoutStore((state) => state.isHeaderVisible);
   const router = useRouter();
   const { user, loading } = useAuth();
   const { openRegister, openLogin } = useAuthModal();
@@ -39,6 +41,11 @@ export function Header({ className }: HeaderProps) {
     usePostEditorStore();
   const { hasDraft } = useDraftStore();
   const { requireEmailVerification } = useEmailVerificationGuard();
+
+  if (!isHeaderVisible) {
+    return <></>;
+  }
+
 
   const handleLogoClick = React.useCallback(
     (e: React.MouseEvent) => {
