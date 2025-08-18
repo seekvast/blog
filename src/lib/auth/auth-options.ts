@@ -30,16 +30,13 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Please enter your email and password");
         }
         let data: ApiUser;
-        if (credentials.auth_token) {
-          data = await api.users.refreshToken();
-        } else {
-          data = await api.users.login({
-            email: credentials.email,
-            password: credentials.password,
-            turnstile_token: credentials.turnstile_token ?? "",
-            auth_token: credentials.auth_token ?? "",
-          });
-        }
+
+        data = await api.users.login({
+          email: credentials.email,
+          password: credentials.password,
+          turnstile_token: credentials.turnstile_token ?? "",
+          auth_token: credentials.auth_token ?? "",
+        });
 
         if (!data || !data.hashid) {
           return null;
