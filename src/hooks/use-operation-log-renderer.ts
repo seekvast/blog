@@ -3,6 +3,7 @@
 import { useTranslation } from "react-i18next";
 import { OperationLog, OperationLogData } from "@/types/operation-log";
 import { getOperationLogTranslationKey } from "@/constants/operation-log";
+import { BoardUserRoleMapping } from "@/constants/board-user-role";
 
 export function useOperationLogRenderer() {
   const { t } = useTranslation();
@@ -42,6 +43,11 @@ export function useOperationLogRenderer() {
     // 准备占位符数据
     const safeData = data || {};
     const placeholders: OperationLogData = {
+      role:
+        safeData.role &&
+        BoardUserRoleMapping[safeData.role as keyof typeof BoardUserRoleMapping]
+          ? BoardUserRoleMapping[safeData.role as keyof typeof BoardUserRoleMapping]
+          : safeData.role,
       operator_name:
         operator_user?.nickname || operator_user?.username || "system",
       username: user?.nickname || "",
@@ -109,6 +115,11 @@ export function useOperationLogRenderer() {
     // 准备占位符数据
     const safeData = data || {};
     const placeholders: OperationLogData = {
+      role:
+        safeData.role &&
+        BoardUserRoleMapping[safeData.role as keyof typeof BoardUserRoleMapping]
+          ? BoardUserRoleMapping[safeData.role as keyof typeof BoardUserRoleMapping]
+          : safeData.role,
       operator_name:
         operator_user?.nickname || operator_user?.username || "system",
       username: user?.nickname || "",

@@ -321,9 +321,6 @@ export default function ProfileSettings({ user }: { user: User | null }) {
                         })
                       : "未知"}
                   </div>
-                  <p className="text-xs sm:text-sm opacity-90 max-w-[250px] sm:max-w-[400px]">
-                    {user.bio || "这个人很懒，什么都没写~"}
-                  </p>
                 </div>
               </div>
 

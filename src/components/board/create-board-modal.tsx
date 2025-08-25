@@ -139,20 +139,9 @@ export function CreateBoardModal({
 
     try {
       setLoading(true);
-
-      // 先在服务端验证 Turnstile token
-      const verifyRes = await api.auth.verifyTurnstile(turnstileToken);
-      if (!verifyRes?.success) {
-        toast({
-          variant: "destructive",
-          title: "验证失败",
-          description: "人机验证失败，请重试",
-        });
-        return;
-      }
-
       const formData = {
         ...data,
+        turnstile_token: turnstileToken,
         attachment_id: attachmentId,
         avatar,
       };
@@ -209,36 +198,38 @@ export function CreateBoardModal({
           >
             <div className="space-y-2">
               <Label>看板头像</Label>
-              <div className="relative">
-                <input
-                  type="file"
-                  className="hidden"
-                  id="boardImage"
-                  accept="image/jpeg,image/jpg,image/png,image/gif"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      handleImageUpload(file);
-                    }
-                  }}
-                />
-                <label
-                  htmlFor="boardImage"
-                  className="w-24 h-24 rounded-full bg-neutral-100 flex items-center justify-center cursor-pointer hover:bg-neutral-200 transition-colors"
-                >
-                  {avatar ? (
-                    <img
-                      src={avatar}
-                      alt="Board avatar"
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <ImagePlus className="w-8 h-8 text-neutral-400" />
-                  )}
-                </label>
-              </div>
-              <div className="text-sm text-neutral-500">
-                照片上传规格要求：格式为JPG、JPEG、GIF或者PNG，大小2MB以内。
+              <div className="flex justify-between item-content space-x-2">
+                <div className="">
+                  <input
+                    type="file"
+                    className="hidden"
+                    id="boardImage"
+                    accept="image/jpeg,image/jpg,image/png,image/gif"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        handleImageUpload(file);
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor="boardImage"
+                    className="w-24 h-24 rounded-full bg-neutral-100 flex items-center justify-center cursor-pointer hover:bg-neutral-200 transition-colors"
+                  >
+                    {avatar ? (
+                      <img
+                        src={avatar}
+                        alt="Board avatar"
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <ImagePlus className="w-8 h-8 text-neutral-400" />
+                    )}
+                  </label>
+                </div>
+                <div className="flex items-center text-sm text-muted-foreground">
+                  照片上传规格要求：格式为JPG、JPEG、GIF或者PNG，大小2MB以内。
+                </div>
               </div>
             </div>
 

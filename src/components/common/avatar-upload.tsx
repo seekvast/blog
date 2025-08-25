@@ -116,12 +116,10 @@ export function AvatarUpload({
         alt={`${name}'s avatar`}
         className="object-cover"
       />
-      <AvatarFallback className="bg-gray-100">
-        {name[0].toUpperCase()}
-      </AvatarFallback>
+      <AvatarFallback>{name[0].toUpperCase()}</AvatarFallback>
       {/* 上传图标悬浮层 */}
       <div
-        className={`absolute rounded-full bg-white/30 transition-colors shadow-sm left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center ${sizeMap[size].overlay}`}
+        className={`absolute rounded-full bg-white/30 group-hover:bg-white/30 opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-sm left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center ${sizeMap[size].overlay}`}
       >
         <ImageIcon className={`text-white ${sizeMap[size].icon}`} />
       </div>
