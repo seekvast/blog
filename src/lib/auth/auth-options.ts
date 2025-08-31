@@ -60,6 +60,7 @@ export const authOptions: NextAuthOptions = {
           preferences: data.preferences,
           is_board_moderator: data.is_board_moderator,
           age_verified: data.age_verified,
+          is_adult: data.is_adult,
         };
       },
     }),
@@ -85,6 +86,7 @@ export const authOptions: NextAuthOptions = {
         token.token = user.token;
         token.is_board_moderator = user.is_board_moderator;
         token.age_verified = user.age_verified;
+        token.is_adult = user.is_adult;
       }
 
       // 当 session 被更新时（例如调用 useSession().update()）
@@ -106,6 +108,7 @@ export const authOptions: NextAuthOptions = {
         token.token = refreshUser.token;
         token.is_board_moderator = refreshUser.is_board_moderator;
         token.age_verified = refreshUser.age_verified;
+        token.is_adult = refreshUser.is_adult;
       }
       return token;
     },
@@ -130,6 +133,7 @@ export const authOptions: NextAuthOptions = {
           preferences: token.preferences as any,
           is_board_moderator: token.is_board_moderator as number,
           age_verified: token.age_verified as number,
+          is_adult: token.is_adult as boolean,
           ...token, // 展开其他属性
         };
       }

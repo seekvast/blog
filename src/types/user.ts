@@ -43,6 +43,7 @@ export interface User {
   is_board_moderator?: number;
   age_verified?: number;
   is_online?: boolean;
+  is_adult?: boolean;
   categories?: Category[];
   preferences?: {
     nsfwVisible: string;

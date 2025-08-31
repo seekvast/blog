@@ -63,15 +63,14 @@ export function useNsfwWarning() {
     if (pathname === "/") {
       return false;
     }
-
     // 已登录且年龄认证通过的用户不显示
-    if (user && user.age_verified === 1) {
+    if (user && user.is_adult === true) {
       return false;
     }
 
     // 检查冷却时间和时区
     return shouldShowNsfwWarning(user?.hashid);
-  }, [user?.age_verified, user?.hashid, pathname]);
+  }, [user?.is_adult, user?.hashid, pathname]);
 
   // 处理确认
   const handleConfirm = React.useCallback(() => {

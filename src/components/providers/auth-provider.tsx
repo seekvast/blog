@@ -71,6 +71,7 @@ function AuthContextProvider({ children }: { children: React.ReactNode }) {
         preferences: session.user.preferences,
         is_board_moderator: session.user.is_board_moderator || 0,
         age_verified: session.user.age_verified || 0,
+        is_adult: session.user.is_adult || false,
       };
 
       // 只有当用户数据真正发生变化时才更新
