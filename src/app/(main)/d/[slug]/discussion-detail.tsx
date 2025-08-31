@@ -33,7 +33,8 @@ import { useLoginModal } from "@/components/providers/login-modal-provider";
 import { PostContent } from "@/components/post/post-content";
 import { api } from "@/lib/api";
 import { toast } from "@/components/ui/use-toast";
-import { VotersList } from "@/components/post/voters-list";
+import { VotersList } from '@/components/post/voters-list';
+import { VotersListModal } from '@/components/post/voters-list-modal';
 import { useState, useLayoutEffect } from "react";
 import {
   useMutation,
@@ -897,18 +898,11 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
                   }
                 />
                 {discussion.main_post.up_votes_count > 0 && (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button className="text-xs md:text-sm hover:text-primary">
-                        {formatCompactNumber(
-                          discussion.main_post.up_votes_count
-                        )}
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-80 p-0" align="start">
-                      <VotersList postId={discussion.main_post.id} />
-                    </PopoverContent>
-                  </Popover>
+                  <VotersListModal postId={discussion.main_post.id}>
+                    <button className="text-xs md:text-sm hover:text-primary">
+                      {formatCompactNumber(discussion.main_post.up_votes_count)}
+                    </button>
+                  </VotersListModal>
                 )}
               </button>
               <button

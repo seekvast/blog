@@ -3,12 +3,7 @@
 import * as React from "react";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { VotersList } from "@/components/post/voters-list";
+import { VotersListModal } from '@/components/post/voters-list-modal';
 import { useCompactNumberFormat } from "@/lib/utils/format";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -37,7 +32,6 @@ export function VoteButtons({
   showDownVotesThreshold = 5,
 }: VoteButtonsProps) {
   const formatCompactNumber = useCompactNumberFormat();
-  const [votersPopoverOpen, setVotersPopoverOpen] = React.useState(false);
   const { requireEmailVerification } = useEmailVerificationGuard();
 
   // 内部处理投票逻辑
@@ -78,16 +72,11 @@ export function VoteButtons({
           onClick={() => handleVoteClick("up")}
         />
         {upVotesCount > 0 && (
-          <Popover open={votersPopoverOpen} onOpenChange={setVotersPopoverOpen}>
-            <PopoverTrigger asChild>
-              <button className="text-xs md:text-sm hover:text-primary">
-                {formatCompactNumber(upVotesCount)}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="start">
-              <VotersList postId={postId} />
-            </PopoverContent>
-          </Popover>
+          <VotersListModal postId={postId}>
+            <button className="text-xs md:text-sm hover:text-primary">
+              {formatCompactNumber(upVotesCount)}
+            </button>
+          </VotersListModal>
         )}
       </div>
       <div
