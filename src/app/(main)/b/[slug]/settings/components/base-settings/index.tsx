@@ -38,7 +38,7 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
       toast({
         title: "错误",
         description: "获取看板类型失败",
-        variant: "destructive",
+        variant: "default",
       });
     }
   }, [categoriesError, toast]);
@@ -93,7 +93,7 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
     },
     onError: () => {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "删除失败",
         description: "删除看板失败，请重试",
       });
@@ -130,7 +130,7 @@ export function BaseSettings({ board, onSuccess }: BaseSettingsProps) {
       },
       onError: () => {
         toast({
-          variant: "destructive",
+          variant: "default",
           title: "撤回失败",
           description: "撤回删除请求失败，请重试",
         });

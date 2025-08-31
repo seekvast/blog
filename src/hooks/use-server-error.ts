@@ -35,7 +35,7 @@ export function useServerError(
         toast({
           title: "发生错误",
           description: errorMessage,
-          variant: "destructive",
+          variant: "default",
         });
       }
 

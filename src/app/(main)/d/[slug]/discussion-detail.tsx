@@ -371,7 +371,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       toast({
         title: "操作失败",
         description: "书签操作失败，请稍后重试",
-        variant: "destructive",
+        variant: "default",
       });
     },
     onSuccess: () => {
@@ -418,7 +418,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       toast({
         title: "操作失败",
         description: "关注操作失败，请稍后重试",
-        variant: "destructive",
+        variant: "default",
       });
     },
     onSuccess: () => {
@@ -548,7 +548,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       toast({
         title: "失败",
         description: "请稍后重试",
-        variant: "destructive",
+        variant: "default",
       });
     },
   });
@@ -581,7 +581,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       toast({
         title: "发布失败",
         description: "请稍后重试",
-        variant: "destructive",
+        variant: "default",
       });
     },
     onSettled: () => {
@@ -615,7 +615,7 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
       toast({
         title: "评论更新失败",
         description: "请稍后重试",
-        variant: "destructive",
+        variant: "default",
       });
     },
     onSettled: () => {

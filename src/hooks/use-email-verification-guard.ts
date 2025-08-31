@@ -30,7 +30,7 @@ export function useEmailVerificationGuard() {
     // 如果用户未登录，提示登录
     if (!isAuthenticated) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "请先登录",
         description: "您需要登录后才能使用此功能",
       });
@@ -43,7 +43,7 @@ export function useEmailVerificationGuard() {
       const message = restriction?.message || "此功能需要验证邮箱";
 
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "此功能需要验证邮箱",
       });
       return false;
@@ -90,7 +90,7 @@ export function useEmailVerificationGuard() {
     const message = restriction?.message || "此功能需要验证邮箱";
 
     toast({
-      variant: "destructive",
+      variant: "default",
       title: "此功能需要验证邮箱",
       //   description: message,
     });

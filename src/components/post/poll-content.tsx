@@ -83,7 +83,7 @@ export function PollContent({ discussion }: PollContentProps) {
           toast({
             title: "投票失败",
             description: "请稍后重试",
-            variant: "destructive",
+            variant: "default",
           });
         }
       }, EmailVerificationRequiredFeature.VOTE);

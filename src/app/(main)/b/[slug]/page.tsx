@@ -228,7 +228,7 @@ function BoardContent() {
     onError: () => {
       toast({
         title: "操作失败",
-        variant: "destructive",
+        variant: "default",
       });
     },
   });

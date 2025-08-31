@@ -122,7 +122,7 @@ export default function ProfileSettings({ user }: { user: User | null }) {
     } catch (error) {
       console.error("Error uploading background:", error);
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "上传失败",
         description: "背景图上传失败，请重试",
       });
@@ -212,7 +212,7 @@ export default function ProfileSettings({ user }: { user: User | null }) {
       });
     } catch (error: any) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "更新失败",
         description: error?.message || "请稍后重试",
       });

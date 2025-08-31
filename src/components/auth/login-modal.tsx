@@ -6,12 +6,14 @@ import { signIn } from "next-auth/react";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Eye, EyeOff } from "lucide-react";
@@ -49,6 +51,12 @@ export function LoginModal({
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const { remainingSeconds, isActive, startCountdown } =
     useCountdown("forgot-password");
+  const [showApiErrorModal, setShowApiErrorModal] = useState(false);
+  const [apiError, setApiError] = useState<{
+    code: number;
+    message: string;
+    data: any;
+  } | null>(null);
 
   useEffect(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -72,20 +80,30 @@ export function LoginModal({
         turnstile_token: turnstileToken,
       });
 
-      if (!result?.ok) {
-        toast({
-          variant: "destructive",
-          title: "登录失败",
-          description: result?.error || "邮箱或密码错误",
-        });
-        return;
-      }
-      if (result.error) {
-        toast({
-          variant: "destructive",
-          title: "登录失败",
-          description: result?.error || "邮箱或密码错误",
-        });
+      if (result && !result.ok && result.error) {
+        let errorData;
+        try {
+          errorData = JSON.parse(result.error);
+        } catch (e) {
+          // 解析失败，直接显示原始错误
+          toast({
+            variant: "default",
+            title: "登录失败",
+            description: result.error,
+          });
+          return;
+        }
+
+        if (errorData.code === 4402) {
+          setApiError(errorData);
+          setShowApiErrorModal(true);
+        } else {
+          toast({
+            variant: "default",
+            title: "登录失败",
+            description: errorData.message || "邮箱或密码错误",
+          });
+        }
         return;
       }
 
@@ -103,7 +121,7 @@ export function LoginModal({
       }
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "登录失败",
         description:
           error instanceof Error
@@ -265,6 +283,37 @@ export function LoginModal({
         onOpenChange={setIsForgotPasswordOpen}
         onBack={() => setIsForgotPasswordOpen(false)}
       />
+      <Dialog open={showApiErrorModal} onOpenChange={setShowApiErrorModal}>
+        <DialogContent className="sm:max-w-sm">
+          <div className="w-full break-all">
+            <div className="text-center p-4">
+              <Image
+                src="/undraw_cancel.svg"
+                alt="Error illustration"
+                width={180}
+                height={220}
+                className="mb-4 mx-auto"
+              />
+              <DialogHeader>
+                <DialogTitle className="text-center text-xl font-bold mb-2">
+                  {apiError?.message || "账号已被暂时停用"}
+                </DialogTitle>
+                <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                  {apiError?.data?.suspend_reason
+                    ? `你因「${apiError.data.suspend_reason}」屡次或严重违反我们的《内容政策》，已将你的账号永久停用。`
+                    : "你的账号因违反社区规定已被停用。"}
+                </div>
+              </DialogHeader>
+              <Button
+                onClick={() => setShowApiErrorModal(false)}
+                className="w-full mt-6"
+              >
+                我知道了
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

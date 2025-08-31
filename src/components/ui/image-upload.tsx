@@ -80,7 +80,7 @@ export function ImageUpload({
     // 检查文件大小
     if (file.size > maxSize * 1024 * 1024) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "文件过大",
         description: `文件大小不能超过${maxSize}MB`,
       });
@@ -90,7 +90,7 @@ export function ImageUpload({
     // 检查文件类型
     if (!file.type.startsWith("image/")) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "格式不支持",
         description: "只支持图片格式",
       });
@@ -110,7 +110,7 @@ export function ImageUpload({
     setIsUploading(true);
     try {
       const data = await uploadFile(file, attachmentType);
-        onUploadSuccess?.(data);
+      onUploadSuccess?.(data);
       toast({
         description: "图片上传成功",
       });

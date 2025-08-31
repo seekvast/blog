@@ -31,12 +31,26 @@ export const authOptions: NextAuthOptions = {
         }
         let data: ApiUser;
 
-        data = await api.users.login({
-          email: credentials.email,
-          password: credentials.password,
-          turnstile_token: credentials.turnstile_token ?? "",
-          auth_token: credentials.auth_token ?? "",
-        });
+        try {
+          data = await api.users.login({
+            email: credentials.email,
+            password: credentials.password,
+            turnstile_token: credentials.turnstile_token ?? "",
+            auth_token: credentials.auth_token ?? "",
+          });
+        } catch (error: any) {
+          // 从 API 错误中提取所有相关信息
+          const errorPayload = {
+            code: error.code,
+            message: error.message || "An unknown error occurred",
+            data: error.data, // 传递额外的数据，例如封禁原因
+          };
+
+          console.error(`Login failed:`, errorPayload);
+
+          // 将完整的错误对象打包成 JSON 字符串
+          throw new Error(JSON.stringify(errorPayload));
+        }
 
         if (!data || !data.hashid) {
           return null;

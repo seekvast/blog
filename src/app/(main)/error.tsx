@@ -33,28 +33,28 @@ export default function Error({
           toast({
             title: "登录已过期",
             description: "请重新登录",
-            variant: "destructive",
+            variant: "default",
           });
           break;
         case 403:
           toast({
             title: "权限不足",
             description: "您没有权限执行此操作",
-            variant: "destructive",
+            variant: "default",
           });
           break;
         case 404:
           toast({
             title: "资源不存在",
             description: "请求的资源不存在或已被删除",
-            variant: "destructive",
+            variant: "default",
           });
           break;
         default:
           toast({
             title: "操作失败",
             description: apiError.message || "请求未能完成，请重试",
-            variant: "destructive",
+            variant: "default",
           });
       }
     } else if (apiError.code) {
@@ -62,14 +62,14 @@ export default function Error({
       toast({
         title: "操作失败",
         description: apiError.message || "请求未能完成，请重试",
-        variant: "destructive",
+        variant: "default",
       });
     } else {
       // 处理其他错误
       toast({
         title: "发生错误",
         description: error.message || "操作未能完成，请重试",
-        variant: "destructive",
+        variant: "default",
       });
     }
   }, [error]);

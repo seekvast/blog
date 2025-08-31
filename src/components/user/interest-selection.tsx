@@ -60,7 +60,7 @@ export function InterestSelection({
       }
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "获取分类失败",
         description: error instanceof Error ? error.message : "发生未知错误",
       });
@@ -91,7 +91,7 @@ export function InterestSelection({
       if (onComplete) onComplete();
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "保存失败",
         description: error instanceof Error ? error.message : "发生未知错误",
       });

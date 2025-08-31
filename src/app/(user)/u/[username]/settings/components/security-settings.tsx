@@ -114,7 +114,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
   const handleBirthdaySubmit = async () => {
     if (!birthday) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "错误",
         description: "请选择生日",
       });
@@ -130,7 +130,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       setBirthdayModalOpen(false);
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "更新失败",
         description: error?.message || "请稍后重试",
       });
@@ -168,13 +168,13 @@ export default function SecuritySettings({ user }: { user: User | null }) {
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
-          variant: "destructive",
+          variant: "default",
           title: "错误",
           description: error.errors[0].message,
         });
       } else {
         toast({
-          variant: "destructive",
+          variant: "default",
           title: "修改失败",
           description: error?.message || "请稍后重试",
         });
@@ -193,7 +193,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
   const handleSendVerificationCode = async () => {
     if (!emailForm.email) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "错误",
         description: "请输入新邮箱",
       });
@@ -202,7 +202,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailForm.email)) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "错误",
         description: "请输入有效的邮箱地址",
       });
@@ -222,7 +222,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       startCountdown(60);
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "发送失败",
         description: error?.message || "请稍后重试",
       });
@@ -262,13 +262,13 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       if (error instanceof z.ZodError) {
         // 显示第一个验证错误
         toast({
-          variant: "destructive",
+          variant: "default",
           title: "验证错误",
           description: error.errors[0].message,
         });
       } else {
         toast({
-          variant: "destructive",
+          variant: "default",
           title: "修改失败",
           description: error?.message || "请稍后重试",
         });
@@ -301,7 +301,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       setAgeVerificationOpen(true);
     } else {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "错误",
         description: "您提交过年龄验证",
       });
@@ -314,7 +314,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
     // 检查文件大小
     if (file.size > 2 * 1024 * 1024) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "文件过大",
         description: "文件大小不能超过2MB",
       });
@@ -325,7 +325,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
     const allowedFormats = ["image/jpeg", "image/jpg", "image/png"];
     if (!allowedFormats.includes(file.type)) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "格式不支持",
         description: "只支持JPG、JPEG、PNG格式",
       });
@@ -346,7 +346,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       });
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "上傳失敗",
         description: "圖片上傳失敗，請重試",
       });
@@ -361,7 +361,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
   const handleAgeVerificationSubmit = async () => {
     if (!verificationImageUrl) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "错误",
         description: "请上传身份证明文件",
       });
@@ -378,7 +378,7 @@ export default function SecuritySettings({ user }: { user: User | null }) {
       setAgeVerificationOpen(false);
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "提交失败",
         description: error?.message || "请稍后重试",
       });

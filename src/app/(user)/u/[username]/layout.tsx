@@ -140,7 +140,7 @@ export default function UserLayout({
       toast({
         title: "拉黑失败",
         description: error.message || "操作失败，请稍后重试",
-        variant: "destructive",
+        variant: "default",
       });
     },
   });

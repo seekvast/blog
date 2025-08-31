@@ -171,7 +171,7 @@ export function RulesSettings({ board }: RulesSettingsProps) {
         setRules(data);
       } catch (error) {
         toast({
-          variant: "destructive",
+          variant: "default",
           title: "获取数据失败",
           description:
             error instanceof Error ? error.message : "服务器错误，请稍后重试",
@@ -202,7 +202,7 @@ export function RulesSettings({ board }: RulesSettingsProps) {
           )
         ).catch(() => {
           toast({
-            variant: "destructive",
+            variant: "default",
             title: "更新失败",
             description: "重新排序失败，请刷新页面重试",
           });
@@ -287,7 +287,7 @@ export function RulesSettings({ board }: RulesSettingsProps) {
       });
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "更新失败",
         description:
           error instanceof Error ? error.message : "服务器错误，请稍后重试",
@@ -303,7 +303,7 @@ export function RulesSettings({ board }: RulesSettingsProps) {
   const handleAddRule = () => {
     if (rules.length >= 25) {
       toast({
-        variant: "destructive",
+        variant: "default",
         description: "最多只能设置25条规则",
       });
       return;
@@ -358,7 +358,7 @@ export function RulesSettings({ board }: RulesSettingsProps) {
       });
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "删除失败",
         description:
           error instanceof Error ? error.message : "服务器错误，请稍后重试",
@@ -390,7 +390,7 @@ export function RulesSettings({ board }: RulesSettingsProps) {
       });
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "保存失败",
         description:
           error instanceof Error ? error.message : "服务器错误，请稍后重试",
@@ -483,7 +483,7 @@ export function RulesSettings({ board }: RulesSettingsProps) {
                         placeholder="输入规则内容"
                         className="min-h-[100px]"
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
+                          if (e.key === "Enter") {
                             e.preventDefault();
                           }
                         }}

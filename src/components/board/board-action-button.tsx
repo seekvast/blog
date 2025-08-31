@@ -166,7 +166,11 @@ export function BoardActionButton({
     );
   }
 
-  if (!board.board_user || status === BoardUserStatus.KICK_OUT || status === BoardUserStatus.LEAVE) {
+  if (
+    !board.board_user ||
+    status === BoardUserStatus.KICK_OUT ||
+    status === BoardUserStatus.LEAVE
+  ) {
     return (
       <>
         <DropdownMenu>
@@ -214,7 +218,7 @@ export function BoardActionButton({
       </>
     );
   }
-    
+
   //禁言中用户可退出看板
   if (status === BoardUserStatus.MUTE) {
     return (
@@ -279,7 +283,7 @@ export function SubscribeBoardDialog({
   const handleSubmit = async () => {
     if (!answer.trim()) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "请输入答案",
       });
       return;

@@ -298,7 +298,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
     if (!turnstileToken) {
       toast({
         description: "請完成人機驗證",
-        variant: "destructive",
+        variant: "default",
       });
       return;
     }
@@ -329,7 +329,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
     if (!turnstileToken) {
       toast({
         description: "請完成人機驗證",
-        variant: "destructive",
+        variant: "default",
       });
       return;
     }
@@ -386,7 +386,7 @@ export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
       setErrors({});
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "註冊失敗",
         description: error instanceof Error ? error.message : "發生未知錯誤",
       });

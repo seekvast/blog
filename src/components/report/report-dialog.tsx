@@ -158,7 +158,7 @@ export function ReportDialog({
         toast({
           title: t("report.error", "错误"),
           description: t("report.pleaseSelectReason", "请选择一个举报原因。"),
-          variant: "destructive",
+          variant: "default",
         });
         return Promise.reject(
           new Error(
@@ -201,7 +201,7 @@ export function ReportDialog({
             error instanceof Error
               ? error.message
               : t("report.errorMessage", "提交失败，请稍后再试。"),
-          variant: "destructive",
+          variant: "default",
         });
       }
     },
@@ -351,7 +351,7 @@ export function ReportDialog({
           <DialogHeader>
             <DialogTitle className="text-xl">感谢您的检举</DialogTitle>
             <DialogDescription className="mt-2">
-              {form.reported_to === 'moderator' ? (
+              {form.reported_to === "moderator" ? (
                 <p>如果看板管理人员确认已违反规范，将会进行处置</p>
               ) : (
                 <p>

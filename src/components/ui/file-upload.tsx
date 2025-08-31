@@ -1,44 +1,52 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Plus } from "lucide-react"
-import Image from "next/image"
+import * as React from "react";
+import { Plus } from "lucide-react";
+import Image from "next/image";
 import { toast } from "@/components/ui/use-toast";
 
 interface FileUploadProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  preview?: string
-  onFileSelect?: (file: File) => void
+  preview?: string;
+  onFileSelect?: (file: File) => void;
 }
 
-export function FileUpload({ preview, onFileSelect, ...props }: FileUploadProps) {
-  const inputRef = React.useRef<HTMLInputElement>(null)
+export function FileUpload({
+  preview,
+  onFileSelect,
+  ...props
+}: FileUploadProps) {
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const handleClick = () => {
-    inputRef.current?.click()
-  }
+    inputRef.current?.click();
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
         toast({
           title: "文件过大",
           description: "文件大小不能超过2MB",
-          variant: "destructive",
+          variant: "default",
         });
         return;
       }
-      if (!["image/jpeg", "image/jpg", "image/gif", "image/png"].includes(file.type)) {
+      if (
+        !["image/jpeg", "image/jpg", "image/gif", "image/png"].includes(
+          file.type
+        )
+      ) {
         toast({
           title: "格式不支持",
           description: "只支持JPG、JPEG、GIF或PNG格式",
-          variant: "destructive",
+          variant: "default",
         });
         return;
       }
-      onFileSelect?.(file)
+      onFileSelect?.(file);
     }
-  }
+  };
 
   return (
     <div
@@ -64,5 +72,5 @@ export function FileUpload({ preview, onFileSelect, ...props }: FileUploadProps)
         <Plus className="h-8 w-8 text-muted-foreground" />
       )}
     </div>
-  )
+  );
 }

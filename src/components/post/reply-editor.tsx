@@ -41,7 +41,7 @@ export const ReplyEditor = ({
       toast({
         title: "内容不能为空",
         description: "请输入回复内容或上传图片",
-        variant: "destructive",
+        variant: "default",
       });
       return;
     }
@@ -68,7 +68,7 @@ export const ReplyEditor = ({
         toast({
           title: "回复失败",
           description: "请稍后重试",
-          variant: "destructive",
+          variant: "default",
         });
       } finally {
         setIsSubmitting(false);

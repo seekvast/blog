@@ -84,7 +84,7 @@ export function OperationLogs({ board }: OperationLogsProps) {
       } catch (error) {
         console.error("Error loading operation logs:", error);
         toast({
-          variant: "destructive",
+          variant: "default",
           title: "加载失败",
           description: "无法加载操作日志，请重试",
         });
@@ -158,8 +158,8 @@ export function OperationLogs({ board }: OperationLogsProps) {
     <div className="space-y-6">
       {/* 标题和筛选器 */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-              <div>
-        <h3 className="text-lg font-medium">审核记录</h3>
+        <div>
+          <h3 className="text-lg font-medium">审核记录</h3>
         </div>
         <div className="flex gap-2 flex-wrap">
           <Select
@@ -230,7 +230,9 @@ export function OperationLogs({ board }: OperationLogsProps) {
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-foreground">{renderTitle(log)}</span>
+                      <span className="text-foreground">
+                        {renderTitle(log)}
+                      </span>
 
                       <Badge
                         className={cn(

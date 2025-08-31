@@ -17,12 +17,10 @@ interface EditReplyProps {
   onSuccess?: () => void;
 }
 
-export const EditReply = ({
-  comment,
-  onCancel,
-  onSuccess,
-}: EditReplyProps) => {
-  const [editContent, setEditContent] = React.useState(comment.raw_content || "");
+export const EditReply = ({ comment, onCancel, onSuccess }: EditReplyProps) => {
+  const [editContent, setEditContent] = React.useState(
+    comment.raw_content || ""
+  );
   const [imageUrl, setImageUrl] = React.useState<string | undefined>(undefined);
   const [attachments, setAttachments] = React.useState<any[]>([]);
   const queryClient = useQueryClient();
@@ -51,7 +49,7 @@ export const EditReply = ({
       toast({
         title: "编辑失败",
         description: error.message,
-        variant: "destructive",
+        variant: "default",
       });
     },
   });
@@ -61,7 +59,7 @@ export const EditReply = ({
       toast({
         title: "内容不能为空",
         description: "请输入评论内容或上传图片",
-        variant: "destructive",
+        variant: "default",
       });
       return;
     }
@@ -73,7 +71,7 @@ export const EditReply = ({
           ? `${editContent}\n\n![图片](${imageUrl})`
           : `![图片](${imageUrl})`;
       }
-      
+
       editMutation.mutate({
         id: comment.id,
         content: finalContent,
@@ -82,7 +80,7 @@ export const EditReply = ({
       toast({
         title: "编辑失败",
         description: "请稍后重试",
-        variant: "destructive",
+        variant: "default",
       });
     }
   };
@@ -148,7 +146,9 @@ export const EditReply = ({
             type="button"
             onClick={handleSubmit}
             size="sm"
-            disabled={editMutation.isPending || (!editContent.trim() && !imageUrl)}
+            disabled={
+              editMutation.isPending || (!editContent.trim() && !imageUrl)
+            }
           >
             {editMutation.isPending ? (
               <>

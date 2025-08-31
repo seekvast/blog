@@ -65,7 +65,7 @@ export function ForgotPasswordModal({
       startCountdown(60);
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "发送失败",
         description:
           error instanceof Error

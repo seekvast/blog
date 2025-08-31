@@ -32,7 +32,7 @@ export function ServerErrorProvider({
       toast({
         title: "API 错误",
         description: apiError.message || "服务器请求失败",
-        variant: "destructive",
+        variant: "default",
       });
     });
 

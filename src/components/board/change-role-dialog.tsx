@@ -51,7 +51,7 @@ export function ChangeRoleDialog({
       onSuccess?.();
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "更新失败",
         description:
           error instanceof Error ? error.message : "服务器错误，请稍后重试",

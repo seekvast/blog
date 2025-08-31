@@ -99,7 +99,7 @@ export function MembersSettings({ board }: SettingsProps) {
       setMembers(data);
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "获取成员列表失败",
         description:
           error instanceof Error ? error.message : "服务器错误，请稍后重试",
@@ -151,7 +151,7 @@ export function MembersSettings({ board }: SettingsProps) {
       fetchMembers(searchQuery, statusFilter);
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "撤销禁言失败",
         description:
           error instanceof Error ? error.message : "服务器错误，请稍后重试",
@@ -191,7 +191,7 @@ export function MembersSettings({ board }: SettingsProps) {
       fetchMembers(searchQuery, statusFilter);
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "操作失败",
         description:
           error instanceof Error ? error.message : "服务器错误，请稍后重试",

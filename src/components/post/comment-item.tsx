@@ -98,7 +98,7 @@ export const CommentItem = ({
       toast({
         title: "编辑失败",
         description: error.message,
-        variant: "destructive",
+        variant: "default",
       });
     },
   });
@@ -135,7 +135,7 @@ export const CommentItem = ({
       toast({
         title: "内容不能为空",
         description: "请输入评论内容",
-        variant: "destructive",
+        variant: "default",
       });
       return;
     }

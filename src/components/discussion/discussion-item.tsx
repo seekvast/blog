@@ -67,7 +67,7 @@ export const DiscussionItem = React.forwardRef<
       toast({
         title: "点赞失败",
         description: error instanceof Error ? error.message : "请稍后重试",
-        variant: "destructive",
+        variant: "default",
       });
     },
   });
@@ -92,7 +92,7 @@ export const DiscussionItem = React.forwardRef<
       toast({
         title: "操作过于频繁",
         description: "请稍后再试",
-        variant: "destructive",
+        variant: "default",
       });
       return;
     }

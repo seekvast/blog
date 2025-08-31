@@ -43,7 +43,7 @@ export function DiscussionSidebar({ className }: DiscussionSidebarProps) {
       toast({
         title: "操作失败",
         description: error instanceof Error ? error.message : "请稍后重试",
-        variant: "destructive",
+        variant: "default",
       });
     },
   });
@@ -65,20 +65,20 @@ export function DiscussionSidebar({ className }: DiscussionSidebarProps) {
       toast({
         title: "操作失败",
         description: error instanceof Error ? error.message : "请稍后重试",
-        variant: "destructive",
+        variant: "default",
       });
     },
   });
 
   const handleFollowDiscussion = () => {
     requireAuthAndEmailVerification(() => {
-        followMutation.mutate("follow");
+      followMutation.mutate("follow");
     });
   };
 
   const handleBookmarkDiscussion = () => {
     requireAuthAndEmailVerification(() => {
-        bookmarkMutation.mutate();
+      bookmarkMutation.mutate();
     });
   };
 

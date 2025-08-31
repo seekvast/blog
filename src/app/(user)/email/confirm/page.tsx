@@ -19,14 +19,16 @@ export default function EmailConfirmPage() {
   const { data: session, update } = useSession();
   const router = useRouter();
   const [redirecting, setRedirecting] = useState(false);
-  const [redirectTimer, setRedirectTimer] = useState<NodeJS.Timeout | null>(null);
-  
+  const [redirectTimer, setRedirectTimer] = useState<NodeJS.Timeout | null>(
+    null
+  );
+
   useEffect(() => {
     if (session?.user && session.user.is_email_confirmed === 1) {
       setRedirecting(true);
       router.push("/");
     }
-    
+
     return () => {
       if (redirectTimer) {
         clearTimeout(redirectTimer);
@@ -42,8 +44,10 @@ export default function EmailConfirmPage() {
   );
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isResending, setIsResending] = useState(false);
-  const { remainingSeconds: countdown, startCountdown } =
-    useCountdown("email-resend", session?.user);
+  const { remainingSeconds: countdown, startCountdown } = useCountdown(
+    "email-resend",
+    session?.user
+  );
 
   const token = searchParams?.get("token");
 
@@ -105,7 +109,7 @@ export default function EmailConfirmPage() {
     },
     onError: (error) => {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "发送失败",
         description:
           error instanceof Error ? error.message : "发送验证邮件失败",

@@ -126,12 +126,9 @@ export async function handleServerApiError(error: unknown): Promise<ApiError> {
             message: "用户名或密码错误",
           };
           break;
-        case 1002:
+        case 4402:
           logger.warn("账号已禁用", { ...errorDetails, level: "warn" });
-          formattedError = {
-            ...apiError,
-            message: "您的账号已被禁用，请联系管理员",
-          };
+          formattedError = apiError;
           break;
         case 1003:
           logger.warn("验证码错误", { ...errorDetails, level: "warn" });

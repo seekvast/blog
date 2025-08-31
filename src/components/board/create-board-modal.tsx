@@ -90,7 +90,7 @@ export function CreateBoardModal({
         toast({
           title: "上传失败",
           description: "图片大小超过2MB限制，请选择更小的图片",
-          variant: "destructive",
+          variant: "default",
         });
         return null;
       }
@@ -112,7 +112,7 @@ export function CreateBoardModal({
           error instanceof Error
             ? error.message
             : "图片上传失败，请重试。可能的原因：文件格式不支持或网络问题",
-        variant: "destructive",
+        variant: "default",
       });
       return null;
     }
@@ -121,7 +121,7 @@ export function CreateBoardModal({
   const handleSubmit = async (data: BoardFormSchema) => {
     if (!user?.token) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "未登录",
         description: "请先登录后再创建看板",
       });
@@ -130,7 +130,7 @@ export function CreateBoardModal({
 
     if (!turnstileToken) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "验证未完成",
         description: "请先完成人机验证",
       });
@@ -175,7 +175,7 @@ export function CreateBoardModal({
       onOpenChange(false);
     } catch (error: any) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "失败",
         description: error?.message || "看板创建失败，请重试",
       });

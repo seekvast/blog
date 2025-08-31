@@ -30,10 +30,10 @@ export default function ResetPasswordPage() {
   // 验证表单
   const validateForm = () => {
     let isValid = true;
-    
+
     // 密码验证规则
     const passwordRegex = /^[0-9a-zA-Z!@#$%^&*\-_]{8,100}$/;
-    
+
     if (password.length < 8) {
       setPasswordError("密碼至少需要8個字符");
       isValid = false;
@@ -59,11 +59,11 @@ export default function ResetPasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm() || isLoading) return;
     if (!token) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "重置失敗",
         description: "無效的重置鏈接，請重新獲取",
       });
@@ -84,7 +84,7 @@ export default function ResetPasswordPage() {
       setIsSuccess(true);
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "重置失敗",
         description:
           error instanceof Error
@@ -114,7 +114,10 @@ export default function ResetPasswordPage() {
               <form onSubmit={handleSubmit} className="mt-8 space-y-6">
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="password" className="text-sm text-neutral-500">
+                    <Label
+                      htmlFor="password"
+                      className="text-sm text-neutral-500"
+                    >
                       新密碼
                     </Label>
                     <Input
@@ -128,12 +131,17 @@ export default function ResetPasswordPage() {
                       required
                     />
                     {passwordError && (
-                      <p className="text-sm text-destructive mt-1">{passwordError}</p>
+                      <p className="text-sm text-destructive mt-1">
+                        {passwordError}
+                      </p>
                     )}
                   </div>
 
                   <div>
-                    <Label htmlFor="confirmPassword" className="text-sm text-neutral-500">
+                    <Label
+                      htmlFor="confirmPassword"
+                      className="text-sm text-neutral-500"
+                    >
                       確認密碼
                     </Label>
                     <Input
@@ -147,7 +155,9 @@ export default function ResetPasswordPage() {
                       required
                     />
                     {confirmPasswordError && (
-                      <p className="text-sm text-destructive mt-1">{confirmPasswordError}</p>
+                      <p className="text-sm text-destructive mt-1">
+                        {confirmPasswordError}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -160,7 +170,12 @@ export default function ResetPasswordPage() {
                       ? "bg-primary text-primary-foreground hover:bg-primary/90"
                       : "bg-neutral-100 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-400"
                   )}
-                  disabled={!password || !confirmPassword || password !== confirmPassword || isLoading}
+                  disabled={
+                    !password ||
+                    !confirmPassword ||
+                    password !== confirmPassword ||
+                    isLoading
+                  }
                 >
                   {isLoading ? (
                     <>
@@ -200,9 +215,9 @@ export default function ResetPasswordPage() {
                 返回首頁
               </Button>
               <div className="mt-4 text-center">
-                <Button 
-                  variant="link" 
-                  className="text-primary hover:underline p-0 h-auto" 
+                <Button
+                  variant="link"
+                  className="text-primary hover:underline p-0 h-auto"
                   onClick={() => openLogin()}
                 >
                   立即登錄

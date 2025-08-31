@@ -32,7 +32,7 @@ export function SubscribeBoardDialog({
   const handleSubmit = async () => {
     if (!answer.trim()) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "请输入答案",
       });
       return;
@@ -53,7 +53,7 @@ export function SubscribeBoardDialog({
       onSuccess?.();
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "加入失败",
         description:
           error instanceof Error ? error.message : "加入失败，请重试",

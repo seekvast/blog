@@ -118,7 +118,7 @@ export function EmailVerificationBanner() {
       });
     } catch (error) {
       toast({
-        variant: "destructive",
+        variant: "default",
         title: "发送失败",
         description:
           error instanceof Error ? error.message : "发送验证邮件失败",

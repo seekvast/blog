@@ -72,7 +72,7 @@ export function ApprovalSettings({ board }: ApprovalSettingsProps) {
       } catch (error) {
         console.error("Error loading applications:", error);
         toast({
-          variant: "destructive",
+          variant: "default",
           title: "加载失败",
           description: "无法加载申请列表，请重试",
         });

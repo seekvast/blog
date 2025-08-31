@@ -278,7 +278,7 @@ export default function CreatePostModal() {
           toast({
             title: "获取文章失败",
             description: error.message || "获取文章详情失败，请重试",
-            variant: "destructive",
+            variant: "default",
           });
         }
       };
@@ -702,7 +702,7 @@ export default function CreatePostModal() {
       toast({
         title: "保存失败",
         description: error.message || "保存草稿失败，请重试",
-        variant: "destructive",
+        variant: "default",
       });
     },
   });

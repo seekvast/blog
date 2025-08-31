@@ -33,7 +33,7 @@ export async function handleApiError(error: unknown): Promise<void> {
       toast({
         title: "网络错误",
         description: "请检查您的网络连接",
-        variant: "destructive",
+        variant: "default",
       });
       return;
     }
@@ -43,7 +43,7 @@ export async function handleApiError(error: unknown): Promise<void> {
       toast({
         title: "请求超时",
         description: "服务器响应时间过长，请稍后重试",
-        variant: "destructive",
+        variant: "default",
       });
       return;
     }
@@ -56,7 +56,7 @@ export async function handleApiError(error: unknown): Promise<void> {
           toast({
             title: "登录已过期",
             description: "请重新登录",
-            variant: "destructive",
+            variant: "default",
           });
           break;
 
@@ -64,7 +64,7 @@ export async function handleApiError(error: unknown): Promise<void> {
           toast({
             title: "权限不足",
             description: "您没有权限执行此操作",
-            variant: "destructive",
+            variant: "default",
           });
           break;
 
@@ -73,14 +73,14 @@ export async function handleApiError(error: unknown): Promise<void> {
           const notFoundError = new Error("请求的资源不存在或已被删除");
           notFoundError.name = "NotFoundError";
           (notFoundError as any).status = 404;
-          
+
           // 显示一个 toast 提示
-        //   toast({
-        //     title: "资源不存在",
-        //     description: "请求的资源不存在或已被删除",
-        //     variant: "destructive",
-        //   });
-          
+          //   toast({
+          //     title: "资源不存在",
+          //     description: "请求的资源不存在或已被删除",
+          //     variant: "default",
+          //   });
+
           // 抛出错误，让 ErrorBoundary 捕获
           throw notFoundError;
           break;
@@ -92,7 +92,7 @@ export async function handleApiError(error: unknown): Promise<void> {
             description: validationErrors
               ? formatValidationErrors(validationErrors)
               : apiError.message || "请检查输入是否正确",
-            variant: "destructive",
+            variant: "default",
           });
           break;
 
@@ -100,7 +100,7 @@ export async function handleApiError(error: unknown): Promise<void> {
           toast({
             title: "请求过于频繁",
             description: "请稍后再试",
-            variant: "destructive",
+            variant: "default",
           });
           break;
 
@@ -111,7 +111,7 @@ export async function handleApiError(error: unknown): Promise<void> {
           toast({
             title: "服务器错误",
             description: "服务器暂时无法处理您的请求，请稍后重试",
-            variant: "destructive",
+            variant: "default",
           });
           break;
 
@@ -120,13 +120,13 @@ export async function handleApiError(error: unknown): Promise<void> {
             toast({
               title: "服务器错误",
               description: "服务器暂时无法处理您的请求，请稍后重试",
-              variant: "destructive",
+              variant: "default",
             });
           } else {
             toast({
               title: "请求失败",
               description: apiError.message || "操作未能完成，请重试",
-              variant: "destructive",
+              variant: "default",
             });
           }
       }
@@ -148,35 +148,35 @@ export async function handleApiError(error: unknown): Promise<void> {
           toast({
             title: "请登录",
             description: "请登录后继续",
-            variant: "destructive",
+            variant: "default",
           });
           break;
         case 1001:
           toast({
             title: "登录失败",
             description: "用户名或密码错误",
-            variant: "destructive",
+            variant: "default",
           });
           break;
         case 1002:
           toast({
             title: "账号已禁用",
             description: "您的账号已被禁用，请联系管理员",
-            variant: "destructive",
+            variant: "default",
           });
           break;
         case 1003:
           toast({
             title: "验证码错误",
             description: "请输入正确的验证码",
-            variant: "destructive",
+            variant: "default",
           });
           break;
         default:
           toast({
             title: "操作失败",
             description: apiError.message || "请求未能完成，请重试",
-            variant: "destructive",
+            variant: "default",
           });
       }
       return;
@@ -186,14 +186,14 @@ export async function handleApiError(error: unknown): Promise<void> {
     toast({
       title: "错误",
       description: apiError.message || "发生未知错误，请重试",
-      variant: "destructive",
+      variant: "default",
     });
   } else {
     // 处理非 Error 类型的错误
     toast({
       title: "错误",
       description: "发生未知错误，请重试",
-      variant: "destructive",
+      variant: "default",
     });
   }
 

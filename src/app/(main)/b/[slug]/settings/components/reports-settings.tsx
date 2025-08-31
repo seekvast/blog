@@ -47,7 +47,7 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
   const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
   const [isProcessDialogOpen, setIsProcessDialogOpen] = useState(false);
   const [isBoardModerator, setIsBoardModerator] = useState(false);
-    
+
   const { data: managersData } = useQuery<BoardUser[]>({
     queryKey: ["board-managers", board.id],
     queryFn: () => api.boards.getManagers({ board_id: board.id }),
@@ -136,7 +136,7 @@ export function ReportsSettings({ board }: ReportsSettingsProps) {
       toast({
         title: "操作失败",
         description: "无法处理检举请求，请稍后再试",
-        variant: "destructive",
+        variant: "default",
       });
     },
   });
