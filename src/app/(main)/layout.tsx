@@ -14,6 +14,7 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { Plus } from "lucide-react";
 import { usePostEditorStore } from "@/store/post-editor";
 import { GlobalNsfwWarning } from "@/components/nsfw/global-nsfw-warning";
+import { CreateBoardModal } from "@/components/board/create-board-modal";
 
 const CreatePostModal = dynamic(
   () => import("@/components/post/create-post-modal"),
@@ -26,6 +27,9 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { setIsVisible } = usePostEditorStore();
+  const [isCreateBoardModalOpen, setCreateBoardModalOpen] =
+    React.useState(false);
 
   // 根据路径确定使用哪个侧边栏配置
   const getSidebarConfig = () => {
@@ -51,7 +55,19 @@ export default function MainLayout({
     ? showDefaultSidebarPaths.includes(pathname)
     : false;
 
-  const { setIsVisible } = usePostEditorStore();
+  const handleFabClick = () => {
+    if (pathname?.startsWith("/b")) {
+      setCreateBoardModalOpen(true);
+    } else {
+      setIsVisible(true);
+    }
+  };
+
+  const fabVisiblePaths = ["/", "/following", "/bookmarked"];
+  const showFab =
+    (pathname && fabVisiblePaths.includes(pathname)) ||
+    pathname?.startsWith("/b");
+
   return (
     <div className="min-h-screen flex flex-col">
       <RouteProgress />
@@ -83,7 +99,7 @@ export default function MainLayout({
         </div>
       </div>
 
-      {pathname === "/" && (
+      {showFab && (
         <button
           className={cn(
             "fixed right-4 bottom-20 lg:hidden z-9",
@@ -93,10 +109,10 @@ export default function MainLayout({
             "transition-all duration-200",
             "touch-none"
           )}
-          onClick={() => setIsVisible(true)}
+          onClick={handleFabClick}
           onTouchStart={(e) => {
             e.preventDefault();
-            setIsVisible(true);
+            handleFabClick();
           }}
         >
           <Plus className="h-7 w-7 stroke-[2.5]" />
@@ -111,6 +127,10 @@ export default function MainLayout({
       <Suspense fallback={null}>
         <CreatePostModal />
       </Suspense>
+      <CreateBoardModal
+        open={isCreateBoardModalOpen}
+        onOpenChange={setCreateBoardModalOpen}
+      />
     </div>
   );
 }
