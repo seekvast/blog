@@ -383,6 +383,16 @@ export const Editor = React.forwardRef<
                 <Maximize2 className="h-4 w-4" />
               </Button>
             )}
+            {isFullscreen && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => toggleFullscreen()}
+              >
+                <Minimize2 className="h-4 w-4" />
+              </Button>
+            )}
             {headerInfo.onClose && (
               <Button
                 variant="ghost"
