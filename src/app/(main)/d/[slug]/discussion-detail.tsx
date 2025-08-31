@@ -885,16 +885,16 @@ export function DiscussionDetail({ initialDiscussion }: DiscussionDetailProps) {
           </div>
           <div className="flex justify-between items-center mb-4 px-2 text-muted-foreground text-sm">
             <div className="flex items-center space-x-4 md:space-x-8">
-              <button
-                className="flex items-center space-x-2"
-                onClick={() => handleVote(discussion.main_post.id, "up", true)}
-              >
+              <button className="flex items-center space-x-2">
                 <ThumbsUp
                   className={cn(
                     "h-4 w-4",
                     discussion.main_post.user_voted?.vote === "up" &&
                       "text-primary fill-primary"
                   )}
+                  onClick={() =>
+                    handleVote(discussion.main_post.id, "up", true)
+                  }
                 />
                 {discussion.main_post.up_votes_count > 0 && (
                   <Popover>
