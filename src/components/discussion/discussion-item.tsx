@@ -225,7 +225,7 @@ export const DiscussionItem = React.forwardRef<
                         <input
                           type="text"
                           readOnly
-                          value={`${window.location.origin}/d/${discussion.slug}`}
+                          //   value={`${window.location.origin}/d/${discussion.slug}`}
                           className="w-full text-xs p-2 rounded bg-background pr-16"
                           onClick={(e) => e.currentTarget.select()}
                         />

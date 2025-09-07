@@ -1,8 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRef, useCallback, useEffect } from "react";
-
+import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import type { Discussion } from "@/types/discussion";
 import type { Pagination } from "@/types/common";
@@ -11,30 +10,30 @@ import { DiscussionItem } from "@/components/discussion/discussion-item";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { cn } from "@/lib/utils";
 import { DiscussionControls } from "@/components/discussion/discussion-controls";
-import { SortBy } from "@/types/display-preferences";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { SortBy } from "@/types/display-preferences";
 
 interface DiscussionsListProps {
   initialDiscussions: Pagination<Discussion>;
   from: string;
   sticky?: Discussion[];
+  defaultSort: SortBy;
 }
-
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
 
 export function DiscussionsList({
   initialDiscussions,
   from,
   sticky,
+  defaultSort,
 }: DiscussionsListProps) {
   const { requireAuth } = useRequireAuth();
 
   const [activeTab, setActiveTab] = React.useState<"recommend" | "trace">(
     "recommend"
   );
+
   const { getDisplayMode, getSortBy } = useDiscussionDisplayStore();
   const displayMode = getDisplayMode();
   const sortBy = getSortBy();
@@ -64,25 +63,34 @@ export function DiscussionsList({
         : undefined;
     },
     initialPageParam: 1,
-    // 使用初始数据
     initialData: {
       pages: [initialDiscussions],
       pageParams: [1],
     },
-    staleTime: 0,
+    staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
+    enabled: true,
   });
+
+  useEffect(() => {
+    const isDefaultSort = sortBy === defaultSort;
+    const isDefaultTab = activeTab === "recommend";
+
+    if (!isDefaultSort || !isDefaultTab) {
+      console.log(
+        "Client preferences differ from server render. Refetching..."
+      );
+      refetch();
+    }
+  }, [sortBy, activeTab, defaultSort, refetch]);
 
   const discussions = data?.pages.flatMap((page) => page.items) || [];
 
-  const handleDeleteDiscussion = useCallback(
-    (deletedSlug: string) => {
-      refetch();
-    },
-    [refetch]
-  );
+  const handleDeleteDiscussion = React.useCallback(() => {
+    refetch();
+  }, [refetch]);
 
-  const loadMore = useCallback(() => {
+  const loadMore = React.useCallback(() => {
     if (!isFetchingNextPage && hasNextPage) {
       fetchNextPage();
     }

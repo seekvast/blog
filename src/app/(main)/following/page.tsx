@@ -46,6 +46,6 @@ export default async function HomePage() {
 
   const initialDiscussions = await getDiscussions(sort);
   return (
-    <DiscussionsList initialDiscussions={initialDiscussions} from="following" />
+    <DiscussionsList initialDiscussions={initialDiscussions} from="following" defaultSort={sort} />
   );
 }

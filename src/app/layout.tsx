@@ -16,7 +16,9 @@ export const metadata = {
   cache: "no-cache", //TODO: 测试环境禁用缓存
   title: "Kater",
   description: "Kater",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  ),
 };
 
 export default async function RootLayout({
@@ -35,11 +37,7 @@ export default async function RootLayout({
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
         />
       </head>
-      <body
-        className={cn(
-          "min-h-screen bg-background antialiased",
-        )}
-      >
+      <body className={cn("min-h-screen bg-background antialiased")}>
         <QueryProvider>
           <ThemeProvider
             attribute="class"

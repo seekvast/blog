@@ -37,10 +37,10 @@ const mapLanguage = (i18nLang: string): string => {
   return "zh-tw";
 };
 
-i18n.on("languageChanged", (lng) => {
-  const dayjsLocale = mapLanguage(lng);
-  dayjs.locale(dayjsLocale);
-});
+// i18n.on("languageChanged", (lng) => {
+//   const dayjsLocale = mapLanguage(lng);
+//   dayjs.locale(dayjsLocale);
+// });
 
 export const formatDate = (
   date: string | Date | number,

@@ -26,6 +26,7 @@ import { SearchMobile } from "@/components/search/search-mobile";
 import { NotificationPopover } from "@/components/notification/notification-popover";
 import { useEmailVerificationGuard } from "@/hooks/use-email-verification-guard";
 import { EmailVerificationRequiredFeature } from "@/config/email-verification";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface HeaderProps {
   className?: string;
@@ -37,15 +38,20 @@ export function Header({ className }: HeaderProps) {
   const { user, loading } = useAuth();
   const { openRegister, openLogin } = useAuthModal();
   const { openInterestSelection } = useInterestSelection();
-  const { hasUnsavedContent, isVisible, onClose, setIsVisible, setOpenFrom } =
+  const { isVisible, onClose, setIsVisible, setOpenFrom } =
     usePostEditorStore();
   const { hasDraft } = useDraftStore();
   const { requireEmailVerification } = useEmailVerificationGuard();
 
-  if (!isHeaderVisible) {
-    return <></>;
-  }
+  const [mounted, setMounted] = React.useState(false);
 
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isHeaderVisible) {
+    return null;
+  }
 
   const handleLogoClick = React.useCallback(
     (e: React.MouseEvent) => {
@@ -89,7 +95,6 @@ export function Header({ className }: HeaderProps) {
     >
       <div className="mx-auto w-full max-w-7xl flex h-16 md:h-14 px-4">
         <div className="flex justify-between w-full items-center">
-          {/* Logo */}
           <div className="flex justify-between gap-4">
             <Link
               href="/"
@@ -100,15 +105,19 @@ export function Header({ className }: HeaderProps) {
             </Link>
           </div>
 
-          {/* Search */}
           <div className="relative flex-1 sm:max-w-[240px] mx-3">
             <SearchPopover triggerClassName="w-full hidden lg:flex" />
             <SearchMobile triggerClassName="w-full lg:hidden" />
           </div>
 
-          {/* Actions */}
           <div className="ml-auto flex items-center gap-4">
-            {user ? (
+            {!mounted || loading ? (
+              <div className="flex items-center gap-4">
+                <Skeleton className="hidden h-5 w-5 md:flex" />
+                <Skeleton className="hidden h-5 w-5 lg:flex" />
+                <Skeleton className="h-8 w-8 rounded-full" />
+              </div>
+            ) : user ? (
               <>
                 <div className="relative hidden md:flex">
                   <button

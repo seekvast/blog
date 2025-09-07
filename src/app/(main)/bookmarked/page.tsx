@@ -49,6 +49,7 @@ export default async function HomePage() {
     <DiscussionsList
       initialDiscussions={initialDiscussions}
       from="bookmarked"
+      defaultSort={sort}
     />
   );
 }

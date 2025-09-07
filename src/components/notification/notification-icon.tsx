@@ -4,7 +4,10 @@ import * as React from "react";
 import { Bell } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useUnreadNotificationCount, useMarkAllNotificationsAsRead } from "@/hooks/use-notification";
+import {
+  useUnreadNotificationCount,
+  useMarkAllNotificationsAsRead,
+} from "@/hooks/use-notification";
 
 interface NotificationIconProps {
   className?: string;
@@ -24,6 +27,12 @@ export function NotificationIcon({
   const { unreadCount } = useUnreadNotificationCount(autoLoad, pollingInterval);
   const { markAllAsRead } = useMarkAllNotificationsAsRead();
 
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const handleClick = (e: React.MouseEvent) => {
     markAllAsRead();
     onClick?.();
@@ -37,13 +46,10 @@ export function NotificationIcon({
       tabIndex={0}
     >
       <Bell className={cn("h-5 w-5", iconClassName)} />
-      {unreadCount > 0 && (
-        <Badge
-          variant="destructive"
-          className="absolute -top-1 -right-2 h-4 w-4 flex items-center justify-center text-[10px] p-0"
-        >
+      {mounted && unreadCount > 0 && (
+        <span className="absolute right-0 top-0 h-2 w-2 rounded-full">
           {unreadCount > 999 ? "999+" : unreadCount}
-        </Badge>
+        </span>
       )}
     </div>
   );

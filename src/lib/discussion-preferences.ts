@@ -2,7 +2,7 @@ import { SortBy, DisplayMode } from "@/types/display-preferences";
 
 // 默认偏好设置
 export const DEFAULT_DISCUSSION_SORT: SortBy = "hot";
-export const DEFAULT_DISCUSSION_DISPLAY: DisplayMode = "list";
+export const DEFAULT_DISPLAY_MODE: DisplayMode = "list";
 
 // Cookie 键名
 const COOKIE_KEYS = {
@@ -23,7 +23,7 @@ export function getValidDisplayMode(display?: string): DisplayMode {
   const validModes: DisplayMode[] = ["list", "grid"];
   return validModes.includes(display as DisplayMode)
     ? (display as DisplayMode)
-    : DEFAULT_DISCUSSION_DISPLAY;
+    : DEFAULT_DISPLAY_MODE;
 }
 
 // 客户端：设置 Cookie
@@ -64,7 +64,7 @@ export function getDiscussionPreferencesFromClientCookie() {
   if (typeof window === "undefined") {
     return {
       sort: DEFAULT_DISCUSSION_SORT,
-      display: DEFAULT_DISCUSSION_DISPLAY,
+      display: DEFAULT_DISPLAY_MODE,
     };
   }
 

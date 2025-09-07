@@ -1,27 +1,31 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from 'react'
-import { I18nextProvider } from 'react-i18next'
-import i18n from '@/i18n'
-import '@/lib/dayjs'
+import { ReactNode, useEffect } from "react";
+import { I18nextProvider } from "react-i18next";
+import { useParams } from "next/navigation";
+import i18nClient from "@/i18n";
 
-export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [isClient, setIsClient] = useState(false)
+interface I18nProviderProps {
+  children: ReactNode;
+}
+
+function LanguageUpdater() {
+  const params = useParams<{ lng: string }>();
 
   useEffect(() => {
-    setIsClient(true)
-    // 确保客户端初始化时使用正确的语言
-    i18n.changeLanguage('zh-Hans-CN')
-  }, [])
+    if (params?.lng && i18nClient.language !== params.lng) {
+      i18nClient.changeLanguage(params.lng);
+    }
+  }, [params?.lng]);
 
-  // 在服务器端渲染时不渲染内容
-  if (!isClient) {
-    return null
-  }
+  return null;
+}
 
+export function I18nProvider({ children }: I18nProviderProps) {
   return (
-    <I18nextProvider i18n={i18n}>
+    <I18nextProvider i18n={i18nClient}>
+      <LanguageUpdater />
       {children}
     </I18nextProvider>
-  )
+  );
 }

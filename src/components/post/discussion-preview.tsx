@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface DiscussionPreviewProps {
-  content: string; // 已经渲染好的 HTML
+  content: string;
   displayMode: "grid" | "list";
   className?: string;
 }
@@ -15,25 +16,34 @@ export function DiscussionPreview({
   displayMode,
   className,
 }: DiscussionPreviewProps) {
-  const processContent = React.useCallback((html: string) => {
+  const [processedData, setProcessedData] = useState<{
+    processedContent: string;
+    firstImgSrc?: string;
+  }>({
+    processedContent: "",
+    firstImgSrc: undefined,
+  });
+
+  useEffect(() => {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
+    const doc = parser.parseFromString(content, "text/html");
 
     const firstImg = doc.querySelector("img");
     const firstImgSrc = firstImg?.src;
 
     doc.querySelectorAll("img").forEach((img) => img.remove());
-
-    return {
+    
+    setProcessedData({
       processedContent: doc.body.innerHTML,
       firstImgSrc,
-    };
-  }, []);
+    });
+  }, [content]);
 
-  const { processedContent, firstImgSrc } = React.useMemo(
-    () => processContent(content),
-    [content, processContent]
-  );
+  const { processedContent, firstImgSrc } = processedData;
+
+  if (!processedContent && !firstImgSrc) {
+    return <div className={cn("mt-2 text-sm h-10", className)}></div>; 
+  }
 
   return (
     <div className={className}>

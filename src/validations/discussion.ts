@@ -111,7 +111,7 @@ export const discussionSchema = z.object({
         path: ["content"],
       }
     ),
-  board_id: z.number(),
+  board_id: z.number().positive('请选择看板'),
   board_child_id: z.number().optional(),
   type: z.string().optional(),
   is_private: z.boolean().optional(),

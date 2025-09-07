@@ -3,7 +3,7 @@ import {
   getValidSortBy,
   getValidDisplayMode,
   DEFAULT_DISCUSSION_SORT,
-  DEFAULT_DISCUSSION_DISPLAY,
+  DEFAULT_DISPLAY_MODE,
 } from "./discussion-preferences";
 
 // Cookie 键名

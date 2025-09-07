@@ -227,7 +227,6 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
           </div>
         </div>
 
-        {/* 加入看板对话框已移至 BoardActionButton 组件内部 */}
 
         {/* 页脚链接 */}
         <div className="mt-auto space-y-4">
