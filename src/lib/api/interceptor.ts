@@ -39,13 +39,6 @@ export async function runRequestInterceptors(
 ): Promise<FetchOptions> {
   let interceptedOptions = { ...options };
 
-  // 添加认证检查拦截器
-  const session = await getSession();
-  if (!session && shouldSkipRequest(endpoint, options)) {
-    interceptedOptions.skipRequest = true;
-    return interceptedOptions;
-  }
-
   for (const interceptor of requestInterceptors) {
     interceptedOptions = await interceptor(interceptedOptions);
   }

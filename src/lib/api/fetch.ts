@@ -9,16 +9,23 @@ import { getBaseUrl, API_CONFIG } from "./config";
 
 const { DEFAULT_RETRY, DEFAULT_TIMEOUT } = API_CONFIG;
 
-async function createHeaders(options: FetchOptions): Promise<Headers> {
-  const session = await getSession();
+async function createHeaders(
+  options: FetchOptions,
+  isServer: boolean
+): Promise<Headers> {
   const headers = new Headers(options.headers);
 
   if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
   }
-  if (session?.user?.token) {
-    headers.set("Authorization", `Bearer ${session.user.token}`);
+
+  if (isServer) {
+    const session = await getSession();
+    if (session?.user?.token) {
+      headers.set("Authorization", `Bearer ${session.user.token}`);
+    }
   }
+
   return headers;
 }
 
@@ -36,18 +43,15 @@ async function handleResponse<T>(response: Response): Promise<T> {
       throw error;
     }
 
-    // 处理错误响应
     const error = new Error() as ApiError;
     error.status = interceptedResponse.status;
     error.data = errorData;
 
-    // 如果错误消息是对象，将其转换为字符串
     if (typeof errorData.message === "object") {
       error.message = Object.entries(errorData.message)
         .map(([key, value]) => `${key}: ${value}`)
         .join("\n");
     } else if (errorData.error) {
-      // 支持标准化的错误格式
       error.message = errorData.error;
       error.code = errorData.code;
     } else {
@@ -55,12 +59,17 @@ async function handleResponse<T>(response: Response): Promise<T> {
         errorData.message ||
         `HTTP error! status: ${interceptedResponse.status}`;
     }
-
     throw error;
+  }
+
+  const contentType = interceptedResponse.headers.get("content-type");
+  if (!contentType || !contentType.includes("application/json")) {
+    return null as T;
   }
 
   const data: ApiResponse<T> = await interceptedResponse.json();
   const interceptedData = await runResponseDataInterceptors(data);
+
   if (interceptedData.code !== 0) {
     const error = new Error() as ApiError;
     error.code = interceptedData.code;
@@ -73,7 +82,6 @@ async function handleResponse<T>(response: Response): Promise<T> {
     } else {
       error.message = interceptedData.message || "操作失败";
     }
-
     throw error;
   }
 
@@ -101,13 +109,11 @@ export async function fetchApi<T>(
 
   const isServer = typeof window === "undefined";
   const baseUrl = getBaseUrl(isServer);
-
+  const urlPath = `${baseUrl}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
   const url = isServer
-    ? new URL(endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`)
-    : new URL(
-        endpoint.startsWith("http") ? endpoint : `${baseUrl}${endpoint}`,
-        window.location.origin
-      );
+    ? new URL(urlPath)
+    : new URL(urlPath, window.location.origin);
+
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
@@ -115,18 +121,12 @@ export async function fetchApi<T>(
       }
     });
   }
-  const headers = await createHeaders(restOptions);
+  console.log(url, "fetch.............");
+  const headers = await createHeaders(restOptions, isServer);
   const interceptedOptions = await runRequestInterceptors(endpoint, {
     ...restOptions,
     headers,
   });
-  if (interceptedOptions.skipRequest) {
-    return {
-      code: 0,
-      data: null,
-      message: "请求已跳过（用户未登录）",
-    } as any;
-  }
 
   let lastError: Error | null = null;
   let attempts = 0;
@@ -143,19 +143,17 @@ export async function fetchApi<T>(
       lastError = error as Error;
       attempts++;
 
-      // 如果是最后一次尝试或者是不需要重试的错误，直接抛出
       const apiError = error as ApiError;
       if (
         attempts === retry ||
         apiError.status === 401 ||
         apiError.status === 403 ||
         apiError.status === 422 ||
-        (apiError.status && apiError.status >= 500 && apiError.status < 600) // 添加500系列错误
+        (apiError.status && apiError.status >= 500 && apiError.status < 600)
       ) {
         throw error;
       }
 
-      // 等待一段时间后重试
       await new Promise((resolve) =>
         setTimeout(resolve, Math.pow(2, attempts) * 1000)
       );

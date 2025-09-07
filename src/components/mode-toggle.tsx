@@ -45,7 +45,7 @@ export function ModeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="flex cursor-pointer items-center gap-2 py-2 text-sm text-muted-foreground hover:text-foreground">
-          <CurrentIcon className="h-4 w-4 leading-none" />
+          <CurrentIcon className="leading-none" />
           <span className="truncate">{currentThemeDetails.label}</span>
         </div>
       </DropdownMenuTrigger>
@@ -59,10 +59,10 @@ export function ModeToggle() {
               className="flex justify-between"
             >
               <div className="flex items-center gap-2">
-                <Icon className="h-4 w-4" />
+                <Icon />
                 <span>{option.label}</span>
               </div>
-              {theme === option.value && <Check className="h-4 w-4" />}
+              {theme === option.value && <Check />}
             </DropdownMenuItem>
           );
         })}

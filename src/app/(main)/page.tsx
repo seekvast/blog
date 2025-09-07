@@ -1,7 +1,6 @@
 // 我是 Linus。看看一个简洁的页面应该是什么样。
 
 import { DiscussionsList } from "@/components/discussion/discussions-list";
-import { DiscussionList } from "@/components/discussion/discussion-list";
 
 import { api } from "@/lib/api";
 import { getHomeMetadata } from "@/lib/metadata";
@@ -53,7 +52,6 @@ export default async function HomePage() {
   const { discussions, sticky } = await getHomePageData();
 
   return (
-    // <DiscussionList discussions={discussions} sticky={sticky} />
     <DiscussionsList
       initialDiscussions={discussions}
       from="index"
