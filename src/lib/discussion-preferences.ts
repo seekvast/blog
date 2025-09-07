@@ -5,14 +5,15 @@ export const DEFAULT_DISCUSSION_SORT: SortBy = "hot";
 export const DEFAULT_DISPLAY_MODE: DisplayMode = "list";
 
 // Cookie 键名
-const COOKIE_KEYS = {
+export const COOKIE_KEYS = {
   DISCUSSION_SORT: "discussion-sort",
   DISCUSSION_DISPLAY: "discussion-display",
 } as const;
 
+
 // 验证排序参数
 export function getValidSortBy(sort?: string): SortBy {
-  const validSorts: SortBy[] = ["hot", "create", "reply"];
+  const validSorts: SortBy[] = ["hot", "newest", "last"];
   return validSorts.includes(sort as SortBy)
     ? (sort as SortBy)
     : DEFAULT_DISCUSSION_SORT;

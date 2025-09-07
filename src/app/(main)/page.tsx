@@ -1,62 +1,53 @@
-// 我是 Linus。看看一个简洁的页面应该是什么样。
 
 import { DiscussionsList } from "@/components/discussion/discussions-list";
-
 import { api } from "@/lib/api";
 import { getHomeMetadata } from "@/lib/metadata";
-import { DEFAULT_DISCUSSION_SORT } from "@/lib/discussion-preferences";
-import type { Discussion } from "@/types/discussion";
-import type { Pagination } from "@/types/common";
+import { getValidSortBy } from "@/lib/discussion-preferences";
+import { SortBy } from "@/types/display-preferences";
 
-export const generateMetadata = () => {
-  return getHomeMetadata();
-};
-
+export const generateMetadata = () => getHomeMetadata();
 export const revalidate = 60;
 
-const defaultDiscussions: Pagination<Discussion> = {
-  code: -1,
-  items: [],
-  total: 0,
-  per_page: 10,
-  current_page: 1,
-  last_page: 1,
-  message: "Failed to fetch data.",
-};
+interface HomePageProps {
+  searchParams: {
+    sort?: string;
+  };
+}
 
-async function getHomePageData() {
+async function getHomePageData(sortBy: SortBy) {
   try {
     const [discussionsResponse, stickyResponse] = await Promise.all([
       api.discussions.list({
         page: 1,
         per_page: 10,
-        sort: DEFAULT_DISCUSSION_SORT,
+        sort: sortBy,
       }),
       api.discussions.getSticky({}),
     ]);
-
-    return {
-      discussions: discussionsResponse,
-      sticky: stickyResponse,
-    };
+    return { discussions: discussionsResponse, sticky: stickyResponse };
   } catch (error) {
     console.error("Failed to get homepage data:", error);
     return {
-      discussions: defaultDiscussions,
+      discussions: {
+        code: -1, items: [], total: 0, per_page: 10,
+        current_page: 1, last_page: 1, message: "Failed to fetch data.",
+      },
       sticky: [],
     };
   }
 }
 
-export default async function HomePage() {
-  const { discussions, sticky } = await getHomePageData();
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const sortBy = getValidSortBy(searchParams.sort)
+
+  const { discussions, sticky } = await getHomePageData(sortBy);
 
   return (
     <DiscussionsList
       initialDiscussions={discussions}
-      from="index"
+      sortBy={sortBy}
       sticky={sticky}
-      defaultSort={DEFAULT_DISCUSSION_SORT}
+      from="index" 
     />
   );
 }

@@ -1,545 +1,69 @@
-"use client";
 
-import * as React from "react";
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams, useSearchParams } from "next/navigation";
-import { Loader2, UserRound } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Suspense } from "react";
 import { api } from "@/lib/api";
-import { ErrorBoundary } from "@/components/error/error-boundary";
-import { Board, BoardChild, BoardRule } from "@/types/board";
-import { Discussion } from "@/types/discussion";
-import { DiscussionItem } from "@/components/discussion/discussion-item";
-import { InfiniteScroll } from "@/components/ui/infinite-scroll";
-import { BoardActionButton } from "@/components/board/board-action-button";
-import { useQuery } from "@tanstack/react-query";
-import { DiscussionControls } from "@/components/discussion/discussion-controls";
-import { SortBy } from "@/types/display-preferences";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@/components/ui/use-toast";
-import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
-import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { ReportDialog } from "@/components/report/report-dialog";
-import { ReportTarget } from "@/constants/report-target";
+import { notFound } from "next/navigation";
+import { BoardDetail } from "./board-detail";
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
+import { getDiscussionPreferencesFromCookie } from "@/lib/discussion-preferences-server";
 
-export default function BoardPage() {
-  return (
-    <ErrorBoundary>
-      <Suspense
-        fallback={
-          <div className="flex items-center justify-center min-h-screen">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        }
-      >
-        <BoardContent />
-      </Suspense>
-    </ErrorBoundary>
-  );
+interface BoardPageProps {
+  params: { slug: string };
+  searchParams: {
+    tab?: string;
+    child?: string;
+    sort?: string;
+  };
 }
 
-function BoardContent() {
-  const router = useRouter();
+export default async function BoardPage({
+  params,
+  searchParams,
+}: BoardPageProps) {
+  const { slug } = params;
 
-  const queryClient = useQueryClient();
-  const params = useParams();
-  const searchParams = useSearchParams();
-  const [discussions, setDiscussions] = useState<Discussion[]>([]);
-  const [discussionsLoading, setDiscussionsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [boardChildren, setBoardChildren] = useState<BoardChild[]>([]);
-  const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const observerRef = useRef<IntersectionObserver>();
-  const [hasMore, setHasMore] = useState(true);
-  const displayMode = useDiscussionDisplayStore((state) =>
-    state.getDisplayMode("board_detail")
-  );
-  const sortBy = useDiscussionDisplayStore((state) => state.getSortBy());
-  const [activeTab, setActiveTab] = useState<"posts" | "rules" | "children">(
-    "posts"
-  );
-  const [reportToKaterOpen, setReportToKaterOpen] = useState(false);
+  const activeTab = searchParams.tab || "posts";
+  const childId = searchParams.child ? parseInt(searchParams.child, 1) : null;
 
-  const updateUrlParams = useCallback(
-    (boardId?: number, childId?: number | null) => {
-      const urlParams = new URLSearchParams(window.location.search);
+  const prefs = getDiscussionPreferencesFromCookie();
+  const sortQuery = searchParams.sort;
+  const sortBy = prefs.sort;
 
-      if (boardId && !urlParams.has("bid")) {
-        urlParams.set("bid", boardId.toString());
-      }
-
-      if (childId !== undefined) {
-        if (childId) {
-          urlParams.set("child", childId.toString());
-        } else {
-          urlParams.delete("child");
-        }
-      }
-
-      const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
-      window.history.replaceState({}, "", newUrl);
-    },
-    []
-  );
-
-  const handleLoadMore = useCallback(() => {
-    if (!discussionsLoading && hasMore) {
-      setCurrentPage((prev) => prev + 1);
-    }
-  }, [discussionsLoading, hasMore]);
-
-  const handleChangeDiscussion = (slug: string) => {
-    setDiscussions((prev) =>
-      prev.filter((discussion) => discussion.slug !== slug)
-    );
-    fetchDiscussions();
-  };
-
-  const {
-    data: board,
-    isLoading: loading,
-    error: boardError,
-  } = useQuery({
-    queryKey: ["board_detail", params?.slug],
-    queryFn: async () => {
-      const data = await api.boards.get({ slug: params?.slug });
-      return data;
-    },
-    enabled: !!params?.slug,
-    staleTime: 1 * 60 * 1000,
-  });
-
-  const fetchBoardChildren = async () => {
-    try {
-      if (!board?.id) return;
-      const data = await api.boards.getChildren(board.id);
-      setBoardChildren(data.items);
-    } catch (error) {
-      setError("获取子板块失败");
-    }
-  };
-
-  const fetchDiscussions = async (sort: SortBy = sortBy) => {
-    try {
-      setDiscussionsLoading(true);
-      if (!board?.id) return;
-
-      const data = await api.discussions.list({
-        board_id: board.id,
-        board_child_id: selectedChildId || undefined,
-        page: currentPage,
-        per_page: 10,
-        from: "board",
-        sort,
-      });
-
-      if (currentPage === 1) {
-        setDiscussions(data.items);
-      } else {
-        setDiscussions((prev) => [...prev, ...data.items]);
-      }
-
-      setTotalPages(data.last_page);
-      setHasMore(currentPage < data.last_page);
-    } catch (error) {
-      console.error("Failed to fetch discussions:", error);
-      setError("获取数据失败");
-    } finally {
-      setDiscussionsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (boardError) {
-      console.error("获取看板信息失败:", boardError);
-    }
-  }, [boardError]);
-
-  // 处理 board 数据加载完成后的初始化
-  useEffect(() => {
-    if (board?.id) {
-      // 更新URL参数中的bid
-      updateUrlParams(board.id);
-
-      // 获取子板块数据
-      fetchBoardChildren().then(() => {
-        const childParam = searchParams?.get("child");
-        if (childParam) {
-          const childId = parseInt(childParam, 10);
-          if (!isNaN(childId)) {
-            setSelectedChildId(childId);
-          }
-        }
-      });
-    }
-  }, [board?.id, searchParams, updateUrlParams]);
-
-  // 处理 selectedChildId 变化
-  useEffect(() => {
-    if (board?.id) {
-      setCurrentPage(1);
-      setDiscussions([]);
-      fetchDiscussions();
-
-      updateUrlParams(undefined, selectedChildId);
-    }
-  }, [board?.id, selectedChildId, updateUrlParams]);
-
-  useEffect(() => {
-    if (board?.id && currentPage > 1) {
-      fetchDiscussions();
-    }
-  }, [currentPage]);
-
-  // 添加对sortBy变化的监听
-  useEffect(() => {
-    if (board?.id && activeTab === "posts") {
-      setCurrentPage(1);
-      setDiscussions([]);
-      fetchDiscussions();
-    }
-  }, [sortBy]);
-
-  const {
-    data: rules = [],
-    isLoading: rulesLoading,
-    isError: rulesError,
-  } = useQuery<BoardRule[]>({
-    queryKey: ["board-rules", board?.id],
-    queryFn: () => {
-      if (!board?.id) return [];
-      return api.boards.getRules({ board_id: board.id });
-    },
-    enabled: !!board?.id && activeTab === "rules",
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const { mutate: hideChild } = useMutation({
-    mutationFn: (child_id: number) =>
-      api.boards.hiddenChild({ child_id, operator: "user" }),
-    onSuccess: () => {
-      fetchBoardChildren();
-    },
-    onError: () => {
-      toast({
-        title: "操作失败",
-        variant: "default",
-      });
-    },
-  });
-
-  const handleHide = (child: BoardChild) => {
-    if (!board?.id) return;
-
-    hideChild(child.id);
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-red-500">
-        {error}
-      </div>
-    );
-  }
-
+  const board = await api.boards.get({ slug });
   if (!board) {
-    const notFoundError = new Error("看板不存在");
-    notFoundError.name = "NotFoundError";
-    throw notFoundError;
+    notFound();
   }
 
-  // 拉黑看板成功后的回调
-  const handleBlockSuccess = () => {
-    router.back();
-  };
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr,auto] gap-4 md:gap-6">
-      {/* 看板信息 */}
-      <div className="min-w-0">
-        <div className="flex flex-col bg-background max-w-4xl">
-          <div className="flex items-start space-x-3 pb-4">
-            <Avatar className="h-14 w-14">
-              <AvatarImage src={board.avatar} alt={board.name} />
-              <AvatarFallback>{board.name[0].toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <h1 className="text-lg font-medium">{board.name}</h1>
-                  {board.is_nsfw === 1 && (
-                    <Badge variant="destructive" className="h-5">
-                      成人
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex items-center space-x-4">
-                  <BoardActionButton
-                    board={board}
-                    setReportToKaterOpen={setReportToKaterOpen}
-                    onBlockSuccess={handleBlockSuccess}
-                  />
-                </div>
-              </div>
-              <div className="mt-1 text-sm text-muted-foreground">
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  {board.visibility >= 1 ? (
-                    <>
-                      <span>私密</span>
-                      <span>•</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>公開</span>
-                      <span>•</span>
-                    </>
-                  )}
-
-                  <div className="flex items-center">
-                    <UserRound className="h-4" />
-                    <span>{board.users_count || 0}</span>
-                  </div>
-                  {board.category && (
-                    <>
-                      <span>•</span>
-                      <span>{board.category.name}</span>
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="mt-1 text-sm text-muted-foreground">
-                {board.desc}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 顶部导航 */}
-        <div className="bg-background">
-          <div className="mx-auto">
-            <div className="flex h-[40px] items-center justify-between px-4 border-b">
-              <div className="flex items-center space-x-4 lg:space-x-8">
-                <button
-                  type="button"
-                  className={cn(
-                    "relative px-2 py-1 transition-colors duration-150",
-                    activeTab === "posts"
-                      ? "text-primary font-bold"
-                      : "text-muted-foreground font-normal"
-                  )}
-                  onClick={() => setActiveTab("posts")}
-                >
-                  文章
-                  {activeTab === "posts" && (
-                    <span
-                      className="absolute left-0 right-0 -bottom-1 h-[3px] rounded bg-primary"
-                      style={{ width: "100%" }}
-                    />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  className={cn(
-                    "relative px-2 py-1 transition-colors duration-150",
-                    activeTab === "rules"
-                      ? "text-primary font-bold"
-                      : "text-muted-foreground font-normal"
-                  )}
-                  onClick={() => setActiveTab("rules")}
-                >
-                  规则
-                  {activeTab === "rules" && (
-                    <span
-                      className="absolute left-0 right-0 -bottom-1 h-[3px] rounded bg-primary"
-                      style={{ width: "100%" }}
-                    />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  className={cn(
-                    "relative px-2 py-1 transition-colors duration-150",
-                    activeTab === "children"
-                      ? "text-primary font-bold"
-                      : "text-muted-foreground font-normal"
-                  )}
-                  onClick={() => setActiveTab("children")}
-                >
-                  子版
-                  {activeTab === "children" && (
-                    <span
-                      className="absolute left-0 right-0 -bottom-1 h-[3px] rounded bg-primary"
-                      style={{ width: "100%" }}
-                    />
-                  )}
-                </button>
-              </div>
-              {activeTab === "posts" && <DiscussionControls />}
-            </div>
-          </div>
-        </div>
-
-        {/* 子导航 */}
-        {activeTab === "posts" && (
-          <div className="flex flex-wrap items-center gap-x-8 gap-y-4 px-4 pt-3 text-sm">
-            <Badge
-              variant={!selectedChildId ? "default" : "secondary"}
-              className={`cursor-pointer hover:bg-primary/90 ${
-                !selectedChildId ? "" : "hover:bg-secondary/80"
-              }`}
-              onClick={() => setSelectedChildId(null)}
-            >
-              全部
-            </Badge>
-            {boardChildren.map((child) => (
-              <Badge
-                key={child.id}
-                variant={selectedChildId === child.id ? "default" : "secondary"}
-                className={`cursor-pointer hover:bg-primary/90 ${
-                  selectedChildId === child.id ? "" : "hover:bg-secondary/80"
-                }`}
-                onClick={() => setSelectedChildId(child.id)}
-              >
-                {child.name}
-              </Badge>
-            ))}
-          </div>
-        )}
-
-        {/* 帖子列表或规则列表 */}
-        <div className="mx-auto w-full">
-          {activeTab === "posts" && (
-            <>
-              <InfiniteScroll
-                loading={discussionsLoading}
-                hasMore={hasMore}
-                onLoadMore={handleLoadMore}
-                className="py-4 divide-y"
-              >
-                {discussions.map((discussion) => (
-                  <div key={discussion.slug} className="px-4">
-                    <DiscussionItem
-                      key={discussion.slug}
-                      discussion={discussion}
-                      displayMode={displayMode}
-                      onChange={handleChangeDiscussion}
-                    />
-                  </div>
-                ))}
-              </InfiniteScroll>
-              {/* 4. 添加加载状态指示器 */}
-              <div className="h-10 flex items-center justify-center text-muted-foreground"></div>
-            </>
-          )}
-
-          {activeTab === "rules" && (
-            <div className="">
-              {rulesLoading ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                </div>
-              ) : rulesError ? (
-                <div className="text-center py-8 text-red-500">
-                  获取规则列表失败，请重试
-                </div>
-              ) : rules.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  暂无规则
-                </div>
-              ) : (
-                <div className="divide-y">
-                  {rules.map((rule, index) => (
-                    <div key={rule.id || index} className="p-4">
-                      <h3 className="text-lg font-medium mb-2">{rule.title}</h3>
-                      <p className="text-muted-foreground">{rule.content}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === "children" && (
-            <div className="">
-              {boardChildren.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  暂无子版块
-                </div>
-              ) : (
-                <div className="divide-y">
-                  {boardChildren.map((child) => (
-                    <div key={child.id} className="p-4">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-medium mb-2">
-                          {child.name}
-                        </h3>
-                        <button
-                          className="text-xs px-2 py-1 rounded-full bg-secondary"
-                          onClick={() => handleHide(child)}
-                        >
-                          {child.user_hidden
-                            ? child.user_hidden.status === 1
-                              ? "取消隐藏"
-                              : "隐藏"
-                            : child.is_hidden === 1
-                            ? "取消隐藏"
-                            : "隐藏"}
-                        </button>
-                      </div>
-                      <span className="text-sm text-muted-foreground">
-                        {child.id} 篇文章
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* 右侧广告模块 */}
-      <div className="hidden lg:block w-[240px] flex-shrink-0">
-        <div className="sticky top-4">
-          <div className="rounded-lg border bg-card shadow-sm overflow-hidden">
-            <div className="p-2">
-              <div className="space-y-4">
-                <div className="rounded overflow-hidden">
-                  <img
-                    src="/placeholder-ad.jpg"
-                    alt="广告"
-                    className="w-full h-auto object-cover"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <ReportDialog
-        open={reportToKaterOpen}
-        onOpenChange={setReportToKaterOpen}
-        title="向Kater檢舉"
-        form={{
-          user_hashid: board.creator_hashid,
+  const [discussions, rules, children] = await Promise.all([
+    activeTab === "posts"
+      ? api.discussions.list({
           board_id: board.id,
-          target: ReportTarget.BOARD,
-          reported_to: "admin",
-        }}
+          board_child_id: childId || undefined,
+          page: 1,
+          per_page: 10,
+          from: "board",
+          sort: sortBy,
+        })
+      : Promise.resolve(null),
+    // 只有在 rules tab 时才获取规则
+    activeTab === "rules"
+      ? api.boards.getRules({ board_id: board.id })
+      : Promise.resolve(null),
+    api.boards.getChildren(board.id).catch(() => ({ items: [] })),
+  ]);
+
+  return (
+    <Suspense
+      fallback={<Loader2 className="h-8 w-8 animate-spin text-primary" />}
+    >
+      <BoardDetail
+        initialBoard={board}
+        initialDiscussions={discussions}
+        initialRules={rules}
+        initialChildren={children.items}
+        activeTab={activeTab}
+        selectedChildId={childId}
+        sortBy={sortBy}
       />
-    </div>
+    </Suspense>
   );
 }

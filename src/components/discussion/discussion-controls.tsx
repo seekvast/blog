@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { LayoutGrid, List, ChevronDown } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -10,38 +11,30 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
-import { DisplayMode, SortBy } from "@/types/display-preferences";
+import { SortBy } from "@/types/display-preferences";
 import { syncDiscussionPreferencesToCookie } from "@/lib/discussion-preferences";
 
 interface DiscussionControlsProps {
-  sortBy?: SortBy;
-  setSortBy?: (sort: SortBy) => void;
+  sortBy: SortBy;
   className?: string;
   pageId?: string;
 }
 
 export function DiscussionControls({
-  sortBy: externalSortBy,
-  setSortBy: externalSetSortBy,
+  sortBy,
   className,
   pageId,
 }: DiscussionControlsProps) {
-  const {
-    getDisplayMode,
-    setDisplayMode,
-    getSortBy,
-    setSortBy: storeSetSortBy,
-  } = useDiscussionDisplayStore();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
+  const { getDisplayMode, setDisplayMode } = useDiscussionDisplayStore();
   const displayMode = getDisplayMode(pageId);
 
-  const sortBy = externalSortBy ?? getSortBy(pageId);
-
-  // 检查是否是讨论页面（需要同步Cookie）
   const isDiscussionPage = React.useMemo(() => {
     if (typeof window === "undefined") return false;
     const path = window.location.pathname;
-    // 统一判断讨论相关页面
     return (
       path === "/" ||
       path === "/following" ||
@@ -50,20 +43,25 @@ export function DiscussionControls({
     );
   }, []);
 
-  const setSortBy =
-    externalSetSortBy ??
-    ((sort: SortBy) => {
-      storeSetSortBy(sort, pageId);
-      // 如果是讨论页面，同步到Cookie
-      if (isDiscussionPage) {
-        syncDiscussionPreferencesToCookie({ sort });
-      }
-    });
+  const handleSortChange = (newSort: SortBy) => {
+    if (isDiscussionPage) {
+      syncDiscussionPreferencesToCookie({ sort: newSort });
+    }
 
-  const sortOptions = {
+    const current = new URLSearchParams(
+      Array.from(searchParams?.entries() ?? [])
+    );
+    current.set("sort", newSort);
+    const search = current.toString();
+    const query = search ? `?${search}` : "";
+
+    router.push(`${pathname}${query}`);
+  };
+
+  const sortOptions: Record<SortBy, string> = {
     hot: "热门",
-    create: "最新发表",
-    reply: "最后回复",
+    newest: "最新发表",
+    last: "最后回复",
   };
 
   return (
@@ -71,7 +69,7 @@ export function DiscussionControls({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <div className="inline-flex items-center space-x-1 font-medium text-muted-foreground cursor-pointer">
-            <span>{sortOptions[sortBy]}</span>
+            <span>{sortOptions[sortBy] || "排序"}</span>
             <ChevronDown className="h-4 w-4" />
           </div>
         </DropdownMenuTrigger>
@@ -80,20 +78,20 @@ export function DiscussionControls({
             <DropdownMenuItem
               key={key}
               className={cn(sortBy === key && "bg-accent", "cursor-pointer")}
-              onClick={() => setSortBy(key as SortBy)}
+              onClick={() => handleSortChange(key as SortBy)}
             >
               {label}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
+
       <button
         type="button"
         className="inline-flex h-8 items-center justify-center font-medium text-muted-foreground"
         onClick={() => {
           const newDisplayMode = displayMode === "grid" ? "list" : "grid";
           setDisplayMode(newDisplayMode, pageId);
-          // 如果是讨论页面，同步到Cookie
           if (isDiscussionPage) {
             syncDiscussionPreferencesToCookie({ display: newDisplayMode });
           }

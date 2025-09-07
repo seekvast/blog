@@ -13,7 +13,6 @@ async function handler(req: NextRequest) {
   if (token?.token) {
     headers.set("Authorization", `Bearer ${token.token}`);
   }
-  console.log(apiUrl, "apiUrl.................");
 
   try {
     const response = await fetch(apiUrl, {

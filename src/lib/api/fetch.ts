@@ -121,7 +121,6 @@ export async function fetchApi<T>(
       }
     });
   }
-  console.log(url, "fetch.............");
   const headers = await createHeaders(restOptions, isServer);
   const interceptedOptions = await runRequestInterceptors(endpoint, {
     ...restOptions,

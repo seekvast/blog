@@ -1,10 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import type { Discussion } from "@/types/discussion";
-import type { Pagination } from "@/types/common";
+import type { Discussion, Pagination } from "@/types/";
 import { api } from "@/lib/api";
 import { DiscussionItem } from "@/components/discussion/discussion-item";
 import { InfiniteScroll } from "@/components/ui/infinite-scroll";
@@ -18,15 +16,17 @@ import { SortBy } from "@/types/display-preferences";
 interface DiscussionsListProps {
   initialDiscussions: Pagination<Discussion>;
   from: string;
+  sortBy: SortBy;
   sticky?: Discussion[];
-  defaultSort: SortBy;
+  boardSlug?: string;
 }
 
 export function DiscussionsList({
   initialDiscussions,
   from,
+  sortBy,
   sticky,
-  defaultSort,
+  boardSlug,
 }: DiscussionsListProps) {
   const { requireAuth } = useRequireAuth();
 
@@ -34,9 +34,8 @@ export function DiscussionsList({
     "recommend"
   );
 
-  const { getDisplayMode, getSortBy } = useDiscussionDisplayStore();
+  const { getDisplayMode } = useDiscussionDisplayStore();
   const displayMode = getDisplayMode();
-  const sortBy = getSortBy();
 
   const {
     data,
@@ -47,49 +46,29 @@ export function DiscussionsList({
     error,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ["discussions", activeTab, from, sortBy],
+    queryKey: ["discussions", from, sortBy, activeTab, boardSlug],
     queryFn: async ({ pageParam = 1 }) => {
       const response = await api.discussions.list({
         q: activeTab,
         from,
         page: pageParam,
         sort: sortBy,
+        ...(boardSlug && { board_slug: boardSlug }),
       });
       return response;
     },
-    getNextPageParam: (lastPage) => {
-      return lastPage.current_page < lastPage.last_page
+    getNextPageParam: (lastPage) =>
+      lastPage.current_page < lastPage.last_page
         ? lastPage.current_page + 1
-        : undefined;
-    },
+        : undefined,
     initialPageParam: 1,
-    initialData: {
-      pages: [initialDiscussions],
-      pageParams: [1],
-    },
+    initialData: { pages: [initialDiscussions], pageParams: [1] },
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
-    enabled: true,
   });
 
-  useEffect(() => {
-    const isDefaultSort = sortBy === defaultSort;
-    const isDefaultTab = activeTab === "recommend";
-
-    if (!isDefaultSort || !isDefaultTab) {
-      console.log(
-        "Client preferences differ from server render. Refetching..."
-      );
-      refetch();
-    }
-  }, [sortBy, activeTab, defaultSort, refetch]);
-
   const discussions = data?.pages.flatMap((page) => page.items) || [];
-
-  const handleDeleteDiscussion = React.useCallback(() => {
-    refetch();
-  }, [refetch]);
-
+  const handleDeleteDiscussion = React.useCallback(() => refetch(), [refetch]);
   const loadMore = React.useCallback(() => {
     if (!isFetchingNextPage && hasNextPage) {
       fetchNextPage();
@@ -98,7 +77,6 @@ export function DiscussionsList({
 
   return (
     <div className="flex flex-col">
-      {/* 顶部导航 - 仅在非移动端显示 */}
       <div className="bg-background">
         <div className="mx-auto">
           <div className="flex h-[40px] items-center justify-between lg:px-6 lg:border-b">
@@ -112,16 +90,11 @@ export function DiscussionsList({
                       ? "text-primary font-bold"
                       : "text-muted-foreground font-normal"
                   )}
-                  onClick={() => {
-                    setActiveTab("recommend");
-                  }}
+                  onClick={() => setActiveTab("recommend")}
                 >
                   推荐
                   {activeTab === "recommend" && (
-                    <span
-                      className="absolute left-0 right-0 -bottom-1 h-[3px] rounded bg-primary"
-                      style={{ width: "100%" }}
-                    />
+                    <span className="absolute left-0 right-0 -bottom-1 h-[3px] rounded bg-primary" />
                   )}
                 </button>
                 <button
@@ -132,31 +105,22 @@ export function DiscussionsList({
                       ? "text-primary font-bold"
                       : "text-muted-foreground font-normal"
                   )}
-                  onClick={() => {
-                    requireAuth(() => {
-                      setActiveTab("trace");
-                    });
-                  }}
+                  onClick={() => requireAuth(() => setActiveTab("trace"))}
                 >
                   追踪
                   {activeTab === "trace" && (
-                    <span
-                      className="absolute left-0 right-0 -bottom-1 h-[3px] rounded bg-primary"
-                      style={{ width: "100%" }}
-                    />
+                    <span className="absolute left-0 right-0 -bottom-1 h-[3px] rounded bg-primary" />
                   )}
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-4 lg:space-x-8"></div>
+              <div />
             )}
-
-            <DiscussionControls />
+            <DiscussionControls sortBy={sortBy} />
           </div>
         </div>
       </div>
 
-      {/* 置顶讨论列表 */}
       {sticky && sticky.length > 0 && (
         <div className="divide-y border-b">
           {sticky.map((discussion, index) => (
@@ -172,7 +136,6 @@ export function DiscussionsList({
         </div>
       )}
 
-      {/* 错误状态 */}
       {error && (
         <div className="flex flex-col items-center justify-center py-8 text-center">
           <p className="text-destructive mb-4">获取数据失败</p>
@@ -185,32 +148,26 @@ export function DiscussionsList({
         </div>
       )}
 
-      {/* 普通帖子列表 */}
       {!error && (
-        <div className="divide-y">
+        <div>
           <InfiniteScroll
             loading={isFetchingNextPage}
             hasMore={!!hasNextPage}
             onLoadMore={loadMore}
             className="divide-y"
           >
-            {discussions.map((discussion, index) => {
-              const isLastItem = index === discussions.length - 1;
-              return (
-                <div className="lg:px-6" key={discussion.slug + index}>
-                  <DiscussionItem
-                    key={discussion.slug + index}
-                    discussion={discussion}
-                    displayMode={displayMode}
-                    isLastItem={isLastItem}
-                    onChange={handleDeleteDiscussion}
-                  />
-                </div>
-              );
-            })}
+            {discussions.map((discussion, index) => (
+              <div className="lg:px-6" key={discussion.slug + index}>
+                <DiscussionItem
+                  discussion={discussion}
+                  displayMode={displayMode}
+                  isLastItem={index === discussions.length - 1}
+                  onChange={handleDeleteDiscussion}
+                />
+              </div>
+            ))}
           </InfiniteScroll>
 
-          {/* 初始加载状态 */}
           {isLoading && discussions.length === 0 && (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin mr-2" />
@@ -218,14 +175,6 @@ export function DiscussionsList({
             </div>
           )}
 
-          {/* 没有更多数据时的提示 */}
-          {/* {!hasNextPage && !isLoading && discussions.length > 0 && (
-            <div className="flex items-center justify-center py-4 text-muted-foreground">
-              <span>没有更多内容了</span>
-            </div>
-          )} */}
-
-          {/* 空状态 */}
           {!isLoading && discussions.length === 0 && !error && (
             <div className="flex items-center justify-center py-8 text-muted-foreground">
               <span>暂无数据</span>

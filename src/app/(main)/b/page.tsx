@@ -1,234 +1,72 @@
-"use client";
-
-import * as React from "react";
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { InfiniteScroll } from "@/components/ui/infinite-scroll";
 import { api } from "@/lib/api";
-import { debounce } from "@/lib/utils";
-import { Board } from "@/types/board";
-import { ChevronDown } from "lucide-react";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-// SubscribeBoardDialog 已移入 BoardActionButton 组件内部
-import { BoardApprovalMode } from "@/constants/board-approval-mode";
-import { BoardItem } from "@/components/board/board-item";
-import { useRequireAuth } from "@/hooks/use-require-auth";
-import { useBoardActions } from "@/hooks/use-board-actions";
+import { BoardList } from "@/components/board/board-list";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function BoardsPage() {
-  const [boards, setBoards] = useState<Board[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"recommended" | "subscribed">(
-    "recommended"
-  );
-  const { requireAuth } = useRequireAuth();
-  const queryClient = useQueryClient();
-  const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
-  const { handleSubscribe } = useBoardActions();
+interface BoardsPageProps {
+  searchParams: {
+    tab?: "recommended" | "subscribed";
+    category?: string;
+  };
+}
 
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
-    queryKey: ["categories"],
-    queryFn: () => api.common.categories(),
-    staleTime: 1 * 60 * 1000,
+export default async function BoardsPage({ searchParams }: BoardsPageProps) {
+  const activeTab = searchParams.tab || "recommended";
+  const categoryFilter = searchParams.category
+    ? Number(searchParams.category)
+    : null;
+
+  const categoriesPromise = api.common.categories();
+  const initialBoardsPromise = api.boards.list({
+    page: 1,
+    per_page: 20,
+    q: activeTab,
+    ...(categoryFilter && { category_id: categoryFilter }),
   });
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-    error: queryError,
-  } = useInfiniteQuery({
-    queryKey: ["boards", activeTab, categoryFilter],
-    queryFn: async ({ pageParam = 1 }) => {
-      return api.boards.list({
-        page: pageParam,
-        per_page: 20,
-        q: activeTab,
-        ...(categoryFilter && { category_id: categoryFilter }),
-      });
-    },
-    getNextPageParam: (data) => {
-      return data.current_page < data.last_page
-        ? data.current_page + 1
-        : undefined;
-    },
-    initialPageParam: 1,
-  });
-
-  useEffect(() => {
-    if (data) {
-      const allBoards = data.pages.flatMap((page) => page.items);
-      setBoards(allBoards);
-    }
-
-    if (isError && queryError) {
-      setError("加载失败，请重试");
-      console.error("Failed to fetch boards:", queryError);
-    }
-  }, [data, isLoading, isFetchingNextPage, isError, queryError]);
-
-  const handleLoadMore = () => {
-    if (!isFetchingNextPage && hasNextPage) {
-      fetchNextPage();
-    }
-  };
-
-  // 使用 useBoardActions 中的 handleBlock 方法替代原来的 blockBoard
-  const { handleBlock } = useBoardActions();
-
-  const debouncedBlockBoard = useMemo(
-    () =>
-      debounce((boardId: number) => {
-        handleBlock(boardId);
-      }, 300),
-    [handleBlock]
-  );
-
-  const handleTabChange = useCallback(
-    (tabKey: "recommended" | "subscribed") => {
-      queryClient.removeQueries({ queryKey: ["boards", tabKey] });
-      setActiveTab(tabKey);
-      setBoards([]);
-      window.scrollTo(0, 0);
-    },
-    [queryClient]
-  );
-
-  const handleBlockBoard = (boardId: number) => {
-    debouncedBlockBoard(boardId);
-  };
+  const [categories, initialBoardsData] = await Promise.all([
+    categoriesPromise,
+    initialBoardsPromise,
+  ]);
 
   return (
     <div className="flex flex-col">
-      {/* 顶部导航 */}
+      <Suspense fallback={<BoardPageSkeleton />}>
+        <BoardList
+          initialPage={initialBoardsData}
+          categories={categories}
+          activeTab={activeTab}
+          categoryFilter={categoryFilter}
+        />
+      </Suspense>
+    </div>
+  );
+}
+
+function BoardPageSkeleton() {
+  return (
+    <div className="flex flex-col">
       <div className="bg-background">
         <div className="mx-auto w-full">
           <div className="flex h-[40px] items-center justify-between relative lg:px-6 lg:border-b">
-            <div className="flex items-center space-x-8 relative ">
-              {[
-                { key: "recommended", label: "推荐" },
-                { key: "subscribed", label: "已加入" },
-              ].map((tab, idx) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  className={`relative px-2 py-1 transition-colors duration-150
-                    ${
-                      activeTab === tab.key
-                        ? "text-primary font-bold"
-                        : "text-muted-foreground font-normal"
-                    }
-                  `}
-                  onClick={() => {
-                    if (tab.key === "subscribed") {
-                      requireAuth(() => handleTabChange("subscribed"));
-                    } else {
-                      handleTabChange("recommended");
-                    }
-                  }}
-                >
-                  {tab.label}
-                  {activeTab === tab.key && (
-                    <span
-                      className="absolute left-0 right-0 -bottom-1 h-[3px] rounded bg-primary"
-                      style={{ width: "100%" }}
-                    />
-                  )}
-                </button>
-              ))}
+            <div className="flex items-center space-x-8 relative">
+              <Skeleton className="h-6 w-16" />
+              <Skeleton className="h-6 w-16" />
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <span className="inline-flex items-center font-medium text-muted-foreground space-x-2  ml-4 cursor-pointer">
-                  {categoryFilter
-                    ? categories.find((c) => c.id === categoryFilter)?.name ||
-                      "加载中..."
-                    : "全部"}
-                  <ChevronDown className="h-4 w-4 ml-1" />
-                </span>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="min-w-[120px]" align="end">
-                <DropdownMenuLabel className="text-center">
-                  选择分类
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem
-                    className={`justify-center text-center !cursor-pointer ${
-                      categoryFilter === null
-                        ? "bg-accent text-accent-foreground font-medium"
-                        : ""
-                    }`}
-                    onClick={() => setCategoryFilter(null)}
-                  >
-                    全部
-                  </DropdownMenuItem>
-                  {categoriesLoading ? (
-                    <DropdownMenuItem
-                      disabled
-                      className="justify-center text-center !cursor-pointer"
-                    >
-                      加载中...
-                    </DropdownMenuItem>
-                  ) : (
-                    categories.map((category) => (
-                      <DropdownMenuItem
-                        key={category.id}
-                        className={`justify-center text-center !cursor-pointer ${
-                          categoryFilter === category.id
-                            ? "bg-accent text-accent-foreground font-medium"
-                            : ""
-                        }`}
-                        onClick={() => setCategoryFilter(category.id)}
-                      >
-                        {category.name}
-                      </DropdownMenuItem>
-                    ))
-                  )}
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Skeleton className="h-6 w-24" />
           </div>
         </div>
       </div>
-
-      {/* 看板列表 */}
-      <div className="mx-auto w-full">
-        {isLoading && boards.length === 0 ? (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin" />
+      <div className="mx-auto w-full divide-y lg:px-6">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="py-4 flex items-center space-x-4">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[250px]" />
+              <Skeleton className="h-4 w-[200px]" />
+            </div>
           </div>
-        ) : (
-          <InfiniteScroll
-            loading={isFetchingNextPage}
-            hasMore={hasNextPage}
-            onLoadMore={handleLoadMore}
-            rootMargin="-10px"
-            className="divide-y"
-          >
-            {boards.map((board) => (
-              <div className="lg:px-6" key={board.id}>
-                <BoardItem board={board} />
-              </div>
-            ))}
-          </InfiniteScroll>
-        )}
+        ))}
       </div>
     </div>
   );

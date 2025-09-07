@@ -1,36 +1,25 @@
-"use client";
-
-import { useParams } from "next/navigation";
-import React from "react";
-import UserSidebar, { UserTabType } from "./components/user-sidebar";
+import React, { Suspense } from "react";
+import { notFound } from "next/navigation";
+import { api } from "@/lib/api";
+import UserSidebar from "./components/user-sidebar";
 import { UserPosts } from "./components/user-posts";
 import { UserReplies } from "./components/user-replies";
-import { useQuery } from "@tanstack/react-query";
-import { api } from "@/lib/api";
-import { useSearchParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAuth } from "@/components/providers/auth-provider";
 import { formatDate } from "@/lib/dayjs";
+import { getSession } from "@/lib/auth";
+import type { Post, Pagination } from "@/types";
+import type { Discussion } from "@/types/discussion";
+import { getDiscussionPreferences } from "@/lib/discussion-preferences-server";
+import { getValidSortBy } from "@/lib/discussion-preferences";
+import { SortBy, DisplayMode } from "@/types/display-preferences";
 
-const navItems = [
-  {
-    label: "回复",
-    count: 22,
-    href: "replies" as UserTabType,
-  },
-  {
-    label: "文章",
-    count: 45,
-    href: "posts" as UserTabType,
-  },
-  {
-    label: "使用者名称历史",
-    count: 41,
-    href: "history" as UserTabType,
-  },
-];
+type UserTabType = "replies" | "posts" | "history";
+const VALID_TABS: UserTabType[] = ["replies", "posts", "history"];
 
-// 用户名历史列表组件
+function isValidTab(tab: any): tab is UserTabType {
+  return VALID_TABS.includes(tab);
+}
+
 function UsernameHistory({
   usernameHistory,
 }: {
@@ -43,93 +32,77 @@ function UsernameHistory({
       </div>
     );
   }
-
   return (
-    <div className="rounded-lg bg-card">
-      <div className="lg:border-b">
-        <h3 className="lg:pb-3 text-md font-semibold">使用者名称历史</h3>
-      </div>
+    <div className="rounded-lg bg-card p-4">
+      <h3 className="lg:pb-3 text-md font-semibold border-b">使用者名称历史</h3>
       <ul className="space-y-2 mt-4">
-        {usernameHistory.map(
-          (username: { [key: string]: number }, index: number) => (
-            <li
-              key={index}
-              className="p-3 flex items-center justify-between w-1/2 text-sm text-muted-foreground bg-muted rounded-lg"
-            >
-              <div>{Object.keys(username)[0]}</div>
-              <div className="text-right">
-                {formatDate(
-                  (Object.values(username)[0] as number) * 1000,
-                  "YYYY-MM-DD"
-                )}
-              </div>
-            </li>
-          )
-        )}
+        {usernameHistory.map((username, index) => (
+          <li
+            key={index}
+            className="p-3 flex items-center justify-between lg:w-1/2 text-sm text-muted-foreground bg-muted rounded-lg"
+          >
+            <span>{Object.keys(username)[0]}</span>
+            <span className="text-right">
+              {formatDate(Object.values(username)[0] * 1000, "YYYY-MM-DD")}
+            </span>
+          </li>
+        ))}
       </ul>
     </div>
   );
 }
 
-// 加载状态组件
-function UsernameHistorySkeleton() {
-  return (
-    <div className="rounded-lg border bg-card shadow-sm">
-      <div className="p-4 border-b">
-        <Skeleton className="h-6 w-48" />
-        <Skeleton className="h-4 w-64 mt-2" />
-      </div>
-      <div className="divide-y">
-        {Array.from({ length: 3 }).map((_, index) => (
-          <div key={index} className="p-4 flex items-center justify-between">
-            <div className="flex items-center">
-              <Skeleton className="h-8 w-8 rounded-full mr-3" />
-              <Skeleton className="h-5 w-32" />
-            </div>
-            <Skeleton className="h-4 w-8" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+export default async function UserPage({
+  params,
+  searchParams,
+}: {
+  params: { username: string };
+  searchParams: { tab?: string; sort?: SortBy };
+}) {
+  const { username } = params;
+  const activeTab = isValidTab(searchParams.tab) ? searchParams.tab : "replies";
+  const session = await getSession();
 
-export default function UserPage() {
-  const { user } = useAuth();
-  const params = useParams();
-  const username = params?.username as string; // 从路径参数获取 username
-  const [activeTab, setActiveTab] = React.useState<UserTabType>("replies");
+  const userData = await api.users.get({ username });
 
-  const { data: userData, isLoading } = useQuery({
-    queryKey: ["user", username],
-    queryFn: () => api.users.get({ username: username }),
-    enabled: !!username,
-  });
+  if (!userData) {
+    notFound();
+  }
 
-  const filteredNavItems = React.useMemo(() => {
-    if (user && userData?.hashid === user.hashid) {
-      return navItems;
-    } else {
-      return navItems.slice(0, -1);
-    }
-  }, [userData, user]);
+  const isOwner = session?.user?.hashid === userData.hashid;
+  const prefsFromCookie = getDiscussionPreferences();
+  const sortFromUrl = searchParams?.sort;
+  const sortBy = getValidSortBy(sortFromUrl ?? prefsFromCookie.sort);
 
-  const renderContent = () => {
+  const renderContent = async () => {
     switch (activeTab) {
       case "posts":
-        return <UserPosts />;
-      case "replies":
-        return <UserReplies username={username || undefined} />;
-      case "history":
+        const initialPosts = await api.discussions.list({ username, page: 1 });
         return (
-          <div className="min-h-screen">
-            {isLoading ? (
-              <UsernameHistorySkeleton />
-            ) : (
-              <UsernameHistory usernameHistory={userData?.username_history} />
-            )}
-          </div>
+          <UserPosts
+            initialPosts={initialPosts as Pagination<Discussion>}
+            username={username}
+            sortBy={sortBy}
+          />
         );
+
+      case "replies":
+        const initialReplies = await api.users.getPosts({
+          username,
+          page: 1,
+        });
+        return (
+          <UserReplies
+            initialReplies={initialReplies as Pagination<Post>}
+            username={username}
+          />
+        );
+
+      case "history":
+        return isOwner ? (
+          <UsernameHistory usernameHistory={userData.username_history} />
+        ) : null;
+
       default:
         return null;
     }
@@ -138,17 +111,22 @@ export default function UserPage() {
   return (
     <div className="lg:py-4">
       <div className="flex flex-col lg:flex-row min-h-screen gap-4 lg:gap-8">
-        {/* 左侧导航 */}
         <div className="lg:w-60 flex-shrink-0">
           <UserSidebar
+            username={username}
             activeTab={activeTab}
-            onTabChange={setActiveTab}
-            navItems={filteredNavItems}
+            isOwner={isOwner}
+            stats={{
+              replies: userData.replies_count ?? 0,
+              posts: userData.discussion_count ?? 0,
+            }}
           />
         </div>
-
-        {/* 右侧内容区 */}
-        <div className="flex-1 min-w-0 overflow-hidden">{renderContent()}</div>
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <Suspense fallback={<Skeleton className="h-96 w-full rounded-lg" />}>
+            {renderContent()}
+          </Suspense>
+        </div>
       </div>
     </div>
   );
