@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import acceptLanguage from 'accept-language';
+import { i18nConfig } from '@/i18n/config';
+import { fallbackLng, languages, cookieName } from "./i18n/settings";
+
+acceptLanguage.languages(languages);
 
 // 需要登录的路由
 const authRoutes = [];
@@ -11,11 +16,59 @@ const isProtectedPath = (path: string) => {
   return false;
 };
 
-// 游客路由（已登录用户不能访问）
 const guestRoutes = ["/login", "/register", "/forgot-password"];
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+    const { pathname } = request.nextUrl;
+    
+  // 从查询参数中获取 lang，优先级最高
+  let lng = request.nextUrl.searchParams.get('lang')
+  
+  // 如果没有查询参数，则检查 cookie
+  if (!lng && request.cookies.has(cookieName)) {
+    lng = acceptLanguage.get(request.cookies.get(cookieName)!.value)
+  }
+  // 如果没有 cookie，则检查 'Accept-Language' header
+  if (!lng) {
+    lng = acceptLanguage.get(request.headers.get('Accept-Language'))
+  }
+  // 如果都没有，则使用后备语言
+  if (!lng) {
+    lng = fallbackLng
+  }
+
+  
+      // 如果路径已经是语言开头，则直接处理
+  if (languages.some(loc => pathname.startsWith(`/${loc}`))) {
+    // 你的身份验证逻辑可以放在这里
+    return NextResponse.next()
+  }
+ if (!pathname.startsWith('/_next') && !pathname.startsWith('/api')) {
+    const redirectUrl = new URL(`/${lng}${pathname}`, request.url)
+    
+    // 把原始的查询参数也带上
+    request.nextUrl.searchParams.forEach((value, key) => {
+      redirectUrl.searchParams.set(key, value);
+    });
+
+    const response = NextResponse.redirect(redirectUrl)
+    // 如果是通过查询参数切换的，把这个选择设置到 cookie 里
+    if (request.nextUrl.searchParams.has('lang')) {
+        response.cookies.set(cookieName, lng)
+    }
+    return response
+  }
+  // 如果语言不在路径中，则重定向
+//   if (
+//     !languages.some((loc) => pathname.startsWith(`/${loc}`)) &&
+//     !pathname.startsWith("/_next") &&
+//     !pathname.startsWith("/api")
+//   ) {
+//     return NextResponse.redirect(
+//       new URL(`/${lng}${pathname}`, request.url)
+//     );
+//   }
+    
   const sessionToken =
     request.cookies.get("next-auth.session-token")?.value ||
     request.cookies.get("__Secure-next-auth.session-token")?.value;

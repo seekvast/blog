@@ -13,8 +13,11 @@ i18n
   .use(initReactI18next)
   .use(
     resourcesToBackend(
-      (language: string, namespace: string) =>
-        import(`../../public/locales/${language}/${namespace}.json`)
+      (language: string, namespace: string) => {
+        console.log(`Loading ${namespace} for ${language}`);
+        return import(`./locales/${language}/${namespace}.json`);
+      }
+        // import(`./locales/${language}/${namespace}.json`)
     )
   )
   .init({

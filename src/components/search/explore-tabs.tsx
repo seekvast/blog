@@ -34,7 +34,7 @@ export function ExploreTabs({ showControls = false }: ExploreTabsProps) {
   };
 
   const activeTab = getActiveTab();
-
+  const { getSortBy } = useDiscussionDisplayStore();
   return (
     <div className="flex justify-between items-center lg:border-b">
       <div className="flex items-center">
@@ -56,7 +56,7 @@ export function ExploreTabs({ showControls = false }: ExploreTabsProps) {
         ))}
       </div>
 
-      {showControls && <DiscussionControls />}
+      {showControls && <DiscussionControls sortBy={getSortBy()} />}
     </div>
   );
 }
