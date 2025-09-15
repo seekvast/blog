@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { useTranslation } from "react-i18next";
+import { useTranslationFixed } from "@/hooks/use-translation-fixed";
 import { api } from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ReportForm } from "@/types/report";
@@ -92,7 +92,7 @@ export function ReportDialog({
   form,
 }: ReportDialogProps) {
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t } = useTranslationFixed();
   const queryClient = useQueryClient();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 

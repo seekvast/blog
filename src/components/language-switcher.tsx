@@ -1,6 +1,5 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,68 +7,87 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Languages } from "lucide-react";
-
+import { Check, Globe } from "lucide-react";
+import { useLanguageSwitcher } from "@/hooks/use-language-switcher";
+import { useState, useEffect } from "react";
 
 export function LanguageSwitcher() {
+  const {
+    getCurrentLanguageCode,
+    getCurrentLanguageName,
+    changeLanguage,
+    languages,
+  } = useLanguageSwitcher();
 
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [isClient, setIsClient] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState('');
 
-  const languages = [
-    { code: "zh", label: "简体中文" },
-    { code: "zh-TW", label: "繁體中文" },
-    { code: "en", label: "English" },
-  ];
+  // 避免水合问题
+  useEffect(() => {
+    setIsClient(true);
+    setCurrentLanguage(getCurrentLanguageCode());
+  }, []);
 
-  const changeLanguage = (newLng: string) => {
-    // 检查 pathname 是否存在
-    if (!pathname) {
-      console.error("LanguageSwitcher: pathname is not available yet.");
-      return;
-    }
-
-    const pathSegments = pathname.split("/").filter(Boolean);
-
-    // 检查路径的第一部分是否是语言代码
-    const currentLng = languages.some((l) => l.code === pathSegments[0])
-      ? pathSegments[0]
-      : null;
-
-    // 如果是，则移除语言代码部分，得到基础路径
-    const basePathSegments = currentLng ? pathSegments.slice(1) : pathSegments;
-    const basePath = "/" + basePathSegments.join("/");
-
-    // 基于当前 searchParams 创建一个新的可修改的实例
-    const newSearchParams = new URLSearchParams(searchParams?.toString());
-
-    // 设置新的语言参数
-    newSearchParams.set("lang", newLng);
-
-    // 构造最终的 URL
-    const finalUrl = `${basePath}?${newSearchParams.toString()}`;
-
-    console.log("LanguageSwitcher: Navigating to:", finalUrl);
-
-    // router.push 会触发中间件，中间件看到 lang 参数后会进行重定向并设置 cookie
-    router.push(finalUrl);
+  const handleLanguageChange = (langCode: string) => {
+    console.log('Changing language to:', langCode);
+    setCurrentLanguage(langCode);
+    changeLanguage(langCode);
   };
+
+  if (!isClient) {
+    // 服务器端渲染时的占位符
+    return (
+      <Button
+        variant="ghost"
+        className="flex items-center justify-start py-2 text-sm text-muted-foreground hover:text-foreground h-auto px-0"
+        disabled
+      >
+        <Globe className="mr-2 h-4 w-4" />
+        <span className="truncate">语言</span>
+      </Button>
+    );
+  }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <Languages className="h-4 w-4" />
-        </Button>
+        <button
+          className="flex items-center justify-start py-2 text-sm text-muted-foreground hover:text-foreground h-auto px-0 bg-transparent border-none cursor-pointer"
+          style={{
+            background: 'transparent',
+            border: 'none',
+            padding: '0.5rem 0',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            fontSize: '0.875rem',
+            color: 'hsl(var(--muted-foreground))',
+            width: '100%',
+            textAlign: 'left',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = 'hsl(var(--foreground))';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = 'hsl(var(--muted-foreground))';
+          }}
+        >
+          <Globe className="mr-2 h-4 w-4" />
+          <span className="truncate">{getCurrentLanguageName()}</span>
+        </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="w-48">
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onClick={() => changeLanguage(lang.code)}
+            onClick={() => handleLanguageChange(lang.code)}
+            className="flex justify-between"
           >
-            {lang.label}
+            {lang.name}
+            {currentLanguage === lang.code && (
+              <Check className="h-4 w-4" />
+            )}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

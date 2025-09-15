@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useTranslation } from "react-i18next";
+import { useTranslationFixed } from "@/hooks/use-translation-fixed";
 import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -120,7 +120,7 @@ interface RegisterModalProps {
 
 export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
   const { isRegisterOpen, closeRegister, openLogin } = useAuthModal();
-  const { t } = useTranslation();
+  const { t } = useTranslationFixed();
   const { setNewlyRegistered } = useRegistrationStore();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);

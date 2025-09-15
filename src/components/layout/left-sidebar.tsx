@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useTranslation } from "react-i18next";
+import { useTranslationFixed } from "@/hooks/use-translation-fixed";
 import Link from "next/link";
 import {
   Home,
@@ -31,15 +31,9 @@ import { BoardApprovalMode } from "@/constants/board-approval-mode";
 import { Board } from "@/types/board";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useBoardActions } from "@/hooks/use-board-actions";
-import { useLanguageName } from "@/hooks/use-language-name";
 import { useEmailVerificationGuard } from "@/hooks/use-email-verification-guard";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { RecommendedBoardItem } from "@/components/board/recommended-board-item";
+import { DynamicLanguageSwitcher } from "@/components/dynamic-language-switcher";
 
 interface NavItem {
   title: string;
@@ -50,25 +44,25 @@ interface NavItem {
 
 const mainNavItems: NavItem[] = [
   {
-    title: "首页",
+    title: "common.home",
     href: "/",
     icon: Home,
     auth: false,
   },
   {
-    title: "关注",
+    title: "common.following",
     href: "/following",
     icon: Heart,
     auth: true,
   },
   {
-    title: "看板",
+    title: "common.boards",
     href: "/b",
     icon: LayoutGrid,
     auth: false,
   },
   {
-    title: "书签",
+    title: "common.bookmarks",
     href: "/bookmarked",
     icon: Bookmark,
     auth: true,
@@ -80,16 +74,10 @@ interface LeftSidebarProps extends React.HTMLAttributes<HTMLElement> {}
 export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslationFixed();
   const { requireAuth, requireAuthAndEmailVerification } = useRequireAuth();
   const { handleSubscribe } = useBoardActions();
   const { requireEmailVerification } = useEmailVerificationGuard();
-  const {
-    getCurrentLanguageName,
-    getCurrentLanguageCode,
-    changeLanguage,
-    languages,
-  } = useLanguageName();
   const [createBoardOpen, setCreateBoardOpen] = useState(false);
   const [subscribeBoardOpen, setSubscribeBoardOpen] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
@@ -168,7 +156,16 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                 onClick={() => requireAuth(() => router.push(item.href))}
               >
                 <item.icon className="mr-2 h-4 w-4" />
-                {item.title}
+                {t(item.title, {
+                  defaultValue:
+                    item.title === "common.home"
+                      ? "首页"
+                      : item.title === "common.following"
+                      ? "关注"
+                      : item.title === "common.boards"
+                      ? "看板"
+                      : "书签",
+                })}
               </div>
             ) : (
               <Link
@@ -182,7 +179,16 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
                 )}
               >
                 <item.icon className="mr-2 h-4 w-4" />
-                {item.title}
+                {t(item.title, {
+                  defaultValue:
+                    item.title === "common.home"
+                      ? "首页"
+                      : item.title === "common.following"
+                      ? "关注"
+                      : item.title === "common.boards"
+                      ? "看板"
+                      : "书签",
+                })}
               </Link>
             )
           )}
@@ -227,7 +233,6 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
           </div>
         </div>
 
-
         {/* 页脚链接 */}
         <div className="mt-auto space-y-4">
           <div className="flex w-full text-sm text-muted-foreground">
@@ -257,31 +262,10 @@ export function LeftSidebar({ className, ...props }: LeftSidebarProps) {
             </Link>
           </div>
           <div className="flex justify-between">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <div className="flex cursor-pointer items-center py-2 text-sm text-muted-foreground hover:text-foreground">
-                  <Globe className="mr-2 leading-none " />
-                  <span className="truncate">{getCurrentLanguageName()}</span>
-                </div>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
-                {languages.map((lang) => (
-                  <DropdownMenuItem
-                    key={lang.code}
-                    onClick={() => changeLanguage(lang.code)}
-                    className="flex justify-between"
-                  >
-                    {lang.name}
-                    {getCurrentLanguageCode() === lang.code && (
-                      <Check className="h-4 w-4" />
-                    )}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <div>
-              <ModeToggle />
-            </div>
+            <DynamicLanguageSwitcher />
+            {/* <div> */}
+            {/* <ModeToggle /> */}
+            {/* </div> */}
           </div>
         </div>
       </div>

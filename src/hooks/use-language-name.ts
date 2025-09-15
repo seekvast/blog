@@ -2,9 +2,9 @@ import { useTranslation } from "react-i18next";
 
 // 语言代码到语言名称的映射
 export const languageNames: Record<string, string> = {
-  "zh-Hans-CN": "简体中文",
-  "zh-Hant-TW": "繁體中文",
-  "en": "English",
+  "zh-TW": "繁體中文",
+  zh: "简体中文",
+  en: "English",
 };
 
 // 语言列表
@@ -19,7 +19,7 @@ export const languages = Object.entries(languageNames).map(([code, name]) => ({
  */
 export function useLanguageName() {
   const { i18n } = useTranslation();
-  
+
   // 获取当前语言的显示名称
   const getCurrentLanguageName = () => {
     const currentLang = i18n.language;
@@ -38,10 +38,10 @@ export function useLanguageName() {
     }
   };
 
-  return { 
+  return {
     getCurrentLanguageName,
     getCurrentLanguageCode,
     changeLanguage,
-    languages
+    languages,
   };
 }

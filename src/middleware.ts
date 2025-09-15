@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import acceptLanguage from 'accept-language';
-import { i18nConfig } from '@/i18n/config';
+import acceptLanguage from "accept-language";
 import { fallbackLng, languages, cookieName } from "./i18n/settings";
 
 acceptLanguage.languages(languages);
@@ -19,56 +18,45 @@ const isProtectedPath = (path: string) => {
 const guestRoutes = ["/login", "/register", "/forgot-password"];
 
 export async function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl;
-    
-  // 从查询参数中获取 lang，优先级最高
-  let lng = request.nextUrl.searchParams.get('lang')
-  
-  // 如果没有查询参数，则检查 cookie
+  const { pathname } = request.nextUrl;
+
+  let lng = request.nextUrl.searchParams.get("lang");
+
   if (!lng && request.cookies.has(cookieName)) {
-    lng = acceptLanguage.get(request.cookies.get(cookieName)!.value)
+    lng = acceptLanguage.get(request.cookies.get(cookieName)!.value);
   }
-  // 如果没有 cookie，则检查 'Accept-Language' header
   if (!lng) {
-    lng = acceptLanguage.get(request.headers.get('Accept-Language'))
+    lng = acceptLanguage.get(request.headers.get("Accept-Language"));
   }
-  // 如果都没有，则使用后备语言
   if (!lng) {
-    lng = fallbackLng
+    lng = fallbackLng;
   }
 
-  
-      // 如果路径已经是语言开头，则直接处理
-  if (languages.some(loc => pathname.startsWith(`/${loc}`))) {
-    // 你的身份验证逻辑可以放在这里
-    return NextResponse.next()
+  // 检查路径是否已经包含语言前缀
+  const pathnameHasLocale = languages.some(
+    (loc) => pathname.startsWith(`/${loc}/`) || pathname === `/${loc}`
+  );
+
+  if (pathnameHasLocale) {
+    // 这里的逻辑可以保持，处理已经有语言前缀的 URL
+    return NextResponse.next();
   }
- if (!pathname.startsWith('/_next') && !pathname.startsWith('/api')) {
-    const redirectUrl = new URL(`/${lng}${pathname}`, request.url)
-    
-    // 把原始的查询参数也带上
+
+  // 重定向到带语言前缀的 URL
+  if (!pathname.startsWith("/_next") && !pathname.startsWith("/api")) {
+    const redirectUrl = new URL(`/${lng}${pathname}`, request.url);
+
     request.nextUrl.searchParams.forEach((value, key) => {
       redirectUrl.searchParams.set(key, value);
     });
 
-    const response = NextResponse.redirect(redirectUrl)
-    // 如果是通过查询参数切换的，把这个选择设置到 cookie 里
-    if (request.nextUrl.searchParams.has('lang')) {
-        response.cookies.set(cookieName, lng)
+    const response = NextResponse.redirect(redirectUrl);
+    if (request.nextUrl.searchParams.has("lang")) {
+      response.cookies.set(cookieName, lng);
     }
-    return response
+    return response;
   }
-  // 如果语言不在路径中，则重定向
-//   if (
-//     !languages.some((loc) => pathname.startsWith(`/${loc}`)) &&
-//     !pathname.startsWith("/_next") &&
-//     !pathname.startsWith("/api")
-//   ) {
-//     return NextResponse.redirect(
-//       new URL(`/${lng}${pathname}`, request.url)
-//     );
-//   }
-    
+
   const sessionToken =
     request.cookies.get("next-auth.session-token")?.value ||
     request.cookies.get("__Secure-next-auth.session-token")?.value;
@@ -124,6 +112,7 @@ export const config = {
      * - _next 静态文件
      * - public 文件
      */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+    "/((?!api|_next/static|_next/image|.*\\..*).*)",
+    // "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };
