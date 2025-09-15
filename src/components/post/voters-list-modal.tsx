@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { VotersList } from "@/components/post/voters-list";
-import { useTranslationFixed } from "@/hooks/use-translation-fixed";
+import { t } from "i18next";
 
 export function VotersListModal({
   postId,
@@ -18,7 +18,6 @@ export function VotersListModal({
   postId: number;
   children: ReactNode;
 }) {
-  const { t } = useTranslationFixed();
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>

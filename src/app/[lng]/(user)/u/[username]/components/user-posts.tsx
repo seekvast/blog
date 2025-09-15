@@ -10,15 +10,13 @@ import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 import type { Discussion, Pagination } from "@/types";
 import { SortBy } from "@/types/display-preferences";
 
-// 1. Props 接口更新，以接收来自服务器的数据和状态
 interface UserPostsProps {
   username: string;
   initialPosts: Pagination<Discussion> | null;
-  sortBy: SortBy; // sortBy 现在由父组件从 URL 读取并传入
+  sortBy: SortBy;
 }
 
 export function UserPosts({ username, initialPosts, sortBy }: UserPostsProps) {
-  // 2. displayMode 纯视觉状态，可以继续保留在 Zustand 中
   const displayMode = useDiscussionDisplayStore((state) =>
     state.getDisplayMode()
   );
@@ -32,7 +30,6 @@ export function UserPosts({ username, initialPosts, sortBy }: UserPostsProps) {
     isError,
     refetch,
   } = useInfiniteQuery({
-    // 3. queryKey 现在使用来自 props 的 sortBy
     queryKey: ["userDiscussions", username, sortBy],
     queryFn: async ({ pageParam = 1 }) => {
       return api.discussions.list({
@@ -70,14 +67,12 @@ export function UserPosts({ username, initialPosts, sortBy }: UserPostsProps) {
 
   const discussions = data?.pages.flatMap((page) => page.items) || [];
 
-  // 5. 所有的 JSX 结构和 className 都与你的原始代码保持一致
   return (
     <div className="flex flex-col min-w-0 overflow-hidden px-4">
       <div className="bg-background">
         <div className="flex justify-between items-center lg:border-b">
           <h3 className="lg:pb-3 text-md font-semibold ">我的文章</h3>
           <div className="flex items-center space-x-3">
-            {/* 6. 将 sortBy prop 传递给 DiscussionControls */}
             <DiscussionControls sortBy={sortBy} />
           </div>
         </div>

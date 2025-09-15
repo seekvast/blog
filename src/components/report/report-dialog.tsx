@@ -16,7 +16,6 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { useTranslationFixed } from "@/hooks/use-translation-fixed";
 import { api } from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ReportForm } from "@/types/report";
@@ -24,6 +23,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Board } from "@/types/board";
 import { ReportTarget } from "@/constants/report-target";
+import { t } from "i18next";
 
 const moderatorReportOptions = [
   { id: 8, label: "離題", description: "此內容與當前討論主題無關" },
@@ -92,7 +92,6 @@ export function ReportDialog({
   form,
 }: ReportDialogProps) {
   const { toast } = useToast();
-  const { t } = useTranslationFixed();
   const queryClient = useQueryClient();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 

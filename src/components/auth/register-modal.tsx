@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useTranslationFixed } from "@/hooks/use-translation-fixed";
 import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,6 +24,7 @@ import { useAuthModal } from "./auth-modal-store";
 import { useRegistrationStore } from "@/store/registration-store";
 import { signIn } from "next-auth/react";
 import { Turnstile } from "@marsidev/react-turnstile";
+import { t } from "i18next";
 
 const TURNSTILE_SITE_KEY =
   process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY ||
@@ -120,7 +120,6 @@ interface RegisterModalProps {
 
 export function RegisterModal({ open, onOpenChange }: RegisterModalProps) {
   const { isRegisterOpen, closeRegister, openLogin } = useAuthModal();
-  const { t } = useTranslationFixed();
   const { setNewlyRegistered } = useRegistrationStore();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);

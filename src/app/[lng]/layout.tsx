@@ -1,7 +1,7 @@
 import "../globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/providers/theme-provider";
-import { I18nProviderFixed } from "@/components/i18n-provider-fixed";
+import { I18nProvider } from "@/components/i18n-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { dir } from "i18next";
 import { languages } from "@/i18n/settings";
@@ -41,13 +41,13 @@ export default async function RootLayout({
           <QueryProvider>
             <AuthProvider session={session}>
               <LoginModalProvider>
-                <I18nProviderFixed lng={lng}>
+                <I18nProvider lng={lng}>
                   <EmailVerificationProvider>
                     <InterestSelectionProvider>
                       {children}
                     </InterestSelectionProvider>
                   </EmailVerificationProvider>
-                </I18nProviderFixed>
+                </I18nProvider>
                 <Toaster />
               </LoginModalProvider>
             </AuthProvider>

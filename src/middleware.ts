@@ -113,6 +113,5 @@ export const config = {
      * - public 文件
      */
     "/((?!api|_next/static|_next/image|.*\\..*).*)",
-    // "/((?!api|_next/static|_next/image|favicon.ico).*)",
   ],
 };
