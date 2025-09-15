@@ -1,9 +1,10 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   SUPPORTED_LANGUAGES,
   languages as supportedLanguageCodes,
+  cookieName,
 } from "@/i18n/settings";
 
 export const languages = SUPPORTED_LANGUAGES;
@@ -11,21 +12,23 @@ export const languages = SUPPORTED_LANGUAGES;
 export function useLanguageSwitcher() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
 
   const getCurrentLanguageCode = () => {
     const pathSegments = pathname.split("/").filter(Boolean);
     const firstSegment = pathSegments[0];
-
     if (supportedLanguageCodes.includes(firstSegment)) {
       return firstSegment;
     }
-
-    return "zh-TW"; //默认语言
+    return "zh-TW";
   };
 
   const getCurrentLanguageName = () => {
     const currentLangCode = getCurrentLanguageCode();
-    const currentLang = languages.find((lang) => lang.code === currentLangCode);
+    const currentLang = languages.find(
+      (lang) => lang.code === currentLangCode
+    );
     return currentLang ? currentLang.name : "繁體中文";
   };
 
@@ -42,8 +45,16 @@ export function useLanguageSwitcher() {
       : pathSegments.join("/");
 
     const newPath = `/${newLng}/${actualPath}`;
+    const currentQueryString = searchParams.toString();
 
-    router.push(newPath);
+    const finalUrl = currentQueryString
+      ? `${newPath}?${currentQueryString}`
+      : newPath;
+
+    const oneYear = 365 * 24 * 60 * 60;
+    document.cookie = `${cookieName}=${newLng};path=/;max-age=${oneYear}`;
+
+    router.push(finalUrl);
   };
 
   return {

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useState, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
+import { LocalLink as Link } from "@/components/local-link";
 import { useTranslation } from "react-i18next";
 import { Home, LayoutGrid, Bookmark, Heart, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
