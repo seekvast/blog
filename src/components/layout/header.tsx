@@ -27,7 +27,6 @@ import { NotificationPopover } from "@/components/notification/notification-popo
 import { useEmailVerificationGuard } from "@/hooks/use-email-verification-guard";
 import { EmailVerificationRequiredFeature } from "@/config/email-verification";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useLocalRouter } from "@/hooks/use-local-router";
 
 interface HeaderProps {
   className?: string;
@@ -35,7 +34,7 @@ interface HeaderProps {
 
 export function Header({ className }: HeaderProps) {
   const isHeaderVisible = useLayoutStore((state) => state.isHeaderVisible);
-  //   const router = useRouter();
+  const router = useRouter();
   const { user, loading } = useAuth();
   const { openRegister, openLogin } = useAuthModal();
   const { openInterestSelection } = useInterestSelection();
@@ -54,7 +53,6 @@ export function Header({ className }: HeaderProps) {
     return null;
   }
 
-  const router = useLocalRouter();
   const handleLogoClick = React.useCallback(
     (e: React.MouseEvent) => {
       if (isVisible) {
@@ -72,11 +70,11 @@ export function Header({ className }: HeaderProps) {
     try {
       await signOut({
         redirect: true,
-        callbackUrl: router.getPath("/"),
+        callbackUrl: "/",
       });
     } catch (error) {
       console.error("Logout error:", error);
-      window.location.href = router.getPath("/");
+      window.location.href = "/";
     }
   };
 

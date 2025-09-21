@@ -3,6 +3,32 @@ import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
 import { UserCover } from "./components/user-cover";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getSiteConfig } from "@/config/site";
+import { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { username: string };
+}): Promise<Metadata> {
+  const siteConfig = getSiteConfig();
+  try {
+    const userData = await api.users.get({ username: params.username });
+    if (!userData) {
+      return {
+        title: `${siteConfig.name}`,
+      };
+    }
+    return {
+      title: `${userData.username}'s Profile - ${siteConfig.name}`,
+      description: `View the profile and activity of ${userData.username} on ${siteConfig.name}.`,
+    };
+  } catch (error) {
+    return {
+      title: `${siteConfig.name}`,
+    };
+  }
+}
 
 export default async function UserLayout({
   children,
@@ -21,7 +47,9 @@ export default async function UserLayout({
 
   return (
     <div>
-      <Suspense fallback={<Skeleton className="h-[200px] sm:h-[260px] w-full" />}>
+      <Suspense
+        fallback={<Skeleton className="h-[200px] sm:h-[260px] w-full" />}
+      >
         <UserCover initialUser={userData} />
       </Suspense>
 

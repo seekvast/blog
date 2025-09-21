@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useState, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { LocalLink as Link } from "@/components/local-link";
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { Home, LayoutGrid, Bookmark, Heart, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -120,11 +120,14 @@ export function LeftSidebar({
       if (boardIdParam) {
         const boardId = parseInt(boardIdParam, 10);
         const childId = childParam ? parseInt(childParam, 10) : undefined;
+
         if (!isNaN(boardId)) {
           usePostEditorStore.setState({
             boardPreselect: {
               boardId: boardId,
-              boardChildId: childId,
+              boardChildId: !isNaN(Number(childId))
+                ? Number(childId)
+                : undefined,
             },
           });
         }
@@ -160,14 +163,14 @@ export function LeftSidebar({
                 requireAuthAndEmailVerification(() => setCreateBoardOpen(true))
               }
             >
-              {t("createBoard")}
+              {t("createBoard", "创建看板")}
             </Button>
           ) : (
             <Button
               className="w-full text-lg font-bold"
               onClick={handlePublishClick}
             >
-              {t("publish")}
+              {t("publish", "发表文章")}
             </Button>
           )}
         </div>
@@ -179,7 +182,9 @@ export function LeftSidebar({
 
         <div>
           <div className="mb-2 flex items-center justify-between px-2">
-            <h3 className="text-sm font-medium">{t("recommendedBoards")}</h3>
+            <h3 className="text-sm font-medium">
+              {t("recommendedBoards", "推荐看板")}
+            </h3>
             <Button
               variant="ghost"
               size="icon"
@@ -207,28 +212,36 @@ export function LeftSidebar({
         <div className="mt-auto space-y-4">
           <div className="flex w-full text-sm text-muted-foreground">
             <Link
-              href="/terms"
+              href="https://support.kater.me/docs/policy/terms-of-service"
               className="flex-1 text-center hover:text-foreground"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              {t("termsOfService")}
+              {t("termsOfService", { defaultValue: "服务条款" })}
             </Link>
             <Link
-              href="/privacy"
+              href="https://support.kater.me/docs/policy/privacy-policy"
               className="flex-1 text-center hover:text-foreground"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              {t("privacyPolicy")}
+              {t("privacyPolicy", { defaultValue: "隐私政策" })}
             </Link>
             <Link
-              href="/contact"
+              href="https://support.kater.me/docs/help"
               className="flex-1 text-center hover:text-foreground"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              {t("contactUs")}
+              {t("contactUs", { defaultValue: "联系我们" })}
             </Link>
             <Link
-              href="/help"
+              href="https://support.kater.me/"
               className="flex-1 text-center hover:text-foreground"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              {t("helpCenter")}
+              {t("helpCenter", { defaultValue: "说明中心" })}
             </Link>
           </div>
           <div className="flex justify-between">

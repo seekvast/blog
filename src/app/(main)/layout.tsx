@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Suspense } from "react";
+import { Suspense, useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/header";
@@ -15,6 +15,7 @@ import { Plus } from "lucide-react";
 import { usePostEditorStore } from "@/store/post-editor";
 import { GlobalNsfwWarning } from "@/components/nsfw/global-nsfw-warning";
 import { CreateBoardModal } from "@/components/board/create-board-modal";
+import { languages } from "@/i18n/settings";
 
 const CreatePostModal = dynamic(
   () => import("@/components/post/create-post-modal"),
@@ -26,37 +27,41 @@ export default function MainLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
+  const pathnameWithLocale = usePathname();
   const { setIsVisible } = usePostEditorStore();
   const [isCreateBoardModalOpen, setCreateBoardModalOpen] =
     React.useState(false);
 
-  // 根据路径确定使用哪个侧边栏配置
-  const getSidebarConfig = () => {
-    // 使用正则表达式精确匹配板块设置页路径
-    if (pathname?.match(/^\/b\/[^/]+\/settings/)) {
-      return sidebarRegistry.boardSettings;
+  const pathname = useMemo(() => {
+    if (!pathnameWithLocale) return "/";
+    const parts = pathnameWithLocale.split("/");
+    if (parts.length > 1 && languages.includes(parts[1])) {
+      return `/${parts.slice(2).join("/")}`;
     }
-    if (pathname?.startsWith("/u")) {
-      return sidebarRegistry.user;
+    return pathnameWithLocale;
+  }, [pathnameWithLocale]);
+
+  const getPageType = (path: string): keyof typeof sidebarRegistry => {
+    if (/^\/b\/[^/]+\/settings/.test(path)) {
+      return "boardSettings";
     }
-    if (pathname?.startsWith("/b")) {
-      return sidebarRegistry.boards;
+    if (path.startsWith("/u")) {
+      return "user";
     }
-    return sidebarRegistry.default;
+    if (path.startsWith("/b")) {
+      return "boards";
+    }
+    return "default";
   };
 
+  const pageType = getPageType(pathname);
   const { left: LeftSidebarComponent, right: RightSidebar } =
-    getSidebarConfig();
-
-  // 确定是否显示右侧边栏
+    sidebarRegistry[pageType];
   const showDefaultSidebarPaths = ["/", "/following", "/bookmarked"];
-  const showRightSidebar = pathname
-    ? showDefaultSidebarPaths.includes(pathname)
-    : false;
+  const showRightSidebar = showDefaultSidebarPaths.includes(pathname);
 
   const handleFabClick = () => {
-    if (pathname?.startsWith("/b")) {
+    if (pathname.startsWith("/b")) {
       setCreateBoardModalOpen(true);
     } else {
       setIsVisible(true);
@@ -65,32 +70,24 @@ export default function MainLayout({
 
   const fabVisiblePaths = ["/", "/following", "/bookmarked"];
   const showFab =
-    (pathname && fabVisiblePaths.includes(pathname)) ||
-    pathname?.startsWith("/b");
+    fabVisiblePaths.includes(pathname) || pathname.startsWith("/b");
 
   return (
     <div className="min-h-screen flex flex-col">
       <RouteProgress />
-
-      {/* 全局 NSFW 警告弹窗 */}
       <GlobalNsfwWarning />
-
-      {/* 头部 */}
       <Header />
 
       <div className="flex-1 flex flex-col min-h-0">
         <div className="mx-auto w-full lg:max-w-7xl flex flex-col lg:flex-row pt-2 lg:pt-4">
-          {/* 左侧边栏 - 桌面端显示 */}
           {LeftSidebarComponent && (
             <aside className="hidden lg:block lg:w-[240px] xl:w-[280px] flex-shrink-0 px-4">
               <LeftSidebarComponent />
             </aside>
           )}
 
-          {/* 主内容区域 */}
           <main className="flex-1 min-w-0 px-4 pb-16 lg:pb-8">{children}</main>
 
-          {/* 右侧边栏 - 仅在桌面端显示 */}
           {showRightSidebar && RightSidebar && (
             <aside className="hidden lg:block lg:w-[240px] xl:w-[280px] flex-shrink-0 lg:px-4">
               <RightSidebar />
@@ -118,10 +115,8 @@ export default function MainLayout({
           <Plus className="h-7 w-7 stroke-[2.5]" />
         </button>
       )}
-      {/* 移动端底部导航 */}
+
       <MobileNav />
-      {/* 悬浮发帖按钮 */}
-      {/* 模态框 */}
       <LoginModal />
       <RegisterModal />
       <Suspense fallback={null}>

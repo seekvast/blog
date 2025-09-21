@@ -3,9 +3,6 @@
 import * as React from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { DiscussionControls } from "@/components/discussion/discussion-controls";
-import { DisplayMode, SortBy } from "@/types/display-preferences";
-import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 
 const tabs = [
   { id: "all", name: "相关", path: "/explore" },
@@ -15,16 +12,15 @@ const tabs = [
 ] as const;
 
 interface ExploreTabsProps {
-  showControls?: boolean;
+  controls?: React.ReactNode;
 }
 
-export function ExploreTabs({ showControls = false }: ExploreTabsProps) {
+export function ExploreTabs({ controls = null }: ExploreTabsProps) {
   const router = useRouter();
   const pathname = usePathname() || "";
   const searchParams = useSearchParams();
   const q = searchParams?.get("q") ?? "";
 
-  // 根据当前路径确定激活的标签
   const getActiveTab = () => {
     if (pathname === "/explore") return "all";
     if (pathname.includes("/discussions")) return "discussion";
@@ -34,7 +30,7 @@ export function ExploreTabs({ showControls = false }: ExploreTabsProps) {
   };
 
   const activeTab = getActiveTab();
-  const { getSortBy } = useDiscussionDisplayStore();
+
   return (
     <div className="flex justify-between items-center lg:border-b">
       <div className="flex items-center">
@@ -55,8 +51,7 @@ export function ExploreTabs({ showControls = false }: ExploreTabsProps) {
           </button>
         ))}
       </div>
-
-      {showControls && <DiscussionControls sortBy={getSortBy()} />}
+      {controls}
     </div>
   );
 }

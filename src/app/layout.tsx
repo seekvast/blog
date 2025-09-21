@@ -1,16 +1,21 @@
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import "@/i18n";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { QueryProvider } from "@/components/providers/query-provider";
+import { dir } from "i18next";
+import { ReactNode } from "react";
 import { AuthProvider } from "@/components/providers/auth-provider";
 import { LoginModalProvider } from "@/components/providers/login-modal-provider";
-import { ThemeProvider } from "@/components/providers/theme-provider";
-import { I18nProvider } from "@/components/i18n-provider";
-import { QueryProvider } from "@/components/providers/query-provider";
-import { EmailVerificationProvider } from "@/components/providers/email-verification-provider";
-import { InterestSelectionProvider } from "@/components/providers/interest-selection-provider";
+import { Toaster } from "@/components/ui/toaster";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/auth-options";
-import { Toaster } from "@/components/ui/toaster";
+import { EmailVerificationProvider } from "@/components/providers/email-verification-provider";
+import { InterestSelectionProvider } from "@/components/providers/interest-selection-provider";
+
+import { cookies, headers } from "next/headers";
+import { cookieName, fallbackLng, languages, defaultNS } from "@/i18n/settings";
+import { initI18next } from "@/i18n/server";
+import { I18nProvider } from "@/components/i18n-provider";
 
 export const metadata = {
   cache: "no-cache", //TODO: 测试环境禁用缓存
@@ -21,44 +26,61 @@ export const metadata = {
   ),
 };
 
+function getLanguageOnServer(): string {
+  const headersList = headers();
+  const localeHeader = headersList.get("k-locale");
+
+  if (localeHeader && languages.includes(localeHeader)) {
+    return localeHeader;
+  }
+
+  const cookieStore = cookies();
+  const lng = cookieStore.get(cookieName)?.value;
+  if (lng && languages.includes(lng)) {
+    return lng;
+  }
+
+  return fallbackLng;
+}
+
 export default async function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const session = await getServerSession(authOptions);
+  const lng = getLanguageOnServer();
+  const i18n = await initI18next(lng, defaultNS);
+  const resources = i18n.store.data;
 
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/favicon.png" />
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-        />
-      </head>
+    <html lang={lng} dir={dir(lng)}>
       <body className={cn("min-h-screen bg-background antialiased")}>
-        <QueryProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <QueryProvider>
             <AuthProvider session={session}>
               <LoginModalProvider>
-                <I18nProvider>
+                <I18nProvider
+                  lng={lng}
+                  ns={Array.isArray(defaultNS) ? defaultNS : [defaultNS]}
+                  resources={resources}
+                >
                   <EmailVerificationProvider>
                     <InterestSelectionProvider>
                       {children}
                     </InterestSelectionProvider>
-                    <Toaster />
                   </EmailVerificationProvider>
                 </I18nProvider>
+                <Toaster />
               </LoginModalProvider>
             </AuthProvider>
-          </ThemeProvider>
-        </QueryProvider>
+          </QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

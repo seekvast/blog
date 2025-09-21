@@ -11,22 +11,26 @@ import { DiscussionControls } from "@/components/discussion/discussion-controls"
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
 import { useRequireAuth } from "@/hooks/use-require-auth";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { SortBy } from "@/types/display-preferences";
+import { SortBy, DisplayMode } from "@/types/display-preferences";
 
 interface DiscussionsListProps {
   initialDiscussions: Pagination<Discussion>;
   from: string;
   sortBy: SortBy;
+  initDisplayMode: DisplayMode;
   sticky?: Discussion[];
   boardSlug?: string;
+  pageId: string;
 }
 
 export function DiscussionsList({
   initialDiscussions,
   from,
   sortBy,
+  initDisplayMode,
   sticky,
   boardSlug,
+  pageId,
 }: DiscussionsListProps) {
   const { requireAuth } = useRequireAuth();
 
@@ -35,7 +39,7 @@ export function DiscussionsList({
   );
 
   const { getDisplayMode } = useDiscussionDisplayStore();
-  const displayMode = getDisplayMode();
+  const displayMode = getDisplayMode(pageId, initDisplayMode);
 
   const {
     data,
@@ -116,7 +120,7 @@ export function DiscussionsList({
             ) : (
               <div />
             )}
-            <DiscussionControls sortBy={sortBy} />
+            <DiscussionControls sortBy={sortBy} pageId={pageId} displayMode={displayMode} />
           </div>
         </div>
       </div>

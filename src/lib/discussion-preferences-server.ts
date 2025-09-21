@@ -1,18 +1,27 @@
 import { cookies } from "next/headers";
-import {
-  getValidSortBy,
-  getValidDisplayMode,
-  COOKIE_KEYS, 
-} from "./discussion-preferences";
+import { DISCUSSION_PREFERENCES_COOKIE_KEY } from "./discussion-preferences";
+import { SortBy, DisplayMode } from "@/types/display-preferences";
 
-export function getDiscussionPreferences() {
+type PagePreferences = {
+  sort?: SortBy;
+  display?: DisplayMode;
+};
+
+type AllPreferences = Record<string, PagePreferences>;
+
+export function getDiscussionPreferences(): AllPreferences {
   const cookieStore = cookies();
+  const cookie = cookieStore.get(DISCUSSION_PREFERENCES_COOKIE_KEY);
 
-  const sortCookie = cookieStore.get(COOKIE_KEYS.DISCUSSION_SORT);
-  const displayCookie = cookieStore.get(COOKIE_KEYS.DISCUSSION_DISPLAY);
+  if (!cookie?.value) {
+    return {};
+  }
 
-  return {
-    sort: getValidSortBy(sortCookie?.value),
-    display: getValidDisplayMode(displayCookie?.value),
-  };
+  try {
+    const value = JSON.parse(cookie.value);
+    return value;
+  } catch (error) {
+    console.error("Failed to parse discussion preferences cookie:", error);
+    return {};
+  }
 }

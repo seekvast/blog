@@ -11,42 +11,31 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useDiscussionDisplayStore } from "@/store/discussion-display-store";
-import { SortBy } from "@/types/display-preferences";
+import { SortBy, DisplayMode } from "@/types/display-preferences";
 import { syncDiscussionPreferencesToCookie } from "@/lib/discussion-preferences";
 
 interface DiscussionControlsProps {
   sortBy: SortBy;
   className?: string;
-  pageId?: string;
+  pageId: string;
+  displayMode: DisplayMode;
 }
 
 export function DiscussionControls({
   sortBy,
   className,
   pageId,
+  displayMode,
 }: DiscussionControlsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const { getDisplayMode, setDisplayMode } = useDiscussionDisplayStore();
-  const displayMode = getDisplayMode(pageId);
-
-  const isDiscussionPage = React.useMemo(() => {
-    if (typeof window === "undefined") return false;
-    const path = window.location.pathname;
-    return (
-      path === "/" ||
-      path === "/following" ||
-      path === "/bookmarked" ||
-      path.startsWith("/d/")
-    );
-  }, []);
+  const { setDisplayMode } = useDiscussionDisplayStore();
+  //   const displayMode = getDisplayMode(pageId, "list");
 
   const handleSortChange = (newSort: SortBy) => {
-    if (isDiscussionPage) {
-      syncDiscussionPreferencesToCookie({ sort: newSort });
-    }
+    syncDiscussionPreferencesToCookie(pageId, { sort: newSort });
 
     const current = new URLSearchParams(
       Array.from(searchParams?.entries() ?? [])
@@ -92,9 +81,9 @@ export function DiscussionControls({
         onClick={() => {
           const newDisplayMode = displayMode === "grid" ? "list" : "grid";
           setDisplayMode(newDisplayMode, pageId);
-          if (isDiscussionPage) {
-            syncDiscussionPreferencesToCookie({ display: newDisplayMode });
-          }
+          syncDiscussionPreferencesToCookie(pageId, {
+            display: newDisplayMode,
+          });
         }}
       >
         {displayMode === "grid" ? (

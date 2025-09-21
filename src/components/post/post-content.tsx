@@ -148,11 +148,9 @@ export function PostContent({ post, className }: PostContentProps) {
     }));
     setImageList(newImageList);
 
-    // 为所有图片添加点击事件
     Array.from(images).forEach((img, index) => {
       img.style.cursor = "zoom-in"; // 设置鼠标样式
 
-      // 移除旧的事件监听器（如果有）
       const oldClone = img.cloneNode(true) as HTMLImageElement;
       if (img.parentNode) {
         img.parentNode.replaceChild(oldClone, img);
@@ -160,7 +158,6 @@ export function PostContent({ post, className }: PostContentProps) {
 
       // 添加新的事件监听器
       oldClone.addEventListener("click", (e) => {
-        console.log("图片被点击", index);
         e.preventDefault();
         e.stopPropagation();
         handleImageClick(oldClone.src || "", oldClone.alt || "", index);

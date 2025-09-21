@@ -19,11 +19,11 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
-import { LocalLink as Link } from "@/components/local-link";
 import { useAuthModal } from "./auth-modal-store";
 import { useRegistrationStore } from "@/store/registration-store";
 import { signIn } from "next-auth/react";
 import { Turnstile } from "@marsidev/react-turnstile";
+import Link from "next/link";
 
 const TURNSTILE_SITE_KEY =
   process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY ||

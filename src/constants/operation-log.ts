@@ -75,7 +75,7 @@ export function getOperationLogTranslationKey(
   category: string,
   action: string
 ): string {
-  return `operationLogs.${category}.${action}`;
+  return `${category}.${action}`;
 }
 
 // 类型定义

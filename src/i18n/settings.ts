@@ -10,14 +10,14 @@ export const languages = SUPPORTED_LANGUAGES.map(lang => lang.code);
 export const defaultNS = 'common';
 export const cookieName = 'i18next';
 
-export function getOptions(lng = fallbackLng, ns: string | string[] = defaultNS) {
+export function getOptions(lng = fallbackLng, ns: string | string[] = defaultNS, resources?: any) {
   return {
-    // debug: process.env.NODE_ENV === 'development',
     supportedLngs: languages,
     fallbackLng,
     lng,
     fallbackNS: defaultNS,
     defaultNS,
     ns,
+    resources: resources ? { [lng]: { [Array.isArray(ns) ? ns[0] : ns]: resources[lng][Array.isArray(ns) ? ns[0] : ns] } } : undefined,
   };
 }

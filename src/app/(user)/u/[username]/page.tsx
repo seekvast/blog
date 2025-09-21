@@ -10,8 +10,12 @@ import { getSession } from "@/lib/auth";
 import type { Post, Pagination } from "@/types";
 import type { Discussion } from "@/types/discussion";
 import { getDiscussionPreferences } from "@/lib/discussion-preferences-server";
-import { getValidSortBy } from "@/lib/discussion-preferences";
-import { SortBy, DisplayMode } from "@/types/display-preferences";
+import {
+  getValidSortBy,
+  getValidDisplayMode,
+} from "@/lib/discussion-preferences";
+
+export const dynamic = "force-dynamic";
 
 type UserTabType = "replies" | "posts" | "history";
 const VALID_TABS: UserTabType[] = ["replies", "posts", "history"];
@@ -57,7 +61,7 @@ export default async function UserPage({
   searchParams,
 }: {
   params: { username: string };
-  searchParams: { tab?: string; sort?: SortBy };
+  searchParams: { tab?: string; sort?: string; display?: string }; // 【修改】searchParams 类型
 }) {
   const { username } = params;
   const activeTab = isValidTab(searchParams.tab) ? searchParams.tab : "replies";
@@ -70,43 +74,53 @@ export default async function UserPage({
   }
 
   const isOwner = session?.user?.hashid === userData.hashid;
-  const prefsFromCookie = getDiscussionPreferences();
-  const sortFromUrl = searchParams?.sort;
-  const sortBy = getValidSortBy(sortFromUrl ?? prefsFromCookie.sort);
 
-  const renderContent = async () => {
-    switch (activeTab) {
-      case "posts":
-        const initialPosts = await api.discussions.list({ username, page: 1 });
-        return (
-          <UserPosts
-            initialPosts={initialPosts as Pagination<Discussion>}
-            username={username}
-            sortBy={sortBy}
-          />
-        );
+  const pageId = `user-${username}-posts`;
 
-      case "replies":
-        const initialReplies = await api.users.getPosts({
-          username,
-          page: 1,
-        });
-        return (
-          <UserReplies
-            initialReplies={initialReplies as Pagination<Post>}
-            username={username}
-          />
-        );
+  const allPrefs = getDiscussionPreferences();
+  const pagePrefs = allPrefs[pageId] || {};
 
-      case "history":
-        return isOwner ? (
-          <UsernameHistory usernameHistory={userData.username_history} />
-        ) : null;
+  const sortBy = getValidSortBy(searchParams.sort ?? pagePrefs.sort);
+  const displayMode = getValidDisplayMode(
+    searchParams.display ?? pagePrefs.display
+  );
 
-      default:
-        return null;
-    }
-  };
+  let content: React.ReactNode = null;
+  switch (activeTab) {
+    case "posts":
+      const initialPosts = await api.discussions.list({
+        username,
+        page: 1,
+        sort: sortBy,
+      });
+      content = (
+        <UserPosts
+          initialPosts={initialPosts as Pagination<Discussion>}
+          username={username}
+          sortBy={sortBy}
+          initDisplayMode={displayMode}
+          pageId={pageId}
+        />
+      );
+      break;
+    case "replies":
+      const initialReplies = await api.users.getPosts({
+        username,
+        page: 1,
+      });
+      content = (
+        <UserReplies
+          initialReplies={initialReplies as Pagination<Post>}
+          username={username}
+        />
+      );
+      break;
+    case "history":
+      content = isOwner ? (
+        <UsernameHistory usernameHistory={userData.username_history} />
+      ) : null;
+      break;
+  }
 
   return (
     <div className="lg:py-4">
@@ -124,7 +138,7 @@ export default async function UserPage({
         </div>
         <div className="flex-1 min-w-0 overflow-hidden">
           <Suspense fallback={<Skeleton className="h-96 w-full rounded-lg" />}>
-            {renderContent()}
+            {content}
           </Suspense>
         </div>
       </div>

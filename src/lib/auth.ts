@@ -103,31 +103,3 @@ export async function refreshUserData() {
     }, 2000);
   }
 }
-
-/*
- * 关于 authMiddleware 的说明：
- *
- * `authMiddleware` 是一个服务器端函数，通常用于 Next.js 的中间件 (`middleware.ts`)。
- * 它不应该放在这个客户端安全的文件中。
- *
- * 应该在根目录下的 `middleware.ts` 文件中实现它，像这样：
- *
- * import { getToken } from "next-auth/jwt";
- * import { NextResponse } from "next/server";
- * import type { NextRequest } from "next/server";
- *
- * export async function middleware(req: NextRequest) {
- * const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
- *
- * // 举例：保护 /dashboard 路径
- * if (req.nextUrl.pathname.startsWith('/dashboard') && !token) {
- * return NextResponse.redirect(new URL('/login', req.url));
- * }
- *
- * return NextResponse.next();
- * }
- *
- * export const config = {
- * matcher: ['/dashboard/:path*'], // 定义需要保护的路径
- * };
- */

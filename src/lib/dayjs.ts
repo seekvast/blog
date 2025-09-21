@@ -6,7 +6,6 @@ import updateLocale from "dayjs/plugin/updateLocale";
 import "dayjs/locale/zh-cn";
 import "dayjs/locale/zh-tw";
 import "dayjs/locale/en";
-import i18n from "@/i18n";
 
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);

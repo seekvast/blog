@@ -6,7 +6,7 @@ import { getOperationLogTranslationKey } from "@/constants/operation-log";
 import { BoardUserRoleMapping } from "@/constants/board-user-role";
 
 export function useOperationLogRenderer() {
-  const { t } = useTranslation();
+  const { t } = useTranslation('operation');
 
   // 转换布尔值为中文描述
   const convertBooleanValues = (
@@ -90,7 +90,7 @@ export function useOperationLogRenderer() {
     }
 
     // 如果没有找到翻译，使用默认模板
-    const defaultTemplate = t("operationLogs.default_log", {
+    const defaultTemplate = t("default_log", {
       returnObjects: true,
       ...convertedPlaceholders,
     });
@@ -100,11 +100,11 @@ export function useOperationLogRenderer() {
       "title" in defaultTemplate
     ) {
       return t(
-        "operationLogs.default_log.title",
+        "default_log.title",
         convertedPlaceholders
       ) as string;
     } else {
-      return t("operationLogs.default_log", convertedPlaceholders) as string;
+      return t("default_log", convertedPlaceholders) as string;
     }
   };
 
@@ -155,7 +155,7 @@ export function useOperationLogRenderer() {
     }
 
     // 如果没有content字段，返回空字符串或默认内容
-    const defaultTemplate = t("operationLogs.default_log", {
+    const defaultTemplate = t("default_log", {
       returnObjects: true,
       ...convertedPlaceholders,
     });
@@ -165,7 +165,7 @@ export function useOperationLogRenderer() {
       "content" in defaultTemplate
     ) {
       return t(
-        "operationLogs.default_log.content",
+        "default_log.content",
         convertedPlaceholders
       ) as string;
     }

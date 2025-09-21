@@ -1,10 +1,15 @@
-
 import { api } from "@/lib/api";
 import { notFound } from "next/navigation";
 import { BoardDetail } from "./board-detail";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
-import { getDiscussionPreferencesFromCookie } from "@/lib/discussion-preferences-server";
+import { getDiscussionPreferences } from "@/lib/discussion-preferences-server";
+import {
+  getValidSortBy,
+  getValidDisplayMode,
+} from "@/lib/discussion-preferences";
+
+export const dynamic = 'force-dynamic';
 
 interface BoardPageProps {
   params: { slug: string };
@@ -12,6 +17,7 @@ interface BoardPageProps {
     tab?: string;
     child?: string;
     sort?: string;
+    display?: string;
   };
 }
 
@@ -22,11 +28,17 @@ export default async function BoardPage({
   const { slug } = params;
 
   const activeTab = searchParams.tab || "posts";
-  const childId = searchParams.child ? parseInt(searchParams.child, 1) : null;
+  const childId = searchParams.child ? parseInt(searchParams.child, 10) : null;
 
-  const prefs = getDiscussionPreferencesFromCookie();
-  const sortQuery = searchParams.sort;
-  const sortBy = prefs.sort;
+  const pageId = "board-detail";
+
+  const allPrefs = getDiscussionPreferences();
+  const pagePrefs = allPrefs[pageId] || {};
+
+  const sortBy = getValidSortBy(searchParams.sort ?? pagePrefs.sort);
+  const displayMode = getValidDisplayMode(
+    searchParams.display ?? pagePrefs.display
+  );
 
   const board = await api.boards.get({ slug });
   if (!board) {
@@ -44,7 +56,6 @@ export default async function BoardPage({
           sort: sortBy,
         })
       : Promise.resolve(null),
-    // 只有在 rules tab 时才获取规则
     activeTab === "rules"
       ? api.boards.getRules({ board_id: board.id })
       : Promise.resolve(null),
@@ -63,6 +74,8 @@ export default async function BoardPage({
         activeTab={activeTab}
         selectedChildId={childId}
         sortBy={sortBy}
+        initDisplayMode={displayMode}
+        pageId={pageId}
       />
     </Suspense>
   );

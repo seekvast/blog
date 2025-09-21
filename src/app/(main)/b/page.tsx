@@ -2,6 +2,12 @@ import { api } from "@/lib/api";
 import { BoardList } from "@/components/board/board-list";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Kater-Boards",
+  description: "Find and explore various boards.",
+};
 
 interface BoardsPageProps {
   searchParams: {

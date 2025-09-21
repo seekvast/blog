@@ -4,11 +4,22 @@ import { getBookmarksMetadata } from "@/lib/metadata";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/auth-options";
 import { LoginPrompt } from "@/components/auth/login-prompt";
-import { getDiscussionPreferencesFromCookie } from "@/lib/discussion-preferences-server";
+import { getDiscussionPreferences } from "@/lib/discussion-preferences-server";
+import {
+  getValidSortBy,
+  getValidDisplayMode,
+} from "@/lib/discussion-preferences";
 
 export const generateMetadata = () => {
   return getBookmarksMetadata();
 };
+
+interface PageProps {
+  searchParams: {
+    sort?: string;
+    display?: string;
+  };
+}
 
 async function getDiscussions(sort?: string) {
   try {
@@ -34,22 +45,29 @@ async function getDiscussions(sort?: string) {
   }
 }
 
-export default async function HomePage() {
+export default async function BookmarkedPage({ searchParams }: PageProps) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
     return <LoginPrompt message="查看关注内容需要登录" />;
   }
 
-  // 读取用户偏好
-  const { sort, display } = getDiscussionPreferencesFromCookie();
+  const pageId = "bookmarked";
+  const allPrefs = getDiscussionPreferences();
+  const pagePrefs = allPrefs[pageId] || {};
+  const sortBy = getValidSortBy(searchParams.sort ?? pagePrefs.sort);
+  const displayMode = getValidDisplayMode(
+    searchParams.display ?? pagePrefs.display
+  );
 
-  const initialDiscussions = await getDiscussions(sort);
+  const initialDiscussions = await getDiscussions(sortBy);
   return (
     <DiscussionsList
       initialDiscussions={initialDiscussions}
       from="bookmarked"
-      defaultSort={sort}
+      sortBy={sortBy}
+      initDisplayMode={displayMode}
+      pageId={pageId}
     />
   );
 }
